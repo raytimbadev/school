@@ -1,0 +1,195 @@
+Introduction to Computer Systems (COMP 273)
+Assignment #1
+By Jacob Errington (260636023)
+For Joseph Vybihal
+Due on 31 January 2015
+
+Note: because it is difficult to write subscripts in a plain text format, I
+will use the convention common in many programming languages to indicate
+numeric literals in the common bases:
+
+ * Numbers preceded by "0x" are hexadecimal, e.g. 0xAF
+ * Numbers preceded by "0b" are binary, e.g. 0b10101011000
+ * Numbers preceded by "0o" are in octal, e.g. 0o6732
+ * Numbers followed by an explicit base indication are in the given base,
+    e.g. 2314 (base 5)
+ * Other numbers are in base 10.
+
+Question #1
+===========
+
+We can represent a fraction with two integers "stuck together", with the first
+one standing for the numerator, and the second standing for the denominator.
+It's the norm in mathematics to say that the denominator cannot be negative, so
+we will do the same in our fraction datatype. The numerator, however, is
+signed.
+
+For the width of these integers, we will choose the standard width for
+integers, 32 bits. Therefore, the total memory taken up by this kind of
+fraction is 64 bits. For example, if we want to allocate ten such fractions,
+then 10 * 2 * 32 = 640 bits are necessary.
+
+This choice of width will affect addressing in the sense that if the numerator
+is stored at address 0xDEADBEEF then the denominator is stored at address
+0xDEADBEF3.
+
+The range of the numerator is -2^32 to 2^32 - 1 using a 2's complement system
+for storing negative numbers. The range of the denominator is 0 to 2^64 - 1.
+This is a pretty good range, but of course, it's nothing compared to the reals,
+which are unlimited.
+
+If the denominator is zero, then the number is invalid and operations involving
+erroneous fractions will produce more erroneous fractions. This can conceivably be
+used by programmers to indicate errors, however, and so is not avoided. This is
+similar to the NaN in floating point datatypes.
+
+Addition of fractions requires that the denominators of both terms be the same.
+First, we would check whether they're the same. If so, the numerators are added
+together. If the denominators do not agree, then we can easily fix that by
+multiplying across. Suppose we have two fractions a1/b1 a2/b2 with b1 != b2. We
+can construct equivalent fractions a1b2/b1b2 a2b1/b1b2 which can then be added.
+A simplification step could be implemented after.
+
+As for division, it turns out that division is the same thing as multiplication
+by the inverse, so if we have fractions a1/b1 and a2/b2, then (a1/b1) divided
+by (a2/b2) is (a1/b1) times (b2/a2), and we multiply through, resulting in
+(a1b2/a2b1). This will require some extra work to make the signs agree. If a2
+is negative, then we make it positive and change the sign of a1.
+
+Question #2
+===========
+
+A) Convert the following numbers and show all work.
+
+1. 0x92A5F to decimal and binary.
+   We multiply each digit by the corresponding power of 16 and sum to get the
+   decimal representation.
+   0xF * 16^0 +
+   0x5 * 16^1 +
+   0xA * 16^2 +
+   0x2 * 16^3 +
+   0x9 * 16^4 =
+   600671
+
+   To convert to binary, we open up the python shell, and type in
+   "bin(600671)". Just kidding.
+
+   We split up the number into known powers of two, which are trivial to write
+   in binary, and then add them up in binary.
+
+   600671 = 524288 + 65536 + 8192 + 2048 + 512 + 64 + 16 + 8 + 4 + 2 + 1
+
+   10000000000000000000 +
+   00010000000000000000 +
+   00000010000000000000 +
+   00000000100000000000 +
+   00000000001000000000 +
+   00000000000001000000 +
+   00000000000000010000 +
+   00000000000000001111 =
+   10010010101001011111
+
+2. 0b100010110101 to decimal and hex.
+
+   To convert to decimal, we multiply each digit by the corresponding power of
+   two and add up the results.
+
+   1 * 2^0 = 1
+   0 * 2^1 = 0
+   1 * 2^2 = 4
+   0 * 2^3 = 0
+   1 * 2^4 = 16
+   1 * 2^5 = 32
+   0 * 2^6 = 0
+   1 * 2^7 = 128
+   0 * 2^8 = 0
+   0 * 2^9 = 0
+   0 * 2^10 = 0
+   1 * 2^11 = 2048
+
+   sum: 2229
+
+   To convert to hexadecimal, we identify the largest powers of 16 that fit
+   into the sum and repeat, just as in the previous question for binary.
+
+   2229 = 8 * 16^2 + 11 * 16^1 + 5 * 16^0
+        = 0x8B5
+
+3. 339 to binary and hex.
+
+   To convert to binary, we go by powers of 2.
+
+   339 = 2^8 + 2^6 + 2^4 + 2^1 + 2^0
+       = 0b101010011
+
+   To convert to hex we go by powers of 16.
+
+   339 = 16^2 + 5 * 16^1 + 3 * 16^0
+       = 0x153
+
+B) Represent the memory taken up by the C string "I am Mary." with both the
+addresses and values represented in binary.
+
+    +------------+----------+
+    |Address     | Value    |
+    +------------+----------+
+    |0b100010000 | 0b1001001|
+    |0b100010001 | 0b0100000|
+    |0b100010010 | 0b1100001|
+    |0b100010011 | 0b1101101|
+    |0b100010100 | 0b0100000|
+    |0b100010101 | 0b1001101|
+    |0b100010110 | 0b1100001|
+    |0b100010111 | 0b1110010|
+    |0b100011000 | 0b1111001|
+    |0b100011001 | 0b0101110|
+    |0b100011010 | 0b0000000|
+    +------------+----------+
+
+Question #3
+===========
+
+A) Create a pseudo algorithm to move 100 bytes from the RAM starting at address
+0x200 to the device connected directly to the RAM at address 0x00F.
+
+    for(int i = 0; i < 100; i++)
+    {
+        LOAD R1, 0x200 + i;
+        SAVE R1, 0x00F;
+    }
+
+B) There are two major steps in this procedure: (1) reading a byte from the RAM and
+(2) writing back at a different location.
+
+Each of those steps can be broken up. A lot.
+
+1.1) When the line 'LOAD R1, 0x200 + i' is brought into the instruction
+register, the CPU will emit a read request onto the system bus. The data
+section of the bus will be empty, the address section of the bus will contain
+the address to read from, and since this is a read operation, the read/write
+bit will be set to read.
+
+1.2) The RAM will respond by emitting the requested byte onto the system bus,
+filling the data section of the bus with the value stored at the requested
+address. The read/write bit remains unchanged and and the address section of
+the bus remains unchanged.
+
+1.3) The CPU will then copy the data section into the register R1, in this
+case.
+
+The LOAD instruction is then complete. The instruction pointer is set to the
+address of following instruction, 'SAVE R1, 0x00F', so that instruction will be
+copied into the instruction register, and the instruction pointer will be
+incremented (it's hard to say exactly where it will point because the for loop
+is pretty high-level compared to the quasi-assembly code with LOAD and SAVE).
+
+The SAVE instruction then executes.
+
+2.1) The CPU emits a write request to the system bus. To do so, it will copy
+the R1 register to the bus's data section. The address section will be set to
+0x00F, since that's where the slot is connected to the RAM. The read/write bit
+will be set to write, since this is a write operation.
+
+2.2) The request will travel along the bus into the RAM, which will service the
+request. The data section of the bus will be written to the address 0x00F. It
+will then travel through the slot to the device.
