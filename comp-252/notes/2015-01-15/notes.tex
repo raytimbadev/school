@@ -1,0 +1,108 @@
+\documentclass{article}
+
+\author{Jacob Errington}
+\date{15 January 2015}
+\title{Lecture \#4}
+
+\usepackage{amsmath,amssymb}
+\usepackage{algorithmicx,algpseudocode}
+
+\begin{document}
+
+There was a certain amount of imprecision in the statement of the Master Theorem last class.  $T_n = a T_{n/b} + f(n)$ is not quite correct; what if $n/b$ is not an integer? Well it turns out that the Master Theorem works if we consider the ceiling or the floor of that division.
+
+\section{Exact analysis of recursive algorithms}
+
+\subsection{Binary search}
+
+Given a sorted array, $x_1 \leq \cdots \leq x_n$, we have two oracles that we can use to implement the algorithm.
+
+\begin{description}
+    \item[Ternary oracle.] Providing two numbers $x, y$, we are told which of $x < y$, $x = y$, $x > y$ is true.
+    \item[Binary oracle.] Providing two numbers $x, y$, we are told which of $x \leq y$ or $x > y$ is true.
+\end{description}
+
+As a warm-up, let's consider that the item we're looking for is guaranteed to be present in the array to search in.
+
+To perform binary search, we have to find the middle element. If $n$ is even, then it's just $n/2$. If n is odd, then it's $\frac{n+1}{2}$. Therefore, if $n$ is odd, $T_n \leq q + T_{\frac{n-1}{2}}$, and f $n$ is even, then $T_n \leq 1 + T_{\frac{n}{2}}$. In either case, $T_1 = 0$. It's zero and not one because if we pass in an array of length 1 and we're guaranteed that the element is present.
+
+Now let's prove it. We hypothesize that $T_n \leq \log_2 n$.
+
+In the base case, $n=1$, $T_1 = 0 \leq \log_2 1 = 0$. Good.
+
+Now the inductive step, $n>1$.
+\begin{align*}
+    T_n &\leq 1 + T_{\frac{n-1}{2}} \\
+        &\leq 1 + \log_2{\frac{n-1}{2}} \\
+        &= \log_2{n - 1} \\
+        &\leq \log_2{n}
+\end{align*}
+
+Now let's do a harder example. We don't know a priori whether the element is in the array, and we're using the binary oracle.
+
+The base case will be different: $T_1 = 2$, since we need two uses of the oracle to check whether that singleton array contains exactly the key we're searching for.
+
+?!?!
+
+\subsection{Mergesort}
+
+$$
+T_n \leq T_{\floor{\frac{n}{2}}} + T_{\ceil{\frac{n}{2}}}
+$$
+
+In the base case, $T_n = 0$, since sorting a singleton takes no effort.
+
+Hypothesis $T_n \leq C n \log_2{n}$ for some unknown $C$.
+
+Proof, will reveal $C$.
+
+Base case, $n=1$, $T_1 = 0 \leq C 1 \log_2{1} = 0$. Good.
+
+Inductive step, $n>1$.
+\begin{align*}
+    T_n &\leq 2 T_{\frac{n}{2}} + n - 1 \\
+        &\leq \cancel{2} C \frac{n}{\cancel{2}} \log_2{\frac{n}{2}} + n - 1 \\
+        &= C n \log_2 n - Cn + n - 1 \\
+        &< C n \log_2 n
+\end{align*}
+
+if $C \geq 1$.
+
+\section{Linear-time median-find algorithm}
+
+More generally, how do we select the $k$th smallest element in an unordered list of size $n$, using a binary comparison oracle.
+
+Here's the trick.
+
+\begin{algorithm}
+    \begin{algorithmic}
+        \If{n \leq 5}
+            \State compute the median by hand. (At most 7 comparisons.)
+        \Else
+            \State Make $\frac{n}{5}$ groups of $5$ out of the $n$ elements.
+            \State Find the median of each group of $5$, recusively. ($\leq 7\frac{n}{5}$ comparisons)
+            \State Find the median of the medians $M$. ($T_{n/5}$)
+            \State Compare each element of $A$ with $M$.
+            \State Let $L = \{x \in A : x < M\}$ and $R$ be the rest.
+            \If{$k \leq |L|$}
+                \State find the $k$th smallest element in $L$. ($\leq T_{|L|}$)
+            \ElsIf{$k = |L| + 1$}
+                \State \Return M
+            \Else
+            \State find the $k - |L| - 1$th smallest element in $R$ ($\leq T_{|R|}$.)
+            \EndIf
+        \EndIf
+    \end{algorithmic}
+\end{algorithm}
+
+If we total up the amounts on the right, we get $T_n = 7$ if $n \leq 5$, and $\frac{12n}{5} + T_{\frac{n}{5}} + T_{\frac{7n}{10}}$, $n > 5$.
+
+Hypothesis. $T_n \leq Cn$.
+
+Base $T_1 \leq C_1,\, \cdots,\, T_5 \leq C_5$.
+
+?!?!? do the proof at home Jake!
+
+\subsection{Algorithm ``find'' by Hoare}
+
+\end{document}

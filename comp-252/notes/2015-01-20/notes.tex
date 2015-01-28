@@ -1,0 +1,61 @@
+\documentclass{article}
+
+\author{Jacob Errington}
+\title{Lecture \#5 \\ Dynamic programming}
+\date{20 January 2015}
+
+\usepackage{amsmath,amssymb}
+
+\begin{document}
+
+The idea of dynamic programming is to compute all the sub-solutions in order to produce a final solution.
+
+\begin{description}
+    \item[Binomial numbers.] $\binom{n}{k} = \frac{n!}{k!(n-k)!}$ requires $2k$ multiplications and $1$ division.
+
+        To use dynamic programming, we'll use the obvious recursion for binomials:
+        \begin{align*}
+            \binom{n}{k} &= \binom{n-1}{k-1} + \binom{n-1}{k} \\
+            \binom{n}{0} &= \binom{n}{n} = 1
+        \end{align*}
+
+    \item[Partition numbers.] $\mathcal{P}_{n,k}$ represents the number of ways we can partition an $n$-set into $k$ non-empty subsets.
+
+        $\mathcal{P}_{n,0} = 1$ and $\mathcal{P}_{n,n} = 1$. $\mathcal{P}_{n,k} = \mathcal{P_n-1,k-1} + \mathcal{P}_{n-1,k} \times k$.
+
+    \item[Travelling salesman problem (TSP).]
+        Given sites $1,\cdots,n$ and a function $d(i,j)$ giving the distance between sites $i$ and $j$, we want to find a permutation $\sigma_1, \cdots, \sigma_n$ such that $\sum_{i=1}^{n-1}$ !?!?!?
+
+        We reduce the problem to finding the shortest paths frmo $1$ to $j$, $2 \leq j \leq n$, that visit all nodes. Note: the shortest TSP has length $\min\{(\text{Shortest path length } i\to j) + dist(j, 1)\}$.
+
+        Notation: $L(1, S, j)$ where $S$ is a set through which we have to travel.
+
+        Side condition: $L(1, \emptyset, j) = dist(i, j)$, $2 \leq j \leq n$.
+
+        Recursion:
+
+        \begin{equation}
+            L(1, S, j) = min_{l\in S}(L(1, S\setminus \{l\}, l) + dist(l, j))
+            \label{eqn:recursion}
+        \end{equation}
+
+        There are $2^n$ values for $S$, each of which we need to check, and for each of those, \eqref{eqn:recursion} takes time proportional to at most $n$.
+
+        Overall this takes time $\Theta{n^2 2^n}$.
+
+    \item[Multiplication of many matrices.] Given $A_1 \times A_2 \times \cdots
+        \times A_n$ with dimensions $r_1\times c_1$, $r_2\times c_2$, \cdots,
+        $r_n\times c_n$ such that $c_i = r_{i+1}$.
+
+        Let $M_{i,j}$ be the minimal complexity for the subproblem of multiplying matrices $i$ through $j$. Our base case is that $M_{ii} = 0$ for all $i$.
+
+        The recurrence is then
+
+        \begin{equation}
+            M_{ij} = \min_{i < l < j} (M_{i,l} + M_{l+1,j} + r_i c_l c_j)
+            \label{eqn:recursionmatrixmult}
+        \end{equation}
+
+\end{description}
+\end{document}
+
