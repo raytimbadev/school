@@ -1,0 +1,163 @@
+\documentclass{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+
+\usepackage[margin=2cm]{geometry}
+
+\author{Jacob Errington (260636023)}
+\title{Assignment \#3\\Algebra II (MATH 251)}
+\date{26 January 2015}
+
+\renewcommand{\a}{\alpha}
+\renewcommand{\b}{\beta}
+
+\newcommand{\R}{\mathbb{R}}
+
+\begin{document}
+
+\maketitle
+
+\begin{enumerate}
+    \item Determine which are functions are linear maps.
+        \begin{enumerate}
+            \item $T : \R^3 \to \R^2$, $(x_1, x_2, x_3) \mapsto (1 + x_1, x_2)$ is not a linear map.
+                \begin{proof}
+                    Suppose $T$ is a linear map.
+                    \begin{align*}
+                        (\a (1 + x_1), \a x_2) &= \a (1 + x_1, x_2) \\
+                                               &= \a T(x_1, x_2, x_3) \\
+                                               &= T(\a (x_1, x_2, x_3)) \\
+                                               &= T(\a x_1, \a x_2, \a x_3) \\
+                                               &= (1 + \a x_1, \a x_2)
+                    \end{align*}
+
+                    In general, it is not true that
+                    $(\a (1 + x_1), \a x_2) = (1 + \a x_1, \a x_2)$,
+                    so the above is a contradiction.
+                \end{proof}
+
+            \item $T : \R^3 \to \R^2$, $(x_1, x_2, x_3) \mapsto (x_3, x_1 + x_2)$ is a linear map.
+                \begin{proof}
+                    We will check that the structure is preserved.
+                    \begin{description}
+                        \item[Scalar multiplication.]
+                            \begin{align*}
+                                \a T(x_1, x_2, x_3) &= \a (x_3, x_1 + x_2) \\
+                                                    &= (\a x_3, \a (x_1 + x_2)) \\
+                                                    &= (\a x_3, \a x_1 + \a x_2) \\
+                                                    &= T(\a x_1, \a x_2, \a x_3) \\
+                                                    &= T(\a (x_1, x_2, x_3))
+                            \end{align*}
+                            Scalar multiplication is preserved.
+                        \item[Addition.]
+                            \begin{align*}
+                                T((x_1, x_2, x_3) + (y_1, y_2, y_3)) &= T(x_1 + y_1, x_2 + y_2, x_3 + y_3) \\
+                                                                     &= (x_3 + y+3, (x_1 + y_1) + (x_2 + y_2)) \\
+                                                                     &= (x_3 + y_3, (x_1 + x_2) + (y_1 + y_2)) \\
+                                                                     &= (x_3, x_1 + x_2) + (y_3, y_1 + y_2) \\
+                                                                     &= T(x_1, x_2, x_3) + T(y_1, y_2, y_3)
+                            \end{align*}
+                    \end{description}
+                    The mapping preserves the structure, so it is a linear map.
+                \end{proof}
+
+            \item $T : \R^3 \to \R^2$, $(x_1, x_2, x_3) \mapsto (x_3, {x_1}^2 + {x_2}^2)$ is not a linear map.
+                \begin{proof}
+                    We will show that the scalar multiplication is not
+                    preserved, by performing operations ``out of order'', which
+                    would not matter if it were preserved.
+                    \begin{description}
+                        \item[Mapping first.]
+                            \begin{align}
+                                \a T(x_1, x_2, x_3) &= \a (x_3, {x_1}^2 + {x_2}^2) \notag \\
+                                                    &= (\a x_3, \a {x_1}^2 + \a {x_2}^2)
+                                \label{eqn:1cmappingfirst}
+                            \end{align}
+
+                        \item[Multiplication first.]
+                            \begin{align}
+                                T(\a (x_1, x_2, x_3)) &= T(\a x_1, \a x_2, \a x_3) \notag \\
+                                                      &= (\a x_3, (\a x_1)^2 + (\a x_2)^2) \notag \\
+                                                      &= (\a x_3, \a^2 {x_1}^2 + \a^2 {x_2}^2)
+                                \label{eqn:1cmultiplyfirst}
+                            \end{align}
+                    \end{description}
+
+                    It is necessary that the results from
+                    \eqref{eqn:1cmappingfirst} and \eqref{eqn:1cmultiplyfirst} be
+                    the same, if $T$ is a linear map. Therefore, $T$ must not
+                    be a linear map.
+                \end{proof}
+
+            \item $T : \R[t]_2 \to \R[t]_3$, $f(t) \mapsto t^2 + f(t)$ is not a linear map.
+                \begin{proof}
+                    The scalar multiplication is not preserved. We will proceed as in the previous proof.
+                    \begin{description}
+                        \item[Mapping first.]
+                            \begin{equation}
+                                \a T(f(t)) = \a (t^2 + f(t)) = \a t^2 + \a f(t)
+                                \label{eqn:1dmappingfirst}
+                            \end{equation}
+                        \item[Multiplication first.]
+                            \begin{equation}
+                                T(\a f(t)) = t^2 + \a f(t)
+                                \label{eqn:1dmultiplyfirst}
+                            \end{equation}
+                    \end{description}
+                    Again as in the previous proof, the results don't match, which is a necessary condition for being a linear map.
+                \end{proof}
+
+            \item $T : \R[t]_2 \to \R[t]_3$, $f(t) \mapsto t f(t) + t^2 f^\prime (t)$ is a linear map.
+                \begin{proof}
+                    We will check that the properties of a linear map are satisfied by $T$.
+                    \begin{description}
+                        \item[Scalar multiplication.]
+                            \begin{align*}
+                                \a T(f(t)) &= \a (t f(t) + t^2 f^\prime (t)) \\
+                                           &= \a t f(t) + \a t^2 f^\prime (t) \\
+                                           &= t (\a f(t)) + t^2 (\a f^\prime (t)) \\
+                                           &= T(\a f(t))
+                            \end{align*}
+                            Scalar multiplication is preserved.
+
+                        \item[Addition.]
+                            \begin{align*}
+                                T(f(t) + g(t)) &= t (f(t) + g(t)) + t^2 (f^\prime (t) + g^\prime (t)) \\
+                                               &= t f(t) + t g(t) + t^2 f^\prime (t) + t^2 g^\prime (t) \\
+                                               &= t f(t) + t^2 f^\prime (t) + t g(t) + t^2 g^\prime (t) \\
+                                               &= T(f(t)) + T(g(t))
+                            \end{align*}
+                            Addition is preserved.
+                    \end{description}
+                \end{proof}
+        \end{enumerate}
+
+    \item In order to find the differentiation matrix ${}_B [D]_B$ with respect
+        to the basis $B = (e^x, xe^x, x^2 e^x)$, we apply the differentiation
+        map $D$ to each element of the basis to construct a basis $B^\prime$,
+        whose elements we express as linear combinations of the elements of
+        $B$. Those coefficients give us the columns of the matrix ${}_B D_B$.
+        \begin{align*}
+            D(e^x) &= e^x \\
+            D(x e^x) &= e^x + x e^x \\
+            D(x^2 e^x) &= 2x e^x + x^2 e^x \\
+            \\
+            e^x &= 1 e^x + 0 x e^x + 0 x^2 e^x \\
+            e^x + x e^x &= 1 e^x + 1 xe^x + 0 x^2 e^x \\
+            2x e^x + x^2 e^x &= 0 e^x + 2 x e^x + 1 x^2 e^x
+        \end{align*}
+
+        \begin{equation*}
+            {}_B [D]_B =
+            \left(
+                \begin{array}{c c c}
+                    1 & 1 & 0 \\
+                    0 & 1 & 2 \\
+                    0 & 0 & 1
+                \end{array}
+            \right)
+        \end{equation*}
+
+\end{enumerate}
+\end{document}
+

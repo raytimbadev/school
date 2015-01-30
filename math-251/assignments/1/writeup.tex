@@ -1,0 +1,163 @@
+\documentclass{article}
+
+\usepackage{amsmath, amssymb}
+
+\author{Jacob Errington (260636023)}
+\title{Assignment \#1\\Honours Algebra II (MATH 251)}
+\date{due on 12 January 2015}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\F}{\mathbb{F}}
+
+\begin{document}
+
+\maketitle
+
+\begin{enumerate}
+    \item $V$ is not a vector space since the distributivity of a vector over a
+        sum of scalars is not satisfied.
+
+        \begin{align*}
+            (\alpha + \beta) (x_1, x_2) &= ((\alpha + \beta) x_1, x_2) \\
+                                        &= (\alpha x_1 + \beta x_1, x_2) \\
+                                        &\neq \alpha (x_1, x_2) + \beta (x_1,
+            x_2)
+        \end{align*}
+
+        %\begin{itemize} %When I used to think it was actually a vector space
+        %    \item The set forms an abelian group under its addition, being
+        %        defined element-wise using the addition of the underlying field
+        %        (in this case the reals). Its neutral element is simply $(0,
+        %        0)$ and additive inverses are given by taking the additive
+        %        inverses of the components, i.e. $-(x_1, x_2) = (-x_1, -x_2)$.
+
+        %    \item The neutral element with respect to scalar multiplication is
+        %        the real $1$, since $1 (x_1, x_2) = (1 x_1, x_2) = (x_1, x_2)$.
+
+        %    \item When more than one scalar is multiplying the vector, it does
+        %        not matter whether we multiply the scalars together first or
+        %        scale the vector by the first one and then by the second one:
+        %        $(\alpha \beta) (x_1, x_2) = (\alpha \beta x_1, x_2) = \alpha
+        %        (\beta x_1, x_2)$.
+        %\end{itemize}
+
+    \item Which of the following subsets of the vector space $\R \to \R$ are
+        its subspaces?
+
+        \begin{enumerate}
+            \item The functions attaining a fixed nonzero value $a$ at a point
+                $b$ do not form a subspace of $\R \to \R$ since their set is
+                not closed under scalar multiplication. Indeed, multiplying by
+                real zero gives a function that is zero everywhere, including
+                the specified point $b$.
+
+            \item The functions vanishing at a specified point $b$ form a
+                subspace of $\R \to \R$, since:
+                \begin{enumerate}
+                    \item adding two functions vanishing at a point $b$ yields
+                        another function vanishing at $b$, so addition is
+                        closed;
+                    \item multiplying a function vanishing at a point $b$ by
+                        any scalar $\alpha$ results in yet another function
+                        vanishing at $b$.
+                \end{enumerate}
+
+            \item Functions vanishing on a specified set $S \subset \R$ form a
+                subspace by the same reasoning as in the case of a single
+                vanishing point.
+
+            \item Functions with only finitely many discontinuity points form a
+                subspace.
+
+                Suppose a function $f : \R \to \R$ with $a$ discontintuities
+                and $g : \R \to \R$ with $b$ discontinuities.  $f + g$ has at
+                most $a + b$ discontinuities, which is also finite.
+
+                As for scalar multiplication, it does not affect the number of
+                discontinuities, so scalar multiplication is closed.
+
+            \item Functions vanishing everywhere outside a finite set dependent
+                on the function (equivalently, functions with nonzero values
+                only on a finite set) form a subspace of $\R \to \R$.
+
+                First, we note that functions that are zero \emph{everywhere}
+                satisfy this property of vanishing everywhere outside a finite
+                set since the empty set is finite.
+
+                Consider $f : \R \to \R$ nonzero for $a$ values in $\R$, and $g
+                : \R \to \R$ nonzero for $b$ values in $\R$. Their sum will
+                have at most $a + b$ and at least $0$ values $z \in \R$ such
+                that $(f + g)(z) \neq 0$. Therefore, addition is closed.
+
+                As for scalar multiplication, multiplication by zero is the
+                only operation that affects the number of nonzero
+                function-values, making the function zero everywhere. As
+                discussed previously, such functions are still in the subset of
+                interest. Therefore, scalar multiplication is closed.
+        \end{enumerate}
+
+    \item Prove that the external direct sum $U \oplus V$ of vector spaces of
+        $\F$ is a vector space over $\F$ as well.
+
+        We will check that the axioms of a vector space are satisfied by this
+        set.
+
+        \begin{itemize}
+            \item The external direct sum forms an abelian group under
+                addition, since addition is performed component-wise and the
+                constituent vector spaces form abelian groups under addition.
+
+                The neutral element of addition is $(0_U, 0_V)$, made up of
+                the neutral elements of addition in the constituent vector
+                spaces.
+
+                Likewise, we can find the additive inverse of an element in the
+                external direct sum by taking the additive inverses of the
+                constituents.
+                \begin{equation*}
+                    (u, v) + (-u, -v) = (u - v, v - v) = (0_U, 0_V)
+                \end{equation*}
+
+            \item The neutral element with respect to scalar multiplication is
+                simply the multiplicative identity of the underlying field:
+                \begin{equation*}
+                    1 (u, v) = (1 u, 1 v) = (u, v)
+                \end{equation*}
+                In other words, since $1_\F$ is the neutral element with
+                respect to scalar multiplication in each of the constituent
+                vector spaces, and scalar multiplication is defined
+                distibutively thereover, $1_\F$ is also the neutral element
+                with respect to scalar multiplication in the external direct
+                sum.
+
+            \item
+                \begin{align*}
+                    (\alpha \beta) (u, v) &= ((\alpha \beta) u, (\alpha \beta)
+                    v) \\
+                        &= (\alpha (\beta u), \alpha (\beta v)) \\
+                        &= \alpha (\beta u, \beta v) \\
+                        &= \alpha (\beta (u, v))
+                \end{align*}
+
+            \item
+                \begin{align*}
+                    (\alpha + \beta) (u, v) &= ((\alpha + \beta) u, (\alpha +
+                    \beta) v) \\
+                        &= (\alpha u + \beta v, \alpha v + \beta v) \\
+                        &= (\alpha u, \alpha v) + (\beta u, \beta v) \\
+                        &= \alpha (u, v) + \beta (u, v)
+                \end{align*}
+
+            \item
+                \begin{align*}
+                    \alpha ( (u_1, v_1) + (u_2, v_2) ) &= \alpha (u_1 + u_2, v_1
+                    + v_2) \\
+                    &= (\alpha (u_1 + u_2), \alpha (v_1 + v_2)) \\
+                    &= (\alpha u_1 + \alpha u_2, \alpha v_1 + \alpha v_2) \\
+                    &= (\alpha u_1, \alpha v_1) + (\alpha u_2, \alpha v_2) \\
+                    &= \alpha (u_1, v_1) + \alpha (u_2, v_2)
+                \end{align*}
+        \end{itemize}
+\end{enumerate}
+
+\end{document}
