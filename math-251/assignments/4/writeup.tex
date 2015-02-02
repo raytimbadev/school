@@ -1,0 +1,106 @@
+\documentclass{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+
+\newtheorem{proposition}{Proposition}
+
+\DeclareMathOperator{\sgn}{sgn}
+
+\author{Jacob Errington}
+\title{Assignment \#4\\Honours Algebra 2 (MATH 252)}
+\date{2 February 2015}
+
+\begin{document}
+
+\maketitle
+
+\section{Linear independence and linear maps}
+
+\begin{proposition}
+    Let $T : V \to W$ be a linear map of vector spaces, and let $U \subset V$ be a subspace of $V$ such that $U \cap \ker T = \{0_V\}$.
+
+    If $B$ is a linearly independent family of vectors in $U$, then $T(B)$ is also linearly independent.
+\end{proposition}
+
+\begin{proof}
+    First we note that since $U \cap \ker T = \{0_V\}$, only $0_U \mapsto 0_W$ under $T$.
+    Therefore, no two vectors in $U$ are mapped to the same value in $W$, i.e. $T\restriction_U$ is injective.
+
+    Now we proceed by contradiction.
+    Suppose $T(B) = (T(b_1), \cdots, T(b_n))$ is not linearly independent.
+    Then, there exists $T(b_i) \in T(B)$ such that it can be expressed as a linear combination of the others:
+    \begin{align*}
+        T(b_i) &= T(\frac{\alpha_1}{\alpha_i} b_1) + \cdots + T(\frac{\alpha_n}{\alpha_i} b_n) \\
+              &= T(\frac{\alpha_1}{\alpha_i} b_1 + \cdots + \frac{\alpha_n}{\alpha_i} b_n)
+    \end{align*}
+
+    By injectivity of $T\restriction_U$, each element of $T(B)$ is mapped to by a unique element of $B$, so we can undo the mapping.
+
+    \begin{equation*}
+        b_i = \frac{\alpha_1}{\alpha_i} b_1 + \cdots + \frac{\alpha_n}{\alpha_i}
+    \end{equation*}
+
+    This contradicts the linear independence of $B$.
+\end{proof}
+
+\section{Permutations}
+Let
+$\sigma =
+\left(
+    \begin{array}{c c c c c}
+        1 & 2 & 3 & 4 & 5 \\
+        3 & 5 & 1 & 2 & 4
+    \end{array}
+\right)$.
+\begin{enumerate}
+    \item Find the sign of $\sigma$.
+
+        We can rewrite this permutation into a composition of cycles,
+        $\sigma = (13)(254)$
+        and calculate the sign of $\sigma$ as the product of the signs of the composed cycles.
+        $\sgn{\sigma} = \sgn{((13)(254))} = \sgn{(13)}\sgn{(254)} = (-1) (-1)^2 = -1$.
+
+    \item Find $\sgn{(\pi^{-1}\sigma\pi)}$ for any permutation $\pi$.
+
+            We will use the multiplicative property of the sign function.
+            \begin{align*}
+                \sgn{\pi^{-1}\sigma\pi} &= \sgn{\pi^{-1}} \sgn\sigma \sgn\pi \\
+                            &= \sgn{\pi^{-1}} \sgn{\pi} \sgn{\sigma} \\
+                            &= \sgn{\pi^{-1}\pi} \sgn{\sigma} \\
+                            &= \sgn{Id} \sgn{\sigma} \\
+                            &= \sgn{\sigma}
+            \end{align*}
+\end{enumerate}
+
+
+\section{Determinant of the transpose}
+
+\begin{proposition}
+    $\det A = \det {A^T}$
+\end{proposition}
+
+\begin{proof}
+    Let $A$ be an $n \times n$ matrix and $A = (a_{ij})$, $1 \leq i \leq n$ and $1 \leq j \leq n$.
+    Then, $A^T = (a_{ji})$.
+
+    By the Laplace expansion, we have the following:
+    \begin{equation*}
+        \det A = a_{i1}A^{i1} + \cdots + a_{in}A^{in}
+    \end{equation*}
+    for any choice of $i$, and
+    \begin{equation*}
+        \det A = a_{1j}A^{1j} + \cdots + a_{nj}A^{nj}
+    \end{equation*}
+    for any choice of $j$, where $A^{ij}$ denotes the $ij$ cofactor of $A$.
+
+    We will use a proof by induction on the size of the matrix.
+    In the base case, where $n = 1$, the matrix has one element $a_{11}$, and the determinant is trivially $\det A = \det{A^T} = a_{11}$.
+
+    Now, the inductive hypothesis is that matrices of size $n$ satisfy the property $\det A = \det {A^T}$.
+    If we take a matrix $A$ of size $n+1$, then its minors will be of size $n$, so its cofactors also satisfy the property $\det A^{ij} = \det {(A^{ij})^T}$.
+
+    We know from the Laplace expansion theorem that expanding along the $i$th row of $A$ is the same as expanding along the $i$th column of $A^T$.
+    The $ij$ cofactor of $A$ is the $ji$ cofactor of $A^T$, but these will have the same value by the inductive hypothesis.
+\end{proof}
+
+\end{document}
