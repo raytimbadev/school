@@ -1,0 +1,46 @@
+\documentclass{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{algorithmicx,algpseudocode}
+
+\author{Jacob Errington (260636023)}
+\title{Assignment \#1\\COMP 252}
+\date{22 January 2015}
+
+\begin{document}
+
+\begin{enumerate}
+    \item
+        First we note that if we have a pile of 11 marbles, at most 10 of them
+        are heavy, so we can decide in constant time which of them are heavy
+        (possibly none). Therefore, our base case will be when there are less
+        than $22$ marbles, since a pile any smaller than that cannot be split
+        into reasonably equally sized subpiles.
+
+        \begin{algorithmic}
+            \caption{Find the 10 heavy marbles.}
+            \require{a bunch of marbles, consisting of 10 heavier than the others}
+            \ensure{the 10 heavy marbles are identified}
+            \begin{algorithm}
+                \Function{TenHeavyMarbles}{a pile of marbles $A$}
+                    \If{$|A| < 22$}
+                        \State check one element of $A$ against all the others
+                        \State this reveals which marbles (if any) are heavier
+                        \State \Return which marbles are heavy (if any)
+                    \Else
+                        \If{$|A|$ is odd}
+                            \State set aside one marble, called $m$.
+                        \EndIf
+                        \State split $A$ into two subpiles, $A_1$ and $A_2$.
+                        \State weigh $A_1$ against $A_2$.
+                    \EndIf
+                \EndFunction
+            \end{algorithm}
+        \end{algorithmic}
+
+    \item
+
+
+
+
+\end{document}
