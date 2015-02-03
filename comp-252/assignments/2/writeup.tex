@@ -1,0 +1,108 @@
+\documentclass{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage[margin=2cm]{geometry}
+
+\DeclareMathOperator{\Tri}{Tri}
+
+\author{Jacob Errington(260636023)}
+\title{Assignment \#4\\COMP 252}
+
+\begin{document}
+
+\maketitle
+
+\section{Minimum edit distance}
+
+We'll denote the empty string by epsilon $\epsilon$. The edit distance matric for changing ``apple'' into ``pear'' will look like the following.
+
+$$
+    \begin{array}{c | c | c | c | c | c}
+        ``apple'' & 5 & & & & \\
+        \hline
+        ``appl'' & 4 & & & & \\
+        \hline
+        ``app'' & 3 & & & & \\
+        \hline
+        ``ap'' & 2 & & & & \\
+        \hline
+        ``a'' & 1 & & & & \\
+        \hline
+        \epsilon & 0 & 1 & 2 & 3 & 4 \\
+        \hline
+                   & \epsilon & ``p'' & ``pe'' & ``pea'' & ``pear''
+    \end{array}
+$$
+
+Changing $\epsilon$ into a string of length $n$ requires $n$ edits, namely insertions. There's no way around that. It's the base case, and by virtue of being trivial, we can write it directly into the matrix.
+From that, we get the following two equations:
+
+\begin{align*}
+    distance\, A(0)\, A(m) &= m \\
+    distance\, A(n)\, B(0) &= n
+\end{align*}
+
+If both the source and destination strings are nonempty, then the string lengths are $n$ and $m$. We check the distances of the three substrings.
+
+\begin{align*}
+    distance\, A(n-1)\, B(m) &\\
+    distance\, A(n)\, B(m-1) &\\
+    distance\, A(n-1)\, B(m-1) &
+\end{align*}
+
+To find the value at position $n,m$, we take the minimum of these distances and
+add one to it unless $a(n) = b(m)$. Of course, we don't bother computing the
+edit distance of the substrings more than once, so we store the results into
+the matrix as we uncover them.
+
+That being said, filling in a cell in the matrix takes time $O(1)$ when we know the distances of the three substrings, and there are $nm$ cells in total. Therefore, this algorithm is $O(nm)$.
+
+
+\section{Optimal triangulation}
+
+The input is a convex polygon $P$ defined by clockwise vertices $v_1, \cdots, v_n$. We'll assume that the indices ``wrap around'' in the intuitive way when they go out of bounds.
+
+We consider chains that form smaller polygons. $P(i,j)$ is the subpolygon having vertices $v_i, \cdots, v_j$. And we'll consider the base case to be that of the triangle, whose triangulation has value zero as there are no diagonals.
+
+In the inductive case, the idea is to hold edge $v_i, v_j$ fixed and split the $n$-gon into two , and recursively find the triangulations of the resulting $(n-1)$-gons. To find an optimal solution where $v_i, v_j$ is fixed, we have to try all triangles $ijk$ where $i < k < j$. 
+
+From that, we get the two following equations.
+
+\begin{align*}
+    \Tri{(P(i, i))} &= 0 \\
+    \Tri{(P(i, i+1))} &= 0 \\
+    \Tri{(P(i, i+2))} &= 0 \\
+    \Tri{(P(i, j))} &= \min_{i < k < j} \{\Tri{(i, k)} + \Tri{(k, j)} + |v_i + v_j|\}
+\end{align*}
+
+Each $\min$ takes time $O(n)$, and we fill out a two dimensional array keyed on $i$ and $j$, so overall, the algorithm is $O(n^3)$.
+
+
+\section{Linear-time selection}
+
+We'll analyse each section and add up.
+
+\begin{enumerate}
+    \item Sorting a fixed number of elements is some constant amount of work, in the $n \leq 7$ case.
+    \item Partitioning into groups of seven is free, as it requires no comparisons.
+    \item Since $|S|$ and $|L|$ are $n/7$, this takes $2 T(n/7)$.
+
+        $s$ is the $\frac{3|S|}{5}$-th smallest element of $S$, and $l$ is the $\frac{2|L|}{5}$-th smallest element of $L$.
+
+        In other words, $s$ is the $\frac{2|S|}{5}$-th largest element of $S$.
+
+        From that, we can conclude that $s$ is ranked $\frac{2}{7} - \frac{2}{7} \frac{3}{5} = \frac{6}{35}$ and $l$ is ranked $\frac{5}{7} + \frac{2}{7} \frac{2}{5} = \frac{29}{35}$.
+
+        So $B$ will be the biggest class, and we'll interest ourselves in $B$ for the analysis.
+
+        Overall, we get the following.
+
+        \begin{equation*}
+            T(n) =
+            \begin{cases}
+                k & \text{if } n \leq 7 \\
+                2 T(n/7) + T(23n/35) + 2n & \text{otherwise}
+            \end{cases}
+        \end{equation*}
+\end{enumerate}
+\end{document}
