@@ -1,0 +1,151 @@
+\documentclass{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+
+\newtheorem{proposition}{Proposition}
+\DeclareMathOperator{\im}{Im}
+
+\newcommand{\R}{\mathbb{R}}
+
+\author{Jacob Errington (260636023)}
+\title{Assignment \#5\\Honours Algebra II (MATH 251)}
+\date{9 February 2015}
+
+\begin{document}
+
+\maketitle
+
+\section{Particular homogeneous systems}
+
+\emph{Find a homogeneous system of linear equations whose solution space is $\im{T}$ for the following $T$.}
+
+$$
+T : \R^3 \to \R^4
+$$
+
+First, we write the matrix representing $T$.
+
+$$ A = \left(
+    \begin{array}{c c c}
+        3 & 4 & 2 \\
+        1 & 2 & 0 \\
+        2 & 1 & 3 \\
+        -1 & 5 & -7
+    \end{array}
+\right) $$
+and we row-reduce it to reduced row echelon form
+$$ \tilde{A} = \left(
+    \begin{array}{c c c}
+        1 & 0 & 2 \\
+        0 & 1 & -1 \\
+        0 & 0 & 0 \\
+        0 & 0 & 0
+    \end{array}
+\right)$$
+We will use $\tilde{A}$ to solve the equation $\tilde{A} \vec{x} = \vec{0}$.
+The solution-set of that equation is the kernel of $A$, and thus $\ker{T}$.
+\begin{eqnarray*}
+\left\{
+    \begin{aligned}
+        x_1 &= -2 r \\
+        x_2 &= r \\
+        x_3 &= r
+    \end{aligned}
+\right.
+\end{eqnarray*}
+So the basis for the kernel consists of exactly one vector, and is $\{(-2, 1, 1)\}$.
+
+To extend the basis for the kernel into a basis for $\R^3$, we need to add the
+elementary vectors $e_2, e_3$. To find the basis for $\im{T}$, we apply $T$ to
+those missing vectors.
+\begin{align*}
+    T(e_2) &= (4, 2, 1, 5) \\
+    T(e_3) &= (2, 0, 3, -7)
+\end{align*}
+
+Linear combinations of these vectors make up $\im{T}$. However, we need to find
+a homogeneous system whose solution space is $\im{T}$. In other words, we must
+find a linear map $S$, represented by a matrix $B$, whose kernel is $\im{T}$.
+The homogeneous system of equations corresponding to $B$ is the answer.
+
+We construct the following system by explicitly writing out the linear combinations of $T(e_2)$ and $T(e_3)$.
+\begin{eqnarray*}
+    \left\{
+        \begin{aligned}
+            x_1 & -2r & -4s &= 0 \\
+            x_2 & & -2s &= 0 \\
+            x_3 & -3r & -s &= 0 \\
+            x_4 & +7r & -5s &= 0
+        \end{aligned}
+    \right.
+\end{eqnarray*}
+
+To stand in for the parameters $r$ and $s$, we will augment the system with two more variables to build the matrix $B$.
+$$\left(
+    \begin{array}{c c c c c c}
+        1 & 0 & 0 & 0 & -2 & -4 \\
+        0 & 1 & 0 & 0 & 0 & -2 \\
+        0 & 0 & 1 & 0 & -3 & -1 \\
+        0 & 0 & 0 & 1 & 7 & -5
+    \end{array}
+\right)$$
+
+The solution set of the corresponding homogeneous system of equations equals $\im{T}$.
+\begin{eqnarray*}
+    \left\{
+        \begin{aligned}
+            x_1 &  &  &  & -2 x_5 & -4 x_6 &= 0 \\
+             & x_2 &  &  &  & -2 x_6 &= 0 \\
+             &  & x_3 &  & -3 x_5 & -1 x_6 &= 0 \\
+             &  &  & x_4 & + 7 x_5 & -5 x_6 &= 0
+        \end{aligned}
+    \right.
+\end{eqnarray*}
+
+\section{Fibonacci numbers as determinants}
+
+\begin{proposition}
+    Consider the matrix whose main diagonal entries are all $1$, whose diagonal
+    entries above the main diagonal are all $1$, whose diagonal entries
+    below the main diagonal are all $-1$, and whose remaining entries are $0$.
+    The determinant of such a matrix of size $n$ is equal to the $n$th
+    Fibonacci number.
+\end{proposition}
+
+\begin{proof}
+    To show that the specially-formed determinant of size $n$ equals the $n$th
+    Fibonacci number, we will prove that its cofactor expansion along the first
+    column yields a sum of exactly two terms, themselves specially-formed
+    determinants of size $n-1$ and $n-2$. Then by induction it will follow that
+    the proposition holds.
+
+    We verify by hand that the base cases hold: the specially-formed
+    determinants of size $1$ and $2$ are trivially seen to be equal to the
+    first and second Fibonacci numbers, respectively.
+
+    Induction hypothesis: the specially-formed determinants of size $n-1$ and $n-2$
+    are equal to the corresponding Fibonacci numbers.
+
+    Let the specially-formed determinant of size $n$ be $D$. We will perform
+    cofactor expansion on it along the first column. There are two nonzero
+    entries in the first column, and we will show that the corresponding
+    cofactors are the specially-formed determinants of size $n-1$ and $n-2$.
+
+    Let $D^{ij}$ refer to the $ij$ cofactor of $D$.
+
+    $D^11$ is clearly seen to be the specially-formed determinant of size
+    $n-1$.
+
+    $D^{21}$'s top row will have only one nonzero element: its top-left entry
+    will be $1$ due to the structure of $D$. So $D^{21} = (D^{21})^{11}$, i.e.
+    $D^{21}$ is equal to its $1,1$ cofactor, which is precisely the
+    specially-formed determinant of size $n-2$.
+
+    We have shown that $D$ is the sum of the specially-formed determinants of
+    size $n-1$ and $n-2$, which by the induction hypothesis are the
+    corresponding Fibonacci numbers.
+    Therefore, $D$ is the $n$th Fibonacci number.
+\end{proof}
+
+\end{document}
+
