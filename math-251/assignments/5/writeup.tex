@@ -3,6 +3,7 @@
 \usepackage{amsmath,amssymb,amsthm}
 
 \newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
 \DeclareMathOperator{\im}{Im}
 
 \newcommand{\R}{\mathbb{R}}
@@ -145,6 +146,66 @@ The solution set of the corresponding homogeneous system of equations equals $\i
     size $n-1$ and $n-2$, which by the induction hypothesis are the
     corresponding Fibonacci numbers.
     Therefore, $D$ is the $n$th Fibonacci number.
+\end{proof}
+
+\section{Determinants and totients}
+
+\begin{lemma}
+    Let $(i,j)$ represent the greatest common divisor of $i$ and $j$ and
+    define $p_{ij}$ as follows
+    $$
+    p_{ij} =
+    \begin{cases}
+        1 & \text{ if } j|i \\
+        0 & \text{ otherwise}
+    \end{cases}
+    $$
+
+    Then,
+    $$(i, j) = \sum_{k=1}^n {p_{ik} p_{jk} \phi(k)}$$
+\end{lemma}
+
+\begin{proof}
+    Let $s = \sum_{k=1}^n {p_{ik} p_{jk} \phi(k)}$.
+
+    A term in the sum $s$ will be nonzero if-and-only-if $k|i$ and $k|j$, and
+    $k$ ranges over all the possible divisors of $i$ and $j$, which are
+    precisely all the divisors of $(i, j)$. Thus, by the Gauss formula, $s =
+    (i, j)$.
+\end{proof}
+
+\begin{proposition}
+    $$
+    \det {(d_{ij})} = \prod_{i=1}^n {\phi{(i)}}
+    $$
+    where $d_{ij} = (i, j)$.
+\end{proposition}
+
+\begin{proof}
+    Consider the $n \times n$ matrix $P = (p_{ij})$, and note that $P$ is
+    triangular, since $j|i$ requires $j \leq i$ (as we are using nonnegative
+    integers only). We also note that the main diagonal of $P$ consists only of
+    $1$, since the divides relation is reflexive.
+
+    We examine the product $P\Phi P^T$, where $\Phi$ is the $n \times n$
+    diagonal matrix, whose $i$th diagonal element is $\phi{(i)}$.
+
+    With these definitions, we can establish
+    $$P\Phi P^T = (p_{ij})\Phi (p_{ji}) = (p_{ij} \phi{(j)}) (p_{ji})$$
+    since a product $AD$ where $D$ is diagonal amounts to multiplying the $j$th
+    column of $A$ by the $j$th entry of $D$.
+
+    We can write the entries of this product as sums
+    $$\left(\sum_{t=k}^n {a_{ik} \phi{(k)} a_{jk}}\right)$$
+    Each of these entries, however, are by lemma, $(i, j)$, which establishes
+    the following equality
+    $$P\Phi P^T = (d_{ij})$$
+
+    We may then take the determinant of both sides. Since $P$ is triangular
+    with $1$ everywhere on its main diagonal, its determinant is $1$. Due to
+    the multiplicative property of the determinant and since the determinant of
+    a diagonal matrix is the product of its diagonal entries, we conclude
+    $$\det {(d_{ij})} = \det \Phi = \prod_{i=1}^n {\phi{(i)}}$$
 \end{proof}
 
 \end{document}
