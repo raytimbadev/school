@@ -1,0 +1,86 @@
+Computer Systems (COMP 273) -- Assignment #2
+
+By: Jacob Errington (260636023)
+For: Joseph Vybihal
+Date: 12 February 2014
+
+Question #1
+===========
+
+See attached file.
+
+
+Question #2
+===========
+
+A) 2 GHz = 2 Gs^(-1) = 2 000 000 000 ticks / second.
+    Two billion ticks per second.
+
+B) We do dimensional analysis:
+    2 * 10^9 ticks/s * 2 * 10^(-9) s = 4 ticks
+
+C) A cycle is the amount of time ~ number of ticks required to complete a
+    single stage in the CPU, in the worst case.
+
+D) We can visualize the pipelining of the CPU by stacking the concurrent paths:
+
+      t=0
+    1.FDEWFDEW
+    2. FDEWFDEW
+    3.  FDEWFDEW
+    4.   FDEWFDEW
+
+    where
+      F: fetch
+      D: decode
+      E: execute
+      W: write
+
+    and assuming that at t=0, the processor was not in the middle of anything.
+
+    At t=1s, the pipeline will look like:
+
+          t=1s
+    1.FDEW|
+    2.WFDE|W
+    3.EWFD|EW
+    4.DEWF|DEW
+
+    Since, conveniently, each character in these diagrams represents one cycle
+    we get the following:
+        1s / 2 (ns/cycle) = 500 000 000 cycles will pass overall in 1s
+        500 000 000 cycles / 4 (cycles/instruction) = 125 000 000 instructions
+
+    But wait, there's more !
+
+    Line N is offset by (N-1) cycles, so only line 1 will perform an integer
+    number of instructions.
+    Therefore:
+        Line two is just about to complete an instruction: 3/4 instructions
+        Line three is in the middle: 2/4 = 1/2 instructions
+        Line four is just starting a new one: 1/4 instructions
+
+    These values are adjustments to be added to 125 000 000 - 1 = 124 999 999
+
+    So we just add up everything:
+        125 000 000 +
+        124 999 999 + 3/4 +
+        124 999 999 + 1/2 +
+        124 999 999 + 1/4
+        = 499 999 998 . 5
+
+E) In a classical CPU, each instruction must be completely finished before the
+    next can begin. Therefore, we just do some divisions:
+
+        1s / 2 (ns/cycle) / 4 (cycles/instruction) = 125 000 000 instructions
+
+    which is roughly 4 times less than a 4-stage pipeline CPU, as we would
+    expect.
+
+F) The pipeline CPU offers a certain amount of concurrency that is unmatched by
+    the classical CPU in that it allows itself to be maximally "busy". The
+    circuitry required to perform each of the different stages is separate to a
+    certain extent: in a classical CPU this goes to waste, whereas in a
+    pipeline CPU while one part of the CPU is performing the decode, another is
+    performing the fetch, and yet another is actually carrying out the
+    execution.
