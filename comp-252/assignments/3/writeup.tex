@@ -1,0 +1,60 @@
+\documentclass{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{algorithm,algorithmicx,algpseudocode}
+
+\newtheorem{proposition}{Proposition}
+
+\author{Jacob Errington (260636023)}
+\date{12 February 2015}
+\title{Assignment \#3\\COMP 252}
+
+\begin{document}
+
+\maketitle
+
+\section{Group testing}
+
+\begin{algorithm}
+    \caption{Group testing}
+    \begin{algorithmic}
+        \Require{$n$ blood samples, of which $0 < k \leq n$ are contaminated}
+        \Ensure{How many blood samples are contaminated}
+        \Function{TestGroup}{$sampleGroup$}
+            \If{$sampleGroup.size = 1$}
+                \Return $1$
+            \EndIf
+            \State $lGroup, rGroup \gets$ split $sampleGroup$ into two equally-sized subgroups
+            \State $l \gets$ \Call{Merge}{$subgroup1$}
+            \State $r \gets$ \Call{Merge}{$subgroup2$}
+            \State $s \gets 0$
+            \If{\Call{Test}{$l$}}
+                \State increase $s$ by \Call{TestGroup}{lGroup}
+            \EndIf
+            \If{\Call{Test}{$r$}}
+                \State increase $s$ by \Call{TestGroup}{rGroup}
+            \EndIf
+            \State \Return $s$
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
+\begin{proposition}
+    The algorithm \textsc{TextGroup} requires $O(k\log_2{n})$ uses of the \textsc{Test} oracle.
+\end{proposition}
+
+\begin{proof}
+    The number of times in which both the left and right subgroups can be
+    contaminated can occur at most $k$ times: in the worst-case split, one
+    subgroup contains $1$ contaminated sample, and the other contains the
+    remaining $k-1$ samples.
+
+    Now we look at the recurrence for the algorithm:
+    \begin{align*}
+        T_1   &= 0 \\
+        T_{n} &= 2 + \alpha T_{n/2}
+    \end{align*}
+    where $\alpha$ is $2$ at most $k$ times.
+\end{proof}
+
+\end{document}
