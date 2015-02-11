@@ -1,0 +1,101 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+
+\author{Jacob Errington (260626023)}
+\date{12 February 2015}
+\title{Assignment \#2\\COMP 273}
+
+\newcommand{\E}[1]{\times 10^{#1}}
+
+\begin{document}
+
+\maketitle
+
+See the attached \texttt{.circ} file for the 3-bit adder.
+
+\section*{Theoretical questions}
+
+\begin{enumerate}
+    \item $2\,\mathrm{GHz} = 2\,\mathrm{Gs}^{-1} = 2\E{9}\,\text{ticks/second}$.
+
+        Two billion ticks per second.
+
+    \item Dimensional analysis is the only real problem solving technique.
+        $$ 2\E{9} \text{ ticks/s} \times 2\E{-9} \text{ s} = 4 \text{ ticks} $$
+
+    \item A cycle is the amount of time or number of ticks required to complete
+        a single stage in the CPU, in the worst case.
+
+    \item We can visualize the pipelining of the CPU by stacking the concurrent
+        paths at $t=0\text{ s}$.
+
+\begin{verbatim}
+FDEWFDEW
+ FDEWFDEW
+  FDEWFDEW
+    FDEWFDEW
+\end{verbatim}
+        where
+        \begin{description}
+            \item[F.] Fetch.
+            \item[D.] Decode.
+            \item[E.] Execute.
+            \item[W.] Write
+        \end{description}
+        assuming that at $t=0 \text{ s}$ the processor was not in the middle of anything.
+
+        Then, at $t=1\text{ s}$, the pipeline will look like the following:
+
+\begin{verbatim}
+FDEW|
+WFDE|W
+EWFD|EW
+DEWF|DEW
+\end{verbatim}
+
+        where the vertical bars show $t=1\text{ s}$. Conveniently, each
+        character in these fancy diagrams represents one cycle, so we get the following analysis:
+        \begin{equation*}
+            \frac{\frac{1\text{ s}}{2 \text{ ns/cycle}}}{4\text{ cycles/instruction}} 
+                =  125 000 000\text{ instructions}
+        \end{equation*}
+
+        But wait, there's more!
+
+        Line $N$ in these diagrams is offset by $N-1$ cycles, so only line 1
+        will perform an integer number of instructions, precisely $125 000 000$
+        instructions as we saw above. The other lines will perform one
+        instruction less, plus some fractional part equal to the
+        $1 - \frac{\text{number of offset cycles}}{4}\text{ instructions}$.
+
+        So let's add all that up:
+        \begin{align*}
+            125 000 000 &+ \\
+            124 999 999 &+ \frac{3}{4} \\
+            124 999 999 &+ \frac{1}{2} \\
+            124 999 999 &+ \frac{1}{4} \\
+                        &= 499 999 998.5
+        \end{align*}
+
+    \item In a classical CPU, each instruction must be completely finished
+        before the subsequent one can begin. Therefore the math is easy: we just do some divisions.
+        \begin{equation*}
+            \frac{\frac{1\text{ s}}{2 \text{ ns/cycle}}}{4\text{ cycles/instruction}} 
+                =  125 000 000\text{ instructions}
+        \end{equation*}
+        which is roughly four times less than in a four-stage pipeline CPU, as we would expect.
+
+    \item The pipeline CPU offers a certain amount of concurrency that is
+        unmatched by the classical CPU in that it allows itself to be maximally
+        "busy". The circuitry required to perform each of the different stages
+        is separate to a certain extent: in a classical CPU this goes to waste,
+        whereas in a pipeline CPU while one part of the CPU is performing the
+        decode, another is performing the fetch, and yet another is actually
+        carrying out the execution. That is why the pipeline CPU is generally
+        faster than a classical CPU.
+
+
+\end{enumerate}
+
+\end{document}
