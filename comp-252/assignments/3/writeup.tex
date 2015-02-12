@@ -97,6 +97,16 @@ iterate moved down, and $0$ was recorded each time it moved up.
     Thus, overall, we get $O(k \log n)$.
 \end{proof}
 
+If $k$ is large (approaches $n$), then it becomes more efficient to just
+check each sample individually, but when $k$ is small, $k \log n$ is pretty
+good. It becomes impossible to do better as we can see from the recursion tree
+when $k=1$: each level of recursion cuts the sample size in half, and we must
+arrive at a single sample before we can definitively conclude that it is that
+sample that is contaminated. Thus the minimum bound then is $\log n$.
+
+Intuitively, this makes sense since the algorithm greatly resembles a binary
+search.
+
 \section{Lower bounds}
 
 \begin{description}
