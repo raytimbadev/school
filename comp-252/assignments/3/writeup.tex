@@ -89,10 +89,10 @@ iterate moved down, and $0$ was recorded each time it moved up.
 
 \begin{proof}
     In the worst case, contaminated samples are split roughly equally into both
-    subgroups upon recursion. Therefore, the $k$ subgroups in which a single
-    contaminated sample will be located around level $\log k$, from there,
-    identifying that sample requires partitioning the samples by two repeatedly
-    until it is found, which requires $O(\log n)$ time, $k$ times.
+    subgroups upon recursion. Therefore, the $k$ subgroups in which there is a
+    single contaminated sample will be located around level $\log k$. From
+    there, identifying that sample requires partitioning the samples by two
+    repeatedly until it is found, which requires $O(\log n)$ time, $k$ times.
 
     Thus, overall, we get $O(k \log n)$.
 \end{proof}
