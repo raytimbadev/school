@@ -1,5 +1,7 @@
 \documentclass{article}
 
+\usepackage{float}
+\usepackage[margin=1.5cm]{geometry}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{algorithm,algorithmicx,algpseudocode}
 
@@ -13,26 +15,68 @@
 
 \maketitle
 
+\section{Tree conversions}
+
+We assume that when the walk was constructed, $1$ was recorded every time the
+iterate moved down, and $0$ was recorded each time it moved up.
+
+\begin{algorithm}[H]
+    \caption{Tree reconstruction from a Harris walk}
+    \begin{algorithmic}
+        \Require{A array $H$ representing the Harris walk}
+        \Ensure{A tree $T$ whose shape is that described by $H$}
+        \Function{RebuildHarris}{$A$}
+            \State $T \gets $ an empty node
+
+            \For{$i$ from $length[A]$ down to $2$}
+                \If{$A[i] = 1$}
+                    \If{A[i-1] = 0}
+                        \State $S \gets$ a new node
+                        \State $nextSibling[S] \gets T$
+                        \State $T \gets S$
+                        \State increment $i$
+                    \Else
+                        \If{$parent[T]$ is not null}
+                            \State $T \gets parent[T]$
+                        \Else
+                            \State $S \gets$ a new node
+                            \State $eldestChild[S] \gets T$
+                            \State $T \gets S$
+                        \EndIf
+                    \EndIf
+                \Else
+                    \State $eldestChild[T] \gets$ a new node
+                    \State $T \gets eldestChild[T]$
+                \EndIf
+            \EndFor
+
+            \State $S \gets$ a new node
+            \State $eldestChild[S] \gets T$
+            \State \Return $S$
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
 \section{Group testing}
 
-\begin{algorithm}
+\begin{algorithm}[H]
     \caption{Group testing}
     \begin{algorithmic}
         \Require{$n$ blood samples, of which $0 < k \leq n$ are contaminated}
         \Ensure{How many blood samples are contaminated}
         \Function{TestGroup}{$sampleGroup$}
             \If{$sampleGroup.size = 1$}
-                \Return $1$
+                \Return the unique contaminated sample
             \EndIf
             \State $lGroup, rGroup \gets$ split $sampleGroup$ into two equally-sized subgroups
             \State $l \gets$ \Call{Merge}{$subgroup1$}
             \State $r \gets$ \Call{Merge}{$subgroup2$}
-            \State $s \gets 0$
+            \State $s \gets \emptyset$
             \If{\Call{Test}{$l$}}
-                \State increase $s$ by \Call{TestGroup}{lGroup}
+                \State $s \gets s \cup$ \Call{TestGroup}{lGroup}
             \EndIf
             \If{\Call{Test}{$r$}}
-                \State increase $s$ by \Call{TestGroup}{rGroup}
+                \State $s \gets s \cup$ \Call{TestGroup}{rGroup}
             \EndIf
             \State \Return $s$
         \EndFunction
@@ -40,21 +84,131 @@
 \end{algorithm}
 
 \begin{proposition}
-    The algorithm \textsc{TextGroup} requires $O(k\log_2{n})$ uses of the \textsc{Test} oracle.
+    The \textsc{TestGroup} algorithm requires $O(k\log_2{n})$ uses of the \textsc{Test} oracle.
 \end{proposition}
 
 \begin{proof}
-    The number of times in which both the left and right subgroups can be
-    contaminated can occur at most $k$ times: in the worst-case split, one
-    subgroup contains $1$ contaminated sample, and the other contains the
-    remaining $k-1$ samples.
+    In the worst case, contaminated samples are split roughly equally into both
+    subgroups upon recursion. Therefore, the $k$ subgroups in which a single
+    contaminated sample will be located around level $\log k$, from there,
+    identifying that sample requires partitioning the samples by two repeatedly
+    until it is found, which requires $O(\log n)$ time, $k$ times.
 
-    Now we look at the recurrence for the algorithm:
-    \begin{align*}
-        T_1   &= 0 \\
-        T_{n} &= 2 + \alpha T_{n/2}
-    \end{align*}
-    where $\alpha$ is $2$ at most $k$ times.
+    Thus, overall, we get $O(k \log n)$.
 \end{proof}
+
+\section{Lower bounds}
+
+\begin{description}
+    \item[Binary oracle.] We consider three pools of elements, $O$, $W$, $D$.
+        We start with all the elements in group $O$, and the algorithm will
+        halt when group $O$ is depleted group $W$ contains only one element. We
+        can establish the following flows:
+        \begin{description}
+            \item[O, O.] One element will move to $W$, one element will move to
+                $D$.
+            \item[W, W.] One element will remain in $W$, one element will move
+                to $D$.
+            \item[O, W.] The size of $W$ remains the same, and $D$ will
+                increase by one.
+            \item[D, *.] No change.
+        \end{description}
+
+        Due to the nature of the termination conditions, we can see we must
+        remove every element from $O$, which can be done in two ways: comparing
+        an element of $O$ with one of $W$ or comparing two elements of $O$. The
+        former process removes one element from $O$, and the latter process
+        removes two.
+
+        We can construct equations representing these flows, considering the
+        total count of elements to be $n$.
+        \begin{equation*}
+            n = f_{OO} + f_{OW}
+        \end{equation*}
+
+        And $n_W$ the number of elements in $W$, is however many have flowed in
+        minus however many have flowed out.
+        \begin{equation*}
+            n_W = f_{OW} - f_{WW}
+        \end{equation*}
+
+        Ultimately, we need $n_W$ to be $1$, so we can rewrite these equations
+        into one.
+        \begin{equation*}
+            n - 1 = f_{OO} + f_{WW}
+        \end{equation*}
+
+        That equation demonstrates that the lower bound on the flows,
+        regardless of the chosen algorithm or inputs is exactly $n - 1$.
+
+    \item[$k$-ary oracle.] Things are trickier because there are more cases to
+        check. Again we consider three pools $O$, $W$, $D$ where all elements
+        are initially in $O$.
+
+        Let $S$ be a sample of $k$ elements used as input to the oracle. There
+        are $w$ elements in $S$ from $W$, $o$ elements in $S$ from $O$, and $d$
+        elements in $S$ from $D$.
+
+        Since elements from $D$ do not affect the flow, we may consider without
+        loss of generality that $d = 0$. Thus, $k = w + o$.
+
+        Then, we must consider two cases.
+        \begin{itemize}
+            \item If $w = 0$, then $o = k$: one element will move to $W$, and
+                the remaining $k-1$ will move to $D$.
+            \item If $w > 0$, then $W$ will lose $w - 1$ elements, $O$ will
+                lose $k - w$ elements, and $D$ will gain $k - w + 1$ elements.
+        \end{itemize}
+
+        The halting conditions are the same as before: $O$ must be emptied and
+        $W$ must contain a single element, since each element must bear witness
+        to the maximality.
+
+        Let's write the number of elements removed from $O$ as a function of
+        $w$.
+        $$
+        f(w) = \begin{cases}
+            k & \text{if } w = 0 \\
+            k - w & \text{if } w > 0
+        \end{cases}
+        $$
+
+        To empty $O$, we must consider all possible ways in which the oracle
+        can be used.
+        \begin{align*}
+            n &= a_0 f(0) + a_1 f(1) + a_2 f(2) + \cdots + a_k f(k) \\
+            n &= a_0 k + a_1 (k - 1) + a_2 (k - 2) + \cdots + a_{k-1} (k - (k-1)) + a_k (k - k)
+        \end{align*}
+        where $a_i$ represents the number of times the oracle has been used in
+        the $i$th fashion.
+
+        Each time we use the oracle to remove some number of elements from $O$,
+        we add some corresponding number of elements to $W$, so let's write the
+        flow for $W$ as a function of $w$.
+        $$
+        g(w) = \begin{cases}
+            1 & \text{if } w = 0 \\
+            1 - w & \text{if } w > 0
+        \end{cases}
+        $$
+
+        Then we get the following equation, reusing the constants $a_i$.
+        \begin{align*}
+            1 &= a_0 g(0) + a_1 g(1) + \cdots + a_k g(k) \\
+            1 &= a_0 1 + a_1 (1 - 1) + \cdots + a_k (1 - k)
+        \end{align*}
+
+        Now let's subtract these equations.
+        \begin{align*}
+            n - 1 &= a_0 \left(f(0) - g(0)\right) + a_1 \left(f(1) - g(1)\right) + \cdots + a_k \left(f(k) - g(k)\right) \\
+            n - 1 &= a_0 \left(k - 1\right) + \sum_{i=1}^k a_i \left(k - i - 1 + i\right) \\
+            n - 1 &= a_0 \left(k - 1\right) + (k-1) \sum_{i=1}^k a_i \\
+            n - 1 &= a_0 (k - 1) + \alpha (k - 1)
+        \end{align*}
+        where $\alpha$ is the total number of times the oracle is used with at
+        least one element from $W$.
+        Therefore, the lower bound for the number of uses of the oracle is
+        $$ a_0 + \alpha = \frac{n - 1}{k - 1} $$
+\end{description}
 
 \end{document}
