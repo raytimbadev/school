@@ -221,4 +221,57 @@ search.
         $$ a_0 + \alpha = \frac{n - 1}{k - 1} $$
 \end{description}
 
+\section{The heart of a tree}
+
+We will essentially ignore the fact that the tree is rooted, and instead only
+consider it essentially as a graph. Our algorithm will first locate all those
+nodes all of whose children are leaves. We will consider a node to be a leaf if
+it has only one edge. Then, for each such node, we remove a single child per
+iteration. When such a node becomes single-edged, then we remove it from the
+leaf-parent set and mark its parent as a leaf-parent.
+
+Since we will consider this tree as a graph, we will also have to do some extra
+parent-child bookkeeping.
+
+We repeat this process until we're left with a single node. That node will be
+in the heart.
+
+%% Is this even true?
+%Clearly, these are the nodes which
+%contribute the most to $D[i_C]$ where $i_C$ denotes the index of a
+%central node.
+
+\begin{algorithm}
+    \caption{Tree heart finding}
+    \begin{algorithmic}
+        \Require{A tree $T$}
+        \Ensure{A node $N$ in the heart of $T$}
+        \Function{HeartFind}{$T$}
+            \State $S \gets \emptyset$ \Comment initialize the leaf-parent set.
+            \State $r \gets null$ \Comment to store the result.
+            \For{$t \in T$} \Comment Traverse the tree to locate the leaves.
+                \If{$|t.edges| = 1$}
+                    \State $t.parent.children \gets t.parent.children \cup \{t\}$
+                    \State $S \gets S \cup \{t.parent\}$
+                \EndIf
+            \EndFor
+
+            \While{$|S| > 0$}
+                \State choose $s \in S$
+                \If{$|s.edges| = 1$}
+                    \State $r \gets s$
+                    \State remove $s$ from $S$.
+                \Else
+                    \State delete one element of $s.children$
+                    \If{$|s.edges| = 1$}
+                        \State $S \gets S \cup \{s.parent\}$
+                    \EndIf
+                \EndIf
+            \EndWhile
+
+            \State \Return $r$
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
 \end{document}
