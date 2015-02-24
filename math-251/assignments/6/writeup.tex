@@ -1,0 +1,67 @@
+\documentclass{article}
+
+\usepackage{amsmath,amssymb}
+
+\DeclareMathOperator{\im}{Im}
+
+\author{Jacob Errington(260636023)}
+\title{Assignment \#6\\Honours Algebra 2 (MATH 215)}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{description}
+
+    \item[Problem \#1] 
+        First we'll find the dual basis to the basis $B = ((5, 2), (7, 3))$. We know
+        that if $V$ is the matrix whose columns consist of $B$ vectors and $U$ is the
+        matrix whose columns are the vectors of $B^*$, then $U^T V = Id$. So the
+        vectors of $B^*$ are the rows of $V^{-1}$.
+
+        By row-reduction, we find 
+        $$V^{-1} = 
+        \frac{1}{11}
+        \begin{array}{c c}
+            3 & -7 \\
+            2 & -1
+        \end{array}
+        $$
+        meaning that the dual basis is $(\frac{1}{11}(3, -7), \frac{1}{11}(2, -1))$, 
+        which we can express in terms of the standard dual basis as
+        $$
+        B^* = (\frac{1}{11}(3x_1 + -7x_2), \frac{1}{11}(2x_1 - x_2))
+        $$
+
+    \item[Problem \#3]
+        First, we show that every linear map defined on a subspace of $W \subset V$ can
+        be extended to a linear map over $V$.
+
+        We consider $W$ to be a proper subset of $V$, so if $\dim V = n$, then it has
+        dimension at most $r = n-1$. Let the basis of $W$ be $B_W = (v_1, \cdots,
+        v_r)$. This can be completed to a basis of $V$, 
+        $B_V = (v_1, \cdots, v_r, v_{r+1} \cdots, v_n)$. The ``extra'' vectors used for
+        the completion can be used as a basis for a vector space $W^\prime$ which is in
+        some sense complementary to $W$. It follows that $V = W \oplus W^\prime$.
+
+        If we have $S : W \to W$ and $R : W^\prime \to W^\prime$, then from the above
+        observation, we can form a $T(v) = S(v) + R(v)$, an extending $S$ over $V$.
+
+        Let $T: V \to W$ be injective. Choose $a \in V^*$ and $b \in W^*$ such that
+        $T^*(a) = b$, i.e. $b = T \circ a$. We split the codomain of $T$, namely $W$,
+        into two subspaces, such that $W = T(V) \oplus W^\prime$. In particular, this
+        means that each $w \in W$ can be represented as $w = T(v) + w^\prime$. Due to
+        the injectivity of $T$, the mapping from $w$ to $v$ is well-defined, i.e. each
+        $w$ is mapped only to one $v$, so we may define 
+        $b(w) = b(T(v) + w^\prime) = a(v)$. Thus, we confirm the surjectivity of $T^*$,
+        since $(b \circ T)(v) = b(T(V)) = a(v)$.
+
+        Let $T : V \to W$ be surjective. Suppose $b \in \ker {T^*}$,
+        meaning that $(b \circ T)(v) = 0\, \forall v \in V$. Since $T$ is surjective,
+        its image is its codomain, so $b$ is the zero map, such that $b(W) = 0$. Thus,
+        $\ker{T*}$ consists only of the zero map and is trivial, implying that $T^*$ is
+        injective.
+\end{description}
+
+\end{document}
