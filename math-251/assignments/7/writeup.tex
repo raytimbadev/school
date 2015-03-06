@@ -1,0 +1,89 @@
+\documentclass{article}
+
+\usepackage{amsmath, amssymb, amsthm}
+
+\newtheorem{proposition}{Proposition}
+
+\DeclareMathOperator{\proj}{proj}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\norm}[1]{\left\langle #1, #1 \right\rangle}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#7\\Honours Algebra 2 (MATH 251)}
+\date{9 March 2015}
+
+\begin{document}
+
+\section{A special inequality}
+
+\begin{proposition}
+    For any $\alpha_1, \cdots, \alpha_n > 0$,
+    $$\left( \sum_{i=1}^n \alpha_i \right) \left( \sum_{i=1}^n \frac{1}{\alpha_i} \right) \geq n^2$$
+\end{proposition}
+
+\begin{proof}
+    Let
+    $x = (\sqrt{\alpha_1}, \cdots, \sqrt{\alpha_n})$,
+    $y = (\frac{1}{\sqrt{\alpha_1}}, \cdots, \frac{1}{\sqrt{\alpha_n}})$
+    where $\alpha_i \in \R$ and $\alpha_i > 0$.
+
+    By the Cauchy-Schwarz inequality and with the usual inner product on
+    vectors of real numbers, we have
+    \begin{equation}
+    \left\langle x, y \right\rangle = \sum_{i=1}^n { x_i y_i }
+    \leq \sqrt{\sum_{i=1}^n {x_i}^2} \sqrt{\sum_{i=1}^n {y_i}^2}
+    \label{eqn:csineq}
+    \end{equation}
+
+    We make the following remark about the summation on the left.
+
+    $$\sum_{i=1}^n {x_i y_i}
+    = \sum_{i=1}^n {\sqrt{\alpha_i} \frac{1}{\sqrt{\alpha_i}}}
+    = \sum_{i=1}^n 1
+    = n$$
+
+    Using this remark, we square both sides of the inequality in
+    \eqref{eqn:csineq}.
+
+    \begin{align*}
+        n^2 &\leq \left( \sum_{i=1}^n {x_i}^2\right) \left(\sum_{i=1}^n {y_i}^2 \right) \\
+        n^2 &\leq \left( \sum_{i=1}^n \alpha_i \right) \left( \sum_{i=1}^n \frac{1}{\alpha_i} \right)
+    \end{align*}
+\end{proof}
+
+Clearly, the inequality becomes equality when each $\alpha_i = 1$.
+However, we can find more general conditions on $\alpha_i$ such that this
+inequality gives rise to equality.
+
+Specifically, we know that the Cauchy-Schwarz inequality is used to define the
+cosine function: $\langle x, y \rangle = \norm{x} \norm{y} \cos{\theta}$.
+Therefore, we have equality when $\cos{\theta} = 1$, i.e. when the vectors are
+the same up to multiplication by a scalar.
+
+For our vectors $x$ and $y$, this means that all $\alpha_i$ are the same.
+
+
+\section{Projections onto subspaces of continuous functions}
+
+We want to find in $\mathcal{C}[0, 1]$ with inner product
+$\langle f, g \rangle = \int_0^1 f(x)g(x)\, dx$ the projection of $e^x$ onto
+the subspace of polynomials of degree at most 1, $\mathcal{P}_1$.
+
+First, we find an orthonormal basis for $\mathcal{P}_1$.
+Starting with the standard basis $\{1, x\}$, we find by the
+Gram-Schmidt process that the orthonormal basis is
+$B_0 = \{1, \sqrt{3}(x - 1)\}$.
+
+Second, we take the sum of projections the vector $e^x$ onto each element of
+$B_0$ in order to find the projection of $e^x$ onto the
+subspace spanned by that orthonormal basis, i.e. $\mathcal{P}_1$.
+
+\begin{align*}
+    \proj_{\mathcal{P}_1} {e^x} &= \proj_{1} {e^x} + \proj_{\sqrt{3} (x - 1)} {e^x} \\
+                                &= e - 1 + 6 x - 6 - 3 e x + 3 e \\
+                                &= 3 e x + 4 e + 6 x - 7
+\end{align*}
+
+
+\end{document}
