@@ -163,4 +163,90 @@
     $O(3k\log k) = O(k\log k)$ as required.
 \end{proof}
 
+\section{Overlapping circles}
+
+\begin{algorithm}
+    \caption{Determine if two circles overlap by a sweepline-inspired method}
+    \begin{algorithmic}
+        \item[]
+            The \textsc{CircleOverlap} algorithm uses an interval tree to keep
+            track of the $x$-spans of the circles as it sweeps across the
+            plane. When two circles are confirmed to overlap on the $x$-axis,
+            then they are checked for full overlap.
+
+        \Require{$n$ closed circles in the plane, each determined by a center
+        $(x_i, y_i)$ and a radius $r_i$.}
+
+        \Ensure{Whether any two of those circles overlap.}
+
+        \Function{CircleOverlap}{positions $(x_i, y_i)$ and radii $r_i$, for $1 \leq i \leq n$}
+            \State Sort the circles by the function $\lambda (x, \_), r \to x - r$.
+            \Comment $O(n \log n)$
+            %\State Initialize an interval tree $T_x \gets \emptyset$ storing
+            %circles, keyed on $\lambda (x, \_), r \to x - r$, with \emph{high}
+            %calculated by $\lambda (x, \_), r \to x + r$.
+            %\State Initialize an interval tree $T_y \gets \emptyset$ storing
+            %circles, keyed on $\lambda (\_, y), r \to y - r$, with \emph{high}
+            %calculated by $\lambda (\_, y), r \to y + r$.
+            %\State Initialize an empty priority queue $Q \gets \emptyset$ keyed
+            %on $\lambda (x, \_), r \to x + r$.
+            %\For{$i = 1 \to n$}
+            %    \While{$(x_q, y_q), r_q \gets \Peek{[Q]}$} \Comment $O(n \log n)$
+            %        \If{$x_q + r_q < x_i - r_i$}
+            %            \State $\Remove{[T_x, x_q - r_q]}$
+            %            \State $\Remove{[T_y, y_q - y_q]}$
+            %            \State $\Dequeue{[Q]}$
+            %        \Else
+            %            \State \texttt{break}
+            %        \EndIf
+            %    \EndWhile
+            %    \If{$\Intersects{[T_x, ((x_i, y_i), r_i)]}$} \Comment $O(\log n)$
+            %        \If{$\Intersects{[T_y, ((x_i, y_i), r_i)]}$} \Comment $O(\log n)$
+            %            \State \Return \texttt{True}
+            %        \EndIf
+            %    \EndIf
+            %\EndFor
+            \State Initialize an empty interval tree $T_x \gets \emptyset$
+            storing circles keyed on $\lambda (x, \_), r \to x - r$, with
+            \emph{high} calculated by $\lambda (x, \_), r \to x + r$.
+            \State Initialize an empty priority queue $Q \gets \emptyset$
+            storing circles keyed on $\lambda (x, \_), r \to x + r$.
+            \State $i \gets 2$
+            \State $x \gets x_1 - r_1$
+            \State $x_{next} \gets x$
+            \While{$i \leq n$}
+                \State $x_{next} \gets x_i - r_i$
+                \If{$x = x_{next}$}
+                    \Comment{The sweepline is at the beginning of a new
+                        circle.}
+                    \If{$cs \gets \Intersects{[T_x, ((x_i, y_i), r_i)]}$}
+                        \For{$(x_c, y_c), r_c$ in $cs$}
+                            \If{$\sqrt{(x_i - x_c)^2 + (y_i - y_c)^2}
+                                    \leq r_i + r_c$}
+                                \State \Return \texttt{True}
+                            \EndIf
+                        \EndFor
+                    \EndIf
+                    \State $\Enqueue{[Q, ((x_i, y_i), r_i)]}$
+                    \State $\Insert{[T_x, ((x_i, y_i), r_i)]}$
+                    \State $i \gets i + 1$
+                \ElsIf{$(x_q, y_q), r_q \gets \Peek{[Q]}$}
+                    \Comment{The sweepline is crossing some circles}
+                    \If{$x_q + r_q < x_{next}$} \Comment{The next circle begins
+                            after a current one ends.}
+                        \State $\Dequeue{[Q]}$
+                        \Comment{Remove the circle whose endpoint is soonest.}
+                        \State $\Remove{[T_x, ((x_q, y_q), r_q)]}$
+                    \EndIf
+                \Else
+                    \State $x \gets x_{next}$
+                    \Comment{Advance the sweepline to the start of the next
+                        circle.}
+                \EndIf
+            \EndWhile
+            \State \Return \texttt{False}
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
 \end{document}
