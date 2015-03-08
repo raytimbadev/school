@@ -5,6 +5,21 @@
 \usepackage{float}
 \usepackage[margin=2.5cm]{geometry}
 
+\newtheorem{proposition}{Proposition}
+
+\DeclareMathOperator{\Key}{\mathtt{key}}
+\DeclareMathOperator{\Enqueue}{\mathtt{enqueue}}
+\DeclareMathOperator{\Dequeue}{\mathtt{dequeue}}
+\DeclareMathOperator{\Peek}{\mathtt{peek}}
+\DeclareMathOperator{\Remove}{\mathtt{remove}}
+\DeclareMathOperator{\Insert}{\mathtt{insert}}
+\DeclareMathOperator{\Intersects}{\mathtt{intersects}}
+\DeclareMathOperator{\print}{\mathtt{print}}
+\DeclareMathOperator{\leftChild}{\mathtt{leftChild}}
+\DeclareMathOperator{\rightChild}{\mathtt{rightChild}}
+\DeclareMathOperator{\Parent}{\mathtt{parent}}
+\DeclareMathOperator{\RemoveMin}{\mathtt{removeMin}}
+
 \author{Jacob Thomas Errington (260636023)}
 \title{Assignment \#4\\Honours Algorithms and Data Structures (COMP 252)}
 \date{10 March 2015}
@@ -12,5 +27,140 @@
 \begin{document}
 
 \maketitle
+
+\section{Browsing a red-black tree}
+
+\begin{enumerate}
+    \item \emph{Finding $k$-th smallest element.}
+
+        \begin{proposition}
+            Given pointers to both the root and the smallest element of a
+            red-black tree, finding an element $u$ such that $\Key{[u]} = x$
+            can be done in time $O(1 + \log k)$ if $x$ is the $k$-th smallest
+            element stored in the tree.
+        \end{proposition}
+
+        \begin{proof}
+            The sub-trees of a red-black tree are also red-black trees, and so
+            are balanced. Between the smallest element and the $k$-th smallest
+            element, there are a total of $k$ elements, so the minimal subtree
+            that contains these two elements will have height $\log k$. Thus,
+            it suffices to find the youngest common ancestor of the two
+            elements, since performing the ordinary lookup procedure from there
+            will take time $O(\log k)$.
+
+            Starting from the smallest element, we keep going to its parent
+            (then its parent's parent, etc.) until we find an element -- call
+            it $p$ -- whose \emph{parent's} key is greater than $x$. Therefore,
+            $p$ will be the youngest common ancestor of the smallest and the
+            $k$-th smallest element. Finding it takes time $O(\log k)$, and
+            performing the regular lookup from there takes time $O(\log k)$, so
+            overall this algorithm takes time $O(\log k)$.
+        \end{proof}
+
+    \item \emph{Listing the $k$ smallest elements.}
+
+        \begin{proposition}
+            Given pointers to both the root and the smallest element of a
+            red-black tree, the $k$ smallest elements of the tree can be listed
+            in time $O(k)$.
+        \end{proposition}
+
+        \begin{proof}
+            The beginning of this proof is similar. We use the fact that there
+            are $k$ elements in the subtree of interest, and we use a modified
+            in-order traversal (since it's \emph{bottom-up} rather than
+            \emph{top-down} as usual) starting from the smallest element.
+
+            Since the traversal is bottom-up, we split it into two parts: one
+            part walks up left leftmost edge of the tree parent by parent, and
+            the other part performs augmented in-order traversals of the right
+            subtrees of those leftmost elements.
+
+            The traversal is augmented by a counter representing how many
+            elements are left to output.  Each time an element is yielded, the
+            global counter is decremented, until a total of $k$ elements have
+            been yielded.
+
+            \begin{algorithm}[H]
+                \caption{List the smallest $k$ elements in a red-black tree
+                given the smallest element.}
+                \begin{algorithmic}
+                    \Require{The smallest element $t$ in a red-black tree, the
+                    number of elements to list $k$.}
+                    \Ensure{The $k$ smallest elements are printed.}
+
+                    \Function{Traverse}{$t$, $k$}
+                        \If{$t$ is \textbf{null} or $k = 0$}
+                            \State \Return $k$
+                        \Else
+                            \State $k^\prime \gets$
+                            \Call{Traverse}{$\leftChild{[t]}$, $k$}
+                            \State $k^\prime \gets$
+                            \Call{Traverse}{$\rightChild{[t]}$, $k^\prime - 1$}
+                            \State \Return $k^\prime$
+                        \EndIf
+                    \EndFunction
+
+                    \Function{ListSmallest}{$t$, $k$}
+                        \State $c \gets k - 1$
+                        \State $\print{t}$
+                        \While{$c > 0$}
+                            \State $t \gets \Parent{[t]}$
+                            \State $\print{t}$
+                            \State $c \gets c - 1$
+                            \State $c \gets $
+                            \Call{Traverse}{$\rightChild{[t]}$, $c$}
+                        \EndWhile
+                    \EndFunction
+                \end{algorithmic}
+            \end{algorithm}
+
+        The algorithm given is $O(k)$ since we essentially perform an in-order
+        traversal of the minimal subtree containing the smallest element and
+        the $k$-the smallest element, in which there are $k$ elements, all of
+        which are printed.
+    \end{proof}
+
+\end{enumerate}
+
+\section{Binary heaps}
+
+\begin{proposition}
+    The $k$ smallest items of a binary min-heap of size $n$ can be found in
+    time $O(k \log k)$.
+\end{proposition}
+
+\begin{proof}
+    We will create a second min-heap -- call it $H^\prime$ -- of size $k$ in
+    which to insert elements as we discover them in the primary heap -- call it
+    $H$. We will then traverse $H$ in a fashion prioritized by $H^\prime$, in
+    which operations take $O(\log{k})$.
+
+    \begin{algorithm}
+        \caption{List the $k$ smallest elements of a binary min-heap.}
+        \begin{algorithmic}
+            \Require{The number of elements to find $k$, the binary min-heap $H$}
+            \Ensure{The $k$ smallest elements are printed.}
+            \Function{ListSmallestHeap}{$k$, $H$}
+                \State Initialize a min-heap of size $k$, $H^\prime \gets
+                \emptyset$
+                \State $\Insert{[H^\prime, \Peek{[H]}]}$
+                \For{$i = k \to 1$} \Comment{Executes a total of $k$ times}
+                    \State $p \gets \RemoveMin{[H]}$ \Comment{$O(\log k)$}
+                    \State $\print{p}$
+                    \State $\Insert{[H, \leftChild{[p]}]}$
+                    \Comment{$O(\log k)$}
+                    \State $\Insert{[H, \rightChild{[p]}]}$
+                    \Comment{$O(\log k)$}
+                \EndFor
+            \EndFunction
+        \end{algorithmic}
+    \end{algorithm}
+
+    Inside the \texttt{for} loop, which is executed $k$ times in total, three
+    $O(\log k)$ operations take place, so the overall time of this algorithm is
+    $O(3k\log k) = O(k\log k)$ as required.
+\end{proof}
 
 \end{document}
