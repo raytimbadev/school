@@ -249,4 +249,56 @@
     \end{algorithmic}
 \end{algorithm}
 
+\section{Augmented data structures}
+
+We will use a red-black tree whose nodes will be augmented with two pieces of
+information: the difference between their value and their in-order
+predecessor's value, and the smallest such difference in the subtree rooted at
+that node, i.e. the min-gap in that subtree. The smallest element will be given
+the nominal difference $\infty$ with its nonexistent predecessor, and all leaf
+nodes will be given the nominal min-gap $\infty$ as they have no subtree.
+
+First, we will remark that the difference between an element and its
+predecessor is unaffected by rotations because they preserve order.
+
+Second, we notice that maintaining the min-gap throughout a rotation requires
+$O(1)$ time since the group of elements being rotated has at most five
+children, collectively, and each of whose min-gap is unchanging. Effectively,
+all that will be required during a rotation is to exchange the min-gap of two
+of the elements being rotated.
+
+Thus no serious performance penalties are incurred by the self-balancing nature
+of the red-black tree when these additional pieces of data are included in the
+nodes.
+
+Notice that the min-gap is determined inductively
+by the min-gap of a node's two children. Let $p_k$ be
+the difference between the value of node $k$ with the value of its predecessor
+and $s_k$ be the min-gap of node $k$. Then,
+$$s_k = \min\{p_k, p_{\leftChild{[k]}}, s_{\leftChild{[k]}}, p_{\rightChild{[k]}},
+s_{\rightChild{:k]}}\}$$.
+
+Now let's examine the running times of the atomic operations.
+
+\begin{description}
+    \item[Min-gap.] $O(1)$ since we simply retrieve the min-gap of the root,
+        which by the inductive argument made above is the minimal difference
+        between any two elements in the tree entire tree.
+    \item[Insert.] Upon inserting, which takes time $O(\log n)$, we must locate
+        the in-order successor and predecessor of the inserted element, one of
+        which takes, at worst, $O(\log n)$ (the other will be $O(1)$ because
+        the inserted element is a leaf), and adjust their neighbor-differences
+        to account for the new element being added. Due to these changes in
+        min-gap, we must travel from parent to parent for both adjusted
+        elements, adjusting their min-gap (a kind of \emph{bubble up} process).
+        This takes time $O(2 \log n)$. Overall, since only a constant number of
+        $O(\log n)$ operations took place, this procedure is $O(\log n)$.
+    \item[Delete.] The procedure is essentially the same as for insertion: we
+        adjust the neighbor difference of the successor of the deleted element,
+        and we bubble up twice to adjust the min-gap. Thus, it operates in
+        $O(\log n)$.
+    \item[Search.] This procedure is unaffected by the extra data stored in the
+        nodes, and so operates in $O(\log n)$.
+\end{description}
+
 \end{document}
