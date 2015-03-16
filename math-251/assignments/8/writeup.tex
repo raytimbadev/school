@@ -1,0 +1,102 @@
+\documentclass{article}
+
+\usepackage{amsmath, amssymb, amsthm}
+
+\DeclareMathOperator{\Deg}{deg}
+
+\newtheorem{proposition}{Proposition}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#8\\Honours Algebra 2 (MATH 251)}
+\date{16 March 2015}
+
+\begin{document}
+
+\maketitle
+
+\section{Finding eigenspaces and eigenvalues}
+
+\begin{enumerate}
+    \item $T : \mathbb{R}[t]_n \to \mathbb{R}[t]_n$,
+        $y \mapsto t \frac{dy}{dt}$
+
+        The linearity of the differentiation operator results in term-by-term
+        differentiation, decreasing the degree by one and multiplying by the
+        exponent of $t$.  But the multiplication by $t$ results in the
+        preservation of the degree of $y$.
+
+        Therefore, the transformation performed by this map can be equally
+        written as follows.
+        \begin{equation}
+            \sum_{i=0}^n {a_i t^i} \mapsto \sum_{i=0}^n {i a_i t^i}
+        \end{equation}
+
+        Since each term is scaled by a different value, the eigenvectors will
+        be those polynomials of the form $at^\lambda$, and the eigenvalues are
+        the integers $0 \leq \lambda \leq n$.
+
+    \item $T : \mathcal{M}_{n \times n} \to \mathcal{M}_{n \times n}$,
+        $A \mapsto A^t$.
+
+        Since matrix transposition does not affect the entries along the main
+        diagonal, we can deduce that there is only one nontrivial eigenvalue
+        $\lambda = 1$, whose eigenspace is the symmetric matrices.
+\end{enumerate}
+
+\section{Common eigenvectors of pairwise commuting linear maps}
+
+\begin{proposition}
+    If $V$ is a finite-dimensional vector space over $\mathbb{C}$ and
+    $T_1, \cdots, T_k$ are pairwise communiting linear operators, then there
+    exists $v \in V$ that is an eigenvector for all $T_i$, $0 \leq i \leq k$.
+\end{proposition}
+
+\begin{proof}
+    Take two commuting linear operators on $V$, $S$ and $T$, and let $\lambda$
+    be an eigenvalue of $T$, with $v \in V$ in $E_\lambda$.
+    \begin{equation}
+        T(S(v)) = S(T(v)) = S(\lambda v) = \lambda S(v)
+    \end{equation}
+    This implies $S(v) \in E_\lambda$. Applying $S$ to the whole eigenspace, we
+    get that $S(E_\lambda) \subset E_\lambda$. Thus, commuting linear
+    transformations preserve each others eigenspaces.
+
+    Now, we will consider a decomposition of $\mathbb{C}^n$ into an direct sum
+    of the eigenspaces of $T_1$ (the choice of $1$ is arbitrary).
+    $$\mathbb{C}^n = E_{\lambda_1} \oplus \cdots \oplus E_{\lambda_m}$$
+
+    As we have shown that the eigenspaces of $T_i$ are preserved by $T_j$, we
+    can decompose each of the eigenspaces in the above decomposition by another
+    one of the linear maps. We repeat this until we have exhausted the set of
+    linear maps $\{T_1, \cdots, T_k\}$.
+
+    At last, we assemble the recursive decompositions of eigenspaces to form
+    a flat decomposition of $\mathbb{C}^n$. Each resulting eigenspace is an
+    eigenspace of each of the linear maps $T_1, \cdots, T_k$.
+\end{proof}
+
+\section{Squared eigenvalues}
+
+\begin{proposition}
+    Let $T : V \to V$ be a linear operator. If $\lambda^2$ is an eigenvalue of
+    $T^2$, then $\lambda$ or $-\lambda$ is an eigenvalue of $T$.
+\end{proposition}
+
+\begin{proof}
+    Let $A$ be a matrix representing $T$. Then, $\lambda^2$ being an
+    eigenvector of $T^2$ is equivalent to stating that
+    $\det{(\lambda^2 Id - A^2)} = 0$. We notice that
+    $$(\lambda Id + A)(\lambda Id - A) = (\lambda^2 Id - A^2)$$
+    Applying $\det$ to both sides, we have
+    \begin{align*}
+        \det{((\lambda Id + A)(\lambda Id - A))}
+            &= \det{(\lambda^2 Id - A^2)} = 0 \\
+        \det{(\lambda Id + A))} \det{(\lambda Id - A)}
+            &= \det{(\lambda^2 Id - A^2)} = 0
+    \end{align*}
+    Therefore, we have $\det{(\lambda Id + A))} = 0$ or
+    $\det{(\lambda Id - A)}$, which in turn are respectively equivalent to
+    $\lambda$ or $-\lambda$ being eigenvalues of $A$, and therefore $T$.
+\end{proof}
+
+\end{document}
