@@ -1,0 +1,69 @@
+\documentclass{article}
+
+\usepackage{amsmath, amssymb, amsthm, algorithm, algorithmicx, algpseudocode}
+\usepackage{float}
+
+\DeclareMathOperator{\enqueue}{\mathtt{enqueue}}
+\DeclareMathOperator{\dequeue}{\mathtt{dequeue}}
+
+\title{Assignment \#5\\Honours Algorithms \& Data Structures (COMP 252)}
+\author{Jacob Thomas Errington (260636023)}
+\date{18 March 2015}
+
+\begin{document}
+
+\maketitle
+
+\section{Huffman trees that change over time}
+
+Constructing a Huffman tree from scratch indeed requires $\Theta{(K \log K)}$.
+The problem is that if we could do it better, we could defeat the lower bound
+for sorting. Then, let's just change what \emph{scratch} means; if we have a
+list of pairs $(n, f_n)$ sorted by $f_n$, then we can insert an element
+$n^\prime$ in linear time and rebuild the tree in linear time, for an overall
+$O(K)$ algorithm.
+
+Update is trivial: for our datum $n$ to insert, scan the list to see if it's
+already in there somewhere. If we find it, we increase its frequency by one,
+and shift the element over in the list until the order is restored. Else, we
+prepend it to the list (assuming the list is sorted in ascending order; we
+would append the new element otherwise). This insertion algorithm is linear in
+the size of the list, which is bounded by the alphabet size. Thus, the insert
+is $O(K)$.
+
+Constructing the tree is trickier. For this we will use two queues containing
+pairs $(n, f_n)$ and that will each maintain the property that their front
+contains an element of smallest weight.
+
+\begin{algorithm}[H]
+    \caption{Build a Huffman tree from a list of pairs $(n, f_n)$ already
+        sorted by frequency.}
+    \begin{algorithmic}
+        \Require{An input list $A$ of pairs $(n, f_n)$ sorted by $f_n$.}
+        \Ensure{A Huffman tree that can be used to compress the data generating
+            the given input list.}
+
+        \Function{HuffmanBuild}{$A$}
+            \State Initialize a queue $P \gets \emptyset$
+            \For{$a \in A$}
+                \State $\enqueue{[P, a]}$
+            \EndFor
+            \State \Comment Consider the elements of $P$ as orphan leaf nodes.
+            \State Initialize a queue $Q \gets \emptyset$
+            \State \Comment Make inner nodes in $Q$ and gradually reparent
+                elements from $P$.
+            \While{$|P| + |Q| > 1$}
+                \State $(n_1, f_1), (n_2, f_2) \gets$ two smallest
+                    elements by frequency from $P$ and $Q$.
+                \State Let $n^\prime$ be a new inner node with frequency
+                    $f^\prime = f_1 + f_2$.
+                \State Reparent $n_2$ and $n_1$ to $n^\prime$.
+                    \Comment In that order since $n_2 > n_1$.
+                \State $\enqueue{[Q, n^\prime]}$
+            \EndWhile
+            \State \Return $\dequeue{[Q]}$
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
+\end{document}
