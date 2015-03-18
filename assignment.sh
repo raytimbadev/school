@@ -1,5 +1,7 @@
 #!/bin/bash
 
+AUTHOR="Jacob Thomas Errington (260636023)"
+
 COURSEDIR="$1"
 
 if test -z "$COURSEDIR" ; then
@@ -26,16 +28,23 @@ if test -z "$CODE" ; then
     exit 1
 fi
 
-AUTHOR="Jacob Thomas Errington (260636023)"
+TYPE="$2"
 
 ASSDIR="$COURSEDIR/assignments"
-ASSNO=1
 
-while test -e "$ASSDIR/$ASSNO" ; do
-    ASSNO=$(( $ASSNO + 1 ))
-done
+if [ "$TYPE" = "new" ] ; then
+    ASSNO=1
 
-mkdir "$ASSDIR/$ASSNO"
+    while test -e "$ASSDIR/$ASSNO" ; do
+        ASSNO=$(( $ASSNO + 1 ))
+    done
+else
+    # this should be a number, but could be anything as long as it's not the
+    # string "new"
+    ASSNO="$TYPE"
+fi
+
+mkdir -p "$ASSDIR/$ASSNO"
 
 start_assignment --author "$AUTHOR" --code "$CODE" --course "$COURSE" \
     --number "$ASSNO" $PROGRAMMING $MATH > "$ASSDIR/$ASSNO/writeup.tex"
