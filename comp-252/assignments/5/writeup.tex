@@ -1,5 +1,6 @@
 \documentclass{article}
 
+\usepackage[margin=2.0cm]{geometry}
 \usepackage{amsmath, amssymb, amsthm, algorithm, algorithmicx, algpseudocode}
 \usepackage{float}
 
@@ -8,7 +9,7 @@
 
 \title{Assignment \#5\\Honours Algorithms \& Data Structures (COMP 252)}
 \author{Jacob Thomas Errington (260636023)}
-\date{18 March 2015}
+\date{19 March 2015}
 
 \begin{document}
 
@@ -65,5 +66,140 @@ contains an element of smallest weight.
         \EndFunction
     \end{algorithmic}
 \end{algorithm}
+
+\section{Lempel-Ziv compression}
+
+Each new piece of the output will index the immediately prior piece and append
+a new zero. If we consider the dictionary as a simple array whose indices
+reflect the insertion order, then the substring at key $i$ will consist of $i$,
+zeroes, assuming indices start at one.
+
+With that in mind, the output string is simply the binary realization of the
+sequence of pairs $(i, 0)$, where $0 \leq i \leq n^\prime$ and $n^\prime$ is
+the greatest integer satisfying $\sum_{k=1}^{n^\prime} k \leq n$.
+
+With $0 \leq i \leq 4$, we have
+$$
+\begin{array}{c c c c c}
+    0 & 1 & 2 & 3 & 4 \\
+    0, 0 & 1, 0 & 10, 0 & 11, 0 & 100, 0
+\end{array}
+$$
+where the commas represent a separation between the index part and the token
+appending part of the piece.
+
+The above code will have the dictionary
+$$
+\begin{array}{c c c c}
+    1 & 2 & 3 & 4 \\
+    0 & 00 & 000 & 0000
+\end{array}
+$$
+and represents a string of exactly fifteen zeroes.
+
+In this example $n^\prime = n$. However, if $n^\prime < n$, then there will be
+one block on the end that does not append a new symbol.
+For instance, if the string had been of sixteen zeros, then the dictionary
+would be the same, but one more piece would be required. This extra piece
+would be the binary realization of the pair $(1,\epsilon)$, where $\epsilon$
+denotes the empty string.
+
+\begin{enumerate}
+    \item In the first part of each piece, we are simply counting in binary,
+        and the number of binary digits needed to write a number $i$ is
+        $\lceil\log_2 i \rceil$. Summing this for pieces $1 \leq i \leq
+        n^\prime$, we get $\lceil\log_2 {n^\prime !}\rceil$ bits contributed
+        by the dictionary indices. To this, we add $n^\prime$ for the zero
+        appended in each piece.
+
+        This analysis did not account for the very first piece's index, so we
+        add $1$ for that. In the case where $n^\prime < n$, one more piece is
+        required, which will contribute $\lceil \log_2 {n^\prime} \rceil$ bits.
+
+        Thus, we have that the number of bits in the output is $\lceil \log_2
+        {n^\prime !} \rceil + \lceil \log_2 {n^\prime} \rceil + 1$.
+
+    \item Consider the binary encoding of the numbers $1$ to $15$ arranged in
+        the following way.
+        $$
+        \begin{array}{c c c c}
+            ~ & ~ & ~ & 1 \\
+            ~ & ~ & 1 & 0 \\
+            ~ & ~ & 1 & 1 \\
+            ~ & 1 & 0 & 0 \\
+            ~ & 1 & 0 & 1 \\
+            ~ & 1 & 1 & 0 \\
+            ~ & 1 & 1 & 1 \\
+            1 & 0 & 0 & 0 \\
+            1 & 0 & 0 & 1 \\
+            1 & 0 & 1 & 0 \\
+            1 & 0 & 1 & 1 \\
+            1 & 1 & 0 & 0 \\
+            1 & 1 & 0 & 1 \\
+            1 & 1 & 1 & 0 \\
+            1 & 1 & 1 & 1
+        \end{array}
+        $$
+
+        Due to the variable-width size of these keys, there are a certain
+        number of \emph{missing zeroes}. Denote the number of zeroes by $n_0$,
+        the number of ones by $n_1$, and these \emph{missing zeroes} by
+        ${n_0}^\prime$. These quantities represent only the contributions made
+        by the dictionary keys used. The actual data will contribute $n^\prime$
+        zeroes.
+
+        Notice that the block to the right of each column consisting wholly of
+        ones contains the same number of ones and zeroes. Thus, there is an
+        excess number of ones, specifically $n^\prime$, so
+        $n_1 = n_0 + n^\prime$.
+
+        Also, if we imagine that the missing zeroes weren't missing, we can
+        see that half the total bits will be ones and half will be zeroes.
+        Thus, $n_1 = \frac{1}{2} n^\prime \log_2 {n^\prime}$.
+
+        Therefore, the proportion of zeroes to ones is
+        $$
+        \frac{\frac{1}{2} n^\prime \log_2 {n^\prime} - n^\prime + n^\prime}
+        {\frac{1}{2} n^\prime \log_2 {n^\prime}} = 1
+        $$
+
+    \item In the worst case, the input string contains all possible substrings,
+        without large repeats. For example,
+        $$
+        \begin{array}{c c c c c c c c c}
+            1 & 2 & 3  & 4  & 5  & 6  & 7   & 8   & ~ \\
+            0 & 1 & 00 & 01 & 10 & 11 & 000 & 001 & \cdots \\
+            (0, 0) & (0, 1) & (1, 0) & (0, 1) & (2, 0) & (2, 1) & (3, 0) & (3,
+            1) & ~
+        \end{array}
+        $$
+
+        We notice that the length of the substring in each piece grows
+        according to $\lfloor \log (n + 1) \rfloor$. Thus, $\log {(n+1)}$ is
+        the longest such substring in the case that generates the most pieces.
+        Dividing the total length of the input string by the longest substring
+        gives us the desired upper bound on the number of pieces,
+        $O(\frac{n}{\log n})$.
+
+\end{enumerate}
+
+\section{String matching}
+
+The method we propose is similar to the Rabin-Karp algorithm. A sliding window
+of width $k$ characters traverses the input string from left to right
+and computes hashes for each window. The hashes along with the position of the
+window's left edge are recorded into a self-balancing binary search tree keyed
+on hashes.
+
+The input string is traversed a second time, but from right to left,
+and hashes are calculated in this direction. Each new hash is looked up in the
+search tree, and if a match is found based on hashes and the window sides line
+up, then the actual string contents are checked. If the contents match as well,
+then the algorithm has successfully identified a palindrome of length $k$.
+
+As is the case for any hash-based algorithm, the above method for detecting the
+presence of a palindrome suffers from potential hash collisions. In that case,
+the performance degenerates to $O(nk)$. However, the average performance is
+$O(n + k)$ (for essentially the same reasons as the Rabin-Karp algorithm), which is fairly efficient.
 
 \end{document}
