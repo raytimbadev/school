@@ -1,0 +1,158 @@
+\documentclass{article}
+
+\usepackage{amsmath, amssymb, amsthm}
+
+\newtheorem{proposition}{Proposition}
+
+\DeclareMathOperator{\diag}{diag}
+
+\title{Assignment \#9\\Algebra 2 (MATH 251)}
+\author{Jacob Thomas Errington (260636023)}
+\date{23 March 2015}
+
+\begin{document}
+
+\maketitle
+
+\section{Linearly independent families of functions}
+
+\begin{proposition}
+    Let $V$ be the space of infinitely differentiable functions of $[0, 1]$.
+    The family of functions $\{e^{\lambda x}\}_{\lambda \in \mathbb{R}}$ is
+    linearly independent.
+\end{proposition}
+
+\begin{proof}
+    Consider the linear map of differentiation $D$.
+    We notice that for each function in the family,
+    $D(e^{\lambda x}) = \lambda e^{\lambda x}$. Thus, each function in the
+    family has its own distinct eigenvalue, for which it is an eigenvector.
+    Since the eigenvalues are distinct, they each can be identified with
+    different eigenspaces. Since a set of eigenvectors each drawn from
+    eigenspaces identified by different eigenvalues is linearly independent,
+    the family of functions is linearly independent.
+\end{proof}
+
+\section{A variation on Fibonacci}
+
+\begin{proposition}
+    The recurrence defined by
+    \begin{align*}
+        a_1 = a_0 &= 1 \\
+        a_n &= 2 a_n + a_{n-1}
+    \end{align*}
+    has the closed form
+    \begin{equation*}
+        a_n = - \frac{\sqrt{2}}{4}
+            \left( \lambda_1^n (1 - \lambda_2) + \lambda_2^n (\lambda_1 - 1)\right)
+    \end{equation*}
+    where
+    ${\lambda_2} = 1 + \sqrt{2}$ and ${\lambda_1} = 1 - \sqrt{2}$
+\end{proposition}
+
+\begin{proof}
+    We will construct the closed form from a linear system based on the
+    recurrence.
+
+    Consider the following two equations.
+    \begin{align*}
+        a_{n+1} &= 2 a_n + a_{n-1} \\
+        a_n &= a_{n-1} + 0 a_{n-2}
+    \end{align*}
+    We can write this homogeneous system of equations in matrix form.
+    \begin{equation*}
+        \left(
+            \begin{array}{c}
+                a_{n+1} \\
+                a_n
+            \end{array}
+        \right)
+        =
+        A
+        \left(
+            \begin{array}{c}
+                a_n \\
+                a_{n-1}
+            \end{array}
+        \right)
+    \end{equation*}
+    where
+    $$
+    A =
+    \left(
+        \begin{array}{c c}
+            2 & 1 \\
+            1 & 0
+        \end{array}
+    \right)
+    $$
+
+    Solving $\Delta_A = 0$, we find that the eigenvalues of $A$ are
+    \begin{align*}
+        \lambda_1 &= 1 - \sqrt{2} \\
+        \lambda_2 &= 1 + \sqrt{2}
+    \end{align*}
+
+    Solving for $x_i$ in the equation $(A - \lambda_i Id) x_i = 0$, for $i \in
+    \{1, 2\}$, we find an eigenvector for each eigenvalue.
+    \begin{align*}
+        x_1 &=
+        \left(
+            \begin{array}{c}
+                1 - \sqrt{2} \\
+                1
+            \end{array}
+        \right) \\
+        x_2 &=
+        \left(
+            \begin{array}{c}
+                1 + \sqrt{2} \\
+                1
+            \end{array}
+        \right)
+    \end{align*}
+
+    Let $\Lambda = \diag{(\lambda_1, \lambda_2)}$ and $S = (x_1\, x_2)$. By the
+    definitions of eigenvalues and eigenvectors, we have $AS = S\Lambda$.
+
+    Since a set of eigenvectors each drawn from different eigenspaces is
+    linearly independent, $S$ is invertible, and we can write
+    \begin{align*}
+        A &= S \Lambda S^{-1} \\
+        A^n &= S \Lambda^n S^{-1} \\
+        A^n u_1 &= S \Lambda^n S^{-1} u_1 \\
+        u_{n+1} &= S \Lambda^n S^{-1} u_1
+    \end{align*}
+    where $u_i = \left(\begin{array}{c} a_i \\ a_{i-1} \end{array}\right)$.
+
+    The last step is due to the fact that we designed $A$ precisely to have the
+    action of taking such vectors to their successors, according to the
+    recurrence.
+
+    Computing the right-hand side of the previous equation, we have
+    \begin{equation*}
+        \left(
+            \begin{array}{c}
+                a_{n+1} \\
+                a_n
+            \end{array}
+        \right)
+        =
+        - \frac{\sqrt{2}}{4}
+        \left(
+            \begin{array}{c}
+                \lambda_1^{n+1} (1 - \lambda_2)
+                + \lambda_2^{n+1} (\lambda_1 - 1) \\
+                \lambda_1^{n} (1 - \lambda_2)
+                + \lambda_2^{n} (\lambda_1 - 1)
+            \end{array}
+        \right)
+    \end{equation*}
+
+    Extracting just an equation for $a_n$, we have
+    \begin{equation*}
+        a_n = \lambda_1^{n} (1 - \lambda_2) + \lambda_2^{n} (\lambda_1 - 1)
+    \end{equation*}
+\end{proof}
+
+\end{document}
