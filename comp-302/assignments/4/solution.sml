@@ -44,36 +44,10 @@ val my_protected_account = make_protected_account (100, "secret")
 
 (* See the attached image for the diagram. *)
 
-(* Here are the steps of the evaluation. *)
-
-(* The innermost expression is `f(y)`, so its value is the overall value of the
-* expression.
-*
-* Since SML is a strict language, we must evaluate `y` first.
-*
-* Lookup `y` in E1:
-*   environment E2 is the first parent of E1 binding `y`, and y = 4 in E2,
-*   so y = 4 in E1.
-*
-* Lookup `f` in E1:
-*   environment E4 is the first parent of E1 binding `f`, and f is a function of
-*   one symbol `u`.
-*
-* Evaluate f(y):
-*   The symbol `u` bound by `f` is substituted for the value of `y` which we
-*   found to be 4.
-*   f(4) = 4 + x + y
-*
-*   Lookup `x` in E3:
-*     `x` is bound to `y` in E3.
-*     Lookup `y` in E3:
-*       environment E5 is the first parent of E3 binding `y`, and y = 1 in E5.
-*     Therefore, x = 1 in E3.
-*   Lookup `y` in E3:
-*     environment E5 is the first parent of E3 binding `y`, and y = 1 in E5.
-*     Therefore, y = 1 in E3.
-*
-* Therefore f(4) = 4 + 1 + 1 = 6 is the final result of the evaluation.
+(*
+* To find the value of f(y), we just follow the arrows whenever we need to look
+* up a symbol.
+* We find that the value of f(y) is 6.
 *)
 
 ;
