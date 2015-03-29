@@ -10,6 +10,33 @@
 
 \maketitle
 
+\section{Detecting a split graph}
 
+The algorithm we propose consists of two steps: in the first, we bin nodes according to whether they have any neighbors and in the second, we verify that the number of edges in the graph is given by the number of vertices in the subset of vertices with degree at least one.
+
+Indeed, we notice that that in a $k$-clique, the number of edges is exactly $|E| = \frac{|V|(|V| + 1)}{2}$, as this count is \emph{maximal}. This allows us to determine, in $O(1)$ time if these counts are known, whether a graph is a $k$-clique.
+
+We assume a graph representation in which it is possible to iterate over the vertices and edges, and in which vertices have pointers to their neighbors and edges have pointers to the vertices they join.
+
+Then, the first step is $O(|V|)$ as we simply iterate over the vertices, keeping a count of the vertices with degree at least one
+
+The second step is $O(|E|)$ if we need to count the edges. Otherwise it is $O(1)$. The calculation to determine whether the subset of vertices with degree at least one is $O(1)$.
+
+Thus, overall, the running time is $O(|V| + |E|)$.
+
+\section{Directed acyclic graphs}
+
+
+
+%The reachability relation forms a partial order on $V$, so we may consider it as a partially ordered set. The property of the graph that no path has length more than $k$ is translated into the language of posets by the statement \emph{no chain in $V$ has cardinality greater than $k$}. The desired property, that the graph can be partitioned into at most $k+1$ groups in each of which no two vertices are reachable from each other, is equivalent to saying \emph{the width of $V$ is at most $k+1$}.
+
+
+\section{Depth-first search}
+
+In a general connected graph, there can be many ``superfluous'' edges; if we imagine replacing the edge set $E$ of a connected graph by the parent-child relationships $E^\prime$ from the tree produced as a by-product of a depth-first search, we have an imaginary graph with minimally redundant \emph{edges}. Then, if we remove from this graph a node that is a leaf of that depth-first search by-product tree, then the resulting graph will still be connected because all the other nodes are still joined by the paths determined by $E^\prime$.
+
+Thus, the algorithm we propose for finding a redundant node is to perform a depth-first search until we find a leaf of the tree, i.e. a node that has no undiscovered neighbors: that node will be the redundant vertex.
+
+Since the algorithm is essentially just depth-first search, its running time is $O(|E| + |V|)$.
 
 \end{document}
