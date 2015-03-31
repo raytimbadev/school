@@ -2,6 +2,8 @@
 
 \usepackage{amsmath, amssymb, amsthm, algorithm, algorithmicx, algpseudocode}
 
+\usepackage[margin=3.5cm]{geometry}
+
 \title{Assignment \#6\\Honours Algorithms & Data Structures (COMP 252)}
 \author{Jacob Thomas Errington (260636023)}
 \date{21 March 2015}
@@ -26,7 +28,17 @@ Thus, overall, the running time is $O(|V| + |E|)$.
 
 \section{Directed acyclic graphs}
 
+Build a tree from the DAG; each level of the tree forms a mutually unreachable group. Since the maximum path length in the DAG is $k$, then the tree will have height $k+1$, as required.
 
+We perform first a depth-first search starting on a white node to produce a preliminary tree; into each node we record its distance from the starting point.
+
+This is not enough, however, since they may be remaining white nodes that are unvisited. We repeat the depth first search on a remaining white node, if any, but with a twist: if these subsequent times, we see that the neighbour of a current node is black, then we set the distance of the current node to one minus the distance of the encountered black node. The intuition is that the current node should be in the same set as the other parents of that black node, to ensure mutual unreachability.
+
+We also make sure to record the parent-child relationships between the nodes. Note that a node may have multiple children and multiple parents.
+
+Then, we create an array of size $k + 1$ of queues, one for each set of mutually unreachable set. The queue at index $0$ will be for the node set of minimal distance. We traverse the tree and insert into the appropriate queue each element.
+
+The initial depth-first searches will take time $O(|V| + |E|)$ since that is the running time of DFS. Then, since the tree hardly has any more structure than a graph, we cannot traverse it in any really clever way, so we traverse it with DFS as well, and since it is undirected, we are guaranteed to visit every node. This takes time $O(|V| + |E|)$ as well, for an overall running time of $O(|V| + |E|)$.
 
 %The reachability relation forms a partial order on $V$, so we may consider it as a partially ordered set. The property of the graph that no path has length more than $k$ is translated into the language of posets by the statement \emph{no chain in $V$ has cardinality greater than $k$}. The desired property, that the graph can be partitioned into at most $k+1$ groups in each of which no two vertices are reachable from each other, is equivalent to saying \emph{the width of $V$ is at most $k+1$}.
 
@@ -38,5 +50,25 @@ In a general connected graph, there can be many ``superfluous'' edges; if we ima
 Thus, the algorithm we propose for finding a redundant node is to perform a depth-first search until we find a leaf of the tree, i.e. a node that has no undiscovered neighbors: that node will be the redundant vertex.
 
 Since the algorithm is essentially just depth-first search, its running time is $O(|E| + |V|)$.
+
+\section{Adjacency matrix and graph coding}
+
+Without loss of generality, we assume $u < v$.
+
+First, to compute the index $i$ in the sequence of digits of $k$ where the entries of row $u$ begin in the matrix, we calculate the following sum.
+
+$$ i_{row} = \sum_i^{u-1} {(n - i)} = (u-1)n - \frac{(u)(u-1)}{2} $$
+
+Then, the offset within the row is given by $i_{col} = v - u$.
+
+So the index of the bit representing whether nodes $u$ and $v$ are joined by an edge is given by $i = i_{row} + i_{col}$.
+
+\begin{description}
+    \item[is-edge] We check that $k \& 2^i$ is nonzero (bitwise and).
+    \item[add-edge] $k \gets k | 2^i$ (bitwise or).
+    \item[delete-edge] $k \gets k - (k \& 2^i)$.
+\end{description}
+
+We note that the operations \textbf{add-edge} and \textbf{delete-edge} when used unnecessary will not put the graph into an inconsistent state. In fact, they are nilpotent.
 
 \end{document}
