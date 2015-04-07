@@ -1,0 +1,202 @@
+\documentclass[12pt]{article}
+
+\usepackage{float, graphicx}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath, amssymb}
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{center}
+        ~\\[2.0cm]
+
+        \textsc{\LARGE McGill University}\\[1.5cm]
+
+        \textsc{\Large Undergraduate Research Course in Human Genetics (HGEN 396)}\\[1.0cm]
+
+        {\huge \bfseries Difference Map Optimizer \\ a new method for the unconstrained global optimization of multivariate scalar functions}
+
+        ~\\[2.0cm]
+
+        \emph{By}\\
+        Jacob Thomas Errington (260636023)\\[1.0cm]
+
+        \emph{Presented to}\\
+        Dr. Simon Gravel
+
+        \vfill
+
+        \today
+    \end{center}
+\end{titlepage}
+
+\begin{abstract}
+    Global optimizers are valuable tools in the context of many applications:
+    whereas some intractable problems are frequently approximated as exact
+    solutions may be too costly to compute, certain problems have no analytic
+    solutions.
+    We propose a deterministic metaheuristic for the global optimization
+    problem based on the works of Simon Gravel and Veit Elser concerning
+    constraint satisfaction.
+    Our method is empirically validated against existing state-of-the-art
+    methods on a variety of difficult functions and its perceived strengths and
+    weaknesses are outlined.
+\end{abstract}
+
+\section{Introduction}
+    %Problems requiring global optimization are ubiquitous in many scientific
+    %disciplines. Broadly speaking,
+    Metaheuristics are useful due to their wide applicability, finding use in
+    problems where the function to optimize is noisy, discrete, or
+    discontinuous.
+
+    As such, the very broad problem with which we concern ourselves is
+    $$
+    \min_{x \in \mathbb{R}^n} f(x)
+    $$
+    where $f : \mathbb{R}^n \to \mathbb{R}$,
+    i.e. we wish to find $x^* \in \mathbb{R}^n$
+    such that $f(x^*) \leq f(x)$ for all $x \in \mathbb{R}^n$.
+
+    \emph{Simulated Annealing}\cite{kirkpatrick1983} is perhaps one of the most
+    well-known and most extensively studied metaheuristics.
+    The intuition for it comes from the \emph{annealing} procedure in
+    metallurgy, in which a metal is brought to a high temperated before being
+    gradually cooled.
+    The greater energy of the high-temperature particles allows for many
+    potentially unstable configurations to be tried, in the hopes that as the
+    metal is slowly cooled, energy-minimizing arrangements will be found.
+    Thus, the annealing's \emph{cooling schedule} is important in avoiding
+    local minima, as a slower one would allow the particles more time to
+    stochastically try many different arrangements, whereas a faster one would
+    offer them fewer such chances.
+
+    A higher temperature value results in more liberal acceptance of new,
+    higher-energy coordinates.
+    Hence the search space is broadly explored while the temperature is high.
+    As the temperature decreases, the acceptance of new coordinates becomes
+    more selective; at a temperature of zero, only coordinates strictly better
+    than the current position will be accepted.
+
+    The Simulated Annealing algorithm thus consists of two essential steps:
+    \begin{enumerate}
+        \item random perturbation of the coordinates;
+        \item accept or reject the new coordinates based on the current
+            temperature.
+    \end{enumerate}
+
+    \emph{Basin Hopping}\cite{wales1997} is a popular variation on Simulated
+    Annealing.
+    Simply put, a local minimization is performed prior to the accept-or-reject
+    step, and the accept-or-reject is perfomed based on the results of that
+    local search.
+    Of course, this method is available only to functions in which local
+    searches are possible.
+    Basin Hopping is thus less robust, but seems to provide better performance
+    on smooth functions with many local minima.
+
+    \emph{Differential Evolution}\cite{storn1997} is a metaheuristic based on
+    \emph{recombination}, a process in genetics whereby two chromosomes
+    exchange pieces of information.
+    In the context of optimization, the chromosomes are candidate solution
+    vectors, and the exchanged pieces of information roughly correspond to
+    entries of those vectors.
+
+    Three control parameters greatly affect the effectiveness of Differential
+    Evolution and must be chosen by the practitioner\cite{storn1997}: the
+    population size, the differential weight, and the crossover probability.
+    In fact, the choice of these parameters has been the topic of
+    meta-optimization\cite{pedersen2010}.
+
+    % talk about Nelder-Mead and hybrid algorithms?
+
+\section{Difference Map Optimizer}
+
+    The method we propose, called the \emph{Difference Map Optimizer} (DMO), is
+    based on the \emph{Difference Map}, a constraint satisfaction algorithm.
+    Despite being an iterative projection technique, which have a reputation
+    for becoming trapped in local minima, the Difference Map can avoid
+    stagnation in a local minimum precisely by using a difference of two
+    elementary projections of its current iterate onto the two constraints to
+    be satisfied.
+
+    DMO is an iterative metaheuristic that uses local searches on each
+    iteration to gradually build up a landscape of the search space.
+    Furthermore, rather than have the iterate follow the local search, the
+    results of the local searches are kept distinct from the iterate.
+    As a mechanism for adapting to different functions, DMO maintains an
+    internal estimate of the global minimum, denoted $t$, which affects the
+    sizes of the steps taken by the iterate.
+
+    First, two starting points $x_0$ and $x_1$ are selected from the search
+    space.
+    A local minimization is performed on $x_0$ to find $x_0^*$ and the
+    initial value for the target is computed as
+    $t := f(x_0^*) - s (f(x_0) - f(x_0^*))$,
+    where $s$ is a scaling factor that controls the overall greediness of the
+    algorithm.
+    The point $x_1$ is taken as the initial position of the iterate. Our
+    experiments showed that $x_0$ and $x_1$ should be chosen to be close to
+    each other, yet ideally in different attractors.
+    The points $x_0^*$ and $x_0$ are then added to a running list $M$ of
+    minimizers discovered so far.
+
+    On each iteration starting from the position of the iterate $x_i$, a local
+    minimizer $x_i^*$ is found by traditional local optimization techniques.
+    If $f(x_i^*)$ is less than the current estimate, then the estimate is
+    recalculated as before, but using $f(x_i^*)$ and $\min_{x \in M} f(x)$.
+    Then, the point $x_{near} \in M$ with the least distance to $x_i^*$ is
+    selected.
+    From $x_{near}$, the step to take is calculated.
+    \begin{equation}
+        \Delta x_i =
+            \frac{t - f(x_i^*)}{f(x_i^*) - f(x_{near})} (x_i^* - x_{near})
+        \label{eqn:dx}
+    \end{equation}
+
+    The next position of the iterate is obtained by applying the step
+    $\Delta x_i$.
+    $$
+        x_{i+1} = x_i + \Delta x_i
+    $$
+
+    Note that if the quantity $f(x_i^*) - f(x_{near}$ is close to zero, i.e.
+    $|f(x_i^*) - f(x_{near})| < tol$ where $tol$ is a predetermined tolerance
+    for numerically distinguishing reals, then that quanitity should be
+    replaced with $tol$. Under these circumstances, which arise when the local
+    landscape of the function appears very flat, the iterate is to be moved
+    infinitely far away. Of course this is not possible, so a numerical
+    approximation is chosen instead.
+
+    Finally, the point $x_0^*$ is added to the set of discovered minimizers
+    $M$, and the target value $t$ is updated.
+
+    Many update strategies are possible, but our experiments showed that merely
+    recalculating the target every $r$ iterations but using the two smallest
+    values $f(x)$ for $x \in M$ produced acceptable estimates of the global
+    minimum.
+
+    \begin{figure}
+        \begin{center}
+            \includegraphics[width=0.8\textwidth]{../figures/iteratingnew.png}
+            \caption{An example iteration of the Difference Map Optimizer.
+                The orange points are, from left to right, the iterate $x_i$
+                and its associated local minimum $x_i^*$. The blue point is the
+                nearest previously discovered local minimum $x_{near}$.
+                The orange and blue lines represent the function values of
+                these two local minima, and the red line represents the current
+                target value. In this example, the iterate will be moved in the
+                negative $x$ direction.}
+        \end{center}
+    \end{figure}
+
+\section{Results}
+
+\section{Conclusion}
+
+\pagebreak
+
+\bibliographystyle{plain}
+\bibliography{dm}
+
+\end{document}

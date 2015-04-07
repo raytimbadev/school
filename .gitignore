@@ -4,4 +4,7 @@
 *.nav
 *.log
 *.aux
+*.bbl
+*.blg
 presentation.pdf
+writeup.pdf
