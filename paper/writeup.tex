@@ -131,6 +131,23 @@
     namely the ratios to use when reflecting, expanding, and contracting the
     simplex.
 
+\section{Objective}
+    In the above survey of existing methods, each optimization technique
+    requires a number of parameters that must be chosen \emph{a priori}. On the
+    one hand, these methods are very general thanks to the parameters that can
+    be tweaked to adapt them to many different problems. On the other hand,
+    this can make them difficult to use when it is not clear how the parameters
+    should be chosen.
+
+    With that in mind, it is our goal to design an optimization technique
+    requiring as little configuration as possible; our method should work
+    \emph{out-of-the-box} on a variety of problems. Furthermore, it is desired
+    that our method outperform Simulated Annealing.
+
+    The rationale for singling out Simulated Annealing, is that it is perhaps
+    the most extensively studied metaheuristic, and is perhaps the most
+    general, having been specialized in many applications. Equally, we would
+    prefer our method to have a certain potential to be specialized further.
 
 \section{Difference Map Optimizer}
     The method we propose, called the \emph{Difference Map Optimizer} (DMO), is
