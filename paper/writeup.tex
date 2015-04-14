@@ -90,7 +90,7 @@
     \emph{Basin Hopping}\cite{wales1997} is a popular variation on Simulated
     Annealing.
     Simply put, a local minimization is performed prior to the accept-or-reject
-    step, and the accept-or-reject is perfomed based on the results of that
+    step, and the accept-or-reject is performed based on the results of that
     local search.
     Of course, this method is available only to functions in which local
     searches are possible.
@@ -167,11 +167,12 @@
 
     Note that if the quantity $f(x_i^*) - f(x_{near}$ is close to zero, i.e.
     $|f(x_i^*) - f(x_{near})| < tol$ where $tol$ is a predetermined tolerance
-    for numerically distinguishing reals, then that quanitity should be
-    replaced with $tol$. Under these circumstances, which arise when the local
-    landscape of the function appears very flat, the iterate is to be moved
-    infinitely far away. Of course this is not possible, so a numerical
-    approximation is chosen instead.
+    for numerically distinguishing reals, then that quantity should be
+    replaced with $tol$.
+    Under these circumstances, which arise when the local landscape of the
+    function appears very flat, the iterate is to be moved infinitely far away.
+    Of course this is not possible, so a numerical approximation is chosen
+    instead.
 
     Finally, the point $x_0^*$ is added to the set of discovered minimizers
     $M$, and the target value $t$ is updated.
