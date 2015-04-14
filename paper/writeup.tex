@@ -98,11 +98,14 @@
     on smooth functions with many local minima.
 
     \emph{Differential Evolution}\cite{storn1997} is a metaheuristic based on
-    \emph{recombination}, a process in genetics whereby two chromosomes
-    exchange pieces of information.
+    \emph{recombination} and \emph{selection}, processes in genetics whereby
+    two chromosomes exchange pieces of information and whereby unfit
+    individuals are removed from the population, respectively.
     In the context of optimization, the chromosomes are candidate solution
     vectors, and the exchanged pieces of information roughly correspond to
-    entries of those vectors.
+    entries of those vectors. As for selection, candidate solutions with
+    smaller function values are favoured over those high higher function
+    values.
 
     Three control parameters greatly affect the effectiveness of Differential
     Evolution and must be chosen by the practitioner\cite{storn1997}: the
@@ -111,9 +114,23 @@
     meta-optimization\cite{pedersen2010}.
 
     The \emph{Simplex Method}\cite{nelder1965}, frequently called the
-    \emph{Nelder-Mead} method after its creators, is a much older minimization
-    strategy. Although originally conceived as a local minimazation technique,
-    it has been applied for global minimization.
+    \emph{Nelder-Mead} method after its creators (and to avoid confusion with a
+    similarly named method for linear programming), is a much older
+    minimization strategy. Although originally conceived as a local
+    minimization technique, it can be applied to global minimization as well.
+
+    If the dimension of the search space is $n$, then $n+1$ points are first
+    chosen to form a simplex in the space. The intuition for this method is to
+    let the simplex tumble down the local minimum, expanding and contracting as
+    twists and turns are encountered in the function. In particular, on each
+    iteration, the vertex with the worst score (highest function value) is
+    replaced by reflecting it through the centroid of the simplex. The simplex
+    is expanded or contracted according to the quality of the reflection.
+
+    As such, a number of parameters are again to be chosen by the practitioner,
+    namely the ratios to use when reflecting, expanding, and contracting the
+    simplex.
+
 
 \section{Difference Map Optimizer}
     The method we propose, called the \emph{Difference Map Optimizer} (DMO), is
