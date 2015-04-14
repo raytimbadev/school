@@ -140,7 +140,8 @@
     for becoming trapped in local minima, the Difference Map can avoid
     stagnation in a local minimum precisely by using a difference of the two
     elementary projections of its current iterate onto the two constraints to
-    be satisfied.
+    be satisfied. As such, the iterate is kept distinct from its projections
+    onto the constraints.
 
     DMO is an iterative metaheuristic that uses local searches on each
     iteration to gradually build up a landscape of the search space.
@@ -148,7 +149,9 @@
     results of the local searches are kept distinct from the iterate.
     As a mechanism for adapting to different functions, DMO maintains an
     internal estimate of the global minimum, denoted $t$, which affects the
-    sizes of the steps taken by the iterate.
+    sizes of the steps taken by the iterate. By analogy with the Difference Map
+    from which we derive our intuition for DMO, the projection operator is the
+    local search.
 
     First, two starting points $x_0$ and $x_1$ are selected from the search
     space.
