@@ -1,0 +1,3 @@
+[submodule "hgen-396"]
+	path = hgen-396
+	url = git@github.com:djeik/HGEN-396.git
