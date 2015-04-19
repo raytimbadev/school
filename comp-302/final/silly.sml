@@ -54,14 +54,15 @@ datatype Statement = Print of Expression
                    *)
                    | Copy of Identifier * Expression
                    (* Binds the identifier to the value of the expression.
-                   * The value of this statement is the value of the expression *)
+                   * The value of this statement is the value of the expression
+                   *)
                    | Pred of Expression * Statement
                    (* *Tries* to take the predecessor of the given expression.
                    * The expression is evaluated; if it does not evaluate to a
                    * Natural, then a TypeError will crash the interpreter.
                    * Else, if the Natural is zero (Z), then we can't take its
                    * predecessor, so we execute the supplied statement.
-                   * Otherwise, we take the predecessor. 
+                   * Otherwise, we take the predecessor.
                    * If the predecessor can be taken, then this statement
                    * evaluates to the predecessor.
                    * Else, it evaluates to the value of the supplied statement.
@@ -136,7 +137,7 @@ exception ReturnValue of Value * SymbolTable
 *)
 fun evaluate (Literal v) m = (v, m)
   | evaluate (Variable i) m = (lookup' i m, m)
-  | evaluate (Succ e) m = 
+  | evaluate (Succ e) m =
   let
     val (v, m') = evaluate e m
   in
