@@ -11,13 +11,19 @@
     \begin{center}
         ~\\[2.0cm]
 
-        \textsc{\LARGE McGill University}\\[1.5cm]
+        \textsc{
+            \LARGE McGill University
+        }\\[1.5cm]
 
-        \textsc{\Large Undergraduate Research Course in Human Genetics (HGEN 396)}\\[1.0cm]
+        \textsc{
+            \Large Undergraduate Research Course in Human Genetics (HGEN 396)
+        }\\[1.0cm]
 
-        {\huge \bfseries Difference Map Optimizer \\ a new method for the unconstrained global optimization of multivariate scalar functions}
-
-        ~\\[2.0cm]
+        {
+            \huge \bfseries Difference Map Optimizer \\
+            a new method for the unconstrained global optimization of
+            multivariate scalar functions
+        }\\[2.0cm]
 
         \emph{By}\\
         Jacob Thomas Errington (260636023)\\[1.0cm]
@@ -43,26 +49,55 @@ internal estimate of the objective function's global minimum.
 Our method is empirically compared to existing state-of-the-art methods on
 a handful of difficult functions and its perceived strengths and weaknesses
 are outlined.
-We conclude that although our method is comparable in effectiveness to the
-state-of-the-art as an out-of-the-box tool requiring practically no
-tweaking, it is outperformed by contemporary methods that are first
-adjusted by the practitioner to suit the problem at hand.
+We conclude that although our method is somewhat comparable in effectiveness to
+the state-of-the-art as an out-of-the-box tool requiring practically no
+tweaking, contemporary methods that are first adjusted by
+the practitioner to suit the problem at hand outperform our method.
 
 \end{abstract}
 
 \section{Introduction}
 
-Metaheuristics are useful due to their wide applicability, finding use in
-problems where the function to optimize is noisy, discrete, or
-discontinuous.
+An \emph{optimization problem} is one in which we seek to identify a solution
+that is better than other candidate solutions with respect to some measure
+of quality.
+In a minimization problem, the optimal solution admits the smallest
+such measure, whereas in a maximization problem, it admits the greatest such
+measure.
+This measure of quality is formally called the \emph{objective function} of the
+optimization problem, and the value it assigns to each candidate solution is
+variously called the \emph{score}, the \emph{energy}, or the \emph{fitness},
+depending on the nature of problem.
+A \emph{local} optimization problem seeks to find an optimal solution within
+some subset of the full range of candidate solutions, whereas a \emph{global}
+optimization problem seeks to identify the best solution across the full set of
+candidates.
 
-As such, the very broad problem with which we concern ourselves is
+The global optimization problem is stated formally as
 $$
 \min_{x \in \mathbb{R}^n} f(x)
 $$
 where $f : \mathbb{R}^n \to \mathbb{R}$,
 i.e. we wish to find $x^* \in \mathbb{R}^n$
 such that $f(x^*) \leq f(x)$ for all $x \in \mathbb{R}^n$.
+
+\emph{Heuristics} are optimization procedures that use problem-specific
+information to make and refine guesses about the location of the global
+minimum.  They tend to be fairly greedy in their search patterns, and thus can
+become trapped in a local minimum when faced with a more general problem.
+On the other hand, \emph{metaheuristics} are general optimization procedures
+that make very few assumptions about the objective function; a metaheuristic
+treats the objective function as a black box and has little additional
+knowledge of the problem.
+
+Metaheuristics can avoid becoming trapped in local minima by occasionally
+searching in directions that do not appear immediately promising, in the hopes
+that this may eventually lead to a better overall solution.
+Generally, a metaheuristic does not have very strong guarantees as to the true
+optimality of its final discovered solution. In many applications, however, the
+solutions found by a metaheuristic are acceptably close to the optimum.
+Metaheuristics are especially useful due to their robustness in problems where
+the function to optimize is noisy, discrete, or discontinuous.
 
 \emph{Simulated Annealing}\cite{kirkpatrick1983} is perhaps one of the most
 well-known and most extensively studied metaheuristics.
@@ -97,25 +132,36 @@ Simply put, a local minimization is performed prior to the accept-or-reject
 step, and the accept-or-reject is performed based on the results of that
 local search.
 Of course, this method is available only to functions in which local
-searches are possible.
+searches are both possible and acceptably effective.
 Basin Hopping is thus less robust, but seems to provide better performance
 on smooth functions with many local minima.
 
 \emph{Differential Evolution}\cite{storn1997} is a metaheuristic based on
-\emph{recombination} and \emph{selection}, processes in genetics whereby
-two chromosomes exchange pieces of information and whereby unfit
-individuals are removed from the population, respectively.
+evolutionary processes.
+In genetics, \emph{chromosomes} are the basic bundles of information.
+The \emph{crossing over} (or \emph{recombination}) of two chromosomes produces
+new chromosomes by stochastically exchanging information between them.
+\emph{Selection} is the process that removes individuals with low
+\emph{fitness} from the population.
+
 In the context of optimization, the chromosomes are candidate solution
 vectors, and the exchanged pieces of information roughly correspond to
-entries of those vectors. As for selection, candidate solutions with
-smaller function values are favoured over those high higher function
-values.
+entries of those vectors. As for selection, the fitness of a candidate solution
+is simply given by the objective function.
 
-Three control parameters greatly affect the effectiveness of Differential
-Evolution and must be chosen by the practitioner\cite{storn1997}: the
-population size, the differential weight, and the crossover probability.
+Each iteration of Differential Evolution traverses the \emph{population} of
+candidate solutions and randomly updates coordinates of the candidate vector
+according to the \emph{crossover probability}. The strength of the crossover is
+given by another parameter called the \emph{differential weight}. The
+optimization is typically made to terminate after some number of iterations or
+when other problem-specific criteria are satisfied.
+
+Three control parameters given above -- the population size, the crossover
+probability, and the differential weight -- greatly affect the effectiveness of
+Differential Evolution and must be chosen by the practitioner\cite{storn1997}.
 In fact, the choice of these parameters has been the topic of
-meta-optimization\cite{pedersen2010}.
+meta-optimization\cite{pedersen2010}, in which one optimizer is used to
+determine the best selection of configuration papmeters for another optimizer.
 
 The \emph{Simplex Method}\cite{nelder1965}, frequently called the
 \emph{Nelder-Mead} method after its creators (and to avoid confusion with a
@@ -131,9 +177,10 @@ iteration, the vertex with the worst score (highest function value) is
 replaced by reflecting it through the centroid of the simplex. The simplex
 is expanded or contracted according to the quality of the reflection.
 
-As such, a number of parameters are again to be chosen by the practitioner,
+Again, a number of parameters are again to be chosen by the practitioner,
 namely the ratios to use when reflecting, expanding, and contracting the
 simplex.
+
 
 \section{Objective}
 
@@ -144,15 +191,15 @@ be tweaked to adapt them to many different problems. On the other hand,
 this can make them difficult to use when it is not clear how the parameters
 should be chosen.
 
-With that in mind, it is our goal to design an optimization technique
+With that in mind, we wish to design an optimization technique
 requiring as little configuration as possible; our method should work
-\emph{out-of-the-box} on a variety of problems. Furthermore, it is desired
+\emph{out-of-the-box} on a variety of problems. Furthermore, we desire
 that our method outperform Simulated Annealing.
 
-The rationale for singling out Simulated Annealing, is that it is perhaps
-the most extensively studied metaheuristic, and is perhaps the most
-general, having been specialized in many applications. Equally, we would
-prefer our method to have a certain potential to be specialized further.
+The rationale for singling out Simulated Annealing is that it is perhaps the
+most extensively studied metaheuristic, and is perhaps the most general, having
+been greatly customized in specific applications. Equally, we would prefer our
+method to have a certain potential to be specialized further.
 
 
 \section{Methods}
