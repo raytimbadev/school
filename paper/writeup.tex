@@ -119,7 +119,8 @@ As the temperature decreases, the acceptance of new coordinates becomes
 more selective; at a temperature of zero, only coordinates strictly better
 than the current position will be accepted.
 
-The Simulated Annealing algorithm thus consists of two essential steps:
+The Simulated Annealing algorithm thus consists of two essential steps at each
+iteration:
 \begin{enumerate}
     \item random perturbation of the coordinates;
     \item accept or reject the new coordinates based on the current
@@ -171,11 +172,12 @@ minimization technique, it can be applied to global minimization as well.
 
 If the dimension of the search space is $n$, then $n+1$ points are first
 chosen to form a simplex in the space. The intuition for this method is to
-let the simplex tumble down the local minimum, expanding and contracting as
-twists and turns are encountered in the function. In particular, on each
-iteration, the vertex with the worst score (highest function value) is
-replaced by reflecting it through the centroid of the simplex. The simplex
-is expanded or contracted according to the quality of the reflection.
+let the simplex tumble downhill towards a local minimum, expanding and
+contracting as twists and turns are encountered in the function. In
+particular, on each iteration, the vertex with the worst score (highest
+function value) is replaced by reflecting it through the centroid of the
+simplex. The simplex is expanded or contracted according to the quality of the
+reflection.
 
 Again, a number of parameters are again to be chosen by the practitioner,
 namely the ratios to use when reflecting, expanding, and contracting the
@@ -205,51 +207,78 @@ method to have a certain potential to be specialized further.
 \section{Methods}
 
 \subsection{Difference Map Optimizer}
-The method we propose, called the \emph{Difference Map Optimizer} (DMO), is
-based on the \emph{Difference Map}\cite{elser2007}, a constraint
-satisfaction algorithm.
-Despite being an iterative projection technique, which have a reputation
-for becoming trapped in local minima, the Difference Map can avoid
-stagnation in a local minimum precisely by using a difference of the two
-elementary projections of its current iterate onto the two constraints to
-be satisfied. As such, the iterate is kept distinct from its projections
-onto the constraints.
+The method we propose is based on the \emph{Difference Map}\cite{elser2007}, a
+constraint satisfaction algorithm that uses an iterative projection scheme.
 
-DMO is an iterative metaheuristic that uses local searches on each
+The problems that the Difference Map aims to solve are those that can be
+formulated as requiring the simultaneous satisfaction of two constraints.
+Naive iterative projection schemes tend to become trapped in local minima, but
+the Difference Map can avoid this precisely by using the difference of the
+projections onto the two constraints to be satisfied.
+More specifically, this keeps the iterate distinct from the projections,
+reducing the greediness of the method and improving its overall ability to
+identify the intersection of the constraints.
+In the case of global optimization, our intuition is to think
+of the function to optimize as a constraint to be satisfied, and to consider
+local minimizations as a kind of projection.
+
+Our global optimization method, called the \emph{Difference Map Optimizer}
+(DMO), is an iterative metaheuristic that uses local searches on each
 iteration to gradually build up a landscape of the search space.
-Furthermore, rather than have the iterate follow the local search, the
-results of the local searches are kept distinct from the iterate.
-As a mechanism for adapting to different functions, DMO maintains an
-internal estimate of the global minimum, denoted $t$, which affects the
-sizes of the steps taken by the iterate. By analogy with the Difference Map
-from which we derive our intuition for DMO, the projection operator is the
-local search.
+Rather than have the iterate directly follow the local search, the results of
+the local searches are kept distinct from the iterate; this acts to avoid
+stagnation in local minima as in the Difference Map.
+
+As a mechanism for adapting to different functions, DMO maintains an internal
+estimate of the global minimum, called the \emph{target} and denoted $t$,
+which affects the sizes of the steps taken by the iterate as it explores the
+search space.
 
 First, two starting points $x_0$ and $x_1$ are selected from the search
 space.
 A local minimization is performed on $x_0$ to find $x_0^*$ and the
 initial value for the target is computed as
-$t := f(x_0^*) - s (f(x_0) - f(x_0^*))$,
-where $s$ is a scaling factor that controls the overall greediness of the
-algorithm.
+$$t := f(x_0^*) - s (f(x_0) - f(x_0^*))$$
+where $s$ is a positive scaling factor that controls the overall greediness of
+the algorithm.
 The point $x_1$ is taken as the initial position of the iterate. Our
 experiments showed that $x_0$ and $x_1$ should be chosen to be close to
-each other, yet ideally in different attractors.
+each other, yet ideally in different basins of attraction.
+Formally, a basin of attraction is a region in which local minimization at
+each point leads to the same local minimum, and the point giving the local
+minimum is called a \emph{minimizer}.
 The points $x_0^*$ and $x_0$ are then added to a running list $M$ of
-minimizers discovered so far.
+local minimizers so far.
 
 On each iteration starting from the position of the iterate $x_i$, a local
 minimizer $x_i^*$ is found by traditional local optimization techniques.
-If $f(x_i^*)$ is less than the current estimate, then the estimate is
+If $f(x_i^*)$ is less than the current target, then the target is
 recalculated as before, but using $f(x_i^*)$ and $\min_{x \in M} f(x)$.
-Then, the point $x_{near} \in M$ with the least distance to $x_i^*$ is
-selected.
-From $x_{near}$, the step to take is calculated.
-\begin{equation}
+
+Next, we devise a step-taking procedure that corresponds to a second kind
+of projection. Since we already have the list $M$ representing the results of
+the first type of projection, we wish to combine somehow these results to
+produce a new position for the iterate. Borrowing the ideas of the Difference
+Map, we choose to take a difference of the element in $M$ nearest to the
+current local minimizer to determine the direction of the step. This step is
+then scaled such that it acts as a projection onto the target. Finally, the
+calculated step is added to the iterate.
+
+The intuition for such a procedure derives directly from the Difference Map;
+by applying a difference of previously discovered local minima to the iterate,
+we keep the minima and the iterate distinct and avoid stagnation.
+
+Figure \ref{fig:iteration} provides a visualization of the step-taking
+procedure.
+
+Precisely, we select the point $x_{near} \in M$ having the least distance to
+$x_i^*$.
+From $x_{near}$, the step $\Delta x$ to take is calculated as
+\begin{equation*}
     \Delta x_i =
         \frac{t - f(x_i^*)}{f(x_i^*) - f(x_{near})} (x_i^* - x_{near})
     \label{eqn:dx}
-\end{equation}
+\end{equation*}
 
 The next position of the iterate is obtained by applying the step
 $\Delta x_i$.
@@ -257,15 +286,12 @@ $$
     x_{i+1} = x_i + \Delta x_i
 $$
 
-Figure \ref{fig:iteration} provides a visualization of the iteration
-procedure.
-
 Note that if the quantity $f(x_i^*) - f(x_{near}$ is close to zero, i.e.
-$|f(x_i^*) - f(x_{near})| < tol$ where $tol$ is a predetermined tolerance
-for numerically distinguishing reals, then that quantity should be
-replaced with $tol$.
+$|f(x_i^*) - f(x_{near})| < \epsilon$ where $\epsilon$ is a predetermined
+tolerance for numerically distinguishing reals, then that quantity should be
+replaced with $\epsilon$.
 Under these circumstances, which arise when the local landscape of the
-function appears very flat, the iterate is to be moved infinitely far away.
+function is flat, the iterate is to be moved infinitely far away.
 Of course this is not possible, so a numerical approximation is chosen
 instead.
 
@@ -299,8 +325,8 @@ Wolfram \emph{Mathematica} provides implementations of several of the
 optimization methods presented earlier.
 In particular, Simulated Annealing, Differential Evolution, and Nelder-Mead
 are implemented.
-As such, \emph{Mathematica} is used as our primary environment for testing
-DMO.
+For that reason, we choose \emph{Mathematica} as our primary environment for
+testing DMO.
 All tests are conducted with version $10.0$ of \emph{Mathematica} on an
 Apple iMac (late 2013) running Ubuntu, with a $3.1$~GHz Intel i7 processor
 and $16$~GB of $1600$~MHz DDR3 RAM.
@@ -312,14 +338,17 @@ we compare DMO to each of the \emph{Mathematica} optimizers with as little
 tweaking as possible.
 
 Second, a minor tweak to the \emph{Mathematica} optimizers is applied. This
-will allow a comparison between DMO, which is requires to such tweaking,
+will allow a comparison between DMO, which requires no such tweaking,
 and solvers that are effectively being advantaged by this extra information
 concerning the problem space.
 
 The tweak in question is essentially a \emph{bracketing} of the search
 space. In some applications it is possible to bracket the optimum, but in
 others, it is not. Hence, we believe that it is worthwhile to explore both
-these avenues.
+these avenues. It is worth noting, however, that applying this bracketing to
+the \emph{Mathematica} optimizers does not prevent the search from leaving the
+supplied region; it simply provides a space in which the optimizer can sample
+initial points and perhaps choose some kind of scale for the problem.
 
 In order to compare the solvers in the fairest way possible, each solver is
 run such that the average number of function evaluations per run is
@@ -347,8 +376,8 @@ of iterations was set.
 Stalls in the \emph{Mathematica} optimizers are dealt with by a random
 restart process: if the solver generates an insufficient number of function
 evaluations, then the solver is restarted with a different random seed.
-It is of note that a new starting point for the solver is not picked, as
-could improve the odds of the solver landing in the global minimum at the
+It should be noted that a new starting point for the solver is not selected, as
+this could improve the odds of the solver landing in the global minimum at the
 first iteration, which would unfairly advantage the randomly restarting
 solvers. Thus, by changing only the seed for the random number generator,
 it is only the trajectory of the solver that is affected.
