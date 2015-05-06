@@ -78,7 +78,7 @@ $$
 \min_{x \in \mathbb{R}^n} f(x)
 $$
 where $f : \mathbb{R}^n \to \mathbb{R}$,
-i.e. we wish to find $x^* \in \mathbb{R}^n$
+\emph{i.e.} we wish to find $x^* \in \mathbb{R}^n$
 such that $f(x^*) \leq f(x)$ for all $x \in \mathbb{R}^n$.
 
 \emph{Heuristics} are optimization procedures that use problem-specific
@@ -286,14 +286,13 @@ $$
     x_{i+1} = x_i + \Delta x_i
 $$
 
-Note that if the quantity $f(x_i^*) - f(x_{near}$ is close to zero, i.e.
-$|f(x_i^*) - f(x_{near})| < \epsilon$ where $\epsilon$ is a predetermined
-tolerance for numerically distinguishing reals, then that quantity should be
-replaced with $\epsilon$.
-Under these circumstances, which arise when the local landscape of the
-function is flat, the iterate is to be moved infinitely far away.
-Of course this is not possible, so a numerical approximation is chosen
-instead.
+Note that if the quantity $f(x_i^*) - f(x_{near}$ is close to zero,
+\emph{i.e.} $|f(x_i^*) - f(x_{near})| < \epsilon$ where $\epsilon$ is a
+predetermined tolerance for numerically distinguishing reals, then that
+quantity should be replaced with $\epsilon$.  Under these circumstances,
+which arise when the local landscape of the function is flat, the iterate is
+to be moved infinitely far away.  Of course this is not possible, so a
+numerical approximation is chosen instead.
 
 Finally, the point $x_0^*$ is added to the set of discovered minimizers
 $M$, and the target value $t$ is updated.
