@@ -511,20 +511,39 @@ DMO may show a lot of promise.
 However, in problems where information about the search space is available,
 other methods are at this time still more appropriate.
 
-With that in mind, there is still considerable room for improvement in DMO. For
-instance, the outliers in figures \ref{fig:good-data} and \ref{fig:bad-data} in
-the Rosenbrock function are perhaps the result of DMO having no intrinsic way
-to ensure that its search converges, or stays within reasonable limits. Indeed,
-that is in some sense a strength of DMO: it has no notion of what is reasonable
-beyond its internal estimate of the global minimum. Moreover, whereas Simulated
-Annealing progressively becomes more conservative in its choices as time goes
-by, DMO does not even keep track of how much time has elapsed beyond how many
-local minima have been discovered thus far.
-
 Overall, the Difference Map Optimizer is interesting due to these perceived
 strengths and its sheer novelty as an optimization technique. Although it is
-not presently ready for use in production environments, the different
+not presently ready for use in production environments, some different
 approaches to improving it are clear.
+
+
+\subsection{Future directions}
+
+There is still substantial room for improvement in DMO.
+For instance, the outliers in figures \ref{fig:good-data} and
+\ref{fig:bad-data} in the Rosenbrock function are perhaps the result of DMO
+having no intrinsic way to ensure that its search converges, or stays within
+reasonable limits.
+Indeed, that is in some sense a strength of DMO: it has no notion of what is
+reasonable beyond its internal estimate of the global minimum.
+Moreover, whereas Simulated Annealing progressively becomes more
+conservative in its choices as time goes by, DMO does not even keep track of
+how much time has elapsed beyond how many local minima have been discovered
+thus far.
+
+Although the step-taking strategy we use comes from our intuition based on
+the Difference Map, there may be alternative strategies that are more
+effective. Specifically, the strategy that we employ uses a single
+previously discovered minimum, but a strategy using more than one previously
+discovered local minimum, for instance, may offer improved results.
+
+Another avenue for potential improvement concerns the target and the methods
+used for calculating it. In our current scheme, it suffices that just two
+minima have similar values for the target to become quite conservative. The
+effect of a conservative target is to shrink the steps taken by the iterate,
+which can considerably slow down the search. Hence, alternative target
+calculation strategies using more advanced sampling techniques may improve
+the effectiveness and self-regulating nature of the search.
 
 \pagebreak
 
