@@ -305,15 +305,18 @@ global minimum.
 
 \begin{figure}[H]
     \begin{center}
-        \includegraphics[width=0.8\textwidth]{../figures/iteratingnew.png}
-        \caption{An example iteration of the Difference Map Optimizer.
-            The orange points are, from left to right, the iterate $x_i$
-            and its associated local minimum $x_i^*$. The blue point is the
-            nearest previously discovered local minimum $x_{near}$.
-            The orange and blue lines represent the function values of
-            these two local minimizers, and the red line represents the
-            current target value. In this example, the iterate will be
-            moved in the negative $x$ direction.}
+        \includegraphics[width=0.8\textwidth]{../figures/iterating.pdf}
+        \caption{
+            An example iteration of the Difference Map Optimizer.
+            $x_i$ is the current position of the iterate, and $x_i^*$ is the
+            local minimizer in the neighborhood of $x_i$. $x_{near}$ is
+            previously discovered local minimizer closest to $x_i^*$.
+            The line passing through $x_{near}$ and $x_i^*$ intersects the
+            line of the current target; the effect of equation \ref{eqn:dx}
+            is to project $x_i^*$ onto the target. The displacement found by
+            that projection is then applied to the current iterate $x_i$ to
+            find the next iterate, $x_{i+1}$.
+        }
         \label{fig:iteration}
     \end{center}
 \end{figure}
