@@ -208,14 +208,17 @@ method to have a certain potential to be specialized further.
 
 \subsection{Difference Map Optimizer}
 The method we propose is based on the \emph{Difference Map}\cite{elser2007}, a
-constraint satisfaction algorithm that uses an iterative projection scheme.
+constraint satisfaction algorithm.
 
-The problems that the Difference Map aims to solve are those that can be
-formulated as requiring the simultaneous satisfaction of two constraints.
+The Difference Map solves problems requiring the simultaneous satisfaction of
+two constraints by iteratively projecting the iterate onto sets identified with
+the constraints.
+This makes the Difference Map an \emph{iterative projection scheme}.
+
 Naive iterative projection schemes tend to become trapped in local minima, but
 the Difference Map can avoid this precisely by using the difference of the
 projections onto the two constraints to be satisfied.
-More specifically, this keeps the iterate distinct from the projections,
+Specifically, this keeps the iterate distinct from the projections,
 reducing the greediness of the method and improving its overall ability to
 identify the intersection of the constraints.
 In the case of global optimization, our intuition is to think
@@ -286,7 +289,7 @@ $$
     x_{i+1} = x_i + \Delta x_i
 $$
 
-Note that if the quantity $f(x_i^*) - f(x_{near}$ is close to zero,
+Note that if the quantity $f(x_i^*) - f(x_{near})$ is close to zero,
 \emph{i.e.} $|f(x_i^*) - f(x_{near})| < \epsilon$ where $\epsilon$ is a
 predetermined tolerance for numerically distinguishing reals, then that
 quantity should be replaced with $\epsilon$.  Under these circumstances,
@@ -294,11 +297,11 @@ which arise when the local landscape of the function is flat, the iterate is
 to be moved infinitely far away.  Of course this is not possible, so a
 numerical approximation is chosen instead.
 
-Finally, the point $x_0^*$ is added to the set of discovered minimizers
+Finally, the point $x_i^*$ is added to the set of discovered minimizers
 $M$, and the target value $t$ is updated.
 
-Many update strategies are possible, but our experiments showed that merely
-recalculating the target, as above, every $r$ iterations using the two
+Many target update strategies are possible, but our experiments showed that
+merely recalculating the target, as above, every $r$ iterations using the two
 smallest values $f(x)$ for $x \in M$ produced acceptable estimates of the
 global minimum.
 
