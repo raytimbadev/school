@@ -1,0 +1,209 @@
+\documentclass[10pt]{article}
+
+\usepackage[margin=0.5cm]{geometry}
+\usepackage{multicol}
+\usepackage{graphicx, float}
+\usepackage{wrapfig}
+\usepackage{amsthm, amsmath, amssymb}
+
+\newcommand{\da}{\downarrow}
+\DeclareMathOperator{\letexp}{let}
+\DeclareMathOperator{\inexp}{in}
+
+\newtheorem{definition}{Definition}
+
+\begin{document}
+
+\begin{multicols}{2}
+
+\section{Library functions}
+
+\subsection{LIST}
+\begin{verbatim}
+datatype 'a list = nil | :: of 'a * 'a list
+exception Empty
+
+val null : 'a list -> bool
+val length : 'a list -> int
+val @ : 'a list * 'a list -> 'a list
+val hd : 'a list -> 'a
+val tl : 'a list -> 'a list
+val last : 'a list -> 'a
+val getItem : 'a list -> ('a * 'a list) option
+val nth : 'a list * int -> 'a
+val take : 'a list * int -> 'a list
+val drop : 'a list * int -> 'a list
+val rev : 'a list -> 'a list
+val concat : 'a list list -> 'a list
+val revAppend : 'a list * 'a list -> 'a list
+val app : ('a -> unit) -> 'a list -> unit
+val map : ('a -> 'b) -> 'a list -> 'b list
+val mapPartial : ('a -> 'b option) -> 'a list -> 'b list
+val find : ('a -> bool) -> 'a list -> 'a option
+val filter : ('a -> bool) -> 'a list -> 'a list
+val partition : ('a -> bool)
+-> 'a list -> 'a list * 'a list
+val foldl : ('a * 'b -> 'b) -> 'b -> 'a list -> 'b
+val foldr : ('a * 'b -> 'b) -> 'b -> 'a list -> 'b
+val exists : ('a -> bool) -> 'a list -> bool
+val all : ('a -> bool) -> 'a list -> bool
+val tabulate : int * (int -> 'a) -> 'a list
+    (* [f(0), f(1), ..., f(n-1)] *)
+\end{verbatim}
+
+\subsection{STRING}
+\begin{verbatim}
+val size : string -> int
+val substring : string * int * int -> string
+val ^ : string * string -> string (* string @ *)
+val concat : string list -> string
+val concatWith : string -> string list -> string
+val str : char -> string
+val implode : char list -> string
+val explode : string -> char list
+val map : (char -> char) -> string -> string
+val isPrefix    : string -> string -> bool
+val isSubstring : string -> string -> bool
+val isSuffix    : string -> string -> bool
+\end{verbatim}
+
+\subsection{CHAR}
+\begin{verbatim}
+val minChar : char
+val maxChar : char
+val maxOrd : int
+
+val ord : char -> int
+val chr : int -> char
+val succ : char -> char
+val pred : char -> char
+
+val contains : string -> char -> bool
+val notContains : string -> char -> bool
+
+val isAscii : char -> bool
+val toLower : char -> char
+val toUpper : char -> char
+val isAlpha : char -> bool
+val isAlphaNum : char -> bool
+val isCntrl : char -> bool
+val isDigit : char -> bool
+val isGraph : char -> bool
+val isHexDigit : char -> bool
+val isLower : char -> bool
+val isPrint : char -> bool
+val isSpace : char -> bool
+val isPunct : char -> bool
+val isUpper : char -> bool
+\end{verbatim}
+
+\section{Datatypes}
+\begin{verbatim}
+'a option = SOME of 'a | NONE
+'a MyList = Cons of 'a * 'a MyList | Nil
+'a Stream = SCons of 'a * 'a Stream
+'a rlist = RCons of 'a * (('a rlist) ref) | RNil
+
+'a ChurchNum = ChurchNum of ('a -> 'a) -> 'a -> 'a
+'a ChurchBool = ChurchBool of 'a -> 'a -> 'a
+
+(* This will give dummy types, but deal with it. *)
+val churchTrue = ChurchBool (fn x => fn y => x)
+val churchFalse = ChurchBool (fn x => fn y => y)
+
+fun succ n = fn f => f (n f)
+
+fun if' (ChurchBool cond) x y = cond x y
+\end{verbatim}
+
+\section{Examples}
+\begin{verbatim}
+fun make_account (opening_balance: int) =
+let
+  val balance = ref opening_balance
+in
+  fn (trans: transactions) => case trans
+    of Withdraw(a) =>
+       ((balance := !balance-a); !balance)
+     | Deposit(a) =>
+       ((balance := !balance+a); !balance)
+     | Check_balance => (!balance)
+end
+\end{verbatim}
+
+\begin{verbatim}
+datatype 'a tree = Empty
+                 | Node of 'a tree * 'a * 'a tree
+exception FoundSoFar of int list
+
+fun findAll'(p, Empty) =
+    raise FoundSoFar []
+  | findAll'(p, Node(L, d, R)) =
+    findAll'(p, L)
+    handle FoundSoFar ll => (findAll'(p,R)
+    handle FoundSoFar lr =>
+      if (p d)
+        then raise FoundSoFar (ll@[d]@lr)
+        else raise FoundSoFar (ll@lr))
+
+fun findAll(p, T) =
+    (findAll'(p, T)
+     handle FoundSoFar l => l)
+
+fun findAllCont' p Empty cont = cont []
+  | findAllCont' p (Node(L,d,R)) cont =
+    findAllCont' p L (fn ll =>
+      findAllCont' p R (fn lr =>
+        if p(d)
+          then cont (ll@[d]@lr)
+          else cont (ll@lr)))
+
+(* Notice the similarities with the exceptions *)
+fun findAllCont p T = findAllCont' p T (fn l => l)
+\end{verbatim}
+
+\section{Environment diagrams}
+\begin{wrapfigure}{1}{\linewidth}
+\includegraphics[width=0.5\linewidth]{environment-diagram.png}
+\caption{A horrible function's environment diagram.}
+\end{wrapfigure}
+\begin{verbatim}
+let val x = 5
+  val r = ref(10+x)
+  val x = 1
+  fun foo x = let val x = 10 in !r + x end
+  val _ = (r := x+1)
+in
+  foo(x + !r)
+end
+\end{verbatim}
+
+\section{Language design}
+
+\begin{definition}
+    Successful evaluation of an expression produces a value. This is called
+    \emph{value soundness}.
+\end{definition}
+
+\begin{definition}
+    The evaluation result of an expression is unique. This is called
+    \emph{determinancy}.
+\end{definition}
+
+\begin{definition}
+    Denote by $[e^\prime / x]e$ the result of replacing all free occurrences of
+    $x$ in $e$ with $e^\prime$.
+\end{definition}
+
+\begin{definition}
+    We write $e \da v$ to say that $e$ evaluates to $v$.
+\end{definition}
+
+$
+    \frac{e_1 \da v_1,\, [v_1/x]e_2 \da v}
+    {\letexp {x = e_1} \inexp {e_2} \da v}
+$
+
+\end{multicols}
+
+\end{document}

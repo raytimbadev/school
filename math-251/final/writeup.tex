@@ -1,0 +1,309 @@
+\documentclass[12pt]{article}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{multicol}
+
+\DeclareMathOperator{\tr}{tr}
+
+\begin{document}
+
+\begin{multicols}{2}
+
+\section{Definitions}
+
+\subsection{Vector spaces}
+
+\begin{itemize}
+    \item Vector space, subspace
+    \item Algebraic sum, external direct sum
+    \item Vector span, spanning family, linearly independent set, basis
+\end{itemize}
+
+
+\subsection{Bases}
+
+\begin{itemize}
+    \item Coordinates with respect to a basis.
+\end{itemize}
+
+
+\subsection{Linear maps}
+
+\begin{itemize}
+    \item Linear map.
+    \item Isomorphism.
+    \item The matrix representing a linear map.
+    \item Inner direct sum.
+    \item Projection.
+    \item Quotient space.
+\end{itemize}
+
+
+\subsection{Determinants}
+
+\begin{itemize}
+    \item Permutation, inversion, sign of a permutation,
+        transposition, $n$-cycle.
+    \item Determinant (using 4 axioms).
+    \item The adjoint matrix.
+    \item Orientation, isomorphism preserving orientation.
+    \item Wronskian matrix.
+\end{itemize}
+
+
+\subsection{Matrices}
+
+\begin{itemize}
+    \item Column rank, row rank.
+\end{itemize}
+
+
+\subsection{The dual space}
+
+\begin{itemize}
+    \item Linear functional, the dual space of a vector space.
+    \item Annihilator.
+    \item Dual map.
+    \item Polar dual to a convex set in $\mathbb{R}^2$ containing
+        $0$.
+\end{itemize}
+
+
+\subsection{Inner product}
+
+\begin{itemize}
+    \item Inner product, norm, distance.
+    \item Orthogonal basis, orthonormal basis.
+    \item Orthogonal subspace.
+    \item Gram matrix.
+    \item Approximate solution of the least squares method to the
+        overdetermined system $Ax = y$ where the columns of $A$ are
+        linearly independent.
+\end{itemize}
+
+
+\subsection{Eigenvalues}
+
+\begin{itemize}
+    \item Eigenvalue, eigenvector.
+    \item Similar matrices.
+    \item Characteristic polynomial.
+    \item Eigenspace.
+    \item Geometric and algebraic multiplicity of eigenvalues.
+    \item Diagonalizable matrix.
+\end{itemize}
+
+
+\subsection{The Jordan normal form}
+
+\begin{itemize}
+    \item Minimal polynomial.
+    \item $T$-invariant subspace.
+    \item Nilpotent map, Jordan block, Jordan form.
+\end{itemize}
+
+
+\subsection{Self-adjoint maps}
+
+\begin{itemize}
+    \item Hermitian adjoint.
+    \item Self-adjoint map.
+    \item Legendre polynomials.
+    \item Unitary map, unitary matrix.
+    \item Symmetric bilinear form.
+    \item Quadrics.
+    \item Normal map.
+\end{itemize}
+
+
+
+\section{Proofs}
+
+\subsection{Vector spaces}
+
+\begin{itemize}
+    \item The span of a family of vectors is a subspace.
+    \item The three definitions of a basis are equivalent.
+\end{itemize}
+
+
+\subsection{Bases}
+
+\begin{itemize}
+    \item The Steinitz substitution lemma.
+    \item (Corollary) The cardinality of a linearly independent set
+        cannot exceed the cardinality of a basis.
+    \item (Corollary) Every linearly independent set can be
+        completed to a basis.
+    \item The identities involving the matrix of basis change.
+    \item A matrix is invertible if and only if its columns form a
+        basis.
+\end{itemize}
+
+
+\subsection{Linear maps}
+
+\begin{itemize}
+    \item The kernel and image of a linear map are subspaces of the
+        domain and codomain, respectively.
+    \item Triviality of the kernel is equivalent to injectivity.
+    \item Every finitely dimensional vector space is isomorphic to
+        $\mathbb{F}^n$.
+    \item The theorem on the kernel and the image.
+    \item The inner direct sum of vector spaces is isomorphic to
+        the external direct sum of vector spaces.
+    \item A projection is equivalent to an inner direct sum.
+\end{itemize}
+
+
+\subsection{Determinants}
+
+\begin{itemize}
+    \item The sign of a permutation is multiplicative.
+    \item The determinant exists and is unique, satisfying the four
+        determinant axioms.
+    \item Functions satisfying only the first three of the
+        determinant axioms are equivalent to the determinant
+        function up to scaling.
+    \item Cauchy's Theorem, $\det {(AB)} = \det{A} \det{B}$, i.e.
+        the determinant is multiplicative.
+    \item (Corollary) A matrix is invertible if and only if its
+        determinant is nonzero.
+    \item Laplace's Expansion Theorem.
+    \item Cramer's rule.
+\end{itemize}
+
+\subsection{Matrices}
+
+\begin{itemize}
+    \item The column and row rank of a matrix are equal.
+    \item The algorithm for computing the inverse matrix.
+\end{itemize}
+
+
+\subsection{The dual space}
+
+\begin{itemize}
+    \item The dimension of a vector space is equal to the dimension
+        of its dual space.
+    \item Lemma on the (first three) properties of the annihilator.
+    \item The annihilator of a sum is the intersection of the
+        annihilators,
+        $(U_1 + U_2)^\perp = U_1^\perp \cap U_2^\perp$.
+    \item Calculation of the dual basis.
+\end{itemize}
+
+\subsection{Inner product}
+
+\begin{itemize}
+    \item Pythegorean lemma.
+    \item Cauchy-Schwarz inequality.
+    \item The properties of the norm.
+    \item Existance and formula of the orthogonal projection.
+    \item A finitely dimensional inner product space can be
+        decomposed into a direct sum of a subspace and its
+        orthogonal subspace.
+\end{itemize}
+
+
+\subsection{Eigenvalues}
+
+\begin{itemize}
+    \item Similar matrices have the same eigenvalues.
+    \item $\det M$ and $\tr M$ appear in the characteristic
+        polynomial of $M$.
+    \item The remark on the 3 equivalent definitions of an
+        eigenvalue.
+    \item The lemma and theorem on equivalent conditions for
+        diagonalizability.
+    \item The closed form for the terms of the Fibonacci sequence.
+\end{itemize}
+
+\subsection{The Jordan normal form}
+
+\begin{itemize}
+    \item The corollary of the Primary Decomposition Theorem giving
+        a condition for diagonalizability.
+\end{itemize}
+
+
+\subsection{Self-adjoint maps}
+
+\begin{itemize}
+    \item The existence and uniqueness of the Hermitian adjoint in
+        finitely dimensional inner product spaces.
+    \item Self-adjoint maps have real eigenvalues and orthogonal
+        eigenspaces.
+    \item Principal Axis Theorem.
+    \item A Hermitian matrix is positive definite if and only if
+        all its eigenvalues are positive.
+    \item Sylvester's Theorem.
+    \item Normal maps are diagonalizable.
+    \item Spectral Theorem.
+\end{itemize}
+
+
+\section{Statements of theorems}
+
+\subsection{Vector spaces}
+
+None.
+
+
+\subsection{Bases}
+
+None.
+
+
+\subsection{Linear maps}
+
+None.
+
+
+\subsection{Determinants}
+
+None.
+
+
+\subsection{Matrices}
+
+None.
+
+
+\subsection{The dual space}
+
+None.
+
+
+\subsection{Inner product}
+
+\begin{itemize}
+    \item The theorem on the volume of an m-parallelipiped in
+        $\mathbb{R}^n$.
+\end{itemize}
+
+
+\subsection{Eigenvalues}
+
+None.
+
+
+\subsection{The Jordan normal form}
+
+\begin{itemize}
+    \item The Cayley-Hamilton theorem.
+    \item The proposition and theorem on the properties of the
+        minimal polynomial.
+    \item The Primary Decomposition theorem.
+    \item The Jordan Normal Form theorem.
+\end{itemize}
+
+
+\subsection{Self-adjoint maps}
+
+None.
+
+
+\end{multicols}
+\end{document}
