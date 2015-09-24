@@ -2,6 +2,10 @@
 
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage[margin=2.0cm]{geometry}
+\usepackage{float}
+\usepackage{tikz}
+
+\usetikzlibrary{arrows,automata}
 
 \newcommand{\N}{\mathbb{N}}
 
@@ -240,13 +244,246 @@
                 In particular, we have the following.
 
                 \begin{align}
-                    m_1<m_2&\lor m_1=m_2\land n_1\leq n_2
-                    \label{eq:trans1}\\
-                    m_2<m_3&\lor m_2=m_3\land n_2\leq n_3
-                    \label{eq:trans2}
+                    m_1<m_2 &\lor m_1 = m_2 \land n_1 \leq n_2
+                        \label{eq:trans1} \\
+                    m_2<m_3 &\lor m_2 = m_3 \land n_2 \leq n_3
+                        \label{eq:trans2}
                 \end{align}
+
+                If $m_1 < m_2 \lor m_2 < m_3$, then $m_1 < m_3$.
+                Hence, $(m_1, n_1) \sqsubseteq (m_3, n_3)$.
+
+                If $m_1 = m_2 = m_3$, then $n_1 \leq n_2 \leq n_3$, which
+                implies $n_1 \leq n_3$.
+                Hence, $(m_1, n_1) \sqsubseteq (m_3, n_3)$.
+
+                This covers all the possible cases that can result from our
+                initial two assumptions. Thus, transitivity holds.
         \end{description}
+
+        Thus, $\sqsubseteq$ is a partial order on $\N \times \N$.
     \end{proof}
+
+    \begin{proposition}
+        The binary lexicographic ordering on $\N \times \N$ is a well-founded
+        order.
+    \end{proposition}
+
+    \begin{proof}
+        Consider $S \neq \emptyset \subseteq \N \times \N$.
+
+        Select
+        $$
+        S_1 = \{
+            (m, n) \in S
+            | \forall (m^\prime, n^\prime) \in S : m \geq m^\prime
+        \}
+        $$
+
+        In other words, select $S_1$ such that its elements have minimal
+        \emph{first} components within $S$.
+
+        Then, select
+        $$
+        S_2 = \{
+            (m, n) \in S_1
+            | \forall (m^\prime, n^\prime) \in S_1 : n \geq n^\prime
+        \}
+        $$
+
+        In other words, select $S_2$ such that its elements have minimal
+        \emph{second} components within $S_1$. Note that both $S_1$ and $S_2$
+        are nonempty due to the well-ordering principle on naturals.
+
+        Now, assume for some
+        $(m, n) \in S_2$
+        there exists
+        $(m^\prime, n^\prime) \in S$
+        such that
+        $(m^\prime, n^\prime) \sqsubseteq (m, n)$.
+        This would mean
+        $m^\prime < m \lor m^\prime = m \land n^\prime \leq n$.
+
+        Recall that $m$ is such that it is minimal as a first component of
+        elements of $S$.
+        Hence, it cannot be the case that $m^\prime < m$;
+        it must be that
+        $m^\prime = m$,
+        and thus that
+        $(m^\prime, n^\prime) \in S_1$.
+
+        However, recall that $n$ is such that it is minimal as a second
+        component of elements of $S_1$.
+        Hence, it cannot be the case that $n^\prime < n$;
+        it must be that
+        $n^\prime = n$,
+        and thus that
+        $(m^\prime, n^\prime) = (m, n)$.
+
+        In conclusion, any nonempty subset of $\N \times \N$ has a minimal
+        element, which we can construct from the above two-stage selection
+        process.
+    \end{proof}
+
+\item[Question \#4]
+    The following DFAs recognize languages on the alphabet $\{0,1\}$.
+
+    \begin{enumerate}
+        \item The DFA in figure \ref{fig:dfa:00} recognizes strings ending with
+            two zeros.
+
+            \begin{figure}[H]
+                \centering
+
+                \begin{tikzpicture}[
+                        ->,
+                        >=stealth',
+                        shorten >=1pt,
+                        auto,
+                        node distance=2.8cm,
+                        semithick
+                    ]
+                    \tikzstyle{every state}=[fill=white,draw=black,text=black]
+
+                    \node[initial,state]   (A) {} ;
+                    \node[state]           (B) [below right of=A] {} ;
+                    \node[accepting,state] (C) [above right of=B] {} ;
+
+                    \path
+                    (A) edge [loop above]   node {1} (A)
+                    (A) edge [bend left=20] node {0} (B)
+                    (B) edge [bend left=20] node {1} (A)
+                    (B) edge                node {0} (C)
+                    (C) edge                node {1} (A)
+                    (C) edge [loop above]   node {0} (C) ;
+                \end{tikzpicture}
+                \label{fig:dfa:00}
+
+                \caption{A DFA to recognize strings ending with two zeroes.}
+            \end{figure}
+
+        \item The DFA in figure \ref{fig:dfa:2zero2one} recognizes strings
+            ending with either two zeros or two ones.
+
+            \begin{figure}[H]
+                \centering
+
+                \begin{tikzpicture}[
+                        ->,
+                        >=stealth',
+                        shorten >=1pt,
+                        auto,
+                        node distance=3.2cm,
+                        semithick
+                    ]
+                    \tikzstyle{every state}=[fill=white,draw=black,text=black]
+
+                    \node[initial,state]   (A)                    {} ;
+                    \node[state]           (B) [right of=A]       {} ;
+                    \node[state,accepting] (D) [below of=B]       {} ;
+                    \node[state,accepting] (C) [below right of=D] {} ;
+                    \node[state]           (E) [below of=A]       {} ;
+
+                    \path
+                    (A) edge                node {0} (B)
+                    (A) edge                node {1} (E)
+                    (B) edge [bend left=20] node {0} (C)
+                    (B) edge [bend left=20] node {1} (E)
+                    (C) edge [loop right]   node {0} (C)
+                    (C) edge [bend left=20] node {1} (E)
+                    (D) edge                node {0} (B)
+                    (D) edge [loop right]   node {1} (D)
+                    (E) edge                node {0} (D)
+                    (E) edge [bend left=20] node {1} (B) ;
+
+                \end{tikzpicture}
+                \label{fig:dfa:2zero2one}
+
+                \caption{A DFA to recognize strings ending with either two
+                zeros or two ones.}
+            \end{figure}
+
+        \item The DFA in figure \ref{fig:dfa:secondlast1} recognizes strings
+            whose second last character is a $1$.
+
+            \begin{figure}[H]
+                \centering
+
+                \begin{tikzpicture}[
+                        ->,
+                        >=stealth',
+                        shorten >=1pt,
+                        auto,
+                        node distance=2.8cm,
+                        semithick
+                    ]
+                    \tikzstyle{every state}=[fill=white,draw=black,text=black]
+
+                    \node[initial,state]   (A)                    {} ;
+                    \node[state]           (B) [right of=A]       {} ;
+                    \node[state,accepting] (C) [right of=B]       {} ;
+                    \node[state,accepting] (D) [below of=B] {} ;
+
+                    \path
+                    (A) edge [loop above]   node {0} (A)
+                    (A) edge                node {1} (B)
+                    (B) edge [bend left=20] node {0} (D)
+                    (B) edge                node {1} (C)
+                    (C) edge                node {0} (D)
+                    (C) edge [loop above]   node {1} (C)
+                    (D) edge                node {0} (A)
+                    (D) edge [bend left=20] node {1} (B) ;
+
+                \end{tikzpicture}
+                \label{fig:dfa:secondlast1}
+
+                \caption{A DFA to recognize strings whose second last character
+                is $1$.}
+            \end{figure}
+    \end{enumerate}
+
+\item[Question \#5]
+    \begin{enumerate}
+        \item The DFA in figure \ref{fig:dfa:contain100110} recognizes strings
+            containing the substrings $100$ or $110$.
+
+            \begin{figure}[H]
+                \centering
+
+                \begin{tikzpicture}[
+                        ->,
+                        >=stealth',
+                        shorten >=1pt,
+                        auto,
+                        node distance=2.8cm,
+                        semithick
+                    ]
+                    \tikzstyle{every state}=[fill=white,draw=black,text=black]
+
+                    \node[initial,state]   (A)              {A} ;
+                    \node[state]           (B) [right of=A] {B} ;
+                    \node[state]           (C) [right of=B] {C} ;
+                    \node[accepting,state] (D) [right of=C] {D} ;
+                    \node[state]           (E) [below of=C] {E} ;
+
+                    \path
+                    (A) edge [loop above]    node {0} (A)
+                    (A) edge                 node {1} (B)
+                    (B) edge [bend left=20]  node {0} (E)
+                    (B) edge                 node {1} (C)
+                    (C) edge                 node {0} (D)
+                    (C) edge [loop above]    node {1} (C)
+                    (D) edge [loop right]    node {0} (D)
+                    (D) edge [loop above]    node {1} (D)
+                    (E) edge                 node {0} (D)
+                    (E) edge [bend left=20]  node {1} (B) ;
+                \end{tikzpicture}
+                \label{fig:dfa:contain100110}
+
+                \caption{A DFA to recognize strings containing at least one of
+                the substrings $100$ or $110$.}
+            \end{figure}
+    \end{enumerate}
 \end{description}
 
 \end{document}
