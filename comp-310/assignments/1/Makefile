@@ -2,15 +2,20 @@
 
 CC = gcc
 LDFLAGS = 
-CFLAGS = -c -Og -Wall -Werror
+CFLAGS = -c -g -Og -Wall -Werror -Iinclude
 
-all: shell
+_ = $(shell mkdir -p obj bin src)
 
-shell: main.o
-	$(CC) $(LDFLAGS) -o $@ $<
+all: bin/shell
 
-main.o: main.c
+bin/shell: obj/main.o obj/history.o
+	$(CC) $(LDFLAGS) -o $@ $^
+
+obj/main.o: src/main.c
+	$(CC) $(CFLAGS) -o $@ $<
+
+obj/history.o: src/history.c include/history.h
 	$(CC) $(CFLAGS) -o $@ $<
 
 clean:
-	@rm -v *.o shell
+	@rm -v obj/*.o bin/shell
