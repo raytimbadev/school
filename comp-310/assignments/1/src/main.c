@@ -30,7 +30,7 @@ int parse_command(char *line, char *args[], int *background)
     {
         *background = 1;
         *loc = ' ';
-    } 
+    }
     else
         *background = 0;
 
@@ -109,8 +109,10 @@ struct JobSpec * dispatch(char **args, int bg)
         }
         else if(strncmp(args[0], BUILTIN_FG, BUILTIN_FG_LEN) == 0)
         {
+            int id = JOBS_MOST_RECENT;
             is_builtin = 1;
-            int id = atoi(args[1]); // TODO use strtol
+            if(args[1] != NULL)
+                id = atoi(args[1]); // TODO use strtol
             ret = builtin_fg(JOBS, id);
         }
 
@@ -127,7 +129,7 @@ struct JobSpec * dispatch(char **args, int bg)
         }
         else // if a builtin didn't run
         {
-            // and if we haven't forked yet, then we must in order to run the 
+            // and if we haven't forked yet, then we must in order to run the
             // subprocess.
             if(!is_forked)
             {
@@ -144,16 +146,20 @@ struct JobSpec * dispatch(char **args, int bg)
     }
 
     // note: we're in the parent process right now
-    // note: pid will be zero if we ran a foreground builtin 
+    // note: pid will be zero if we ran a foreground builtin
     job->pid = pid;
 
     // if we ran a builtin *in the foreground*, then the job is complete
-    if(is_builtin) 
+    if(is_builtin)
         job->running = 0;
 
     // if we ran a subprocess in the foreground, then we need to wait for it
     if(!bg && pid != 0)
-        ret = waitpid(pid, NULL, 0);
+    {
+        int pstat;
+        waitpid(pid, &pstat, 0);
+        job->return_code = WEXITSTATUS(pstat);
+    }
 
     // if the job is run in the background, then we assume it is currently
     // running. Otherwise, we've finished running it, so it's done.
@@ -168,7 +174,7 @@ struct JobSpec * dispatch(char **args, int bg)
     return job;
 }
 
-enum ReplStatus evaluate(char *line)
+struct JobSpec * evaluate(History *history, char *line)
 {
     int bg = 0;
     char *args[20];
@@ -178,35 +184,32 @@ enum ReplStatus evaluate(char *line)
     parse_command(line, args, &bg);
 
     // if there are no tokens
-    if(args[0] == NULL) 
+    if(args[0] == NULL)
         return REPL_SUCCESS; // nothing happens :)
 
     struct JobSpec *job = dispatch(args, bg);
 
-    // if job control is enabled
-    if(JOBS != NULL)
-    {
-        job->command = job_command;
+    job->command = job_command;
 
-        if(job->bg && add_job(JOBS, job) != 0)
-        {
-            fprintf(stderr, "failed to add job\n");
-            return REPL_FAILURE;
-        }
+    if(job->bg && add_job(JOBS, job) != 0)
+    {
+        fprintf(stderr, "failed to add job\n");
+        return NULL;
+    }
+
+    // if history control is enabled or we're repeating commands from the
+    // history.
+    if(history != NULL && strcmp(args[0], "r") != 0)
+    {
+        struct HistoryItem *new_history_item =
+            history_create_item(history, history_command);
+
+        history_add_item(history, new_history_item);
     }
     else
-        destroy_job(job);
+        free(history_command);
 
-    // if history control is enabled
-    if(HISTORY != NULL)
-    {
-        struct HistoryItem *new_history_item = 
-            create_history_item(HISTORY, history_command);
-
-        add_history_item(HISTORY, new_history_item); 
-    }
-
-    return REPL_SUCCESS;
+    return job;
 }
 
 int repl()
@@ -215,9 +218,12 @@ int repl()
     size_t linecap = 0;
     int line_length = 0;
     enum ReplStatus repl_status = REPL_SUCCESS;
+    struct JobSpec *last_job = NULL;
 
-    while(repl_status != REPL_EXIT) 
+    while(repl_status != REPL_EXIT)
     {
+        check_jobs(JOBS, JOBS_SHOW);
+
         // show prompt
         printf("$ ");
 
@@ -225,7 +231,7 @@ int repl()
         // the prompt to the terminal.
         fflush(stdout);
 
-        // Read a line of stdin check that it's nonempty, and hand it off to 
+        // Read a line of stdin check that it's nonempty, and hand it off to
         // evaluate
         line = NULL;
         linecap = 0;
@@ -237,8 +243,18 @@ int repl()
             continue;
         }
 
-        repl_status = evaluate(line);
+        last_job = evaluate(HISTORY, line);
         free(line);
+
+        if(last_job == NULL)
+            repl_status = REPL_FAILURE;
+        else
+        {
+            if(last_job->bg == 0 && strncmp(last_job->command, "exit", 4) == 0)
+                repl_status = REPL_EXIT;
+            else
+                repl_status = REPL_SUCCESS;
+        }
     }
 
     return 0;
@@ -248,6 +264,6 @@ int main()
 {
     HISTORY = malloc(sizeof(History));
     JOBS = malloc(sizeof(Jobs));
-    
+
     return repl();
 }

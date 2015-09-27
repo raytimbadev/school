@@ -1,7 +1,13 @@
 #ifndef JOBS_H
 #define JOBS_H
 
+#define _GNU_SOURCE
+
 #include "ll.h"
+
+#define JOBS_NO_SHOW 0
+#define JOBS_SHOW 1
+#define JOBS_MOST_RECENT (-1)
 
 struct JobSpec
 {
@@ -50,5 +56,7 @@ struct JobSpec * remove_job(Jobs *jobs, int id);
  * Free the memory used by a JobSpec.
  */
 void destroy_job(struct JobSpec *j);
+
+void check_jobs(Jobs *jobs, int show);
 
 #endif

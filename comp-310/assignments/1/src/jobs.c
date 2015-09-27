@@ -1,5 +1,9 @@
 #include "jobs.h"
 
+#include <sys/wait.h>
+#include <string.h>
+#include <stdio.h>
+
 struct JobSpec * create_job(Jobs *j)
 {
     struct JobSpec * new_job = malloc(sizeof(struct JobSpec));
@@ -38,7 +42,7 @@ int add_job(Jobs *jobs, struct JobSpec *j)
     }
 
     // if we make it here, then the id is not in use.
-    ll_push_back(jobs, j);
+    ll_push_front(jobs, j);
 
     return 0;
 }
@@ -91,4 +95,59 @@ void destroy_job(struct JobSpec *j)
 {
     free(j->command);
     free(j);
+}
+
+void check_jobs(Jobs *jobs, int show)
+{
+    struct Node *prev = NULL, *current = NULL;
+    struct JobSpec *j = NULL;
+    char *status = NULL;
+    int pstat, pid;
+
+    for(current = jobs->first; current != NULL; current = current->next)
+    {
+        j = (struct JobSpec *)current->data;
+        pid = waitpid(j->pid, &pstat, WNOHANG);
+        if(pid == j->pid)
+        {
+            j->running = 0; // the subprocess terminated.
+            if(WIFEXITED(pstat))
+            {
+                j->return_code = WEXITSTATUS(pstat);
+
+                asprintf(&status, "done (%d)", j->return_code);
+
+            }
+            else if(WIFSIGNALED(pstat))
+            {
+                j->return_code = -1;
+
+                int sig = WTERMSIG(pstat);
+
+                asprintf(&status, "SIG%s", strsignal(sig));
+            }
+            else
+                status = malloc(1);
+
+            if(show == JOBS_SHOW)
+                printf("[%d] %5d %10s %s", j->id, j->pid, status,
+                        j->command);
+
+            free(status);
+
+            // remove the current item from the list.
+            // if we're at the front of the list
+            if(prev == NULL)
+                jobs->first = current->next;
+            else
+                prev->next = current->next;
+
+            ll_free_node(current);
+            destroy_job(j);
+            jobs->size--;
+
+        }
+
+        prev = current;
+    }
 }

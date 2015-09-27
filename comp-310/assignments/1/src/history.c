@@ -9,53 +9,45 @@ void history_item_destroy(struct HistoryItem *hi)
     free(hi);
 }
 
-struct HistoryItem *create_history_item(History *h, char *cmd)
+struct HistoryItem *history_create_item(History *h, char *cmd)
 {
     struct HistoryItem *last_history = NULL, *new_history = NULL;
-    struct Node *prev = NULL;
-    struct Node *current = h->first;
 
-    // seek to the last element of the history
-    while(current != NULL)
-    {
-        prev = current;
-        current = current->next;
-    }
+    struct Node *front = h->first;
+    if(front != NULL)
+        last_history = (struct HistoryItem *)front->data;
 
     new_history = malloc(sizeof(struct HistoryItem));
     new_history->contents = cmd;
 
     // if history is empty
-    if(prev == NULL) 
+    if(last_history == NULL)
         new_history->index = 1;
     else
-    {
-        last_history = (struct HistoryItem *)prev->data;
         new_history->index = last_history->index + 1;
-    }
 
     return new_history;
 }
 
-void add_history_item(History *h, struct HistoryItem *hi)
+void history_add_item(History *h, struct HistoryItem *hi)
 {
-    struct Node *front = NULL;
-    struct HistoryItem *item = NULL;
-
-    ll_push_back(h, hi);
+    ll_push_front(h, hi);
 
 #if HISTORY_SIZE > 0
+    struct Node *back = NULL;
+    struct HistoryItem *item = NULL;
+
     if(h->size > HISTORY_SIZE)
     {
-        front = ll_pop_front(h);
-        item = (struct HistoryItem *)front->data;
+        back = ll_pop_back(h);
+        item = (struct HistoryItem *)back->data;
         history_item_destroy(item);
-        ll_free_node(front);
+        ll_free_node(back);
     }
 #endif
 }
 
-struct HistoryItem * history_find(History *h, char *cmd)
+struct HistoryItem * history_find_item(History *h, char *cmd)
 {
     size_t good_len = strcspn(cmd, "\n");
     struct Node *current = h->first;
@@ -72,14 +64,19 @@ struct HistoryItem * history_find(History *h, char *cmd)
     return NULL;
 }
 
+void print_history_sub(struct Node *node)
+{
+    if(node == NULL)
+        return;
+
+    print_history_sub(node->next);
+
+    struct HistoryItem *item = (struct HistoryItem *)node->data;
+
+    printf("%2d: %s", item->index, item->contents);
+}
+
 void print_history(History *h)
 {
-    struct Node *current = h->first;
-    struct HistoryItem *item = NULL;
-
-    for(; current != NULL; current = current->next)
-    {
-        item = (struct HistoryItem *)current->data;
-        printf("%2d: %s", item->index, item->contents);
-    }
+    print_history_sub(h->first);
 }

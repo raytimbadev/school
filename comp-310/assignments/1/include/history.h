@@ -29,7 +29,7 @@ void history_item_destroy(struct HistoryItem *hi);
  *
  * Adds a 
  */
-void add_history_item(History *h, struct HistoryItem *hi);
+void history_add_item(History *h, struct HistoryItem *hi);
 
 /**
  * Creates a new HistoryItem with the correct history index within a given
@@ -38,13 +38,13 @@ void add_history_item(History *h, struct HistoryItem *hi);
  * HistoryItems may call free on it. Pass a copy if this is undesirable.
  * Note that the HistoryItem is not automatically added to the History.
  */
-struct HistoryItem * create_history_item(History *h, char *cmd);
+struct HistoryItem * history_create_item(History *h, char *cmd);
 
 /**
  * Finds a HistoryItem in a History such that the provided string is a prefix
  * of the HistoryItem's string.
  */
-struct HistoryItem * find_history_item(History *h, char *cmd);
+struct HistoryItem * history_find_item(History *h, char *cmd);
 
 /**
  * Print the command history.
