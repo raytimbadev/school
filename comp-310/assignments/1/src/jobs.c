@@ -102,11 +102,14 @@ void check_jobs(Jobs *jobs, int show)
     struct JobSpec *j = NULL;
     char *status = NULL;
     int pstat, pid;
+    int asprintf_result;
 
     for(current = jobs->first; current != NULL; current = current->next)
     {
+        asprintf_result = 0;
         j = (struct JobSpec *)current->data;
         pid = waitpid(j->pid, &pstat, WNOHANG);
+
         if(pid == j->pid)
         {
             j->running = 0; // the subprocess terminated.
@@ -114,7 +117,8 @@ void check_jobs(Jobs *jobs, int show)
             {
                 j->return_code = WEXITSTATUS(pstat);
 
-                asprintf(&status, "done (%3d)", j->return_code);
+                asprintf_result =
+                    asprintf(&status, "done (%3d)", j->return_code);
 
             }
             else if(WIFSIGNALED(pstat))
@@ -123,16 +127,20 @@ void check_jobs(Jobs *jobs, int show)
 
                 int sig = WTERMSIG(pstat);
 
-                asprintf(&status, "SIG%s", strsignal(sig));
+                asprintf_result = asprintf(&status, "SIG%s", strsignal(sig));
             }
             else
-                status = malloc(1);
+                status = strdup("unknown");
 
-            if(show == JOBS_SHOW)
+            if(asprintf_result < 0)
+                printf("[%d] %5d error: unable to get status\n", j->id,
+                        j->pid);
+            else if(show == JOBS_SHOW)
+            {
                 printf("[%d] %5d %10s %s", j->id, j->pid, status,
                         j->command);
-
-            free(status);
+                free(status);
+            }
 
             // remove the current item from the list.
             // if we're at the front of the list
