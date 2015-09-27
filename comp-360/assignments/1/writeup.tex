@@ -1,0 +1,72 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington (260636023)}
+\date{29 September 2015}
+\title{Assignment \#1 -- Algorithm Design}
+
+\usepackage{amsthm,amsmath,amssymb}
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{algorithmicx,algpseudocode}
+
+\newtheorem{proposition}{Proposition}
+
+\newcommand{\val}{\!\mathrm{val}}
+
+\begin{document}
+
+\maketitle
+
+\begin{description}
+    \item[Question \#1]
+
+        \begin{proposition}
+            For every flow $f$, $\val{(f)}$ equals the sum of the flows carried
+            by the edges leading into the sink.
+        \end{proposition}
+
+        \begin{proof}
+            Consider the cut $(A, B)$ defined by the following.
+
+            \begin{align*}
+                A &= \{ v \in V | v \neq t \} \\
+                B &= \{ t \}
+            \end{align*}
+            where $t$ is the vertex designated as the sink of the flow network.
+
+            First, we examine $f^\mathrm{out}(A)$.
+
+            \begin{align*}
+                f^\mathrm{out}(A) &= f^\mathrm{in}(B) \\
+                                  &= \sum_{\substack{e = (u, v) \\ u \in A \\ v \in B}} f(e) \\
+                                  &= \sum_{e \text{ into } t} f(e)
+            \end{align*}
+            The summation range is simplified as $B$ is a singleton containing
+            $t$.
+
+            Next, we similarly examine $f^\mathrm{in}(A)$.
+
+            \begin{align*}
+                f^\mathrm{in}(A) &= f^\mathrm{out}(B) \\
+                                 &= \sum_{\substack{e = (u, v) \\ u \in B \\ v \in A}} f(e) \\
+                                 &= \sum_{e \text{ leaving } t} f(e) \\
+                                 &= 0
+            \end{align*}
+            The simplification of the summation range is justified as in the
+            examination of $f^\mathrm{out}(A)$. The final simplification to
+            zero is due to an overarching assumption on flow networks, namely
+            that there are no edges entering the sink $t$.
+
+            Finally, we apply the above results to the definition of
+            $\val{(f)}$.
+
+            \begin{align*}
+                \val{(f)} &= f^\mathrm{out}(A) - f^\mathrm{in}(A) \\
+                          &= \sum_{e \text{ into } t} f(e)
+            \end{align*}
+
+        \end{proof}
+
+
+\end{description}
+
+\end{document}
