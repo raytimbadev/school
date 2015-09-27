@@ -8,7 +8,7 @@ _ = $(shell mkdir -p obj bin src)
 
 all: bin/shell
 
-bin/shell: obj/main.o obj/history.o obj/builtins.o obj/ll.o obj/jobs.o
+bin/shell: obj/main.o obj/history.o obj/builtins.o obj/ll.o obj/jobs.o obj/repl.o
 	$(CC) $(LDFLAGS) -o $@ $^
 
 obj/main.o: src/main.c
@@ -24,6 +24,9 @@ obj/ll.o: src/ll.c include/ll.h
 	$(CC) $(CFLAGS) -o $@ $<
 
 obj/jobs.o: src/jobs.c include/jobs.h
+	$(CC) $(CFLAGS) -o $@ $<
+
+obj/repl.o: src/repl.c include/repl.h include/history.h include/jobs.h
 	$(CC) $(CFLAGS) -o $@ $<
 
 clean:

@@ -1,5 +1,6 @@
 #include "builtins.h"
 #include "history.h"
+#include "repl.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,15 +9,13 @@
 #include <string.h>
 #include <sys/wait.h>
 
-extern struct JobSpec * evaluate(History *history, char *line);
-
 int builtin_history(History *h)
 {
     print_history(h);
     return 0;
 }
 
-int builtin_r(History *h, char *prefix)
+int builtin_r(History *h, Jobs *j, char *prefix)
 {
     struct Node *node = NULL;
     struct HistoryItem *item = NULL;
@@ -42,7 +41,7 @@ int builtin_r(History *h, char *prefix)
     else
     {
         printf("%s", item->contents);
-        struct JobSpec *job = evaluate(h, strdup(item->contents));
+        struct JobSpec *job = evaluate(strdup(item->contents), h, j);
         return job->bg ? 0 : job->return_code;
     }
 }

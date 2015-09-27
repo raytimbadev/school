@@ -13,12 +13,14 @@
 #define BUILTIN_PWD_LEN     3
 #define BUILTIN_FG          "fg"
 #define BUILTIN_FG_LEN      2
+#define BUILTIN_EXIT        "exit"
+#define BUILTIN_EXIT_LEN    4
 
 #include "jobs.h"
 #include "history.h"
 
 int builtin_history(History *h);
-int builtin_r(History *h, char *prefix);
+int builtin_r(History *h, Jobs *j, char *prefix);
 int builtin_cd(char *dst);
 int builtin_pwd();
 int builtin_jobs(Jobs *jobs);
