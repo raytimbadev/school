@@ -40,9 +40,15 @@ int builtin_r(History *h, Jobs *j, char *prefix)
     }
     else
     {
+        // echo the job string to the user.
         printf("%s", item->contents);
         struct JobSpec *job = evaluate(strdup(item->contents), h, j);
-        return job->bg ? 0 : job->return_code;
+
+        // gracefully deal with the subcommand failing
+        if(job == NULL)
+            return -1;
+        else
+            return job->bg ? 0 : job->return_code;
     }
 }
 
@@ -79,7 +85,7 @@ int builtin_jobs(Jobs *j)
     {
         item = (struct JobSpec *)current->data;
         status = item->running ? "running" : "done";
-        printf("[%d] %5d %7s %s", item->id, item->pid, status, item->command);
+        printf("[%d] %5d %10s %s", item->id, item->pid, status, item->command);
     }
 
     check_jobs(j, JOBS_NO_SHOW);
@@ -103,7 +109,7 @@ int builtin_fg(Jobs *j, int id)
 
     if(job == NULL)
     {
-        if(id == 0)
+        if(id == JOBS_MOST_RECENT)
             fprintf(stderr, "fg: no current job\n");
         else
             fprintf(stderr, "fg: job not found: %d\n", id);

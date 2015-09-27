@@ -181,7 +181,7 @@ struct JobSpec * evaluate(char *line, History *history, Jobs *jobs)
 
     // if there are no tokens
     if(args[0] == NULL)
-        return REPL_SUCCESS; // nothing happens :)
+        return NULL; // nothing happens :)
 
     struct JobSpec *job = dispatch(args, bg, jobs, history);
 
@@ -189,11 +189,11 @@ struct JobSpec * evaluate(char *line, History *history, Jobs *jobs)
 
     if(job->bg && add_job(jobs, job) != 0)
     {
-        fprintf(stderr, "failed to add job\n");
+        fprintf(stderr, "jobctl: failed to add job\n");
         return NULL;
     }
 
-    // if history control is enabled or we're repeating commands from the
+    // if history control is enabled and we're not repeating commands from the
     // history.
     if(history != NULL && strcmp(args[0], "r") != 0)
     {

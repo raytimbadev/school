@@ -7,19 +7,18 @@
 struct JobSpec * create_job(Jobs *j)
 {
     struct JobSpec * new_job = malloc(sizeof(struct JobSpec));
-    struct Node * current = j->first;
+    struct Node * current = NULL;
     struct JobSpec * item = NULL;
-    int id = 1;
+    int max_id = 0;
 
-    while(current != NULL)
+    for(current = j->first; current != NULL; current = current->next)
     {
         item = (struct JobSpec *)current->data;
-        if(id == item->id)
-            id++;
-        current = current->next;
+        if(max_id < item->id)
+            max_id = item->id;
     }
 
-    new_job->id = id;
+    new_job->id = max_id + 1;
     new_job->pid = 0;
     new_job->return_code = -1;
     new_job->bg = 0;
@@ -38,7 +37,7 @@ int add_job(Jobs *jobs, struct JobSpec *j)
     {
         item = (struct JobSpec *)current->data;
         if(item->id == j->id)
-            return 1; // id already in use
+            return 1;
     }
 
     // if we make it here, then the id is not in use.
@@ -115,7 +114,7 @@ void check_jobs(Jobs *jobs, int show)
             {
                 j->return_code = WEXITSTATUS(pstat);
 
-                asprintf(&status, "done (%d)", j->return_code);
+                asprintf(&status, "done (%3d)", j->return_code);
 
             }
             else if(WIFSIGNALED(pstat))
@@ -147,7 +146,7 @@ void check_jobs(Jobs *jobs, int show)
             jobs->size--;
 
         }
-
-        prev = current;
+        else
+            prev = current;
     }
 }
