@@ -125,15 +125,13 @@ int builtin_fg(Jobs *j, int id)
         if(pid == job->pid)
         {
             if(WIFEXITED(pstat))
-            {
                 job->return_code = WEXITSTATUS(pstat);
-                job->running = 0;
-            }
             else if(WIFSIGNALED(pstat))
-            {
                 job->return_code = -1;
-                job->running = 0;
-            }
+            else
+                job->return_code = -2;
+
+            job->running = 0;
         }
 
         return job->return_code;

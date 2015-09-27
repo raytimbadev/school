@@ -238,6 +238,9 @@ int repl(History *h, Jobs *j)
         }
 
         last_job = evaluate(line, h, j);
+
+        // evaluate strdups the line if it requires any copies, so we may now
+        // free the line.
         free(line);
 
         if(last_job == NULL)

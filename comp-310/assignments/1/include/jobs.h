@@ -57,6 +57,14 @@ struct JobSpec * remove_job(Jobs *jobs, int id);
  */
 void destroy_job(struct JobSpec *j);
 
+/**
+ * Free the memory used by a JobSpec in a jobs list, and adjust the list.
+ *
+ * prev: the node prior to the one holding the job to delete
+ * current: the node holding the job to delete
+ */
+void destroy_job_in(Jobs *jobs, struct Node *prev, struct Node *current);
+
 void check_jobs(Jobs *jobs, int show);
 
 #endif

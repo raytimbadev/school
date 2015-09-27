@@ -96,6 +96,20 @@ void destroy_job(struct JobSpec *j)
     free(j);
 }
 
+void destroy_job_in(Jobs *jobs, struct Node *prev, struct Node *current)
+{
+    // remove the current item from the list.
+    // if we're at the front of the list
+    if(prev == NULL)
+        jobs->first = current->next;
+    else
+        prev->next = current->next;
+
+    destroy_job((struct JobSpec *)current->data);
+    ll_free_node(current);
+    jobs->size--;
+}
+
 void check_jobs(Jobs *jobs, int show)
 {
     struct Node *prev = NULL, *current = NULL;
@@ -110,7 +124,9 @@ void check_jobs(Jobs *jobs, int show)
         j = (struct JobSpec *)current->data;
         pid = waitpid(j->pid, &pstat, WNOHANG);
 
-        if(pid == j->pid)
+        if(j->running == 0)
+            destroy_job_in(jobs, prev, current);
+        else if(pid == j->pid)
         {
             j->running = 0; // the subprocess terminated.
             if(WIFEXITED(pstat))
@@ -142,17 +158,7 @@ void check_jobs(Jobs *jobs, int show)
                 free(status);
             }
 
-            // remove the current item from the list.
-            // if we're at the front of the list
-            if(prev == NULL)
-                jobs->first = current->next;
-            else
-                prev->next = current->next;
-
-            ll_free_node(current);
-            destroy_job(j);
-            jobs->size--;
-
+            destroy_job_in(jobs, prev, current);
         }
         else
             prev = current;
