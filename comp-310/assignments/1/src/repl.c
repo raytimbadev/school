@@ -22,7 +22,7 @@ int parse_command(char *line, char **args, int *background)
             args[i++] = token;
     }
 
-    if(strncmp(args[i-1], "&", 1) == 0)
+    if(i > 0 && strncmp(args[i-1], "&", 1) == 0)
     {
         args[i-1] = NULL;
         *background = 1;
