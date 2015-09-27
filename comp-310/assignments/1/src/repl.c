@@ -10,17 +10,7 @@
 int parse_command(char *line, char **args, int *background)
 {
     int i = 0, j = 0, token_length = 0;
-    char *token, *loc;
-    //
-    // Check if background is specified..
-    // TODO check that the ampersand appears as *it's own token*.
-    if ((loc = index(line, '&')) != NULL)
-    {
-        *background = 1;
-        *loc = ' ';
-    }
-    else
-        *background = 0;
+    char *token;
 
     while ((token = strsep(&line, " \t\n")) != NULL)
     {
@@ -31,6 +21,14 @@ int parse_command(char *line, char **args, int *background)
         if (strlen(token) > 0)
             args[i++] = token;
     }
+
+    if(strncmp(args[i-1], "&", 1) == 0)
+    {
+        args[i-1] = NULL;
+        *background = 1;
+    }
+    else
+        *background = 0;
 
     args[i] = NULL;
 
