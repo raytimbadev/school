@@ -128,6 +128,52 @@
             $v \in B$, since $(A, B)$ is a partition.
         \end{proof}
 
+    \item[Question \#4]
+
+        We can decide whether there is a unique minimum cut in a flow network
+        on a graph $G = (V, E)$ in polynomial time in the following way.
+
+        We first find a minimum cut $(A, B)$ on $G$ and an associated maximum
+        flow $f$. Let $F$ be the set of all edges $e = (u, v)$ where $u \in A$
+        and $v \in B$. For each $e \in F$, consider a graph $G_e$ built
+        from $G$ simply by replacing $e$ with $e^\prime = (u, v)$ but having
+        $c_{e^\prime} = c_e + 1$. We then find a maximum flow $f_e$ on
+        $G_e$ and an associated minimum cut $(A_e, B_e)$. Let
+        $\mathcal{G} = \{ G_e | e \in F \}$.
+
+        \begin{proposition}
+            If for all $G_e in \mathcal{G}$, the maximum flow $f_e$ on $G_e$ is
+            greater than $f$, then $(A, B)$ is a unique minimum cut on $G$
+        \end{proposition}
+
+        \begin{proof}
+            Since $F$ is finite, our proof simply chooses distinct
+            $e = (u, v) \in F$ until there are none left.
+
+            If $u \in A_e$ and $v \in B_e$, then
+            $\val{(f^_e} = \val{(f)} + 1$.
+            and we conclude nothing yet about
+            the uniqueness of the minimum cut $(A, B)$.
+
+            Else, if $u \in A_e \iff v \in A_e$, then
+            $\val{(f^_e} = \val{(f)}$. Furthermore, $(A, B) \neq (A_e, B_e)$,
+            for if they were equal, then $u \in A_e$ and $v \in B_e$, which
+            contradict our assumption. Hence, the minimum cut $(A, B)$ is not
+            unique, since we have found a distinct yet equivalent one.
+
+            If we exhaust $F$, then we can conclude that the minimum cut
+            $(A, B)$ is unique.
+        \end{proof}
+
+        This proof gives rise to a natural algorithm whose running time is at
+        most $|F|$ times the running time of an algorithm to compute the
+        maximum flow and minimum cut of a flow network. Since there are
+        polynomial time algorithms to do so, the algorithm that emerges from
+        this proof is also polynomial, as $|F| \in O(|E|)$. (We can discount
+        the construction of the graphs $G_e \in \mathcal{G}$; since two such
+        graphs are never needed simultaneously, they may be built by modifying
+        $G$ and then undoing this modification.)
+
     \item[Question \#7]
 
         Consider a variant of the maximum flow problem in which vertices as
