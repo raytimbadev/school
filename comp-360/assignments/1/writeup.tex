@@ -66,6 +66,67 @@
 
         \end{proof}
 
+    \item[Question \#2]
+        There are five types of packages to be delivered by four trucks, with
+        capacities $5$, $4$, $4$, and $3$ respectively. There are three
+        packages of each type. No truck may carry two of the same type of
+        package.
+
+        We set up a maximum flow problem as follows in order to optimize the
+        delivery of the packages subject to the above constraints.
+
+        \begin{itemize}
+            \item
+                The vertex set $V$ of the graph is composed of: the source
+                vertex $s$, a set $P \subset V$ of vertices representing the
+                types of packages, a set $T \subset V$ of vertices representing
+                the trucks, and the sink vertex $t$. Since there are $5$ types
+                of packages, $|P| = 5$, and likewise, $|T| = 4$.
+
+            \item
+                For each vertex representing a package type $p \in P$, we
+                create an edge $(s, p)$ with capacity $3$, representing that
+                there are three packages of each type.
+
+            \item
+                For each vertex representing a package type $p \in P$ and for
+                each vertex representing a truck $q \in T$, we create an edge
+                $(p, q)$ with capacity $1$, representing that no truck may
+                carry two packages of the same type.
+
+            \item
+                Finally, for each vertex representing a truck $q \in T$, we
+                create an edge $(q, t)$. The capacities on these edges match
+                the respective capacities of the trucks as given in the problem
+                statement.
+        \end{itemize}
+
+    \item[Question \#3]
+
+        \begin{proposition}
+            If an edge $e = (u, v)$ where $u \in A$, $v \in B$, and $(A, B)$ is
+            a minimum cut, then every maximum flow $f$ uses the full capacity
+            of $e$, i.e. $f(e) = c_e$.
+        \end{proposition}
+
+        \begin{proof}
+            By contradiction.
+
+            Suppose there is such an edge such that
+            \begin{equation}
+                f(e) < c_e
+                \label{eq:max-flow-contradiction}
+            \end{equation}
+
+            From this assumption, $e$ is a forward edge in the residual graph
+            due to $f$.
+
+            From the construction of $A$ as the set of all vertices reachable
+            from $s$, there is an $s \to u$ path. Since $e$ has unused
+            capacity, we can append $e$ to the $s \to u$ path, forming an $s
+            \to v$ path. Hence, $v \in A$, contradicting the assumption that
+            $v \in B$, since $(A, B)$ is a partition.
+        \end{proof}
 
 \end{description}
 
