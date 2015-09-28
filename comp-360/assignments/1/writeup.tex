@@ -128,6 +128,29 @@
             $v \in B$, since $(A, B)$ is a partition.
         \end{proof}
 
+    \item[Question \#7]
+
+        Consider a variant of the maximum flow problem in which vertices as
+        well as edges are given capacities. The capacity $c_v$ of a vertex $v$
+        is such that $f^\mathrm{in}(v) \leq c_v$.
+
+        This variant may be solved by applying the following transformation
+        resulting in a regular maximum flow problem.
+
+        For each vertex $v$, we create a new vertex $v^\prime$. Each edge
+        $e = (u, v)$ for some $u$ is changed into a new edge
+        $e^\prime = (u, v^\prime)$. An edge $e_v = (v^\prime, v)$ is created
+        and given capacity $c_v$.
+
+        In the case of the source vertex, there is no incoming flow, so this
+        transformation is unnecessary. In other words, the restriction imposed
+        by a vertex capacity is only effectful when the vertex has incoming
+        edges.
+
+        In the case of the sink vertex, the transformation is applied as usual.
+        Note that the newly created vertex $v^\prime$ in this case is not a
+        sink vertex.
+
 \end{description}
 
 \end{document}
