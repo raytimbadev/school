@@ -197,6 +197,21 @@
         Note that the newly created vertex $v^\prime$ in this case is not a
         sink vertex.
 
+    \item[Question \#9]
+
+        When we run the Ford-Fulkerson algorithm, we arrive at a maximum flow
+        $f$ and an associated minimum cut $(A, B)$. Let
+        $F = \{e = (u, v) | u \in A, v \in B\}$. For each $e \in F$, we can
+        find an augmenting $s$-$t$ path $P$ in $G$ such that
+        $\max \{d \in P\} = c_e$. Conceptually, that path will fill the
+        bottleneck $e$. Once such a path has been found, we may delete $e$ from
+        $G$ and repeat in order to find a sequence of augmenting paths that
+        results in a max flow. This sequence arrives at a max flow because it
+        will consume each final bottleneck edge $e$, and we know that the
+        capacity of the minimum cut is equal to the maximum flow. Finally,
+        this sequence has at most $m$ paths in it because its size it precisely
+        $|F| \leq m$.
+
 \end{description}
 
 \end{document}
