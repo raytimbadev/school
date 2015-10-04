@@ -83,21 +83,51 @@
         </java>
     </target>
 
+    <target name="start-middleware-tomcat">
+        <echo message="Starting Tomcat for middleware... "/>
+        <java fork="true" classname="middleware.ws.Middleware">
+            <classpath>
+                <path refid="jaxws.classpath"/>
+                <pathelement location="${basedir}/build/classes"/>
+            </classpath>
+            <jvmarg value="-Djava.security.policy=${basedir}/etc/server.policy"/>
+            <arg value="${service.name}"/>
+            <arg value="${service.port}"/>
+            <arg value="${basedir}/webapps"/>
+        </java>
+    </target>
+
     <target name="server" depends="setup">
-        <antcall target="clean"/>
         <antcall target="build-server"/>
         <antcall target="create-war"/>
         <antcall target="deploy-war"/>
         <antcall target="start-tomcat"/>        
     </target>
 
+    <target name="middleware" depends="setup">
+        <antcall target="build-middleware"/>
+        <antcall target="create-war"/>
+        <antcall target="deploy-war"/>
+        <antcall target="start-middleware-tomcat"/>        
+    </target>
+
     <taskdef name="wsimport" classname="com.sun.tools.ws.ant.WsImport">
         <classpath refid="jaxws.classpath"/>
     </taskdef>
 
+    <target name="generate-middleware" depends="setup">
+        <wsimport
+                quiet="false"
+                keep="true"
+                destdir="${basedir}/build/classes"
+                package="middleware"
+                wsdl="http://${service.host}:${service.port}/${service.name}/service?wsdl">
+        </wsimport>
+    </target>
+
     <target name="generate-client" depends="setup">
         <wsimport
-                quiet="true"
+                quiet="false"
                 keep="true"
                 destdir="${basedir}/build/classes"
                 package="client"
@@ -111,6 +141,16 @@
                 srcdir="${basedir}/src"
                 destdir="${basedir}/build/classes"
                 includes="client/**">
+            <classpath refid="jaxws.classpath"/>
+        </javac>
+    </target>
+
+    <target name="build-middleware" depends="generate-middleware">
+        <javac
+                fork="true"
+                srcdir="${basedir}/src"
+                destdir="${basedir}/build/classes"
+                includes="middleware/**">
             <classpath refid="jaxws.classpath"/>
         </javac>
     </target>
