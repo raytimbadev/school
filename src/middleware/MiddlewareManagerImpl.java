@@ -2,9 +2,56 @@ package middleware;
 
 import java.util.*;
 import javax.jws.WebService;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import java.net.MalformedURLException;
+
+import client.WSClient;
 
 @WebService(endpointInterface = "server.ws.ResourceManager")
 public class MiddlewareManagerImpl implements server.ws.ResourceManager {
+    private static String rmServiceName;
+    private static String flightHost;
+    private static Integer flightPort;
+    private static String carHost;
+    private static Integer carPort;
+    private static String roomHost;
+    private static Integer roomPort;
+    private static boolean initialized = false;
+
+    private static WSClient flightClient, carClient, roomClient;
+
+    private static void initializeEnv() throws NamingException, MalformedURLException {
+        if (initialized)
+            return;
+
+        System.setProperty(
+                Context.INITIAL_CONTEXT_FACTORY,
+                "org.apache.naming.java.javaURLContextFactory"
+        );
+
+        Context env = (Context) new InitialContext()
+            .lookup("java:comp/env");
+
+        rmServiceName = (String) env.lookup("service-name");
+
+        flightHost = (String) env.lookup("flight-service-host");
+        flightPort = (Integer) env.lookup("flight-service-port");
+
+        carHost = (String) env.lookup("car-service-host");
+        carPort = (Integer) env.lookup("car-service-port");
+
+        roomHost = (String) env.lookup("room-service-host");
+        roomPort = (Integer) env.lookup("room-service-port");
+
+        flightClient = new WSClient(rmServiceName, flightHost, flightPort);
+        carClient = new WSClient(rmServiceName, carHost, carPort);
+        roomClient = new WSClient(rmServiceName, roomHost, roomPort);
+
+        initialized = true;
+    }
+
     // Flight operations //
     
     /* Add seats to a flight.  
@@ -16,8 +63,13 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
      */
     @Override
     public boolean addFlight(int id, int flightNumber, int numSeats, int flightPrice) {
-        System.out.println("hi");
-        throw new UnsupportedOperationException();
+        try {
+            initializeEnv();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return flightClient.getProxy().addFlight(id, flightNumber, numSeats, flightPrice);
     }
 
     /**

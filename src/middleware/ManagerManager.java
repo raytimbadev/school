@@ -40,4 +40,16 @@ public class ManagerManager {
         this.carManager = carManager;
         this.roomManager = roomManager;
     }
+
+    public ResourceManager getFlightManager() {
+        return flightManager;
+    }
+
+    public ResourceManager getCarManager() {
+        return carManager;
+    }
+
+    public ResourceManager getRoomManager() {
+        return roomManager;
+    }
 }

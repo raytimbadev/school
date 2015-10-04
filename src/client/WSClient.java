@@ -21,4 +21,7 @@ public class WSClient {
         proxy = service.getMiddlewareManagerImplPort();
     }
 
+    public ResourceManager getProxy() {
+        return proxy;
+    }
 }
