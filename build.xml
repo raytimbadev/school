@@ -157,7 +157,7 @@
                 keep="true"
                 destdir="${basedir}/build/classes"
                 package="client"
-                wsdl="http://${service.host}:${service.port}/${middleware.name}/service?wsdl">
+                wsdl="http://${service.host}:${service.port}/${middleware.name}/middleware?wsdl">
         </wsimport>
     </target>
 

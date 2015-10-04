@@ -24,6 +24,19 @@ Inc.//DTD Web Application 2.3//EN"
         <url-pattern>/service</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>middleware</servlet-name>
+        <servlet-class>
+        	com.sun.xml.ws.transport.http.servlet.WSServlet
+        </servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>middleware</servlet-name>
+        <url-pattern>/middleware</url-pattern>
+    </servlet-mapping>
+
     <session-config>
         <session-timeout>120</session-timeout>
     </session-config>
