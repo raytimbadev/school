@@ -197,7 +197,7 @@
                 keep="true"
                 destdir="${basedir}/build/classes"
                 package="client"
-                wsdl="http://54.69.201.163:${service.port}/${middleware.name}/middleware?wsdl">
+                wsdl="http://54.69.159.69:${service.port}/${middleware.name}/middleware?wsdl">
         </wsimport>
     </target>
 
@@ -228,7 +228,7 @@
                 <pathelement location="${basedir}/build/classes"/>
             </classpath>
             <arg value="${middleware.name}"/>
-            <arg value="${service.host}"/>
+            <arg value="54.69.159.69"/>
             <arg value="${service.port}"/>
         </java>
     </target>
