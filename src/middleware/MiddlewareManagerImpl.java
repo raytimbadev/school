@@ -125,19 +125,35 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
      */   
     @Override
     public boolean deleteFlight(int id, int flightNumber) {
-        throw new UnsupportedOperationException();
+		try {
+			initializeEnv(); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return flightManager.deleteFlight(id,flightNumber); 
+	
     }
 
     /* Return the number of empty seats in this flight. */
     @Override
     public int queryFlight(int id, int flightNumber) {
-        throw new UnsupportedOperationException();
+		try{
+			initializeEnv();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return flightManager.queryFlight(id,flightNumber);
     }
 
     /* Return the price of a seat on this flight. */
     @Override
     public int queryFlightPrice(int id, int flightNumber) {
-        throw new UnsupportedOperationException();
+		try{ 
+			initializeEnv();
+		} catch(Exception e) {
+			e.printStackTrace(); 
+		}
+		return flightManager.queryFlightPrice(id,flightNumber); 
     }
 
 
@@ -149,7 +165,12 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
      */
     @Override
     public boolean addCars(int id, String location, int numCars, int carPrice) {
-        throw new UnsupportedOperationException();
+		try{
+			initializeEnv();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return carManager.addCars(id,location,numCars,carPrice); 
     }
     
     /* Delete all cars from a location.
@@ -157,19 +178,34 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
      */		    
     @Override
     public boolean deleteCars(int id, String location) {
-        throw new UnsupportedOperationException();
-    }
+		try{
+			initializeEnv();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return carManager.deleteCars(id, location);
+    }	
 
     /* Return the number of cars available at this location. */
     @Override
     public int queryCars(int id, String location) {
-        throw new UnsupportedOperationException();
+		try{
+			initializeEnv();
+		}catch(Exception e) {
+			e.printStackTrace(); 
+		}
+		return carManager.queryCars(id,location); 
     }
 
     /* Return the price of a car at this location. */
     @Override
     public int queryCarsPrice(int id, String location) {
-        throw new UnsupportedOperationException();
+		try{
+			initializeEnv(); 
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return carManager.queryCarsPrice(id, location); 
     }
 
 
@@ -181,7 +217,12 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
      */
     @Override
     public boolean addRooms(int id, String location, int numRooms, int roomPrice) {
-        throw new UnsupportedOperationException();
+		try{
+			initializeEnv(); 
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return roomManager.addRooms(id,location, numRooms, roomPrice); 
     }
 
     /* Delete all rooms from a location.
@@ -189,64 +230,123 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
      */
     @Override
     public boolean deleteRooms(int id, String location) {
-        throw new UnsupportedOperationException();
+		try{
+			initializeEnv();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return roomManager.deleteRooms(id,location); 
     }
 
     /* Return the number of rooms available at this location. */
     @Override
     public int queryRooms(int id, String location) {
-        throw new UnsupportedOperationException();
+		try{
+			initializeEnv();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return roomManager.queryRooms(id,location); 
     }
 
     /* Return the price of a room at this location. */
     @Override
     public int queryRoomsPrice(int id, String location) {
-        throw new UnsupportedOperationException();
+		try{
+			initializeEnv();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return roomManager.queryRoomsPrice(id,location); 
     }
 
 
     // Customer operations //
-        
+    //NOTE: temporarilly the curstomer info will be passed to all
+	//managers however this will later be changed to a database write 
     /* Create a new customer and return their unique identifier. */
     @Override
     public int newCustomer(int id) {
-        throw new UnsupportedOperationException();
+		try{
+			initializeEnv();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		roomManager.newCustomer(id);
+		carManager.newCustomer(id);
+		return flightManager.newCustomer(id); 
     }
     
     /* Create a new customer with the provided identifier. */
     @Override
     public boolean newCustomerId(int id, int customerId){
-        throw new UnsupportedOperationException();
+		try{
+			initializeEnv();
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		roomManager.newCustomerId(id,customerId); 
+		carManager.newCustomerId(id, customerId);
+		return flightManager.newCustomerId(id, customerId);
     }
 
     /* Remove this customer and all their associated reservations. */
     @Override
     public boolean deleteCustomer(int id, int customerId) {
-        throw new UnsupportedOperationException();
+		try{
+			initializeEnv(); 
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		roomManager.deleteCustomer(id,customerId);
+		carManager.deleteCustomer(id,customerId);
+		return flightManager.deleteCustomer(id, customerId); 
     }
 
     /* Return a bill. */
     @Override
     public String queryCustomerInfo(int id, int customerId) {
-        throw new UnsupportedOperationException();
+		try{
+			initializeEnv();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		roomManager.queryCustomerInfo(id,customerId);
+		carManager.queryCustomerInfo(id,customerId);
+		return flightManager.queryCustomerInfo(id,customerId); 
     }
 
     /* Reserve a seat on this flight. */
     @Override
     public boolean reserveFlight(int id, int customerId, int flightNumber) {
-        throw new UnsupportedOperationException();
+		try{
+			initializeEnv();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return flightManager.reserveFlight(id, customerId, flightNumber); 
     }
 
     /* Reserve a car at this location. */
     @Override
     public boolean reserveCar(int id, int customerId, String location) {
-        throw new UnsupportedOperationException();
+		try{
+			initializeEnv();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return carManager.reserveCar(id, customerId, location);
     }
 
     /* Reserve a room at this location. */
     @Override
     public boolean reserveRoom(int id, int customerId, String location) {
-        throw new UnsupportedOperationException();
+		try {
+			initializeEnv();
+		} catch (Exception e) {
+			e.printStackTrace(); 
+		}
+		return roomManager.reserveRoom(id,customerId,location);
     }
 
 
