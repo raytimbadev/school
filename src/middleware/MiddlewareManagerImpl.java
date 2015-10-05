@@ -53,7 +53,7 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
         carHost = "54.69.201.163";
         carPort = 8080;
 
-        roomHost = "54.148.36,47";
+        roomHost = "54.148.36.47";
         roomPort = 8080;
 
         URL flightWsdlLocation = new URL(
