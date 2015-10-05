@@ -3,7 +3,6 @@ package middleware;
 import java.io.File;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
-import java.net.URL;
 import java.net.MalformedURLException;
 
 public class Main {

@@ -5,14 +5,16 @@
 
 package server;
 
+import common.*;
+
 import java.util.*;
 import javax.jws.WebService;
 
 
 @WebService(endpointInterface = "server.ws.ResourceManager")
-public class ResourceManagerImpl implements server.ws.ResourceManager {
+public class ResourceManagerImpl implements ResourceManager {
     
-    protected RMHashtable m_itemHT = new RMHashtable();
+    protected RMHashtable m_itemHT;
     
     
     // Basic operations on RMItem //
@@ -125,7 +127,10 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
             return true;
         }
     }
-    
+
+    public ResourceManagerImpl() {
+        m_itemHT = new RMHashtable();
+    }
     
     // Flight operations //
     

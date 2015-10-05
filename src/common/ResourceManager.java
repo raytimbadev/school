@@ -14,16 +14,11 @@
  * has succeeded.
  */
 
-package server.ws;
+package common;
 
 import java.util.*;
-import javax.jws.WebService;
-import javax.jws.WebMethod;
 
-
-@WebService
 public interface ResourceManager {
-    
     // Flight operations //
     
     /* Add seats to a flight.  
@@ -33,7 +28,6 @@ public interface ResourceManager {
      *
      * @return success.
      */
-    @WebMethod
     public boolean addFlight(int id, int flightNumber, int numSeats, int flightPrice); 
 
     /**
@@ -43,15 +37,12 @@ public interface ResourceManager {
      *
      * @return success.
      */   
-    @WebMethod
     public boolean deleteFlight(int id, int flightNumber); 
 
     /* Return the number of empty seats in this flight. */
-    @WebMethod
     public int queryFlight(int id, int flightNumber); 
 
     /* Return the price of a seat on this flight. */
-    @WebMethod
     public int queryFlightPrice(int id, int flightNumber); 
 
 
@@ -61,21 +52,17 @@ public interface ResourceManager {
      * This should look a lot like addFlight, only keyed on a string location
      * instead of a flight number.
      */
-    @WebMethod
     public boolean addCars(int id, String location, int numCars, int carPrice); 
     
     /* Delete all cars from a location.
      * It should not succeed if there are reservations for this location.
      */		    
-    @WebMethod
     public boolean deleteCars(int id, String location); 
 
     /* Return the number of cars available at this location. */
-    @WebMethod
     public int queryCars(int id, String location); 
 
     /* Return the price of a car at this location. */
-    @WebMethod
     public int queryCarsPrice(int id, String location); 
 
 
@@ -85,57 +72,45 @@ public interface ResourceManager {
      * This should look a lot like addFlight, only keyed on a string location
      * instead of a flight number.
      */
-    @WebMethod
     public boolean addRooms(int id, String location, int numRooms, int roomPrice); 			    
 
     /* Delete all rooms from a location.
      * It should not succeed if there are reservations for this location.
      */
-    @WebMethod
     public boolean deleteRooms(int id, String location); 
 
     /* Return the number of rooms available at this location. */
-    @WebMethod
     public int queryRooms(int id, String location); 
 
     /* Return the price of a room at this location. */
-    @WebMethod
     public int queryRoomsPrice(int id, String location); 
 
 
     // Customer operations //
         
     /* Create a new customer and return their unique identifier. */
-    @WebMethod
     public int newCustomer(int id); 
     
     /* Create a new customer with the provided identifier. */
-    @WebMethod
     public boolean newCustomerId(int id, int customerId);
 
     /* Remove this customer and all their associated reservations. */
-    @WebMethod
     public boolean deleteCustomer(int id, int customerId); 
 
     /* Return a bill. */
-    @WebMethod
     public String queryCustomerInfo(int id, int customerId); 
 
     /* Reserve a seat on this flight. */
-    @WebMethod
     public boolean reserveFlight(int id, int customerId, int flightNumber); 
 
     /* Reserve a car at this location. */
-    @WebMethod
     public boolean reserveCar(int id, int customerId, String location); 
 
     /* Reserve a room at this location. */
-    @WebMethod
     public boolean reserveRoom(int id, int customerId, String location); 
 
 
     /* Reserve an itinerary. */
-    @WebMethod
     public boolean reserveItinerary(int id, int customerId, Vector flightNumbers, 
                                     String location, boolean car, boolean room);
     			
