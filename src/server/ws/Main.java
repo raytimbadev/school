@@ -30,8 +30,11 @@ public class Main {
 
         //tomcat.addWebapp("", new File(deployDir).getAbsolutePath());
 
-        tomcat.addWebapp("/" + serviceName, 
-                new File(deployDir + "/" + serviceName).getAbsolutePath());
+        File f = new File(deployDir + "/" + serviceName);
+
+        tomcat.addWebapp("/" + serviceName, f.getAbsolutePath());
+
+        System.out.println(f.getAbsolutePath());
 
         tomcat.start();
         tomcat.getServer().await();

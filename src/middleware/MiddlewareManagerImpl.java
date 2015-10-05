@@ -5,9 +5,8 @@ import javax.jws.WebService;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.net.URL;
 import java.net.MalformedURLException;
-
-import client.WSClient;
 
 @WebService(endpointInterface = "server.ws.ResourceManager")
 public class MiddlewareManagerImpl implements server.ws.ResourceManager {
@@ -20,35 +19,82 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
     private static Integer roomPort;
     private static boolean initialized = false;
 
-    private static WSClient flightClient, carClient, roomClient;
+    private static ResourceManager flightManager, carManager, roomManager;
 
     private static void initializeEnv() throws NamingException, MalformedURLException {
         if (initialized)
             return;
 
-        System.setProperty(
-                Context.INITIAL_CONTEXT_FACTORY,
-                "org.apache.naming.java.javaURLContextFactory"
+        //System.setProperty(
+        //        Context.INITIAL_CONTEXT_FACTORY,
+        //        "org.apache.naming.java.javaURLContextFactory"
+        //);
+
+        //Context env = (Context) new InitialContext();
+
+        //rmServiceName = (String) env.lookup("service-name");
+
+        //flightHost = (String) env.lookup("flight-service-host");
+        //flightPort = (Integer) env.lookup("flight-service-port");
+
+        //carHost = (String) env.lookup("car-service-host");
+        //carPort = (Integer) env.lookup("car-service-port");
+
+        //roomHost = (String) env.lookup("room-service-host");
+        //roomPort = (Integer) env.lookup("room-service-port");
+
+        // // hardcode this for now
+
+        rmServiceName = "service";
+
+        flightHost = "localhost";
+        flightPort = 8081;
+
+        carHost = "localhost";
+        carPort = 8082;
+
+        roomHost = "localhost";
+        roomPort = 8083;
+
+        URL flightWsdlLocation = new URL(
+                "http",
+                flightHost,
+                flightPort, 
+                "/" + rmServiceName + "/service?wsdl"
+        );
+                
+        URL carWsdlLocation = new URL(
+                "http",
+                carHost,
+                carPort,
+                "/" + rmServiceName + "/service?wsdl"
         );
 
-        Context env = (Context) new InitialContext()
-            .lookup("java:comp/env");
+        URL roomWsdlLocation = new URL(
+                "http",
+                roomHost,
+                roomPort,
+                "/" + rmServiceName + "/service?wsdl"
+        );
 
-        rmServiceName = (String) env.lookup("service-name");
+        ResourceManagerImplService flightService = new ResourceManagerImplService(
+                flightWsdlLocation
+        );
 
-        flightHost = (String) env.lookup("flight-service-host");
-        flightPort = (Integer) env.lookup("flight-service-port");
+        flightManager = flightService.getResourceManagerImplPort();
 
-        carHost = (String) env.lookup("car-service-host");
-        carPort = (Integer) env.lookup("car-service-port");
+        ResourceManagerImplService carService = new ResourceManagerImplService(
+                carWsdlLocation
+        );
 
-        roomHost = (String) env.lookup("room-service-host");
-        roomPort = (Integer) env.lookup("room-service-port");
+        carManager = carService.getResourceManagerImplPort();
 
-        flightClient = new WSClient(rmServiceName, flightHost, flightPort);
-        carClient = new WSClient(rmServiceName, carHost, carPort);
-        roomClient = new WSClient(rmServiceName, roomHost, roomPort);
+        ResourceManagerImplService roomService = new ResourceManagerImplService(
+                roomWsdlLocation
+        );
 
+        roomManager = roomService.getResourceManagerImplPort();
+        
         initialized = true;
     }
 
@@ -69,7 +115,7 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
             e.printStackTrace();
         }
 
-        return flightClient.getProxy().addFlight(id, flightNumber, numSeats, flightPrice);
+        return flightManager.addFlight(id, flightNumber, numSeats, flightPrice);
     }
 
     /**

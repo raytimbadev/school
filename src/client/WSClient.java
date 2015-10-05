@@ -3,7 +3,6 @@ package client;
 import java.net.URL;
 import java.net.MalformedURLException;
 
-
 public class WSClient {
 
     MiddlewareManagerImplService service;
@@ -18,7 +17,7 @@ public class WSClient {
                 
         service = new MiddlewareManagerImplService(wsdlLocation);
         
-        proxy = service.getMiddlewareManagerImplPort();
+        proxy = (ResourceManager) service.getMiddlewareManagerImplPort();
     }
 
     public ResourceManager getProxy() {
