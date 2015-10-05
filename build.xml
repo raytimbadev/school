@@ -21,6 +21,9 @@
 
     <target name="setup">
         <mkdir dir="${basedir}/build"/>
+	<mkdir dir="${basedir}/main"/>
+	<mkdir dir="${basedir}/server"/>
+	<mkdir dir="${basedir}/middlewareMain"/>
         <mkdir dir="${basedir}/build/classes"/>
         <mkdir dir="${basedir}/build/war"/>
         <mkdir dir="${basedir}/webapps"/>
