@@ -30,6 +30,43 @@
              classname="com.sun.tools.ws.ant.AnnotationProcessingTask">
         <classpath refid="jaxws.classpath"/>
     </taskdef>
+    <target name="build-main" depends="setup">
+		<annotationProcessing
+			fork="true"
+			debug="true"
+			verbose="${verbose}"
+			destdir="${basedir}/build"
+			srcdir = "${basedir}/src"
+			includes="main/**, server/**"
+			sourceDestDir="${basedir}/build"
+			procOnly="false"
+			sourcepath="${basedir}/src"
+		>
+		<classpath>
+			<path refid="jaxws.classpath"/>
+			<pathelement location="${basedir}/src"/>
+		</classpath>
+		</annotationProcessing>
+    </target>
+
+	<target name="build-middleware-main" depends="setup">
+		<annotationProcessing
+			fork="true"
+			debug="true"
+			verbose="${verbose}"
+			destdir="${basedir}/build"
+			srcdir="${basedir}/src"
+			includes="server/**, middlewaremain/**"
+			sourceDestDir="${basedir}/build"
+			procOnly="false"
+			sourcepath="${basedir}/src"
+		>
+		<classpath>
+			<path refid="jaxws.classpath"/>
+			<pathelement location="${basedir}/src"/> 
+		</classpath>
+		</annotationProcessing>
+	</target>
 
     <target name="build-server" depends="setup">
         <annotationProcessing
@@ -58,7 +95,7 @@
                     dir="${basedir}/etc/server"
                     includes="*.wsdl, *.xsd"
                     prefix="WEB-INF/wsdl"/>
-            <classes dir="${basedir}/build/classes"/>
+            <classes dir="${basedir}/build/server"/>
         </war>
     </target>
 
@@ -93,12 +130,13 @@
             dest="${basedir}/webapps/${middleware.name}"/>
     </target>
     
-    <target name="start-tomcat">
+    <target name="start-tomcat" depends="build-main">
         <echo message="Starting Tomcat and deploying service ... "/>
-        <java fork="true" classname="server.ws.Main">
+        <java fork="true" classname="main.Main">
             <classpath>
                 <path refid="jaxws.classpath"/>
-                <pathelement location="${basedir}/build/classes"/>
+                <pathelement location="${basedir}/build"/>
+		<pathelement location="${basedir}/build"/>
             </classpath>
             <jvmarg value="-Djava.security.policy=${basedir}/etc/server/server.policy"/>
             <arg value="${service.name}"/>
@@ -107,12 +145,12 @@
         </java>
     </target>
 
-    <target name="start-middleware-tomcat">
+    <target name="start-middleware-tomcat" depends="build-middleware-main">
         <echo message="Starting Tomcat for middleware... "/>
-        <java fork="true" classname="middleware.Main">
+        <java fork="true" classname="middlewareMain.Main">
             <classpath>
                 <path refid="jaxws.classpath"/>
-                <pathelement location="${basedir}/build/classes"/>
+                <pathelement location="${basedir}/build"/>
             </classpath>
             <jvmarg value="-Djava.security.policy=${basedir}/etc/middleware/server.policy"/>
             <arg value="${middleware.name}"/>

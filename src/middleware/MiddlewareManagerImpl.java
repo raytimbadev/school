@@ -45,7 +45,7 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 
         // // hardcode this for now
 
-        rmServiceName = "service";
+        rmServiceName = "rm";
 
         flightHost = "localhost";
         flightPort = 8081;
@@ -94,7 +94,6 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
         );
 
         roomManager = roomService.getResourceManagerImplPort();
-        
         initialized = true;
     }
 
@@ -114,7 +113,6 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return flightManager.addFlight(id, flightNumber, numSeats, flightPrice);
     }
 
