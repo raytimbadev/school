@@ -5,7 +5,7 @@
     <property name="middleware.name" value="rmm"/>
     <property name="service.host" value="localhost"/>
     <property name="service.port" value="8080"/>
-    <property name="middleware.port" value="8081"/>
+    <property name="middleware.port" value="8080"/>
 
     <path id="jaxws.classpath">
         <pathelement location="${java.home}/../lib/tools.jar"/>
@@ -21,9 +21,9 @@
 
     <target name="setup">
         <mkdir dir="${basedir}/build"/>
-	<mkdir dir="${basedir}/main"/>
-	<mkdir dir="${basedir}/server"/>
-	<mkdir dir="${basedir}/middlewareMain"/>
+	<mkdir dir="${basedir}/build/main"/>
+	<mkdir dir="${basedir}/build/server"/>
+	<mkdir dir="${basedir}/build/middlewareMain"/>
         <mkdir dir="${basedir}/build/classes"/>
         <mkdir dir="${basedir}/build/war"/>
         <mkdir dir="${basedir}/webapps"/>
@@ -187,7 +187,7 @@
                 keep="true"
                 destdir="${basedir}/build/classes"
                 package="middleware"
-                wsdl="http://${service.host}:${middleware.port}/${service.name}/service?wsdl">
+                wsdl="http://52.88.147.185:${middleware.port}/${service.name}/service?wsdl">
         </wsimport>
     </target>
 
@@ -197,7 +197,7 @@
                 keep="true"
                 destdir="${basedir}/build/classes"
                 package="client"
-                wsdl="http://${service.host}:${service.port}/${middleware.name}/middleware?wsdl">
+                wsdl="http://54.69.201.163:${service.port}/${middleware.name}/middleware?wsdl">
         </wsimport>
     </target>
 

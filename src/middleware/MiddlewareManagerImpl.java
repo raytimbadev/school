@@ -47,14 +47,14 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 
         rmServiceName = "rm";
 
-        flightHost = "localhost";
-        flightPort = 8081;
+        flightHost = "52.88.147.185";
+        flightPort = 8080;
 
-        carHost = "localhost";
-        carPort = 8082;
+        carHost = "54.69.201.163";
+        carPort = 8080;
 
-        roomHost = "localhost";
-        roomPort = 8083;
+        roomHost = "54.148.36,47";
+        roomPort = 8080;
 
         URL flightWsdlLocation = new URL(
                 "http",
