@@ -1,3 +1,6 @@
 /build/
 /webapps/
 *.class
+*.swp
+*wsdl
+*.secrets

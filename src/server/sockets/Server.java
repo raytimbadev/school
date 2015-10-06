@@ -60,11 +60,16 @@ public class Server implements Runnable {
     }
 
     public static void main(String[] args)
-    throws IOException {
+    throws Exception {
         String address = args[0];
         int port = Integer.parseInt(args[1]);
 
-        ResourceManager resourceManager = new ResourceManagerImpl();
+        // TODO read a file with this configuration
+        ResourceManager resourceManager = new ResourceManagerImpl(
+                "jax",
+                "",
+                "jdbc:postgresql://localhost:5432/jax"
+        );
 
         Server server = new ServerBuilder()
             .withListenPort(port)

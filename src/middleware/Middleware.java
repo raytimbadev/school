@@ -5,6 +5,7 @@ import common.sockets.RequestHandler;
 import common.sockets.RequestContext;
 
 import client.SocketResourceManager;
+import server.ResourceManagerImpl;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -61,7 +62,7 @@ public class Middleware implements Runnable {
     }
 
     public static void main(String[] args)
-    throws IOException {
+    throws Exception {
         final InetAddress bindAddress = InetAddress.getByName(args[0]);
         final int port = Integer.parseInt(args[1]);
 
@@ -80,8 +81,20 @@ public class Middleware implements Runnable {
         final ResourceManager roomManager =
             new SocketResourceManager(roomAddress, roomPort);
 
+        // TODO configuration file for database access
+        final ResourceManager customerManager =
+            new ResourceManagerImpl(
+                    "jax",
+                    "",
+                    "jdbc:postgresql://localhost:5432/jax"
+            );
+
         ResourceManager resourceManager =
-            new MiddlewareResourceManager(flightManager, carManager, roomManager);
+            new MiddlewareResourceManager(
+                    flightManager,
+                    carManager,
+                    roomManager,
+                    customerManager);
 
         new MiddlewareBuilder()
             .withListenPort(port)

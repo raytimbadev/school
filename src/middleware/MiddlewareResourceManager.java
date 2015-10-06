@@ -12,15 +12,20 @@ import java.net.MalformedURLException;
 
 public class MiddlewareResourceManager implements ResourceManager {
 
-    final ResourceManager flightManager, carManager, roomManager;
+    final ResourceManager flightManager;
+    final ResourceManager carManager;
+    final ResourceManager roomManager;
+    final ResourceManager customerManager;
 
     public MiddlewareResourceManager(
             ResourceManager flightManager,
             ResourceManager carManager,
-            ResourceManager roomManager) {
+            ResourceManager roomManager,
+            ResourceManager customerManager) {
         this.flightManager = flightManager;
         this.carManager = carManager;
         this.roomManager = roomManager;
+        this.customerManager = customerManager;
     }
 
     // Flight operations //
@@ -163,7 +168,7 @@ public class MiddlewareResourceManager implements ResourceManager {
     /* Create a new customer and return their unique identifier. */
     @Override
     public int newCustomer(int id) {
-        throw new UnsupportedOperationException();
+        return customerManager.newCustomer(id);
     }
 
     /* Create a new customer with the provided identifier. */
@@ -175,13 +180,13 @@ public class MiddlewareResourceManager implements ResourceManager {
     /* Remove this customer and all their associated reservations. */
     @Override
     public boolean deleteCustomer(int id, int customerId) {
-        throw new UnsupportedOperationException();
+        return customerManager.deleteCustomer(id, customerId);
     }
 
     /* Return a bill. */
     @Override
     public String queryCustomerInfo(int id, int customerId) {
-        throw new UnsupportedOperationException();
+        return customerManager.queryCustomerInfo(id, customerId);
     }
 
     /* Reserve a seat on this flight. */
@@ -216,6 +221,12 @@ public class MiddlewareResourceManager implements ResourceManager {
     @Override
     public boolean reserveItinerary(int id, int customerId, Vector flightNumbers,
                                     String location, boolean car, boolean room){
-        throw new UnsupportedOperationException();
+        return customerManager.reserveItinerary(
+                id,
+                customerId,
+                flightNumbers,
+                location,
+                car,
+                room);
     }
 }

@@ -17,11 +17,12 @@
     <property name="roomServer.hostname" value="localhost"/>
     <property name="roomServer.listenPort" value="8083"/>
 
-    <path id="jaxws.classpath">
-        <pathelement location="${java.home}/../lib/tools.jar"/>
-        <pathelement location="${java.home}/../jre/lib/rt.jar"/>
+    <path id="dbcp">
         <fileset dir="${basedir}/lib">
-            <include name="*.jar"/>
+            <include name="commons-dbcp2-2.1.1.jar"/>
+            <include name="commons-pool2-2.4.2.jar"/>
+            <include name="commons-logging-1.2.jar"/>
+            <include name="postgresql-9.4-1203.jdbc4.jar"/>
         </fileset>
     </path>
 
@@ -44,7 +45,11 @@
             destdir="${basedir}/build/server"
             srcdir="${basedir}/src"
             includes="common/**, server/**"
-            sourcepath="${basedir}/src" />
+            sourcepath="${basedir}/src" >
+            <classpath>
+                <path refid="dbcp" />
+            </classpath>
+        </javac>
     </target>
 
     <target name="build-client" depends="setup">
@@ -55,7 +60,11 @@
             destdir="${basedir}/build/client"
             srcdir="${basedir}/src"
             includes="common/**, client/**"
-            sourcepath="${basedir}/src" />
+            sourcepath="${basedir}/src">
+            <classpath>
+                <path refid="dbcp" />
+            </classpath>
+        </javac>
     </target>
 
     <target name="build-middleware" depends="setup">
@@ -65,14 +74,19 @@
             verbose="${verbose}"
             destdir="${basedir}/build/middleware"
             srcdir="${basedir}/src"
-            includes="common/**, middleware/**, client/**"
-            sourcepath="${basedir}/src" />
+            includes="common/**, middleware/**, client/**, server/**"
+            sourcepath="${basedir}/src">
+            <classpath>
+                <path refid="dbcp" />
+            </classpath>
+        </javac>
     </target>
 
     <target name="server" depends="build-server">
         <java classname="server.sockets.Server">
             <classpath>
                 <pathelement location="${basedir}/build/server" />
+                <path refid="dbcp" />
             </classpath>
             <arg value="${server.bindAddress}" />
             <arg value="${server.listenPort}" />
@@ -83,6 +97,7 @@
         <java classname="client.Client">
             <classpath>
                 <pathelement location="${basedir}/build/client" />
+                <path refid="dbcp" />
             </classpath>
             <arg value="${middleware.hostname}" />
             <arg value="${middleware.listenPort}" />
@@ -93,6 +108,7 @@
         <java classname="middleware.Middleware">
             <classpath>
                 <pathelement location="${basedir}/build/middleware" />
+                <path refid="dbcp" />
             </classpath>
             <arg value="${middleware.bindAddress}" />
             <arg value="${middleware.listenPort}" />

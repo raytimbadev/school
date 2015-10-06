@@ -147,7 +147,7 @@ public class SocketResourceManager implements ResourceManager {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
-                        .withMethod("deleteCards")
+                        .withMethod("deleteCars")
                         .primitive(id)
                         .parameter(location)
                         .build()
