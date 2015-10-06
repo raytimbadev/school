@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.beans.PropertyVetoException; 
 import java.sql.DriverManager;
 import java.sql.PreparedStatement; 
+import java.sql.Statement; 
 import java.sql.ResultSet; 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -75,18 +76,70 @@ public class sqlInterfaceImpl implements sql.sqlInterface {
 
 	@Override	
 	public void writeTransaction(String[] t) {
+		Connection con = null;
+		Statement ps=null;
 		try{
-			initialize(); 
-		}catch (Exception e) {
+			initialize();
+			con=datasource.getConnection();
+			ps = con.createStatement();
+			con.setAutoCommit(false);
+			for(String s : t) {
+				ps.executeUpdate(s);
+			}
+			con.commit(); 
+		}catch (SQLException e) {
 			e.printStackTrace();
+			if(con != null) {
+				try {
+					con.rollback();
+				} catch(Exception ex) {
+					ex.printStackTrace(); 
+				}
+			}
+		}finally {
+			try {
+				if(ps != null)
+					ps.close();
+				if(con != null)
+					con.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	@Override
-	public int returningTransaction(String[] t) {
-		throw new UnsupportedOperationException();
+	public int[] returningTransaction(String[] t) {
+	    Connection con = null;
+        Statement ps=null;
+		int[] arr = new int[t.length]; 
+        try{
+            initialize();
+            con=datasource.getConnection();
+            ps = con.createStatement();
+            for(int i = 0; i < t.length; i++) {
+                ps.executeUpdate(t[i],Statement.RETURN_GENERATED_KEYS);
+				ResultSet rs = ps.getGeneratedKeys();
+				if( rs.next() ) {
+					arr[i] = rs.getInt(1); 
+				}
+            }
+            con.commit(); 
+        }catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if(ps != null)
+                    ps.close();
+                if(con != null)
+                    con.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+		return arr; 
 	}
 	@Override
-	public void Retrieve(String query) {
+	public ResultSet Retrieve(String query) {
 		Connection con=null; 
 		PreparedStatement ps=null;
 		ResultSet rs=null;  
@@ -102,8 +155,6 @@ public class sqlInterfaceImpl implements sql.sqlInterface {
 			try {
 				if(ps != null)
 					ps.close();
-				if(rs != null)
-					rs.close();
 				if(con != null)
 					rs.close(); 
 			} catch (Exception e) {
@@ -111,6 +162,6 @@ public class sqlInterfaceImpl implements sql.sqlInterface {
 			}
 		}	
 
-		return;
+		return rs;
 	}
 } 
