@@ -24,10 +24,10 @@ public class MiddlewareResourceManager implements ResourceManager {
     }
 
     // Flight operations //
-    
-    /* Add seats to a flight.  
-     * In general, this will be used to create a new flight, but it should be 
-     * possible to add seats to an existing flight.  Adding to an existing 
+
+    /* Add seats to a flight.
+     * In general, this will be used to create a new flight, but it should be
+     * possible to add seats to an existing flight.  Adding to an existing
      * flight should overwrite the current price of the available seats.
      *
      * @return success.
@@ -47,11 +47,11 @@ public class MiddlewareResourceManager implements ResourceManager {
 
     /**
      * Delete the entire flight.
-     * This implies deletion of this flight and all its seats.  If there is a 
+     * This implies deletion of this flight and all its seats.  If there is a
      * reservation on the flight, then the flight cannot be deleted.
      *
      * @return success.
-     */   
+     */
     @Override
     public boolean deleteFlight(int id, int flightNumber) {
         return flightManager.deleteFlight(
@@ -78,22 +78,22 @@ public class MiddlewareResourceManager implements ResourceManager {
 
     // Car operations //
 
-    /* Add cars to a location.  
+    /* Add cars to a location.
      * This should look a lot like addFlight, only keyed on a string location
      * instead of a flight number.
      */
     @Override
     public boolean addCars(int id, String location, int numCars, int carPrice) {
-        return carManager.addCards(
+        return carManager.addCars(
                 id,
                 location,
                 numCars,
                 carPrice);
     }
-    
+
     /* Delete all cars from a location.
      * It should not succeed if there are reservations for this location.
-     */		    
+     */		
     @Override
     public boolean deleteCars(int id, String location) {
         return carManager.deleteCars(
@@ -118,8 +118,8 @@ public class MiddlewareResourceManager implements ResourceManager {
     }
 
     // Room operations //
-    
-    /* Add rooms to a location.  
+
+    /* Add rooms to a location.
      * This should look a lot like addFlight, only keyed on a string location
      * instead of a flight number.
      */
@@ -159,13 +159,13 @@ public class MiddlewareResourceManager implements ResourceManager {
     }
 
     // Customer operations //
-        
+
     /* Create a new customer and return their unique identifier. */
     @Override
     public int newCustomer(int id) {
         throw new UnsupportedOperationException();
     }
-    
+
     /* Create a new customer with the provided identifier. */
     @Override
     public boolean newCustomerId(int id, int customerId){
@@ -214,7 +214,7 @@ public class MiddlewareResourceManager implements ResourceManager {
 
     /* Reserve an itinerary. */
     @Override
-    public boolean reserveItinerary(int id, int customerId, Vector flightNumbers, 
+    public boolean reserveItinerary(int id, int customerId, Vector flightNumbers,
                                     String location, boolean car, boolean room){
         throw new UnsupportedOperationException();
     }

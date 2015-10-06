@@ -17,17 +17,17 @@ public class Middleware implements Runnable {
 
 
     public static final int BACKLOG_MULTIPLIER = 5;
-    
+
     public final int THREAD_COUNT;
 
     final ExecutorService executorService;
     final ServerSocket serverSocket;
     final ResourceManager resourceManager;
 
-    public Middleware(int port, InetAddress bindAddress, ResourceManager manager) 
+    public Middleware(int port, InetAddress bindAddress, ResourceManager manager)
     throws IOException {
         resourceManager = manager;
-        
+
         THREAD_COUNT = Runtime.getRuntime().availableProcessors();
         executorService = Executors.newFixedThreadPool(THREAD_COUNT);
 
@@ -60,7 +60,7 @@ public class Middleware implements Runnable {
         }
     }
 
-    public static void main(String[] args) 
+    public static void main(String[] args)
     throws IOException {
         final InetAddress bindAddress = InetAddress.getByName(args[0]);
         final int port = Integer.parseInt(args[1]);
@@ -80,7 +80,7 @@ public class Middleware implements Runnable {
         final ResourceManager roomManager =
             new SocketResourceManager(roomAddress, roomPort);
 
-        ResourceManager resourceManager = 
+        ResourceManager resourceManager =
             new MiddlewareResourceManager(flightManager, carManager, roomManager);
 
         new MiddlewareBuilder()

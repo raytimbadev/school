@@ -18,9 +18,9 @@ public class SocketResourceManager implements ResourceManager {
     }
 
     // Flight operations //
-    
+
     // Create a new flight, or add seats to existing flight.
-    // Note: if flightPrice <= 0 and the flight already exists, it maintains 
+    // Note: if flightPrice <= 0 and the flight already exists, it maintains
     // its current price.
     @Override
     public boolean addFlight(
@@ -38,7 +38,7 @@ public class SocketResourceManager implements ResourceManager {
                         .primitive(flightPrice)
                         .build()
             );
-            
+
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
@@ -59,7 +59,7 @@ public class SocketResourceManager implements ResourceManager {
                         .primitive(flightNumber)
                         .build()
             );
-            
+
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
@@ -81,7 +81,7 @@ public class SocketResourceManager implements ResourceManager {
                         .primitive(flightNumber)
                         .build()
             );
-            
+
             if(response.isSuccessful())
                 return (Integer)response.getResult();
             else
@@ -102,7 +102,7 @@ public class SocketResourceManager implements ResourceManager {
                         .primitive(flightNumber)
                         .build()
             );
-            
+
             if(response.isSuccessful())
                 return (Integer)response.getResult();
             else
@@ -116,7 +116,7 @@ public class SocketResourceManager implements ResourceManager {
     // Car operations //
 
     // Create a new car location or add cars to an existing location.
-    // Note: if price <= 0 and the car location already exists, it maintains 
+    // Note: if price <= 0 and the car location already exists, it maintains
     // its current price.
     @Override
     public boolean addCars(int id, String location, int numCars, int carPrice) {
@@ -130,7 +130,7 @@ public class SocketResourceManager implements ResourceManager {
                         .primitive(carPrice)
                         .build()
             );
-            
+
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
@@ -152,7 +152,7 @@ public class SocketResourceManager implements ResourceManager {
                         .parameter(location)
                         .build()
             );
-            
+
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
@@ -174,7 +174,7 @@ public class SocketResourceManager implements ResourceManager {
                         .parameter(location)
                         .build()
             );
-            
+
             if(response.isSuccessful())
                 return (Integer)response.getResult();
             else
@@ -196,7 +196,7 @@ public class SocketResourceManager implements ResourceManager {
                         .parameter(location)
                         .build()
             );
-            
+
             if(response.isSuccessful())
                 return (Integer)response.getResult();
             else
@@ -206,12 +206,12 @@ public class SocketResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(e);
         }
     }
-    
+
 
     // Room operations //
 
     // Create a new room location or add rooms to an existing location.
-    // Note: if price <= 0 and the room location already exists, it maintains 
+    // Note: if price <= 0 and the room location already exists, it maintains
     // its current price.
     @Override
     public boolean addRooms(int id, String location, int numRooms, int roomPrice) {
@@ -225,7 +225,7 @@ public class SocketResourceManager implements ResourceManager {
                         .primitive(roomPrice)
                         .build()
             );
-            
+
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
@@ -247,7 +247,7 @@ public class SocketResourceManager implements ResourceManager {
                         .parameter(location)
                         .build()
             );
-            
+
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
@@ -269,7 +269,7 @@ public class SocketResourceManager implements ResourceManager {
                         .parameter(location)
                         .build()
             );
-            
+
             if(response.isSuccessful())
                 return (Integer)response.getResult();
             else
@@ -279,7 +279,7 @@ public class SocketResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(e);
         }
     }
-    
+
     // Returns room price at this location.
     @Override
     public int queryRoomsPrice(int id, String location) {
@@ -291,7 +291,7 @@ public class SocketResourceManager implements ResourceManager {
                         .parameter(location)
                         .build()
             );
-            
+
             if(response.isSuccessful())
                 return (Integer)response.getResult();
             else
@@ -313,7 +313,7 @@ public class SocketResourceManager implements ResourceManager {
                         .primitive(id)
                         .build()
             );
-            
+
             if(response.isSuccessful())
                 return (Integer)response.getResult();
             else
@@ -330,7 +330,7 @@ public class SocketResourceManager implements ResourceManager {
         throw new UnsupportedOperationException();
     }
 
-    // Delete customer from the database. 
+    // Delete customer from the database.
     @Override
     public boolean deleteCustomer(int id, int customerId) {
         try {
@@ -341,7 +341,7 @@ public class SocketResourceManager implements ResourceManager {
                         .primitive(customerId)
                         .build()
             );
-            
+
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
@@ -363,7 +363,7 @@ public class SocketResourceManager implements ResourceManager {
                         .primitive(customerId)
                         .build()
             );
-            
+
             if(response.isSuccessful())
                 return (String)response.getResult();
             else
@@ -374,7 +374,7 @@ public class SocketResourceManager implements ResourceManager {
         }
     }
 
-    // Add flight reservation to this customer.  
+    // Add flight reservation to this customer.
     @Override
     public boolean reserveFlight(int id, int customerId, int flightNumber) {
         try {
@@ -386,7 +386,7 @@ public class SocketResourceManager implements ResourceManager {
                         .primitive(flightNumber)
                         .build()
             );
-            
+
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
@@ -397,7 +397,7 @@ public class SocketResourceManager implements ResourceManager {
         }
     }
 
-    // Add car reservation to this customer. 
+    // Add car reservation to this customer.
     @Override
     public boolean reserveCar(int id, int customerId, String location) {
         try {
@@ -409,7 +409,7 @@ public class SocketResourceManager implements ResourceManager {
                         .parameter(location)
                         .build()
             );
-            
+
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
@@ -420,7 +420,7 @@ public class SocketResourceManager implements ResourceManager {
         }
     }
 
-    // Add room reservation to this customer. 
+    // Add room reservation to this customer.
     @Override
     public boolean reserveRoom(int id, int customerId, String location) {
         try {
@@ -432,7 +432,7 @@ public class SocketResourceManager implements ResourceManager {
                         .parameter(location)
                         .build()
             );
-            
+
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
@@ -464,7 +464,7 @@ public class SocketResourceManager implements ResourceManager {
                         .primitive(room)
                         .build()
             );
-            
+
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else

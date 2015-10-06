@@ -34,7 +34,7 @@ public class RequestHandler implements Runnable {
                 System.out.println("Failure.");
             }
 
-            final ObjectOutputStream output = 
+            final ObjectOutputStream output =
                 new ObjectOutputStream(sock.getOutputStream());
             output.writeObject(response);
 

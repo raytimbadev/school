@@ -16,17 +16,17 @@ import java.net.Socket;
 public class Server implements Runnable {
 
     public static final int BACKLOG_MULTIPLIER = 5;
-    
+
     public final int THREAD_COUNT;
 
     final ExecutorService executorService;
     final ServerSocket serverSocket;
     final ResourceManager resourceManager;
 
-    public Server(int port, InetAddress bindAddress, ResourceManager manager) 
+    public Server(int port, InetAddress bindAddress, ResourceManager manager)
     throws IOException {
         resourceManager = manager;
-        
+
         THREAD_COUNT = Runtime.getRuntime().availableProcessors();
         executorService = Executors.newFixedThreadPool(THREAD_COUNT);
 
@@ -59,7 +59,7 @@ public class Server implements Runnable {
         }
     }
 
-    public static void main(String[] args) 
+    public static void main(String[] args)
     throws IOException {
         String address = args[0];
         int port = Integer.parseInt(args[1]);

@@ -19,7 +19,7 @@ public class Request implements Serializable {
     public Request(
             final String method,
             final Object[] parameters,
-            final Boolean[] primitives) 
+            final Boolean[] primitives)
     throws NoSuchFieldException, IllegalAccessException {
         if(parameters.length != primitives.length)
             throw new IllegalArgumentException("Array lengths don't match.");
@@ -44,7 +44,7 @@ public class Request implements Serializable {
      *
      * @param manager The ResourceManager to invoke the request on.
      */
-    public Object invoke(ResourceManager manager) 
+    public Object invoke(ResourceManager manager)
     throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return manager.getClass()
             .getMethod(method, types)
@@ -52,7 +52,7 @@ public class Request implements Serializable {
     }
 
     public static class RequestParser {
-        public static Request parseStream(final InputStream stream) 
+        public static Request parseStream(final InputStream stream)
         throws IOException, ClassNotFoundException {
             final ObjectInputStream ois = new ObjectInputStream(stream);
             return (Request)ois.readObject();

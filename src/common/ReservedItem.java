@@ -7,7 +7,7 @@ package common;
 
 
 // Represents a customer's "reserved item" (e.g. Flight, Car, or Room).
-// Note: if a customer reserves more than one item of the same kind, this is 
+// Note: if a customer reserves more than one item of the same kind, this is
 // stored as a single instance of ReservedItem reflecting the *latest price*.
 
 public class ReservedItem extends RMItem {
@@ -25,38 +25,38 @@ public class ReservedItem extends RMItem {
         m_nPrice = price;
     }
 
-    public String getReservableItemKey() { 
-        return m_strReservableItemKey; 
+    public String getReservableItemKey() {
+        return m_strReservableItemKey;
     }
 
     public String getLocation() {
-        return m_strLocation; 
+        return m_strLocation;
     }
 
     public void setCount(int count) {
-        m_nCount = count; 
+        m_nCount = count;
     }
 
-    public int getCount() { 
-        return m_nCount; 
+    public int getCount() {
+        return m_nCount;
     }
 
-    public void setPrice(int price) { 
-        m_nPrice = price; 
+    public void setPrice(int price) {
+        m_nPrice = price;
     }
 
-    public int getPrice() { 
-        return m_nPrice; 
+    public int getPrice() {
+        return m_nPrice;
     }
 
-    public String toString() { 
-        return "hashkey = " + getKey() + ", " 
+    public String toString() {
+        return "hashkey = " + getKey() + ", "
                 + "reservableItemKey = " + getReservableItemKey() + ", "
-                + "count = " + getCount() + ", price = " + getPrice(); 
+                + "count = " + getCount() + ", price = " + getPrice();
     }
 
-    // Note: hashKey is the same as the ReservableItem hashkey.  This would 
-    // have to change if we weren't lumping all reservable items under the 
+    // Note: hashKey is the same as the ReservableItem hashkey.  This would
+    // have to change if we weren't lumping all reservable items under the
     // same price.
     public String getKey() {
         String s = getReservableItemKey();

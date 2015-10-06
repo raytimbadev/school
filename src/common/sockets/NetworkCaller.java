@@ -18,13 +18,13 @@ public class NetworkCaller {
         this.port = port;
     }
 
-    public Response invoke(final Request request) 
+    public Response invoke(final Request request)
     throws IOException, ClassNotFoundException {
         System.out.println("Invoking network call.");
 
-        final Socket socket = new Socket(address, port);         
+        final Socket socket = new Socket(address, port);
 
-        final ObjectOutputStream oos = 
+        final ObjectOutputStream oos =
             new ObjectOutputStream(socket.getOutputStream());
         oos.writeObject(request);
 
