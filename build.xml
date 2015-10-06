@@ -23,6 +23,7 @@
         <mkdir dir="${basedir}/build"/>
 	<mkdir dir="${basedir}/build/main"/>
 	<mkdir dir="${basedir}/build/server"/>
+	<mkdir dir="${basedir}/build/sql"/>
 	<mkdir dir="${basedir}/build/middlewareMain"/>
         <mkdir dir="${basedir}/build/classes"/>
         <mkdir dir="${basedir}/build/war"/>
@@ -78,7 +79,7 @@
                 verbose="${verbose}"
                 destdir="${basedir}/build/classes"
                 srcdir="${basedir}/src"
-                includes="server/**"
+                includes="server/**, sql/**"
                 sourceDestDir="${basedir}/build/classes"
                 procOnly="false"
                 sourcepath="${basedir}/src">
@@ -216,7 +217,7 @@
                 fork="true"
                 srcdir="${basedir}/src"
                 destdir="${basedir}/build/classes"
-                includes="middleware/**">
+                includes="middleware/**, sql/**">
             <classpath refid="jaxws.classpath"/>
         </javac>
     </target>

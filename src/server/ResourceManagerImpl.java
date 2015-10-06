@@ -7,7 +7,8 @@ package server;
 
 import java.util.*;
 import javax.jws.WebService;
-
+import sql.sqlInterface;
+import sql.sqlInterfaceImpl; 
 
 @WebService(endpointInterface = "server.ws.ResourceManager")
 public class ResourceManagerImpl implements server.ws.ResourceManager {

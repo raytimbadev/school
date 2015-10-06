@@ -3,3 +3,4 @@ servermapping.txt
 /webapps/
 *.swp
 *wsdl
+*.secrets

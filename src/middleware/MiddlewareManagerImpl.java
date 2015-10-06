@@ -1,4 +1,4 @@
-package middleware;
+ package middleware;
 
 import java.util.*;
 import javax.jws.WebService;
@@ -7,6 +7,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.net.URL;
 import java.net.MalformedURLException;
+import sql.sqlInterface;
+import sql.sqlInterfaceImpl;
 
 @WebService(endpointInterface = "server.ws.ResourceManager")
 public class MiddlewareManagerImpl implements server.ws.ResourceManager {
@@ -18,7 +20,7 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
     private static String roomHost;
     private static Integer roomPort;
     private static boolean initialized = false;
-
+    private static sqlInterface sqlServer;
     private static ResourceManager flightManager, carManager, roomManager;
 
     private static void initializeEnv() throws NamingException, MalformedURLException {
@@ -43,8 +45,7 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
         //roomHost = (String) env.lookup("room-service-host");
         //roomPort = (Integer) env.lookup("room-service-port");
 
-        // // hardcode this for now
-
+	//hardocded service name and service hosts could be moved to config file
         rmServiceName = "rm";
 
         flightHost = "52.88.147.185";
@@ -80,6 +81,7 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
         ResourceManagerImplService flightService = new ResourceManagerImplService(
                 flightWsdlLocation
         );
+	
 
         flightManager = flightService.getResourceManagerImplPort();
 
@@ -92,7 +94,7 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
         ResourceManagerImplService roomService = new ResourceManagerImplService(
                 roomWsdlLocation
         );
-
+	sqlServer = new sqlInterfaceImpl();
         roomManager = roomService.getResourceManagerImplPort();
         initialized = true;
     }
@@ -272,6 +274,7 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+		sqlServer.Retrieve("a"); 	
 		roomManager.newCustomer(id);
 		carManager.newCustomer(id);
 		return flightManager.newCustomer(id); 
@@ -285,6 +288,7 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
+		sqlServer.Retrieve("a");
 		roomManager.newCustomerId(id,customerId); 
 		carManager.newCustomerId(id, customerId);
 		return flightManager.newCustomerId(id, customerId);
