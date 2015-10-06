@@ -1,5 +1,7 @@
 package middleware;
 
+import common.ResourceManager;
+
 import java.util.*;
 import javax.jws.WebService;
 import javax.naming.Context;
@@ -8,94 +10,17 @@ import javax.naming.NamingException;
 import java.net.URL;
 import java.net.MalformedURLException;
 
-@WebService(endpointInterface = "server.ws.ResourceManager")
-public class MiddlewareManagerImpl implements server.ws.ResourceManager {
-    private static String rmServiceName;
-    private static String flightHost;
-    private static Integer flightPort;
-    private static String carHost;
-    private static Integer carPort;
-    private static String roomHost;
-    private static Integer roomPort;
-    private static boolean initialized = false;
+public class MiddlewareResourceManager implements ResourceManager {
 
-    private static ResourceManager flightManager, carManager, roomManager;
+    final ResourceManager flightManager, carManager, roomManager;
 
-    private static void initializeEnv() throws NamingException, MalformedURLException {
-        if (initialized)
-            return;
-
-        //System.setProperty(
-        //        Context.INITIAL_CONTEXT_FACTORY,
-        //        "org.apache.naming.java.javaURLContextFactory"
-        //);
-
-        //Context env = (Context) new InitialContext();
-
-        //rmServiceName = (String) env.lookup("service-name");
-
-        //flightHost = (String) env.lookup("flight-service-host");
-        //flightPort = (Integer) env.lookup("flight-service-port");
-
-        //carHost = (String) env.lookup("car-service-host");
-        //carPort = (Integer) env.lookup("car-service-port");
-
-        //roomHost = (String) env.lookup("room-service-host");
-        //roomPort = (Integer) env.lookup("room-service-port");
-
-        // // hardcode this for now
-
-        rmServiceName = "service";
-
-        flightHost = "localhost";
-        flightPort = 8081;
-
-        carHost = "localhost";
-        carPort = 8082;
-
-        roomHost = "localhost";
-        roomPort = 8083;
-
-        URL flightWsdlLocation = new URL(
-                "http",
-                flightHost,
-                flightPort, 
-                "/" + rmServiceName + "/service?wsdl"
-        );
-                
-        URL carWsdlLocation = new URL(
-                "http",
-                carHost,
-                carPort,
-                "/" + rmServiceName + "/service?wsdl"
-        );
-
-        URL roomWsdlLocation = new URL(
-                "http",
-                roomHost,
-                roomPort,
-                "/" + rmServiceName + "/service?wsdl"
-        );
-
-        ResourceManagerImplService flightService = new ResourceManagerImplService(
-                flightWsdlLocation
-        );
-
-        flightManager = flightService.getResourceManagerImplPort();
-
-        ResourceManagerImplService carService = new ResourceManagerImplService(
-                carWsdlLocation
-        );
-
-        carManager = carService.getResourceManagerImplPort();
-
-        ResourceManagerImplService roomService = new ResourceManagerImplService(
-                roomWsdlLocation
-        );
-
-        roomManager = roomService.getResourceManagerImplPort();
-        
-        initialized = true;
+    public MiddlewareResourceManager(
+            ResourceManager flightManager,
+            ResourceManager carManager,
+            ResourceManager roomManager) {
+        this.flightManager = flightManager;
+        this.carManager = carManager;
+        this.roomManager = roomManager;
     }
 
     // Flight operations //
@@ -108,14 +33,16 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
      * @return success.
      */
     @Override
-    public boolean addFlight(int id, int flightNumber, int numSeats, int flightPrice) {
-        try {
-            initializeEnv();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return flightManager.addFlight(id, flightNumber, numSeats, flightPrice);
+    public boolean addFlight(
+            int id,
+            int flightNumber,
+            int numSeats,
+            int flightPrice) {
+        return flightManager.addFlight(
+                id,
+                flightNumber,
+                numSeats,
+                flightPrice);
     }
 
     /**
@@ -127,19 +54,25 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
      */   
     @Override
     public boolean deleteFlight(int id, int flightNumber) {
-        throw new UnsupportedOperationException();
+        return flightManager.deleteFlight(
+                id,
+                flightNumber);
     }
 
     /* Return the number of empty seats in this flight. */
     @Override
     public int queryFlight(int id, int flightNumber) {
-        throw new UnsupportedOperationException();
+        return flightManager.queryFlight(
+                id,
+                flightNumber);
     }
 
     /* Return the price of a seat on this flight. */
     @Override
     public int queryFlightPrice(int id, int flightNumber) {
-        throw new UnsupportedOperationException();
+        return flightManager.queryFlightPrice(
+                id,
+                flightNumber);
     }
 
 
@@ -151,7 +84,11 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
      */
     @Override
     public boolean addCars(int id, String location, int numCars, int carPrice) {
-        throw new UnsupportedOperationException();
+        return carManager.addCards(
+                id,
+                location,
+                numCars,
+                carPrice);
     }
     
     /* Delete all cars from a location.
@@ -159,21 +96,26 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
      */		    
     @Override
     public boolean deleteCars(int id, String location) {
-        throw new UnsupportedOperationException();
+        return carManager.deleteCars(
+                id,
+                location);
     }
 
     /* Return the number of cars available at this location. */
     @Override
     public int queryCars(int id, String location) {
-        throw new UnsupportedOperationException();
+        return carManager.queryCars(
+                id,
+                location);
     }
 
     /* Return the price of a car at this location. */
     @Override
     public int queryCarsPrice(int id, String location) {
-        throw new UnsupportedOperationException();
+        return carManager.queryCarsPrice(
+                id,
+                location);
     }
-
 
     // Room operations //
     
@@ -183,7 +125,11 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
      */
     @Override
     public boolean addRooms(int id, String location, int numRooms, int roomPrice) {
-        throw new UnsupportedOperationException();
+        return roomManager.addRooms(
+                id,
+                location,
+                numRooms,
+                roomPrice);
     }
 
     /* Delete all rooms from a location.
@@ -191,21 +137,26 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
      */
     @Override
     public boolean deleteRooms(int id, String location) {
-        throw new UnsupportedOperationException();
+        return roomManager.deleteRooms(
+                id,
+                location);
     }
 
     /* Return the number of rooms available at this location. */
     @Override
     public int queryRooms(int id, String location) {
-        throw new UnsupportedOperationException();
+        return roomManager.queryRooms(
+                id,
+                location);
     }
 
     /* Return the price of a room at this location. */
     @Override
     public int queryRoomsPrice(int id, String location) {
-        throw new UnsupportedOperationException();
+        return roomManager.queryRoomsPrice(
+                id,
+                location);
     }
-
 
     // Customer operations //
         
@@ -236,19 +187,28 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
     /* Reserve a seat on this flight. */
     @Override
     public boolean reserveFlight(int id, int customerId, int flightNumber) {
-        throw new UnsupportedOperationException();
+        return flightManager.reserveFlight(
+                id,
+                customerId,
+                flightNumber);
     }
 
     /* Reserve a car at this location. */
     @Override
     public boolean reserveCar(int id, int customerId, String location) {
-        throw new UnsupportedOperationException();
+        return carManager.reserveCar(
+                id,
+                customerId,
+                location);
     }
 
     /* Reserve a room at this location. */
     @Override
     public boolean reserveRoom(int id, int customerId, String location) {
-        throw new UnsupportedOperationException();
+        return roomManager.reserveRoom(
+                id,
+                customerId,
+                location);
     }
 
 

@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project basedir="." default="help" name="project">
 
-    <property name="server.hostname" value="localhost"/>
-    <property name="server.bindAddress" value="0.0.0.0"/>
+    <property name="server.bindAddress" value="localhost"/>
     <property name="server.listenPort" value="8080"/>
+
+    <property name="middleware.hostname" value="localhost"/>
+    <property name="middleware.bindAddress" value="0.0.0.0"/>
+    <property name="middleware.listenPort" value="8080"/>
+
+    <property name="flightServer.hostname" value="localhost"/>
+    <property name="flightServer.listenPort" value="8081"/>
+
+    <property name="carServer.hostname" value="localhost"/>
+    <property name="carServer.listenPort" value="8082"/>
+
+    <property name="roomServer.hostname" value="localhost"/>
+    <property name="roomServer.listenPort" value="8083"/>
 
     <path id="jaxws.classpath">
         <pathelement location="${java.home}/../lib/tools.jar"/>
@@ -21,6 +33,7 @@
         <mkdir dir="${basedir}/build" />
         <mkdir dir="${basedir}/build/server" />
         <mkdir dir="${basedir}/build/client" />
+        <mkdir dir="${basedir}/build/middleware" />
     </target>
 
     <target name="build-server" depends="setup">
@@ -45,6 +58,17 @@
             sourcepath="${basedir}/src" />
     </target>
 
+    <target name="build-middleware" depends="setup">
+        <javac
+            fork="true"
+            debug="true"
+            verbose="${verbose}"
+            destdir="${basedir}/build/middleware"
+            srcdir="${basedir}/src"
+            includes="common/**, middleware/**, client/**"
+            sourcepath="${basedir}/src" />
+    </target>
+
     <target name="server" depends="build-server">
         <java classname="server.sockets.Server">
             <classpath>
@@ -60,8 +84,24 @@
             <classpath>
                 <pathelement location="${basedir}/build/client" />
             </classpath>
-            <arg value="${server.hostname}" />
-            <arg value="${server.listenPort}" />
+            <arg value="${middleware.hostname}" />
+            <arg value="${middleware.listenPort}" />
+        </java>
+    </target>
+
+    <target name="middleware" depends="build-middleware">
+        <java classname="middleware.Middleware">
+            <classpath>
+                <pathelement location="${basedir}/build/middleware" />
+            </classpath>
+            <arg value="${middleware.bindAddress}" />
+            <arg value="${middleware.listenPort}" />
+            <arg value="${flightServer.hostname}" />
+            <arg value="${flightServer.listenPort}" />
+            <arg value="${carServer.hostname}" />
+            <arg value="${carServer.listenPort}" />
+            <arg value="${roomServer.hostname}" />
+            <arg value="${roomServer.listenPort}" />
         </java>
     </target>
 
