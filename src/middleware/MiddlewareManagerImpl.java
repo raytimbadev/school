@@ -307,6 +307,10 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
+		roomManager.deleteCustomer(id, customerId); 
+		flightManager.deleteCustomer(id, customerId);
+		carManager.deleteCustomer(id, customerId);
+		
 		return customerManager.deleteCustomer(id, customerId); 
     }
 
@@ -318,7 +322,16 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return customerManager.queryCustomerInfo(id,customerId); 
+		StringBuilder sb = new StringBuilder();
+		String s1 = flightManager.queryCustomerInfo(id, customerId); 
+		String s2 = flightManager.queryCustomerInfo(id, customerId); 
+		String s3 = flightManager.queryCustomerInfo(id, customerId); 
+		String s4 = customerManager.queryCustomerInfo(id,customerId); 
+		sb.append(s1); 
+		sb.append(s2); 
+		sb.append(s3); 
+		sb.append(s4); 
+		return sb.toString(); 
     }
 
     /* Reserve a seat on this flight. */
@@ -329,6 +342,9 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		if(customerManager.newCustomerId(id,customerId) == false){
+			return false; 
+		} 
 		return flightManager.reserveFlight(id, customerId, flightNumber); 
     }
 
@@ -339,6 +355,9 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 			initializeEnv();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		if(customerManager.newCustomerId(id,customerId) == false) {
+			return false;
 		}
 		return carManager.reserveCar(id, customerId, location);
     }
@@ -351,6 +370,9 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 		} catch (Exception e) {
 			e.printStackTrace(); 
 		}
+		if(customerManager.newCustomerId(id,customerId) == false) {
+			return false; 
+		}
 		return roomManager.reserveRoom(id,customerId,location);
     }
 
@@ -359,6 +381,16 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
     @Override
     public boolean reserveItinerary(int id, int customerId, Vector flightNumbers, 
                                     String location, boolean car, boolean room){
-	return customerManager.reserveItinerary(id,customerId,flightNumbers,location,car,room); 	
+	if(customerManager.newCustomerId(id,customerId) == false) {
+		return false; 
+	}
+	boolean f = true; 
+	for(int i=0; i < flightNumbers.size(); i++) {
+		f = f&&flightManager.reserveFlight(id, customerId,(int)flightNumbers.get(i));
+	}
+	boolean c = carManager.reserveCar(id, customerId, location);
+	boolean r = roomManager.reserveCar(id, customerId, location); 
+	return f&&c&&r;  	
     }
+	
 }
