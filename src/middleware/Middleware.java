@@ -80,14 +80,13 @@ public class Middleware implements Runnable {
         final int roomPort = Integer.parseInt(args[7]);
         final ResourceManager roomManager =
             new SocketResourceManager(roomAddress, roomPort);
+	
+	final InetAddress customerAddress = InetAddress.getByName(args[8]);
+	final int customerPort = Integer.parseInt(args[9]);
+	final ResourceManager roomMaanger = new SocketResourceManager(customerAddress, roomPort); 
 
         // TODO configuration file for database access
         final ResourceManager customerManager =
-            new ResourceManagerImpl(
-                    "jax",
-                    "",
-                    "jdbc:postgresql://localhost:5432/jax"
-            );
 
         ResourceManager resourceManager =
             new MiddlewareResourceManager(

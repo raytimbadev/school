@@ -16,6 +16,9 @@
 
     <property name="roomServer.hostname" value="localhost"/>
     <property name="roomServer.listenPort" value="8083"/>
+ 
+    <property name ="customerServer.hostname" value="localhost"/>
+    <property name ="customerServer.listenPort" value="8084" />
 
     <path id="dbcp">
         <fileset dir="${basedir}/lib">
@@ -118,6 +121,8 @@
             <arg value="${carServer.listenPort}" />
             <arg value="${roomServer.hostname}" />
             <arg value="${roomServer.listenPort}" />
+	    <arg value="${customerServer.hostname}"/>
+	    <arg value="${customerServer.listenPort}"/>
         </java>
     </target>
 
