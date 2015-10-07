@@ -211,6 +211,8 @@
     \item The bisimulation-minimal LTS is the following.
 
         \begin{figure}[H]
+            \centering
+
             \begin{tikzpicture}[
                     ->,
                     >=stealth',
@@ -222,11 +224,11 @@
                 \tikzstyle{every state}=[fill=white,draw=black,text=black]
 
                 \node[state] (A) {$s_0$};
-                \node[state] (B) {$s_1$} [below left of=A];
-                \node[state] (C) {$s_2$} [below right of=A];
-                \node[state] (D) {$s_4$} [below of=B];
-                \node[state] (E) {$s_5$} [below left of=B];
-                \node[state] (F) {$s_6$} [below of=C];
+                \node[state] (B) [below left of=A] {$s_1$} ;
+                \node[state] (C) [below right of=A] {$s_2$} ;
+                \node[state] (D) [below right of=B] {$s_4$} ;
+                \node[state] (E) [below left of=B] {$s_5$} ;
+                \node[state] (F) [below of=C] {$s_6$} ;
 
                 \path
                 (A) edge node {$a$} (B)
