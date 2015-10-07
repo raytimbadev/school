@@ -5,26 +5,24 @@ import javax.jws.WebService;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import server.ResourceManagerImpl; 
 import java.net.URL;
 import java.net.MalformedURLException;
-import sql.sqlInterface;
-import sql.sqlInterfaceImpl;
 
 @WebService(endpointInterface = "server.ws.ResourceManager")
 public class MiddlewareManagerImpl implements server.ws.ResourceManager {
-    private static String rmServiceName;
-    private static String flightHost;
-    private static Integer flightPort;
-    private static String carHost;
-    private static Integer carPort;
-    private static String roomHost;
-    private static Integer roomPort;
-    private static boolean initialized = false;
-    private static sqlInterface sqlServer;
-    private static ResourceManager flightManager, carManager, roomManager, customerManager;
+    private String customerHost;
+    private Integer flightPort; 
+    private String rmServiceName;
+    private String flightHost;
+    private Integer flightPort;
+    private String carHost;
+    private Integer carPort;
+    private String roomHost;
+    private Integer roomPort;
+    private boolean initialized = false;
+    private ResourceManager flightManager, carManager, roomManager, customerManager;
 
-    private static void initializeEnv() throws NamingException, MalformedURLException {
+    private void initializeEnv() throws NamingException, MalformedURLException {
         if (initialized)
             return;
 
@@ -57,6 +55,9 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 
         roomHost = "54.148.36.47";
         roomPort = 8080;
+	
+	customerHost = "52.89.36.206";
+	customerPort=8080; 
 
         URL flightWsdlLocation = new URL(
                 "http",
@@ -79,11 +80,20 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
                 "/" + rmServiceName + "/service?wsdl"
         );
 
+	URL customerWsdlLocation = new URL(
+		"http",
+		roomHost,
+		roomPort,
+		"/" + rmServiceName + "/service?wsdl"
+	);
+	ResourceManagerImplService customerService = new ResourceManagerImplService(
+		customerWsdlLocation 	
+	); 
+	customerManager = customerService.getResourceManagerImplPort(); 
+
         ResourceManagerImplService flightService = new ResourceManagerImplService(
                 flightWsdlLocation
         );
-	customerManager = (ResourceManager) new ResourceManagerImpl();
-	
 
         flightManager = flightService.getResourceManagerImplPort();
 
