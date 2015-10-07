@@ -42,7 +42,7 @@ public class SocketResourceManager implements ResourceManager {
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
-                throw new RuntimeException(response.getError());
+                throw UncheckedThrow.throwUnchecked(response.getError());
         }
         catch(Exception e) {
             throw UncheckedThrow.throwUnchecked(e);
@@ -63,7 +63,7 @@ public class SocketResourceManager implements ResourceManager {
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
-                throw new RuntimeException(response.getError());
+                throw UncheckedThrow.throwUnchecked(response.getError());
         }
         catch(Exception e) {
             throw UncheckedThrow.throwUnchecked(e);
@@ -85,7 +85,7 @@ public class SocketResourceManager implements ResourceManager {
             if(response.isSuccessful())
                 return (Integer)response.getResult();
             else
-                throw new RuntimeException(response.getError());
+                throw UncheckedThrow.throwUnchecked(response.getError());
         }
         catch(Exception e) {
             throw UncheckedThrow.throwUnchecked(e);
@@ -106,7 +106,7 @@ public class SocketResourceManager implements ResourceManager {
             if(response.isSuccessful())
                 return (Integer)response.getResult();
             else
-                throw new RuntimeException(response.getError());
+                throw UncheckedThrow.throwUnchecked(response.getError());
         }
         catch(Exception e) {
             throw UncheckedThrow.throwUnchecked(e);
@@ -134,7 +134,7 @@ public class SocketResourceManager implements ResourceManager {
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
-                throw new RuntimeException(response.getError());
+                throw UncheckedThrow.throwUnchecked(response.getError());
         }
         catch(Exception e) {
             throw UncheckedThrow.throwUnchecked(e);
@@ -156,7 +156,7 @@ public class SocketResourceManager implements ResourceManager {
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
-                throw new RuntimeException(response.getError());
+                throw UncheckedThrow.throwUnchecked(response.getError());
         }
         catch(Exception e) {
             throw UncheckedThrow.throwUnchecked(e);
@@ -178,7 +178,7 @@ public class SocketResourceManager implements ResourceManager {
             if(response.isSuccessful())
                 return (Integer)response.getResult();
             else
-                throw new RuntimeException(response.getError());
+                throw UncheckedThrow.throwUnchecked(response.getError());
         }
         catch(Exception e) {
             throw UncheckedThrow.throwUnchecked(e);
@@ -200,7 +200,7 @@ public class SocketResourceManager implements ResourceManager {
             if(response.isSuccessful())
                 return (Integer)response.getResult();
             else
-                throw new RuntimeException(response.getError());
+                throw UncheckedThrow.throwUnchecked(response.getError());
         }
         catch(Exception e) {
             throw UncheckedThrow.throwUnchecked(e);
@@ -229,7 +229,7 @@ public class SocketResourceManager implements ResourceManager {
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
-                throw new RuntimeException(response.getError());
+                throw UncheckedThrow.throwUnchecked(response.getError());
         }
         catch(Exception e) {
             throw UncheckedThrow.throwUnchecked(e);
@@ -251,7 +251,7 @@ public class SocketResourceManager implements ResourceManager {
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
-                throw new RuntimeException(response.getError());
+                throw UncheckedThrow.throwUnchecked(response.getError());
         }
         catch(Exception e) {
             throw UncheckedThrow.throwUnchecked(e);
@@ -273,7 +273,7 @@ public class SocketResourceManager implements ResourceManager {
             if(response.isSuccessful())
                 return (Integer)response.getResult();
             else
-                throw new RuntimeException(response.getError());
+                throw UncheckedThrow.throwUnchecked(response.getError());
         }
         catch(Exception e) {
             throw UncheckedThrow.throwUnchecked(e);
@@ -295,7 +295,7 @@ public class SocketResourceManager implements ResourceManager {
             if(response.isSuccessful())
                 return (Integer)response.getResult();
             else
-                throw new RuntimeException(response.getError());
+                throw UncheckedThrow.throwUnchecked(response.getError());
         }
         catch(Exception e) {
             throw UncheckedThrow.throwUnchecked(e);
@@ -317,7 +317,7 @@ public class SocketResourceManager implements ResourceManager {
             if(response.isSuccessful())
                 return (Integer)response.getResult();
             else
-                throw new RuntimeException(response.getError());
+                throw UncheckedThrow.throwUnchecked(response.getError());
         }
         catch(Exception e) {
             throw UncheckedThrow.throwUnchecked(e);
@@ -327,7 +327,23 @@ public class SocketResourceManager implements ResourceManager {
     // This method makes testing easier.
     @Override
     public boolean newCustomerId(int id, int customerId) {
-        throw new UnsupportedOperationException();
+        try {
+            final Response response = network.invoke(
+                    new Request.RequestBuilder()
+                        .withMethod("newCustomerId")
+                        .primitive(id)
+                        .primitive(customerId)
+                        .build()
+            );
+
+            if(response.isSuccessful())
+                return (Boolean)response.getResult();
+            else
+                throw UncheckedThrow.throwUnchecked(response.getError());
+        }
+        catch(Exception e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
 
     // Delete customer from the database.
@@ -345,7 +361,7 @@ public class SocketResourceManager implements ResourceManager {
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
-                throw new RuntimeException(response.getError());
+                throw UncheckedThrow.throwUnchecked(response.getError());
         }
         catch(Exception e) {
             throw UncheckedThrow.throwUnchecked(e);
@@ -367,7 +383,7 @@ public class SocketResourceManager implements ResourceManager {
             if(response.isSuccessful())
                 return (String)response.getResult();
             else
-                throw new RuntimeException(response.getError());
+                throw UncheckedThrow.throwUnchecked(response.getError());
         }
         catch(Exception e) {
             throw UncheckedThrow.throwUnchecked(e);
@@ -390,7 +406,7 @@ public class SocketResourceManager implements ResourceManager {
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
-                throw new RuntimeException(response.getError());
+                throw UncheckedThrow.throwUnchecked(response.getError());
         }
         catch(Exception e) {
             throw UncheckedThrow.throwUnchecked(e);
@@ -413,7 +429,7 @@ public class SocketResourceManager implements ResourceManager {
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
-                throw new RuntimeException(response.getError());
+                throw UncheckedThrow.throwUnchecked(response.getError());
         }
         catch(Exception e) {
             throw UncheckedThrow.throwUnchecked(e);
@@ -436,7 +452,7 @@ public class SocketResourceManager implements ResourceManager {
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
-                throw new RuntimeException(response.getError());
+                throw UncheckedThrow.throwUnchecked(response.getError());
         }
         catch(Exception e) {
             throw UncheckedThrow.throwUnchecked(e);
@@ -468,7 +484,7 @@ public class SocketResourceManager implements ResourceManager {
             if(response.isSuccessful())
                 return (Boolean)response.getResult();
             else
-                throw new RuntimeException(response.getError());
+                throw UncheckedThrow.throwUnchecked(response.getError());
         }
         catch(Exception e) {
             throw UncheckedThrow.throwUnchecked(e);
