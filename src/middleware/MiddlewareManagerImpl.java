@@ -326,11 +326,9 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 		String s1 = flightManager.queryCustomerInfo(id, customerId); 
 		String s2 = flightManager.queryCustomerInfo(id, customerId); 
 		String s3 = flightManager.queryCustomerInfo(id, customerId); 
-		String s4 = customerManager.queryCustomerInfo(id,customerId); 
 		sb.append(s1); 
 		sb.append(s2); 
 		sb.append(s3); 
-		sb.append(s4); 
 		return sb.toString(); 
     }
 
@@ -385,11 +383,17 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 		return false; 
 	}
 	boolean f = true; 
+	boolean c = true; 
+	boolean r = true; 
 	for(int i=0; i < flightNumbers.size(); i++) {
 		f = f&&flightManager.reserveFlight(id, customerId,(int)flightNumbers.get(i));
 	}
-	boolean c = carManager.reserveCar(id, customerId, location);
-	boolean r = roomManager.reserveCar(id, customerId, location); 
+	if(car) {
+		c = carManager.reserveCar(id, customerId, location);
+	}
+	if(room) {
+		r = roomManager.reserveCar(id, customerId, location); 
+	} 
 	return f&&c&&r;  	
     }
 	

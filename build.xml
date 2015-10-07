@@ -29,7 +29,12 @@
         <mkdir dir="${basedir}/build/war"/>
         <mkdir dir="${basedir}/webapps"/>
     </target>
-
+    <target name= "setup-client-server" depends="setup">
+	  <copy file="${basedir}/temp/CustomerResourceManager.java" tofile="${basedir}/src/server/ResourceManagerImpl.java"/>
+    </target>
+    <target name="setup-item-server" depends="setup">
+	  <copy file="${basedir}/temp/ItemResourceManager.java" tofile="${basedir}/src/server/ResourceManagerImpl.java"/>
+    </target>
     <taskdef name="annotationProcessing" 
              classname="com.sun.tools.ws.ant.AnnotationProcessingTask">
         <classpath refid="jaxws.classpath"/>
@@ -72,7 +77,24 @@
 		</annotationProcessing>
 	</target>
 
-    <target name="build-server" depends="setup">
+    <target name="build-client-server" depends="setup-client-server">
+        <annotationProcessing
+                fork="true"
+                debug="true"
+                verbose="${verbose}"
+                destdir="${basedir}/build/classes"
+                srcdir="${basedir}/src"
+                includes="server/**, sql/**,common/**"
+                sourceDestDir="${basedir}/build/classes"
+                procOnly="false"
+                sourcepath="${basedir}/src">
+            <classpath>
+                <path refid="jaxws.classpath"/>
+                <pathelement location="${basedir}/src"/>
+            </classpath>
+        </annotationProcessing>
+    </target>
+        <target name="build-item-server" depends="setup-item-server">
         <annotationProcessing
                 fork="true"
                 debug="true"
@@ -97,6 +119,7 @@
             <webinf dir="${basedir}/etc/server" includes="sun-jaxws.xml"/>
             <zipfileset
                     dir="${basedir}/etc/server"
+	
                     includes="*.wsdl, *.xsd"
                     prefix="WEB-INF/wsdl"/>
             <classes dir="${basedir}/build/server"/>
@@ -165,7 +188,6 @@
     </target>
 
     <target name="server" depends="setup">
-        <antcall target="build-server"/>
         <antcall target="create-war-server"/>
         <antcall target="deploy-war-server"/>
         <antcall target="start-tomcat"/>        
@@ -191,7 +213,6 @@
                 wsdl="http://52.88.147.185:${middleware.port}/${service.name}/service?wsdl">
         </wsimport>
     </target>
-
     <target name="generate-client" depends="setup">
         <wsimport
                 quiet="false"
