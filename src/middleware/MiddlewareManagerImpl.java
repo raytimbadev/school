@@ -5,6 +5,7 @@ import javax.jws.WebService;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import server.ResourceManagerImpl; 
 import java.net.URL;
 import java.net.MalformedURLException;
 import sql.sqlInterface;
@@ -21,7 +22,7 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
     private static Integer roomPort;
     private static boolean initialized = false;
     private static sqlInterface sqlServer;
-    private static ResourceManager flightManager, carManager, roomManager;
+    private static ResourceManager flightManager, carManager, roomManager, customerManager;
 
     private static void initializeEnv() throws NamingException, MalformedURLException {
         if (initialized)
@@ -81,6 +82,7 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
         ResourceManagerImplService flightService = new ResourceManagerImplService(
                 flightWsdlLocation
         );
+	customerManager = (ResourceManager) new ResourceManagerImpl();
 	
 
         flightManager = flightService.getResourceManagerImplPort();
@@ -94,7 +96,6 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
         ResourceManagerImplService roomService = new ResourceManagerImplService(
                 roomWsdlLocation
         );
-	sqlServer = new sqlInterfaceImpl();
         roomManager = roomService.getResourceManagerImplPort();
         initialized = true;
     }
@@ -274,10 +275,7 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		sqlServer.Retrieve("a"); 	
-		roomManager.newCustomer(id);
-		carManager.newCustomer(id);
-		return flightManager.newCustomer(id); 
+		return customerManager.newCustomer(id); 
     }
     
     /* Create a new customer with the provided identifier. */
@@ -289,9 +287,7 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 			e.printStackTrace();
 		}
 		sqlServer.Retrieve("a");
-		roomManager.newCustomerId(id,customerId); 
-		carManager.newCustomerId(id, customerId);
-		return flightManager.newCustomerId(id, customerId);
+		return customerManager.newCustomerId(id, customerId);
     }
 
     /* Remove this customer and all their associated reservations. */
@@ -302,9 +298,7 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
-		roomManager.deleteCustomer(id,customerId);
-		carManager.deleteCustomer(id,customerId);
-		return flightManager.deleteCustomer(id, customerId); 
+		return customerManager.deleteCustomer(id, customerId); 
     }
 
     /* Return a bill. */
@@ -315,9 +309,7 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		roomManager.queryCustomerInfo(id,customerId);
-		carManager.queryCustomerInfo(id,customerId);
-		return flightManager.queryCustomerInfo(id,customerId); 
+		return customerManager.queryCustomerInfo(id,customerId); 
     }
 
     /* Reserve a seat on this flight. */
@@ -358,6 +350,6 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
     @Override
     public boolean reserveItinerary(int id, int customerId, Vector flightNumbers, 
                                     String location, boolean car, boolean room){
-        throw new UnsupportedOperationException();
+	return customerManager.reserveItinerary(id,customerId,flightNumbers,location,car,room); 	
     }
 }

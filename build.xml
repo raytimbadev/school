@@ -217,7 +217,7 @@
                 fork="true"
                 srcdir="${basedir}/src"
                 destdir="${basedir}/build/classes"
-                includes="middleware/**, sql/**">
+                includes="middleware/**, server/**">
             <classpath refid="jaxws.classpath"/>
         </javac>
     </target>
