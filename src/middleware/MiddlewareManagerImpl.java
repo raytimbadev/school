@@ -11,7 +11,7 @@ import java.net.MalformedURLException;
 @WebService(endpointInterface = "server.ws.ResourceManager")
 public class MiddlewareManagerImpl implements server.ws.ResourceManager {
     private String customerHost;
-    private Integer flightPort; 
+    private Integer customerPort; 
     private String rmServiceName;
     private String flightHost;
     private Integer flightPort;
@@ -296,7 +296,6 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
-		sqlServer.Retrieve("a");
 		return customerManager.newCustomerId(id, customerId);
     }
 
