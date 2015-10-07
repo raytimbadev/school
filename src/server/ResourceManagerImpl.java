@@ -29,7 +29,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 public class ResourceManagerImpl implements server.ws.ResourceManager {
     private static BasicDataSource database;
     boolean initialized = false; 
-    public void initializeEnv() throws IOException, SQLException, PropertyVetoException {
+    public void initializeEnv() {
 	String dbUrl=""; 
 	String dbUsername=""; 
 	String dbPassword=""; 
@@ -136,6 +136,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     // Reserve an item.
     protected boolean reserveItem(int id, int customerId,
                                   String key, String location) {
+	initializeEnv(); 
         Trace.info("RM::reserveItem(" + id + ", " + customerId + ", "
                 + key + ", " + location + ") called.");
         // Read customer object if it exists (and read lock it).
@@ -221,6 +222,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     @Override
     public boolean addFlight(int id, int flightNumber,
                              int numSeats, int flightPrice) {
+	initializeEnv(); 
         Trace.info("RM::addFlight(" + id + ", " + flightNumber
                 + ", $" + flightPrice + ", " + numSeats + ") called.");
 
@@ -254,7 +256,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
                     flightNumber
                 )
         );
-
+	initializeEnv(); 
         try(final Connection connection = database.getConnection()) {
             connection.setAutoCommit(false);
 
@@ -276,6 +278,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     // Returns the number of empty seats on this flight.
     @Override
     public int queryFlight(int id, int flightNumber) {
+	initializeEnv(); 
         Trace.info(
                 String.format(
                     "RM::queryFlight(%d, %d)",
@@ -313,6 +316,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
 
     // Returns price of this flight.
     public int queryFlightPrice(int id, int flightNumber) {
+	initializeEnv(); 
         Trace.info(
                 String.format(
                     "RM::queryFlightPrice(%d, %d)",
@@ -368,6 +372,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     // its current price.
     @Override
     public boolean addCars(int id, String location, int numCars, int carPrice) {
+	initializeEnv(); 
         Trace.info("RM::addCars(" + id + ", " + location + ", "
                 + numCars + ", $" + carPrice + ") called.");
         try(final Connection connection = database.getConnection()) {
@@ -396,6 +401,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     // Delete cars from a location.
     @Override
     public boolean deleteCars(int id, String location) {
+	initializeEnv(); 
         Trace.info(
                 String.format(
                     "RM::deleteCars(%d, %s)",
@@ -427,6 +433,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     // Returns the number of cars available at a location.
     @Override
     public int queryCars(int id, String location) {
+	initializeEnv(); 
         Trace.info(
                 String.format(
                     "RM::queryCars(%d, %s)",
@@ -466,6 +473,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     // Returns price of cars at this location.
     @Override
     public int queryCarsPrice(int id, String location) {
+	initializeEnv(); 
         Trace.info(
                 String.format(
                     "RM::queryCarsPrice(%d, %s)",
@@ -517,6 +525,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     // its current price.
     @Override
     public boolean addRooms(int id, String location, int numRooms, int roomPrice) {
+	initializeEnv(); 
         Trace.info(
                 String.format(
                     "RM::addRooms(%d, %s, %d, $%d)",
@@ -553,6 +562,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     // Delete rooms from a location.
     @Override
     public boolean deleteRooms(int id, String location) {
+	initializeEnv(); 
         Trace.info(
                 String.format(
                     "RM::deleteRooms(%d, %s)",
@@ -584,6 +594,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     // Returns the number of rooms available at a location.
     @Override
     public int queryRooms(int id, String location) {
+	initializeEnv(); 
         Trace.info(
                 String.format(
                     "RM::queryRooms(%d, %s)",
@@ -623,6 +634,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     // Returns room price at this location.
     @Override
     public int queryRoomsPrice(int id, String location) {
+	initializeEnv(); 
         Trace.info(
                 String.format(
                     "RM::queryRoomsPrice(%d, %s)",
@@ -672,6 +684,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
 
     @Override
     public int newCustomer(int id) {
+	initializeEnv(); 
         Trace.info(
                 String.format(
                     "INFO: RM::newCustomer(%d)",
@@ -703,12 +716,14 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
 
     @Override
     public boolean newCustomerId(int id, int customerId) {
+	initializeEnv();
         throw new UnsupportedOperationException();
     }
 
     // Delete customer from the database.
     @Override
     public boolean deleteCustomer(int id, int customerId) {
+	initializeEnv(); 
         Trace.info(
                 String.format(
                     "RM::deleteCustomer(%d, %d)",
@@ -739,6 +754,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     // Return a bill.
     @Override
     public String queryCustomerInfo(int id, int customerId) {
+	initializeEnv(); 
         Trace.info(
                 String.format(
                     "RM::queryCustomerInfo(%d, %d)",
@@ -843,6 +859,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     // Add flight reservation to this customer.
     @Override
     public boolean reserveFlight(int id, int customerId, int flightNumber) {
+	initializeEnv(); 
         Trace.info(
                 String.format(
                     "RM::reserveFlight(%d, %d, %d)",
@@ -1013,6 +1030,7 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
             String location,
             boolean car,
             boolean room) {
+	initializeEnv();
         try(final Connection connection = database.getConnection()) {
             connection.setAutoCommit(false);
 
