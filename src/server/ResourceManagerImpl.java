@@ -5,19 +5,63 @@
 
 package server;
 
-import java.util.*;
+import server.ws.*; 
+import java.beans.PropertyVetoException;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import javax.jws.WebService;
-import sql.sqlInterface;
-import sql.sqlInterfaceImpl; 
-
-@WebService(endpointInterface = "server.ws.ResourceManager")
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import java.io.BufferedReader;
+import java.io.FileReader; 
+import java.io.File;
+import javax.naming.NamingException;
+import java.net.URL;
+import java.net.MalformedURLException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.*;
+import org.apache.commons.dbcp2.BasicDataSource;
+@WebService(endpointInterface="server.ws.ResourceManager")
 public class ResourceManagerImpl implements server.ws.ResourceManager {
-    
-    protected RMHashtable m_itemHT = new RMHashtable();
-    
-    
+    private static BasicDataSource database;
+    boolean initialized = false; 
+    public void initializeEnv() throws IOException, SQLException, PropertyVetoException {
+	String dbUrl=""; 
+	String dbUsername=""; 
+	String dbPassword=""; 
+	if(initialized)
+		return;
+
+        try{
+               	File f = new File("sql.secrets");
+                if(f.exists() && !f.isDirectory()) {
+                    BufferedReader br = new BufferedReader(new FileReader("sql.secrets"));
+                  dbUrl=br.readLine();
+                   dbUsername=br.readLine();
+                   dbPassword=br.readLine();
+                        } else {
+                                System.out.println("secrets file not found in project root directory");
+                        }
+                } catch (Exception e) {
+                        e.printStackTrace();
+                }
+
+        database = new BasicDataSource();
+        database.setDriverClassName("org.postgresql.Driver");
+        database.setUsername(dbUsername);
+        database.setPassword(dbPassword);
+        database.setUrl(dbUrl);
+	initialized=true; 
+    }
+
+    protected RMHashtable m_itemHT;
+
     // Basic operations on RMItem //
-    
+
     // Read a data item.
     private RMItem readData(int id, String key) {
         synchronized(m_itemHT) {
@@ -31,24 +75,24 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
             m_itemHT.put(key, value);
         }
     }
-    
+
     // Remove the item out of storage.
     protected RMItem removeData(int id, String key) {
         synchronized(m_itemHT) {
             return (RMItem) m_itemHT.remove(key);
         }
     }
-    
-    
+
+
     // Basic operations on ReservableItem //
-    
+
     // Delete the entire item.
     protected boolean deleteItem(int id, String key) {
         Trace.info("RM::deleteItem(" + id + ", " + key + ") called.");
         ReservableItem curObj = (ReservableItem) readData(id, key);
         // Check if there is such an item in the storage.
         if (curObj == null) {
-            Trace.warn("RM::deleteItem(" + id + ", " + key + ") failed: " 
+            Trace.warn("RM::deleteItem(" + id + ", " + key + ") failed: "
                     + " item doesn't exist.");
             return false;
         } else {
@@ -64,24 +108,24 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
             }
         }
     }
-    
+
     // Query the number of available seats/rooms/cars.
     protected int queryNum(int id, String key) {
         Trace.info("RM::queryNum(" + id + ", " + key + ") called.");
         ReservableItem curObj = (ReservableItem) readData(id, key);
-        int value = 0;  
+        int value = 0;
         if (curObj != null) {
             value = curObj.getCount();
         }
         Trace.info("RM::queryNum(" + id + ", " + key + ") OK: " + value);
         return value;
-    }    
-    
+    }
+
     // Query the price of an item.
     protected int queryPrice(int id, String key) {
         Trace.info("RM::queryCarsPrice(" + id + ", " + key + ") called.");
         ReservableItem curObj = (ReservableItem) readData(id, key);
-        int value = 0; 
+        int value = 0;
         if (curObj != null) {
             value = curObj.getPrice();
         }
@@ -90,223 +134,537 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
     }
 
     // Reserve an item.
-    protected boolean reserveItem(int id, int customerId, 
+    protected boolean reserveItem(int id, int customerId,
                                   String key, String location) {
-        Trace.info("RM::reserveItem(" + id + ", " + customerId + ", " 
+        Trace.info("RM::reserveItem(" + id + ", " + customerId + ", "
                 + key + ", " + location + ") called.");
         // Read customer object if it exists (and read lock it).
         Customer cust = (Customer) readData(id, Customer.getKey(customerId));
         if (cust == null) {
-            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", " 
+            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", "
                    + key + ", " + location + ") failed: customer doesn't exist.");
             return false;
-        } 
-        
+        }
+
         // Check if the item is available.
         ReservableItem item = (ReservableItem) readData(id, key);
         if (item == null) {
-            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", " 
+            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", "
                     + key + ", " + location + ") failed: item doesn't exist.");
             return false;
         } else if (item.getCount() == 0) {
-            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", " 
+            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", "
                     + key + ", " + location + ") failed: no more items.");
             return false;
         } else {
             // Do reservation.
             cust.reserve(key, location, item.getPrice());
             writeData(id, cust.getKey(), cust);
-            
+
             // Decrease the number of available items in the storage.
             item.setCount(item.getCount() - 1);
             item.setReserved(item.getReserved() + 1);
-            
-            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", " 
+
+            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", "
                     + key + ", " + location + ") OK.");
             return true;
         }
     }
-    
-    
+
+    /**
+     * Gets the id of a location, persisting a new location to the database if
+     * necessary.
+     *
+     * @param connection The database connection (transaction) within which
+     * to perform the insertion/selection.
+     * @param location The name of the location to find or create.
+     */
+    private int getOrCreateLocation(Connection connection, String location)
+    throws SQLException {
+        final PreparedStatement stmt = connection.prepareStatement(
+                "WITH new " +
+                "AS ( " +
+                "  INSERT INTO location ( name ) " +
+                "  SELECT ? " +
+                "  WHERE NOT EXISTS ( " +
+                "    SELECT 1 " +
+                "    FROM location l " +
+                "    WHERE l.name = ? " +
+                "  ) " +
+                "  RETURNING id " +
+                ") " +
+                "SELECT id " +
+                "FROM new " +
+                "UNION " +
+                "SELECT l.id " +
+                "FROM location l " +
+                "WHERE l.name = ? "
+        );
+        stmt.setString(1, location);
+        stmt.setString(2, location);
+        stmt.setString(3, location);
+
+        final ResultSet rs = stmt.executeQuery();
+        if(!rs.next())
+            throw new RuntimeException("Unable to insert/select location.");
+
+        final int id = rs.getInt(1);
+
+        return id;
+    }
+
     // Flight operations //
-    
+
     // Create a new flight, or add seats to existing flight.
-    // Note: if flightPrice <= 0 and the flight already exists, it maintains 
+    // Note: if flightPrice <= 0 and the flight already exists, it maintains
     // its current price.
     @Override
-    public boolean addFlight(int id, int flightNumber, 
+    public boolean addFlight(int id, int flightNumber,
                              int numSeats, int flightPrice) {
-        Trace.info("RM::addFlight(" + id + ", " + flightNumber 
+        Trace.info("RM::addFlight(" + id + ", " + flightNumber
                 + ", $" + flightPrice + ", " + numSeats + ") called.");
-        Flight curObj = (Flight) readData(id, Flight.getKey(flightNumber));
-        if (curObj == null) {
-            // Doesn't exist; add it.
-            Flight newObj = new Flight(flightNumber, numSeats, flightPrice);
-            writeData(id, newObj.getKey(), newObj);
-            Trace.info("RM::addFlight(" + id + ", " + flightNumber 
-                    + ", $" + flightPrice + ", " + numSeats + ") OK.");
-        } else {
-            // Add seats to existing flight and update the price.
-            curObj.setCount(curObj.getCount() + numSeats);
-            if (flightPrice > 0) {
-                curObj.setPrice(flightPrice);
+
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            for(int i = 0; i < numSeats; i++) {
+                final PreparedStatement stmt = connection.prepareStatement(
+                        "INSERT INTO flight ( flight_number, price ) " +
+                        "VALUES ( ?, ? ) "
+                );
+                stmt.setInt(1, flightNumber);
+                stmt.setInt(2, flightPrice);
+                stmt.executeUpdate();
             }
-            writeData(id, curObj.getKey(), curObj);
-            Trace.info("RM::addFlight(" + id + ", " + flightNumber 
-                    + ", $" + flightPrice + ", " + numSeats + ") OK: "
-                    + "seats = " + curObj.getCount() + ", price = $" + flightPrice);
+
+            connection.commit();
+            return true;
         }
-        return(true);
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
 
     @Override
     public boolean deleteFlight(int id, int flightNumber) {
-        return deleteItem(id, Flight.getKey(flightNumber));
+        Trace.info(
+                String.format(
+                    "RM::deleteFlight(%d, %d)",
+                    id,
+                    flightNumber
+                )
+        );
+
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final PreparedStatement stmt = connection.prepareStatement(
+                    "DELETE FROM flight " +
+                    "WHERE flight_number = ? "
+            );
+            stmt.setInt(1, flightNumber);
+            stmt.executeUpdate();
+
+            connection.commit();
+            return true;
+        }
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
 
     // Returns the number of empty seats on this flight.
     @Override
     public int queryFlight(int id, int flightNumber) {
-        return queryNum(id, Flight.getKey(flightNumber));
+        Trace.info(
+                String.format(
+                    "RM::queryFlight(%d, %d)",
+                    id,
+                    flightNumber
+                )
+        );
+
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final PreparedStatement stmt = connection.prepareStatement(
+                    "SELECT COUNT(f.id) " +
+                    "FROM flight f " +
+                    "WHERE NOT EXISTS ( " +
+                    "        SELECT 1 " +
+                    "        FROM flight_reservation fr " +
+                    "        WHERE fr.flight_id = f.id " +
+                    "      ) " +
+                    "  AND f.flight_number = ? "
+            );
+            stmt.setInt(1, flightNumber);
+
+            final ResultSet rs = stmt.executeQuery();
+            rs.next();
+            final int count = rs.getInt(1);
+
+            connection.commit();
+            return count;
+        }
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
 
     // Returns price of this flight.
     public int queryFlightPrice(int id, int flightNumber) {
-        return queryPrice(id, Flight.getKey(flightNumber));
-    }
+        Trace.info(
+                String.format(
+                    "RM::queryFlightPrice(%d, %d)",
+                    id,
+                    flightNumber
+                )
+        );
 
-    /*
-    // Returns the number of reservations for this flight. 
-    public int queryFlightReservations(int id, int flightNumber) {
-        Trace.info("RM::queryFlightReservations(" + id 
-                + ", #" + flightNumber + ") called.");
-        RMInteger numReservations = (RMInteger) readData(id, 
-                Flight.getNumReservationsKey(flightNumber));
-        if (numReservations == null) {
-            numReservations = new RMInteger(0);
-       }
-        Trace.info("RM::queryFlightReservations(" + id + 
-                ", #" + flightNumber + ") = " + numReservations);
-        return numReservations.getValue();
-    }
-    */
-    
-    /*
-    // Frees flight reservation record. Flight reservation records help us 
-    // make sure we don't delete a flight if one or more customers are 
-    // holding reservations.
-    public boolean freeFlightReservation(int id, int flightNumber) {
-        Trace.info("RM::freeFlightReservations(" + id + ", " 
-                + flightNumber + ") called.");
-        RMInteger numReservations = (RMInteger) readData(id, 
-                Flight.getNumReservationsKey(flightNumber));
-        if (numReservations != null) {
-            numReservations = new RMInteger(
-                    Math.max(0, numReservations.getValue() - 1));
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final PreparedStatement stmt = connection.prepareStatement(
+                    "SELECT MIN(f.price) " +
+                    "FROM flight f " +
+                    "WHERE NOT EXISTS ( " +
+                    "        SELECT 1 " +
+                    "        FROM flight_reservation fr " +
+                    "        WHERE fr.flight_id = f.id " +
+                    "      ) " +
+                    "  AND f.flight_number = ? "
+            );
+            stmt.setInt(1, flightNumber);
+
+            final ResultSet rs = stmt.executeQuery();
+            rs.next();
+
+            final int price = rs.getInt(1);
+
+            if(rs.wasNull()) {
+                Trace.warn(
+                        String.format(
+                            "RM::queryFlightPrice(%d, %s): " +
+                            "no flight for minimum price",
+                            id,
+                            flightNumber
+                        )
+                );
+                return -1; // indicates error to the client
+            }
+
+            connection.commit();
+            return price;
         }
-        writeData(id, Flight.getNumReservationsKey(flightNumber), numReservations);
-        Trace.info("RM::freeFlightReservations(" + id + ", " 
-                + flightNumber + ") OK: reservations = " + numReservations);
-        return true;
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
-    */
-
 
     // Car operations //
 
     // Create a new car location or add cars to an existing location.
-    // Note: if price <= 0 and the car location already exists, it maintains 
+    // Note: if price <= 0 and the car location already exists, it maintains
     // its current price.
     @Override
     public boolean addCars(int id, String location, int numCars, int carPrice) {
-        Trace.info("RM::addCars(" + id + ", " + location + ", " 
+        Trace.info("RM::addCars(" + id + ", " + location + ", "
                 + numCars + ", $" + carPrice + ") called.");
-        Car curObj = (Car) readData(id, Car.getKey(location));
-        if (curObj == null) {
-            // Doesn't exist; add it.
-            Car newObj = new Car(location, numCars, carPrice);
-            writeData(id, newObj.getKey(), newObj);
-            Trace.info("RM::addCars(" + id + ", " + location + ", " 
-                    + numCars + ", $" + carPrice + ") OK.");
-        } else {
-            // Add count to existing object and update price.
-            curObj.setCount(curObj.getCount() + numCars);
-            if (carPrice > 0) {
-                curObj.setPrice(carPrice);
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final int locationId = getOrCreateLocation(connection, location);
+
+            for(int i = 0; i < numCars; i++) {
+                final PreparedStatement stmt = connection.prepareStatement(
+                        "INSERT INTO car ( location_id, price ) " +
+                        "VALUES ( ?, ? ) "
+                );
+                stmt.setInt(1, locationId);
+                stmt.setInt(2, carPrice);
+                stmt.executeUpdate();
             }
-            writeData(id, curObj.getKey(), curObj);
-            Trace.info("RM::addCars(" + id + ", " + location + ", " 
-                    + numCars + ", $" + carPrice + ") OK: " 
-                    + "cars = " + curObj.getCount() + ", price = $" + carPrice);
+
+            connection.commit();
+            return true;
         }
-        return(true);
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
 
     // Delete cars from a location.
     @Override
     public boolean deleteCars(int id, String location) {
-        return deleteItem(id, Car.getKey(location));
+        Trace.info(
+                String.format(
+                    "RM::deleteCars(%d, %s)",
+                    id,
+                    location
+                )
+        );
+
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final PreparedStatement stmt = connection.prepareStatement(
+                    "DELETE FROM car AS c " +
+                    "USING location l " +
+                    "WHERE l.id = c.location_id " +
+                    "  AND l.name = ? "
+            );
+            stmt.setString(1, location);
+            stmt.executeUpdate();
+
+            connection.commit();
+            return true;
+        }
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
 
     // Returns the number of cars available at a location.
     @Override
     public int queryCars(int id, String location) {
-        return queryNum(id, Car.getKey(location));
+        Trace.info(
+                String.format(
+                    "RM::queryCars(%d, %s)",
+                    id,
+                    location
+                )
+        );
+
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final PreparedStatement stmt = connection.prepareStatement(
+                    "SELECT COUNT(1) " +
+                    "FROM car c, location l " +
+                    "WHERE c.location_id = l.id " +
+                    "  AND l.name = ? " +
+                    "  AND NOT EXISTS ( " +
+                    "        SELECT 1 " +
+                    "        FROM car_reservation cr " +
+                    "        WHERE cr.car_id = c.id " +
+                    "      ) "
+            );
+            stmt.setString(1, location);
+
+            final ResultSet rs = stmt.executeQuery();
+            rs.next();
+            final int count = rs.getInt(1);
+
+            connection.commit();
+            return count;
+        }
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
 
     // Returns price of cars at this location.
     @Override
     public int queryCarsPrice(int id, String location) {
-        return queryPrice(id, Car.getKey(location));
+        Trace.info(
+                String.format(
+                    "RM::queryCarsPrice(%d, %s)",
+                    id,
+                    location
+                )
+        );
+
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final PreparedStatement stmt = connection.prepareStatement(
+                    "SELECT MIN(c.price) " +
+                    "FROM car c, location l " +
+                    "WHERE c.location_id = l.id " +
+                    "  AND l.name = ? "
+            );
+            stmt.setString(1, location);
+
+            final ResultSet rs = stmt.executeQuery();
+            rs.next();
+
+            final int price = rs.getInt(1);
+
+            if(rs.wasNull()) {
+                Trace.warn(
+                        String.format(
+                            "RM::queryCarsPrice(%d, %s): " +
+                            "no cars for minimum price",
+                            id,
+                            location
+                        )
+                );
+                return -1; // indicates error to the client
+            }
+
+            connection.commit();
+            return price;
+        }
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
-    
 
     // Room operations //
 
     // Create a new room location or add rooms to an existing location.
-    // Note: if price <= 0 and the room location already exists, it maintains 
+    // Note: if price <= 0 and the room location already exists, it maintains
     // its current price.
     @Override
     public boolean addRooms(int id, String location, int numRooms, int roomPrice) {
-        Trace.info("RM::addRooms(" + id + ", " + location + ", " 
-                + numRooms + ", $" + roomPrice + ") called.");
-        Room curObj = (Room) readData(id, Room.getKey(location));
-        if (curObj == null) {
-            // Doesn't exist; add it.
-            Room newObj = new Room(location, numRooms, roomPrice);
-            writeData(id, newObj.getKey(), newObj);
-            Trace.info("RM::addRooms(" + id + ", " + location + ", " 
-                    + numRooms + ", $" + roomPrice + ") OK.");
-        } else {
-            // Add count to existing object and update price.
-            curObj.setCount(curObj.getCount() + numRooms);
-            if (roomPrice > 0) {
-                curObj.setPrice(roomPrice);
+        Trace.info(
+                String.format(
+                    "RM::addRooms(%d, %s, %d, $%d)",
+                    id,
+                    location,
+                    numRooms,
+                    roomPrice
+                )
+        );
+
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final int locationId = getOrCreateLocation(connection, location);
+
+            for(int i = 0; i < numRooms; i++) {
+                final PreparedStatement stmt = connection.prepareStatement(
+                        "INSERT INTO room ( location_id, price ) " +
+                        "VALUES ( ?, ? ) "
+                );
+                stmt.setInt(1, locationId);
+                stmt.setInt(2, roomPrice);
+                stmt.executeUpdate();
             }
-            writeData(id, curObj.getKey(), curObj);
-            Trace.info("RM::addRooms(" + id + ", " + location + ", " 
-                    + numRooms + ", $" + roomPrice + ") OK: " 
-                    + "rooms = " + curObj.getCount() + ", price = $" + roomPrice);
+
+            connection.commit();
+            return true;
         }
-        return(true);
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
 
     // Delete rooms from a location.
     @Override
     public boolean deleteRooms(int id, String location) {
-        return deleteItem(id, Room.getKey(location));
+        Trace.info(
+                String.format(
+                    "RM::deleteRooms(%d, %s)",
+                    id,
+                    location
+                )
+        );
+
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final PreparedStatement stmt = connection.prepareStatement(
+                    "DELETE FROM room AS c " +
+                    "USING location l " +
+                    "WHERE l.id = c.location_id " +
+                    "  AND l.name = ? "
+            );
+            stmt.setString(1, location);
+            stmt.executeUpdate();
+
+            connection.commit();
+            return true;
+        }
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
 
     // Returns the number of rooms available at a location.
     @Override
     public int queryRooms(int id, String location) {
-        return queryNum(id, Room.getKey(location));
+        Trace.info(
+                String.format(
+                    "RM::queryRooms(%d, %s)",
+                    id,
+                    location
+                )
+        );
+
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final PreparedStatement stmt = connection.prepareStatement(
+                    "SELECT COUNT(1) " +
+                    "FROM room c, location l " +
+                    "WHERE c.location_id = l.id " +
+                    "  AND l.name = ? " +
+                    "  AND NOT EXISTS ( " +
+                    "        SELECT 1 " +
+                    "        FROM room_reservation cr " +
+                    "        WHERE cr.room_id = c.id " +
+                    "      ) "
+            );
+            stmt.setString(1, location);
+
+            final ResultSet rs = stmt.executeQuery();
+            rs.next();
+            final int count = rs.getInt(1);
+
+            connection.commit();
+            return count;
+        }
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
-    
+
     // Returns room price at this location.
     @Override
     public int queryRoomsPrice(int id, String location) {
-        return queryPrice(id, Room.getKey(location));
+        Trace.info(
+                String.format(
+                    "RM::queryRoomsPrice(%d, %s)",
+                    id,
+                    location
+                )
+        );
+
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final PreparedStatement stmt = connection.prepareStatement(
+                    "SELECT MIN(c.price) " +
+                    "FROM room c, location l " +
+                    "WHERE c.location_id = l.id " +
+                    "  AND l.name = ? "
+            );
+            stmt.setString(1, location);
+
+            final ResultSet rs = stmt.executeQuery();
+            rs.next();
+
+            final int price = rs.getInt(1);
+
+            if(rs.wasNull()) {
+                Trace.warn(
+                        String.format(
+                            "RM::queryRoomsPrice(%d, %s): " +
+                            "no rooms for minimum price",
+                            id,
+                            location
+                        )
+                );
+                return -1; // indicates error to the client
+            }
+
+            connection.commit();
+            return price;
+        }
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
 
 
@@ -314,127 +672,387 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
 
     @Override
     public int newCustomer(int id) {
-        Trace.info("INFO: RM::newCustomer(" + id + ") called.");
-        // Generate a globally unique Id for the new customer.
-        int customerId = Integer.parseInt(String.valueOf(id) +
-                String.valueOf(Calendar.getInstance().get(Calendar.MILLISECOND)) +
-                String.valueOf(Math.round(Math.random() * 100 + 1)));
-        Customer cust = new Customer(customerId);
-        writeData(id, cust.getKey(), cust);
-        Trace.info("RM::newCustomer(" + id + ") OK: " + customerId);
-        return customerId;
+        Trace.info(
+                String.format(
+                    "INFO: RM::newCustomer(%d)",
+                    id
+                )
+        );
+
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final PreparedStatement stmt = connection.prepareStatement(
+                    "INSERT INTO customer " +
+                    "DEFAULT VALUES " +
+                    "RETURNING id "
+            );
+
+            final ResultSet rs = stmt.executeQuery();
+            rs.next();
+
+            final int customerId = rs.getInt(1);
+
+            connection.commit();
+            return customerId;
+        }
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
 
-    // This method makes testing easier.
     @Override
     public boolean newCustomerId(int id, int customerId) {
-        Trace.info("INFO: RM::newCustomer(" + id + ", " + customerId + ") called.");
-        Customer cust = (Customer) readData(id, Customer.getKey(customerId));
-        if (cust == null) {
-            cust = new Customer(customerId);
-            writeData(id, cust.getKey(), cust);
-            Trace.info("INFO: RM::newCustomer(" + id + ", " + customerId + ") OK.");
-            return true;
-        } else {
-            Trace.info("INFO: RM::newCustomer(" + id + ", " + 
-                    customerId + ") failed: customer already exists.");
-            return false;
-        }
+        throw new UnsupportedOperationException();
     }
 
-    // Delete customer from the database. 
+    // Delete customer from the database.
     @Override
     public boolean deleteCustomer(int id, int customerId) {
-        Trace.info("RM::deleteCustomer(" + id + ", " + customerId + ") called.");
-        Customer cust = (Customer) readData(id, Customer.getKey(customerId));
-        if (cust == null) {
-            Trace.warn("RM::deleteCustomer(" + id + ", " 
-                    + customerId + ") failed: customer doesn't exist.");
-            return false;
-        } else {            
-            // Increase the reserved numbers of all reservable items that 
-            // the customer reserved. 
-            RMHashtable reservationHT = cust.getReservations();
-            for (Enumeration e = reservationHT.keys(); e.hasMoreElements();) {        
-                String reservedKey = (String) (e.nextElement());
-                ReservedItem reservedItem = cust.getReservedItem(reservedKey);
-                Trace.info("RM::deleteCustomer(" + id + ", " + customerId + "): " 
-                        + "deleting " + reservedItem.getCount() + " reservations "
-                        + "for item " + reservedItem.getKey());
-                ReservableItem item = 
-                        (ReservableItem) readData(id, reservedItem.getKey());
-                item.setReserved(item.getReserved() - reservedItem.getCount());
-                item.setCount(item.getCount() + reservedItem.getCount());
-                Trace.info("RM::deleteCustomer(" + id + ", " + customerId + "): "
-                        + reservedItem.getKey() + " reserved/available = " 
-                        + item.getReserved() + "/" + item.getCount());
-            }
-            // Remove the customer from the storage.
-            removeData(id, cust.getKey());
-            Trace.info("RM::deleteCustomer(" + id + ", " + customerId + ") OK.");
-            return true;
-        }
-    }
+        Trace.info(
+                String.format(
+                    "RM::deleteCustomer(%d, %d)",
+                    id,
+                    customerId
+                )
+        );
 
-    // Return data structure containing customer reservation info. 
-    // Returns null if the customer doesn't exist. 
-    // Returns empty RMHashtable if customer exists but has no reservations.
-    public RMHashtable getCustomerReservations(int id, int customerId) {
-        Trace.info("RM::getCustomerReservations(" + id + ", " 
-                + customerId + ") called.");
-        Customer cust = (Customer) readData(id, Customer.getKey(customerId));
-        if (cust == null) {
-            Trace.info("RM::getCustomerReservations(" + id + ", " 
-                    + customerId + ") failed: customer doesn't exist.");
-            return null;
-        } else {
-            return cust.getReservations();
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final PreparedStatement stmt = connection.prepareStatement(
+                    "DELETE FROM customer AS c " +
+                    "WHERE c.id = ? "
+            );
+            stmt.setInt(1, customerId);
+
+            final int rowCount = stmt.executeUpdate();
+
+            connection.commit();
+            return rowCount > 0;
+        }
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
         }
     }
 
     // Return a bill.
     @Override
     public String queryCustomerInfo(int id, int customerId) {
-        Trace.info("RM::queryCustomerInfo(" + id + ", " + customerId + ") called.");
-        Customer cust = (Customer) readData(id, Customer.getKey(customerId));
-        if (cust == null) {
-            Trace.warn("RM::queryCustomerInfo(" + id + ", " 
-                    + customerId + ") failed: customer doesn't exist.");
-            // Returning an empty bill means that the customer doesn't exist.
-            return "";
-        } else {
-            String s = cust.printBill();
-            Trace.info("RM::queryCustomerInfo(" + id + ", " + customerId + "): \n");
-            System.out.println(s);
-            return s;
+        Trace.info(
+                String.format(
+                    "RM::queryCustomerInfo(%d, %d)",
+                    id,
+                    customerId
+                )
+        );
+
+        StringBuffer sb = new StringBuffer();
+        int totalPrice = 0;
+
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final PreparedStatement flightStmt = connection.prepareStatement(
+                    "SELECT f.flight_number, f.price " +
+                    "FROM flight f, flight_reservation fr, customer cu " +
+                    "WHERE fr.flight_id = f.id " +
+                    "  AND fr.customer_id = cu.id " +
+                    "  AND cu.id = ? "
+            );
+            flightStmt.setInt(1, customerId);
+
+            final PreparedStatement carStmt = connection.prepareStatement(
+                    "SELECT l.name, c.price " +
+                    "FROM car c, car_reservation cr, location l, customer cu " +
+                    "WHERE cr.car_id = c.id " +
+                    "  AND cr.customer_id = cu.id " +
+                    "  AND c.location_id = l.id " +
+                    "  AND cu.id = ? "
+            );
+            carStmt.setInt(1, customerId);
+
+            final PreparedStatement roomStmt = connection.prepareStatement(
+                    "SELECT l.name, r.price " +
+                    "FROM room r, room_reservation rr, location l, customer cu " +
+                    "WHERE rr.room_id = r.id " +
+                    "  AND rr.customer_id = cu.id " +
+                    "  AND r.location_id = l.id " +
+                    "  AND cu.id = ? "
+            );
+            roomStmt.setInt(1, customerId);
+
+            final ResultSet flightRs = flightStmt.executeQuery();
+
+            sb.append("Flights:\n");
+            while(flightRs.next()) {
+                final int flightNumber = flightRs.getInt(1);
+                final int flightPrice = flightRs.getInt(2);
+                totalPrice += flightPrice;
+                sb.append(
+                        String.format(
+                            "#%d -- $%d.00\n",
+                            flightNumber,
+                            flightPrice
+                        )
+                );
+            }
+
+            final ResultSet carRs = carStmt.executeQuery();
+
+            sb.append("Cars:\n");
+            while(carRs.next()) {
+                final String carLocation = carRs.getString(1);
+                final int carPrice = carRs.getInt(2);
+                totalPrice += carPrice;
+                sb.append(
+                        String.format(
+                            "%s -- $%d.00\n",
+                            carLocation,
+                            carPrice
+                        )
+                );
+            }
+
+            final ResultSet roomRs = roomStmt.executeQuery();
+
+            sb.append("Rooms:\n");
+            while(roomRs.next()) {
+                final String roomLocation = roomRs.getString(1);
+                final int roomPrice = roomRs.getInt(2);
+                totalPrice += roomPrice;
+                sb.append(
+                        String.format(
+                            "%s -- $%d.00\n",
+                            roomLocation,
+                            roomPrice
+                        )
+                );
+            }
+
+            sb.append(String.format("Total: $%d.00\n", totalPrice));
+
+            connection.commit();
+            return sb.toString();
+        }
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
         }
     }
 
-    // Add flight reservation to this customer.  
+    // Add flight reservation to this customer.
     @Override
     public boolean reserveFlight(int id, int customerId, int flightNumber) {
-        return reserveItem(id, customerId, 
-                Flight.getKey(flightNumber), String.valueOf(flightNumber));
+        Trace.info(
+                String.format(
+                    "RM::reserveFlight(%d, %d, %d)",
+                    id,
+                    customerId,
+                    flightNumber
+                )
+        );
+
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final int insertedRows = insertFlightReservation(
+                    connection,
+                    customerId,
+                    flightNumber
+            ).executeUpdate();
+
+            connection.commit();
+            return insertedRows > 0;
+        }
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
 
-    // Add car reservation to this customer. 
+    // Add car reservation to this customer.
     @Override
     public boolean reserveCar(int id, int customerId, String location) {
-        return reserveItem(id, customerId, Car.getKey(location), location);
+        Trace.info(
+                String.format(
+                    "RM::reserveCar(%d, %d, %s)",
+                    id,
+                    customerId,
+                    location
+                )
+        );
+
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final int insertedRows = insertCarReservation(
+                    connection,
+                    customerId,
+                    location
+            ).executeUpdate();
+
+            connection.commit();
+            return insertedRows > 0;
+        }
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
 
-    // Add room reservation to this customer. 
+    // Add room reservation to this customer.
     @Override
     public boolean reserveRoom(int id, int customerId, String location) {
-        return reserveItem(id, customerId, Room.getKey(location), location);
+        Trace.info(
+                String.format(
+                    "RM::reserveRoom(%d, %d, %s)",
+                    id,
+                    customerId,
+                    location
+                )
+        );
+
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final int insertedRows = insertRoomReservation(
+                    connection,
+                    customerId,
+                    location
+            ).executeUpdate();
+
+            connection.commit();
+            return insertedRows > 0;
+        }
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
-    
+
+    private PreparedStatement insertFlightReservation(
+            Connection connection,
+            int customerId,
+            int flightNumber
+    ) throws SQLException {
+        final PreparedStatement stmt = connection.prepareStatement(
+                "INSERT INTO flight_reservation " +
+                "            ( flight_id, customer_id ) " +
+                "SELECT f.id, ? " +
+                "FROM flight f " +
+                "WHERE NOT EXISTS ( " +
+                "        SELECT 1 " +
+                "        FROM flight_reservation fr " +
+                "        WHERE fr.flight_id = f.id " +
+                "      ) " +
+                "  AND f.flight_number = ? " +
+                "ORDER BY f.price ASC " +
+                "LIMIT 1 "
+        );
+        stmt.setInt(1, customerId);
+        stmt.setInt(2, flightNumber);
+
+        return stmt;
+    }
+
+    private PreparedStatement insertCarReservation(
+            Connection connection,
+            int customerId,
+            String location
+    ) throws SQLException {
+        final PreparedStatement stmt = connection.prepareStatement(
+                "INSERT INTO car_reservation " +
+                "            ( car_id, customer_id ) " +
+                "SELECT c.id, ? " +
+                "FROM car c, location l " +
+                "WHERE NOT EXISTS ( " +
+                "        SELECT 1 " +
+                "        FROM car_reservation cr " +
+                "        WHERE cr.car_id = c.id " +
+                "      ) " +
+                "  AND c.location_id = l.id " +
+                "  AND l.name = ? " +
+                "ORDER BY c.price ASC " +
+                "LIMIT 1 "
+        );
+        stmt.setInt(1, customerId);
+        stmt.setString(2, location);
+
+        return stmt;
+    }
+
+    private PreparedStatement insertRoomReservation(
+            Connection connection,
+            int customerId,
+            String location
+    ) throws SQLException {
+        final PreparedStatement stmt = connection.prepareStatement(
+                "INSERT INTO room_reservation " +
+                "            ( room_id, customer_id ) " +
+                "SELECT r.id, ? " +
+                "FROM room r, location l " +
+                "WHERE NOT EXISTS ( " +
+                "        SELECT 1 " +
+                "        FROM room_reservation rr " +
+                "        WHERE rr.room_id = r.id " +
+                "      ) " +
+                "  AND r.location_id = l.id " +
+                "  AND l.name = ? " +
+                "ORDER BY r.price ASC " +
+                "LIMIT 1 "
+        );
+        stmt.setInt(1, customerId);
+        stmt.setString(2, location);
+
+        return stmt;
+    }
 
     // Reserve an itinerary.
     @Override
-    public boolean reserveItinerary(int id, int customerId, Vector flightNumbers,
-                                    String location, boolean car, boolean room) {
-        return false;
-    }
+    public boolean reserveItinerary(
+            int id,
+            int customerId,
+            Vector flightNumbers,
+            String location,
+            boolean car,
+            boolean room) {
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
 
+            if(car) {
+                final int rowCount = insertCarReservation(
+                        connection,
+                        customerId,
+                        location
+                ).executeUpdate();
+                if(rowCount == 0)
+                    return false;
+            }
+
+            if(room) {
+                final int rowCount = insertRoomReservation(
+                        connection,
+                        customerId,
+                        location
+                ).executeUpdate();
+                if(rowCount == 0)
+                    return false;
+            }
+
+            for(Object o : flightNumbers) {
+                Trace.info(o.toString());
+                int flightNumber = Integer.parseInt((String)o);
+                final int rowCount = insertFlightReservation(
+                        connection,
+                        customerId,
+                        flightNumber
+                ).executeUpdate();
+                if(rowCount == 0)
+                    return false;
+            }
+
+            connection.commit();
+            return true;
+        }
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
+    }
 }
