@@ -3,6 +3,7 @@
 
     <property name="server.bindAddress" value="localhost"/>
     <property name="server.listenPort" value="8080"/>
+    <property name="server.type" value="item"/>
 
     <property name="middleware.hostname" value="localhost"/>
     <property name="middleware.bindAddress" value="0.0.0.0"/>
@@ -86,6 +87,7 @@
     </target>
 
     <target name="server" depends="build-server">
+        <echo message="Lauching ${server.type} server."/>
         <java classname="server.sockets.Server">
             <classpath>
                 <pathelement location="${basedir}/build/server" />

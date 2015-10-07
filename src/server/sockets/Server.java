@@ -63,13 +63,26 @@ public class Server implements Runnable {
     throws Exception {
         String address = args[0];
         int port = Integer.parseInt(args[1]);
+        String serverType = args[2];
 
         // TODO read a file with this configuration
-        ResourceManager resourceManager = new ResourceManagerImpl(
-                "jax",
-                "",
-                "jdbc:postgresql://localhost:5432/jax"
-        );
+        ResourceManager resourceManager = null
+        if(serverType.equals("customer")) {
+            resourceManager = new CustomerResourceManager(
+                    "jax",
+                    "",
+                    "jdbc:postgresql://localhost:5432/jax"
+            );
+        }
+        else if(serverType.equals("item")) {
+            resourceManager = new ItemResourceManager(
+                    "jax",
+                    "",
+                    "jdbc:postgresql://localhost:5432/jax"
+            );
+        }
+        else
+            throw new RuntimeException("Please give the server a type: 'customer' or 'item'.");
 
         Server server = new ServerBuilder()
             .withListenPort(port)

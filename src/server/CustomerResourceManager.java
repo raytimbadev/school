@@ -18,10 +18,10 @@ import java.sql.Statement;
 import java.util.*;
 import org.apache.commons.dbcp2.BasicDataSource;
 
-public class ResourceManagerImpl implements ResourceManager {
+public class CustomerResourceManager implements ResourceManager {
     final BasicDataSource database;
 
-    public ResourceManagerImpl(
+    public CustomerResourceManager(
             String dbUsername,
             String dbPassword,
             String dbUrl
@@ -31,161 +31,6 @@ public class ResourceManagerImpl implements ResourceManager {
         database.setUsername(dbUsername);
         database.setPassword(dbPassword);
         database.setUrl(dbUrl);
-    }
-
-    protected RMHashtable m_itemHT;
-
-    // Basic operations on RMItem //
-
-    // Read a data item.
-    private RMItem readData(int id, String key) {
-        synchronized(m_itemHT) {
-            return (RMItem) m_itemHT.get(key);
-        }
-    }
-
-    // Write a data item.
-    private void writeData(int id, String key, RMItem value) {
-        synchronized(m_itemHT) {
-            m_itemHT.put(key, value);
-        }
-    }
-
-    // Remove the item out of storage.
-    protected RMItem removeData(int id, String key) {
-        synchronized(m_itemHT) {
-            return (RMItem) m_itemHT.remove(key);
-        }
-    }
-
-
-    // Basic operations on ReservableItem //
-
-    // Delete the entire item.
-    protected boolean deleteItem(int id, String key) {
-        Trace.info("RM::deleteItem(" + id + ", " + key + ") called.");
-        ReservableItem curObj = (ReservableItem) readData(id, key);
-        // Check if there is such an item in the storage.
-        if (curObj == null) {
-            Trace.warn("RM::deleteItem(" + id + ", " + key + ") failed: "
-                    + " item doesn't exist.");
-            return false;
-        } else {
-            if (curObj.getReserved() == 0) {
-                removeData(id, curObj.getKey());
-                Trace.info("RM::deleteItem(" + id + ", " + key + ") OK.");
-                return true;
-            }
-            else {
-                Trace.info("RM::deleteItem(" + id + ", " + key + ") failed: "
-                        + "some customers have reserved it.");
-                return false;
-            }
-        }
-    }
-
-    // Query the number of available seats/rooms/cars.
-    protected int queryNum(int id, String key) {
-        Trace.info("RM::queryNum(" + id + ", " + key + ") called.");
-        ReservableItem curObj = (ReservableItem) readData(id, key);
-        int value = 0;
-        if (curObj != null) {
-            value = curObj.getCount();
-        }
-        Trace.info("RM::queryNum(" + id + ", " + key + ") OK: " + value);
-        return value;
-    }
-
-    // Query the price of an item.
-    protected int queryPrice(int id, String key) {
-        Trace.info("RM::queryCarsPrice(" + id + ", " + key + ") called.");
-        ReservableItem curObj = (ReservableItem) readData(id, key);
-        int value = 0;
-        if (curObj != null) {
-            value = curObj.getPrice();
-        }
-        Trace.info("RM::queryCarsPrice(" + id + ", " + key + ") OK: $" + value);
-        return value;
-    }
-
-    // Reserve an item.
-    protected boolean reserveItem(int id, int customerId,
-                                  String key, String location) {
-        Trace.info("RM::reserveItem(" + id + ", " + customerId + ", "
-                + key + ", " + location + ") called.");
-        // Read customer object if it exists (and read lock it).
-        Customer cust = (Customer) readData(id, Customer.getKey(customerId));
-        if (cust == null) {
-            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", "
-                   + key + ", " + location + ") failed: customer doesn't exist.");
-            return false;
-        }
-
-        // Check if the item is available.
-        ReservableItem item = (ReservableItem) readData(id, key);
-        if (item == null) {
-            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", "
-                    + key + ", " + location + ") failed: item doesn't exist.");
-            return false;
-        } else if (item.getCount() == 0) {
-            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", "
-                    + key + ", " + location + ") failed: no more items.");
-            return false;
-        } else {
-            // Do reservation.
-            cust.reserve(key, location, item.getPrice());
-            writeData(id, cust.getKey(), cust);
-
-            // Decrease the number of available items in the storage.
-            item.setCount(item.getCount() - 1);
-            item.setReserved(item.getReserved() + 1);
-
-            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", "
-                    + key + ", " + location + ") OK.");
-            return true;
-        }
-    }
-
-    /**
-     * Gets the id of a location, persisting a new location to the database if
-     * necessary.
-     *
-     * @param connection The database connection (transaction) within which
-     * to perform the insertion/selection.
-     * @param location The name of the location to find or create.
-     */
-    private int getOrCreateLocation(Connection connection, String location)
-    throws SQLException {
-        final PreparedStatement stmt = connection.prepareStatement(
-                "WITH new " +
-                "AS ( " +
-                "  INSERT INTO location ( name ) " +
-                "  SELECT ? " +
-                "  WHERE NOT EXISTS ( " +
-                "    SELECT 1 " +
-                "    FROM location l " +
-                "    WHERE l.name = ? " +
-                "  ) " +
-                "  RETURNING id " +
-                ") " +
-                "SELECT id " +
-                "FROM new " +
-                "UNION " +
-                "SELECT l.id " +
-                "FROM location l " +
-                "WHERE l.name = ? "
-        );
-        stmt.setString(1, location);
-        stmt.setString(2, location);
-        stmt.setString(3, location);
-
-        final ResultSet rs = stmt.executeQuery();
-        if(!rs.next())
-            throw new RuntimeException("Unable to insert/select location.");
-
-        final int id = rs.getInt(1);
-
-        return id;
     }
 
     // Flight operations //
@@ -204,7 +49,7 @@ public class ResourceManagerImpl implements ResourceManager {
 
             for(int i = 0; i < numSeats; i++) {
                 final PreparedStatement stmt = connection.prepareStatement(
-                        "INSERT INTO flight ( flight_number, price ) " +
+                        "INSERT INTO item ( flight_number, price ) " +
                         "VALUES ( ?, ? ) "
                 );
                 stmt.setInt(1, flightNumber);
@@ -234,11 +79,13 @@ public class ResourceManagerImpl implements ResourceManager {
             connection.setAutoCommit(false);
 
             final PreparedStatement stmt = connection.prepareStatement(
-                    "DELETE FROM flight " +
+                    "DELETE FROM item " +
                     "WHERE flight_number = ? "
             );
             stmt.setInt(1, flightNumber);
             stmt.executeUpdate();
+
+            // Cascading deletes ensure that reservations are released.
 
             connection.commit();
             return true;
@@ -263,14 +110,14 @@ public class ResourceManagerImpl implements ResourceManager {
             connection.setAutoCommit(false);
 
             final PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT COUNT(f.id) " +
-                    "FROM flight f " +
+                    "SELECT COUNT(i.id) " +
+                    "FROM item i " +
                     "WHERE NOT EXISTS ( " +
                     "        SELECT 1 " +
-                    "        FROM flight_reservation fr " +
-                    "        WHERE fr.flight_id = f.id " +
+                    "        FROM item_reservation ir " +
+                    "        WHERE ir.item_id = i.id " +
                     "      ) " +
-                    "  AND f.flight_number = ? "
+                    "  AND i.flight_number = ? "
             );
             stmt.setInt(1, flightNumber);
 
@@ -300,14 +147,14 @@ public class ResourceManagerImpl implements ResourceManager {
             connection.setAutoCommit(false);
 
             final PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT MIN(f.price) " +
-                    "FROM flight f " +
+                    "SELECT MIN(i.price) " +
+                    "FROM item i " +
                     "WHERE NOT EXISTS ( " +
                     "        SELECT 1 " +
-                    "        FROM flight_reservation fr " +
-                    "        WHERE fr.flight_id = f.id " +
+                    "        FROM item_reservation ir " +
+                    "        WHERE ir.item_id = i.id " +
                     "      ) " +
-                    "  AND f.flight_number = ? "
+                    "  AND i.flight_number = ? "
             );
             stmt.setInt(1, flightNumber);
 
@@ -348,14 +195,12 @@ public class ResourceManagerImpl implements ResourceManager {
         try(final Connection connection = database.getConnection()) {
             connection.setAutoCommit(false);
 
-            final int locationId = getOrCreateLocation(connection, location);
-
             for(int i = 0; i < numCars; i++) {
                 final PreparedStatement stmt = connection.prepareStatement(
-                        "INSERT INTO car ( location_id, price ) " +
+                        "INSERT INTO item ( location, price ) " +
                         "VALUES ( ?, ? ) "
                 );
-                stmt.setInt(1, locationId);
+                stmt.setString(1, location);
                 stmt.setInt(2, carPrice);
                 stmt.executeUpdate();
             }
@@ -383,10 +228,8 @@ public class ResourceManagerImpl implements ResourceManager {
             connection.setAutoCommit(false);
 
             final PreparedStatement stmt = connection.prepareStatement(
-                    "DELETE FROM car AS c " +
-                    "USING location l " +
-                    "WHERE l.id = c.location_id " +
-                    "  AND l.name = ? "
+                    "DELETE FROM item AS i " +
+                    "WHERE i.location = ? "
             );
             stmt.setString(1, location);
             stmt.executeUpdate();
@@ -415,13 +258,12 @@ public class ResourceManagerImpl implements ResourceManager {
 
             final PreparedStatement stmt = connection.prepareStatement(
                     "SELECT COUNT(1) " +
-                    "FROM car c, location l " +
-                    "WHERE c.location_id = l.id " +
-                    "  AND l.name = ? " +
+                    "FROM item i " +
+                    "WHERE i.location = ? " +
                     "  AND NOT EXISTS ( " +
                     "        SELECT 1 " +
-                    "        FROM car_reservation cr " +
-                    "        WHERE cr.car_id = c.id " +
+                    "        FROM item_reservation ir " +
+                    "        WHERE ir.item_id = i.id " +
                     "      ) "
             );
             stmt.setString(1, location);
@@ -453,10 +295,14 @@ public class ResourceManagerImpl implements ResourceManager {
             connection.setAutoCommit(false);
 
             final PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT MIN(c.price) " +
-                    "FROM car c, location l " +
-                    "WHERE c.location_id = l.id " +
-                    "  AND l.name = ? "
+                    "SELECT MIN(i.price) " +
+                    "FROM item i" +
+                    "WHERE i.location = ? " + 
+                    "  AND NOT EXISTS ( " +
+                    "        SELECT 1 " +
+                    "        FROM item_reservation ir " +
+                    "        WHERE ir.item_id = i.id " +
+                    "      ) "
             );
             stmt.setString(1, location);
 
@@ -505,14 +351,12 @@ public class ResourceManagerImpl implements ResourceManager {
         try(final Connection connection = database.getConnection()) {
             connection.setAutoCommit(false);
 
-            final int locationId = getOrCreateLocation(connection, location);
-
             for(int i = 0; i < numRooms; i++) {
                 final PreparedStatement stmt = connection.prepareStatement(
-                        "INSERT INTO room ( location_id, price ) " +
+                        "INSERT INTO item ( location, price ) " +
                         "VALUES ( ?, ? ) "
                 );
-                stmt.setInt(1, locationId);
+                stmt.setString(1, location);
                 stmt.setInt(2, roomPrice);
                 stmt.executeUpdate();
             }
@@ -540,10 +384,8 @@ public class ResourceManagerImpl implements ResourceManager {
             connection.setAutoCommit(false);
 
             final PreparedStatement stmt = connection.prepareStatement(
-                    "DELETE FROM room AS c " +
-                    "USING location l " +
-                    "WHERE l.id = c.location_id " +
-                    "  AND l.name = ? "
+                    "DELETE FROM item AS i " +
+                    "WHERE i.name = ? "
             );
             stmt.setString(1, location);
             stmt.executeUpdate();
@@ -572,13 +414,12 @@ public class ResourceManagerImpl implements ResourceManager {
 
             final PreparedStatement stmt = connection.prepareStatement(
                     "SELECT COUNT(1) " +
-                    "FROM room c, location l " +
-                    "WHERE c.location_id = l.id " +
-                    "  AND l.name = ? " +
+                    "FROM item i " +
+                    "WHERE i.location = ? " +
                     "  AND NOT EXISTS ( " +
                     "        SELECT 1 " +
-                    "        FROM room_reservation cr " +
-                    "        WHERE cr.room_id = c.id " +
+                    "        FROM item_reservation ir " +
+                    "        WHERE ir.room_id = i.id " +
                     "      ) "
             );
             stmt.setString(1, location);
@@ -610,10 +451,9 @@ public class ResourceManagerImpl implements ResourceManager {
             connection.setAutoCommit(false);
 
             final PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT MIN(c.price) " +
-                    "FROM room c, location l " +
-                    "WHERE c.location_id = l.id " +
-                    "  AND l.name = ? "
+                    "SELECT MIN(i.price) " +
+                    "FROM item i " +
+                    "WHERE i.location = ? "
             );
             stmt.setString(1, location);
 
@@ -678,7 +518,34 @@ public class ResourceManagerImpl implements ResourceManager {
 
     @Override
     public boolean newCustomerId(int id, int customerId) {
-        throw new UnsupportedOperationException();
+        Trace.info(
+                String.format(
+                    "RM::newCustomerId(%d, %d)",
+                    id,
+                    customerId
+                )
+        );
+
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final PreparedStatement stmt = connection.prepareStatement(
+                    "SELECT COUNT(1) " +
+                    "FROM customer c " +
+                    "WHERE c.id = ? "
+            );
+            stmt.setInt(1, customerId);
+
+            final ResultSet rs = stmt.executeQuery();
+            rs.next();
+            final int count = rs.getInt(1);
+
+            return count == 1;
+        }
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
+
     }
 
     // Delete customer from the database.
@@ -714,7 +581,7 @@ public class ResourceManagerImpl implements ResourceManager {
     // Return a bill.
     @Override
     public String queryCustomerInfo(int id, int customerId) {
-        Trace.info(
+        Trace.warn(
                 String.format(
                     "RM::queryCustomerInfo(%d, %d)",
                     id,
@@ -722,97 +589,7 @@ public class ResourceManagerImpl implements ResourceManager {
                 )
         );
 
-        StringBuffer sb = new StringBuffer();
-        int totalPrice = 0;
-
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final PreparedStatement flightStmt = connection.prepareStatement(
-                    "SELECT f.flight_number, f.price " +
-                    "FROM flight f, flight_reservation fr, customer cu " +
-                    "WHERE fr.flight_id = f.id " +
-                    "  AND fr.customer_id = cu.id " +
-                    "  AND cu.id = ? "
-            );
-            flightStmt.setInt(1, customerId);
-
-            final PreparedStatement carStmt = connection.prepareStatement(
-                    "SELECT l.name, c.price " +
-                    "FROM car c, car_reservation cr, location l, customer cu " +
-                    "WHERE cr.car_id = c.id " +
-                    "  AND cr.customer_id = cu.id " +
-                    "  AND c.location_id = l.id " +
-                    "  AND cu.id = ? "
-            );
-            carStmt.setInt(1, customerId);
-
-            final PreparedStatement roomStmt = connection.prepareStatement(
-                    "SELECT l.name, r.price " +
-                    "FROM room r, room_reservation rr, location l, customer cu " +
-                    "WHERE rr.room_id = r.id " +
-                    "  AND rr.customer_id = cu.id " +
-                    "  AND r.location_id = l.id " +
-                    "  AND cu.id = ? "
-            );
-            roomStmt.setInt(1, customerId);
-
-            final ResultSet flightRs = flightStmt.executeQuery();
-
-            sb.append("Flights:\n");
-            while(flightRs.next()) {
-                final int flightNumber = flightRs.getInt(1);
-                final int flightPrice = flightRs.getInt(2);
-                totalPrice += flightPrice;
-                sb.append(
-                        String.format(
-                            "#%d -- $%d.00\n",
-                            flightNumber,
-                            flightPrice
-                        )
-                );
-            }
-
-            final ResultSet carRs = carStmt.executeQuery();
-
-            sb.append("Cars:\n");
-            while(carRs.next()) {
-                final String carLocation = carRs.getString(1);
-                final int carPrice = carRs.getInt(2);
-                totalPrice += carPrice;
-                sb.append(
-                        String.format(
-                            "%s -- $%d.00\n",
-                            carLocation,
-                            carPrice
-                        )
-                );
-            }
-
-            final ResultSet roomRs = roomStmt.executeQuery();
-
-            sb.append("Rooms:\n");
-            while(roomRs.next()) {
-                final String roomLocation = roomRs.getString(1);
-                final int roomPrice = roomRs.getInt(2);
-                totalPrice += roomPrice;
-                sb.append(
-                        String.format(
-                            "%s -- $%d.00\n",
-                            roomLocation,
-                            roomPrice
-                        )
-                );
-            }
-
-            sb.append(String.format("Total: $%d.00\n", totalPrice));
-
-            connection.commit();
-            return sb.toString();
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        throw new UnsupportedOperationException();
     }
 
     // Add flight reservation to this customer.
@@ -908,17 +685,17 @@ public class ResourceManagerImpl implements ResourceManager {
             int flightNumber
     ) throws SQLException {
         final PreparedStatement stmt = connection.prepareStatement(
-                "INSERT INTO flight_reservation " +
-                "            ( flight_id, customer_id ) " +
-                "SELECT f.id, ? " +
-                "FROM flight f " +
+                "INSERT INTO item_reservation " +
+                "            ( item_id, customer_id ) " +
+                "SELECT i.id, ? " +
+                "FROM item i " +
                 "WHERE NOT EXISTS ( " +
                 "        SELECT 1 " +
-                "        FROM flight_reservation fr " +
-                "        WHERE fr.flight_id = f.id " +
+                "        FROM item_reservation ir " +
+                "        WHERE ir.item_id = i.id " +
                 "      ) " +
-                "  AND f.flight_number = ? " +
-                "ORDER BY f.price ASC " +
+                "  AND i.flight_number = ? " +
+                "ORDER BY i.price ASC " +
                 "LIMIT 1 "
         );
         stmt.setInt(1, customerId);
@@ -933,18 +710,17 @@ public class ResourceManagerImpl implements ResourceManager {
             String location
     ) throws SQLException {
         final PreparedStatement stmt = connection.prepareStatement(
-                "INSERT INTO car_reservation " +
-                "            ( car_id, customer_id ) " +
-                "SELECT c.id, ? " +
-                "FROM car c, location l " +
+                "INSERT INTO item_reservation " +
+                "            ( item_id, customer_id ) " +
+                "SELECT i.id, ? " +
+                "FROM item i " +
                 "WHERE NOT EXISTS ( " +
                 "        SELECT 1 " +
-                "        FROM car_reservation cr " +
-                "        WHERE cr.car_id = c.id " +
+                "        FROM item_reservation ir " +
+                "        WHERE ir.item_id = i.id " +
                 "      ) " +
-                "  AND c.location_id = l.id " +
-                "  AND l.name = ? " +
-                "ORDER BY c.price ASC " +
+                "  AND i.location = ? " +
+                "ORDER BY i.price ASC " +
                 "LIMIT 1 "
         );
         stmt.setInt(1, customerId);
@@ -959,18 +735,17 @@ public class ResourceManagerImpl implements ResourceManager {
             String location
     ) throws SQLException {
         final PreparedStatement stmt = connection.prepareStatement(
-                "INSERT INTO room_reservation " +
-                "            ( room_id, customer_id ) " +
-                "SELECT r.id, ? " +
-                "FROM room r, location l " +
+                "INSERT INTO item_reservation " +
+                "            ( item_id, customer_id ) " +
+                "SELECT i.id, ? " +
+                "FROM item i " +
                 "WHERE NOT EXISTS ( " +
                 "        SELECT 1 " +
-                "        FROM room_reservation rr " +
-                "        WHERE rr.room_id = r.id " +
+                "        FROM item_reservation ir " +
+                "        WHERE ir.item_id = i.id " +
                 "      ) " +
-                "  AND r.location_id = l.id " +
-                "  AND l.name = ? " +
-                "ORDER BY r.price ASC " +
+                "  AND i.location = ? " +
+                "ORDER BY i.price ASC " +
                 "LIMIT 1 "
         );
         stmt.setInt(1, customerId);
@@ -988,46 +763,6 @@ public class ResourceManagerImpl implements ResourceManager {
             String location,
             boolean car,
             boolean room) {
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            if(car) {
-                final int rowCount = insertCarReservation(
-                        connection,
-                        customerId,
-                        location
-                ).executeUpdate();
-                if(rowCount == 0)
-                    return false;
-            }
-
-            if(room) {
-                final int rowCount = insertRoomReservation(
-                        connection,
-                        customerId,
-                        location
-                ).executeUpdate();
-                if(rowCount == 0)
-                    return false;
-            }
-
-            for(Object o : flightNumbers) {
-                Trace.info(o.toString());
-                int flightNumber = Integer.parseInt((String)o);
-                final int rowCount = insertFlightReservation(
-                        connection,
-                        customerId,
-                        flightNumber
-                ).executeUpdate();
-                if(rowCount == 0)
-                    return false;
-            }
-
-            connection.commit();
-            return true;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        throw new UnsupportedOperationException();
     }
 }
