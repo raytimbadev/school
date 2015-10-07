@@ -79,7 +79,7 @@
                 verbose="${verbose}"
                 destdir="${basedir}/build/classes"
                 srcdir="${basedir}/src"
-                includes="server/**, sql/**"
+                includes="server/**, sql/**,common/**"
                 sourceDestDir="${basedir}/build/classes"
                 procOnly="false"
                 sourcepath="${basedir}/src">
