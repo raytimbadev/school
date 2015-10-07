@@ -81,12 +81,10 @@ public class Middleware implements Runnable {
         final ResourceManager roomManager =
             new SocketResourceManager(roomAddress, roomPort);
 	
-	final InetAddress customerAddress = InetAddress.getByName(args[8]);
-	final int customerPort = Integer.parseInt(args[9]);
-	final ResourceManager roomMaanger = new SocketResourceManager(customerAddress, roomPort); 
-
-        // TODO configuration file for database access
-        final ResourceManager customerManager =
+	    final InetAddress customerAddress = InetAddress.getByName(args[8]);
+	    final int customerPort = Integer.parseInt(args[9]);
+	    final ResourceManager customerManager =
+            new SocketResourceManager(customerAddress, customerPort);
 
         ResourceManager resourceManager =
             new MiddlewareResourceManager(

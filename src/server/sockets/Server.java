@@ -1,7 +1,8 @@
 package server.sockets;
 
 import common.ResourceManager;
-import server.ResourceManagerImpl;
+import server.CustomerResourceManager;
+import server.ItemResourceManager;
 
 import common.sockets.RequestContext;
 import common.sockets.RequestHandler;
@@ -64,9 +65,10 @@ public class Server implements Runnable {
         String address = args[0];
         int port = Integer.parseInt(args[1]);
         String serverType = args[2];
+        String dbName = args[3];
 
         // TODO read a file with this configuration
-        ResourceManager resourceManager = null
+        ResourceManager resourceManager = null;
         if(serverType.equals("customer")) {
             resourceManager = new CustomerResourceManager(
                     "jax",
@@ -78,7 +80,7 @@ public class Server implements Runnable {
             resourceManager = new ItemResourceManager(
                     "jax",
                     "",
-                    "jdbc:postgresql://localhost:5432/jax"
+                    "jdbc:postgresql://localhost:5432/" + dbName
             );
         }
         else

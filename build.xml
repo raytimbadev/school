@@ -4,6 +4,7 @@
     <property name="server.bindAddress" value="localhost"/>
     <property name="server.listenPort" value="8080"/>
     <property name="server.type" value="item"/>
+    <property name="server.db.name" value="jax"/>
 
     <property name="middleware.hostname" value="localhost"/>
     <property name="middleware.bindAddress" value="0.0.0.0"/>
@@ -95,6 +96,8 @@
             </classpath>
             <arg value="${server.bindAddress}" />
             <arg value="${server.listenPort}" />
+            <arg value="${server.type}" />
+            <arg value="${server.db.name}" />
         </java>
     </target>
 
@@ -123,8 +126,8 @@
             <arg value="${carServer.listenPort}" />
             <arg value="${roomServer.hostname}" />
             <arg value="${roomServer.listenPort}" />
-	    <arg value="${customerServer.hostname}"/>
-	    <arg value="${customerServer.listenPort}"/>
+            <arg value="${customerServer.hostname}"/>
+            <arg value="${customerServer.listenPort}"/>
         </java>
     </target>
 
