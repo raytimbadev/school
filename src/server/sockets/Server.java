@@ -82,9 +82,9 @@ public class Server implements Runnable {
         }
         else if(serverType.equals("item")) {
             resourceManager = new ItemResourceManager(
-                    "jax",
-                    "",
-                    "jdbc:postgresql://localhost:5432/" + dbName
+                    dbUser,
+                    dbPass,
+                    "jdbc:postgresql://" + dbHost + ":" + dbPort + "/" + dbName
             );
         }
         else
