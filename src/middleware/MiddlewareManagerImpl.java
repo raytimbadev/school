@@ -322,13 +322,29 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		StringBuilder sb = new StringBuilder();
-		String s1 = flightManager.queryCustomerInfo(id, customerId); 
-		String s2 = roomManager.queryCustomerInfo(id, customerId); 
-		String s3 = carManager.queryCustomerInfo(id, customerId); 
-		sb.append(s1); 
-		sb.append(s2); 
-		sb.append(s3); 
+        final StringBuilder sb = new StringBuilder();
+        final boolean exists = customerManager.newCustomerId(id, customerId);
+
+        if(exists) {
+            sb.append("\nFlights:\n");
+            sb.append(flightManager.queryCustomerInfo(id, customerId));
+
+            sb.append("\nRooms:\n");
+            sb.append(roomManager.queryCustomerInfo(id, customerId));
+
+            sb.append("\nCars:\n");
+            sb.append(carManager.queryCustomerInfo(id, customerId));
+        }
+        else {
+            sb.append(
+                    String.format(
+                        "\nNo customer with id %d.",
+                        customerId
+                    )
+            );
+        }
+
+        return sb.toString();
 		return sb.toString(); 
     }
 
