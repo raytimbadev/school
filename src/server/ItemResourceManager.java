@@ -563,9 +563,8 @@ public class ItemResourceManager implements ResourceManager {
             connection.setAutoCommit(false);
 
             final PreparedStatement stmt = connection.prepareStatement(
-                    "DELETE FROM item AS i " +
-                    "USING item_reservation ir " +
-                    "WHERE i.id = ir.item_id AND ir.customer_id = ? "
+                    "DELETE FROM item_reservation AS ir " +
+                    "WHERE ir.customer_id = ? "
             );
             stmt.setInt(1, customerId);
 
