@@ -98,7 +98,7 @@ public class MiddlewareResourceManager implements ResourceManager {
 
     /* Delete all cars from a location.
      * It should not succeed if there are reservations for this location.
-     */		
+     */
     @Override
     public boolean deleteCars(int id, String location) {
         return carManager.deleteCars(
@@ -174,23 +174,23 @@ public class MiddlewareResourceManager implements ResourceManager {
     /* Create a new customer with the provided identifier. */
     @Override
     public boolean newCustomerId(int id, int customerId){
-       return customerManager.newCustomerId(id, customerId);  
+       return customerManager.newCustomerId(id, customerId);
     }
 
     /* Remove this customer and all their associated reservations. */
     @Override
     public boolean deleteCustomer(int id, int customerId) {
-	roomManager.deleteCustomer(id, customerId); 
-	flightManager.deleteCustomer(id, customerId); 
-	carManager.deleteCustomer(id, customerId); 
-	return customerManager.deleteCustomer(id,customerId); 
-	
+    roomManager.deleteCustomer(id, customerId);
+    flightManager.deleteCustomer(id, customerId);
+    carManager.deleteCustomer(id, customerId);
+    return customerManager.deleteCustomer(id,customerId);
+
     }
 
     /* Return a bill. */
     @Override
     public String queryCustomerInfo(int id, int customerId) {
-	 StringBuilder sb = new StringBuilder();
+     StringBuilder sb = new StringBuilder();
          String s1 = flightManager.queryCustomerInfo(id, customerId);
          String s2 = flightManager.queryCustomerInfo(id, customerId);
          String s3 = flightManager.queryCustomerInfo(id, customerId);
@@ -203,21 +203,21 @@ public class MiddlewareResourceManager implements ResourceManager {
     /* Reserve a seat on this flight. */
     @Override
     public boolean reserveFlight(int id, int customerId, int flightNumber) {
-	if(customerManager.newCustomerId(id, customerId)==false){
-		return false; 		
-	} 
+    if(customerManager.newCustomerId(id, customerId)==false){
+        return false;
+    }
         return flightManager.reserveFlight(
                 id,
                 customerId,
                 flightNumber);
     }
-	
+
     /* Reserve a car at this location. */
-    	@Override
+        @Override
     public boolean reserveCar(int id, int customerId, String location) {
-	if(customerManager.newCustomerId(id, customerId) == false) {
-		return false;
-	}
+    if(customerManager.newCustomerId(id, customerId) == false) {
+        return false;
+    }
         return carManager.reserveCar(
                 id,
                 customerId,
@@ -227,9 +227,9 @@ public class MiddlewareResourceManager implements ResourceManager {
     /* Reserve a room at this location. */
     @Override
     public boolean reserveRoom(int id, int customerId, String location) {
-	if(customerManager.newCustomerId(id, customerId) == false) {
-		return false; 
-	}
+    if(customerManager.newCustomerId(id, customerId) == false) {
+        return false;
+    }
         return roomManager.reserveRoom(
                 id,
                 customerId,
@@ -239,24 +239,38 @@ public class MiddlewareResourceManager implements ResourceManager {
 
     /* Reserve an itinerary. */
     @Override
-    public boolean reserveItinerary(int id, int customerId, Vector flightNumbers,
-                                    String location, boolean car, boolean room){
-	if(customerManager.newCustomerId(id,customerId) == false) {
+    public boolean reserveItinerary(
+            int id,
+            int customerId,
+            Vector flightNumbers,
+            String location,
+            boolean car,
+            boolean room) {
+        if(customerManager.newCustomerId(id,customerId) == false)
+            return false; // customer does not exist
+
+        for(int i=0; i < flightNumbers.size(); i++) {
+            final int flightNumber = Integer.parseInt((String)flightNumbers.get(i));
+            final boolean success =
+                flightManager.reserveFlight(id, customerId, flightNumber);
+            if(!success)
                 return false;
         }
-        boolean f = true;
-	boolean c = true;
-	boolean r = true; 
-        for(int i=0; i < flightNumbers.size(); i++) {
-                f = f&&flightManager.reserveFlight(id, customerId,(int)flightNumbers.get(i));
-        }
-	if(car) {
-        	c = carManager.reserveCar(id, customerId, location);
-	}
-	if(room) {
-        	 r = roomManager.reserveCar(id, customerId, location);
-	}
-        return f&&c&&r;
 
+        if(car) {
+            final boolean success =
+                carManager.reserveCar(id, customerId, location);
+            if(!success)
+                return false;
+        }
+
+        if(room) {
+            final boolean success =
+                roomManager.reserveCar(id, customerId, location);
+            if(!success)
+                return false;
+        }
+
+        return true;
     }
 }
