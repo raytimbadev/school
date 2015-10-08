@@ -345,7 +345,6 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
         }
 
         return sb.toString();
-		return sb.toString(); 
     }
 
     /* Reserve a seat on this flight. */
