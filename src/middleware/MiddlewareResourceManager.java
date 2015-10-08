@@ -190,13 +190,13 @@ public class MiddlewareResourceManager implements ResourceManager {
     @Override
     public String queryCustomerInfo(int id, int customerId) {
      StringBuilder sb = new StringBuilder();
-         sb.append("\nFlights:\n")
+         sb.append("\nFlights:\n");
          sb.append(flightManager.queryCustomerInfo(id, customerId));
 
-         sb.append("\nRooms:\n")
+         sb.append("\nRooms:\n");
          sb.append(roomManager.queryCustomerInfo(id, customerId));
 
-         sb.append("\nCars:\n")
+         sb.append("\nCars:\n");
          sb.append(carManager.queryCustomerInfo(id, customerId));
 
          return sb.toString();
