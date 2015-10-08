@@ -419,7 +419,7 @@ public class ItemResourceManager implements ResourceManager {
                     "  AND NOT EXISTS ( " +
                     "        SELECT 1 " +
                     "        FROM item_reservation ir " +
-                    "        WHERE ir.room_id = i.id " +
+                    "        WHERE ir.item_id = i.id " +
                     "      ) "
             );
             stmt.setString(1, location);
