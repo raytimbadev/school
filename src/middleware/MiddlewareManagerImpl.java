@@ -386,7 +386,7 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 	boolean c = true; 
 	boolean r = true; 
 	for(int i=0; i < flightNumbers.size(); i++) {
-		f = f&&flightManager.reserveFlight(id, customerId,(int)flightNumbers.get(i));
+		f = f&&flightManager.reserveFlight(id, customerId,Integer.parseInt((String)flightNumbers.get(i)));
 	}
 	if(car) {
 		c = carManager.reserveCar(id, customerId, location);
