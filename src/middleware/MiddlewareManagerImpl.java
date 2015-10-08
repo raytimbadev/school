@@ -389,10 +389,10 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 		f = f&&flightManager.reserveFlight(id, customerId,Integer.parseInt((String)flightNumbers.get(i)));
 	}
 	if(car) {
-		c = carManager.reserveCar(id, customerId, location);
+		c = c&&carManager.reserveCar(id, customerId, location);
 	}
 	if(room) {
-		r = roomManager.reserveCar(id, customerId, location); 
+		r = r&&roomManager.reserveRoom(id, customerId, location); 
 	} 
 	return f&&c&&r;  	
     }
