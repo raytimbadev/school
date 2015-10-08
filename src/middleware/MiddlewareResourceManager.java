@@ -180,11 +180,10 @@ public class MiddlewareResourceManager implements ResourceManager {
     /* Remove this customer and all their associated reservations. */
     @Override
     public boolean deleteCustomer(int id, int customerId) {
-    roomManager.deleteCustomer(id, customerId);
-    flightManager.deleteCustomer(id, customerId);
-    carManager.deleteCustomer(id, customerId);
-    return customerManager.deleteCustomer(id,customerId);
-
+        roomManager.deleteCustomer(id, customerId);
+        flightManager.deleteCustomer(id, customerId);
+        carManager.deleteCustomer(id, customerId);
+        return customerManager.deleteCustomer(id,customerId);
     }
 
     /* Return a bill. */
@@ -192,8 +191,8 @@ public class MiddlewareResourceManager implements ResourceManager {
     public String queryCustomerInfo(int id, int customerId) {
      StringBuilder sb = new StringBuilder();
          String s1 = flightManager.queryCustomerInfo(id, customerId);
-         String s2 = flightManager.queryCustomerInfo(id, customerId);
-         String s3 = flightManager.queryCustomerInfo(id, customerId);
+         String s2 = roomManager.queryCustomerInfo(id, customerId);
+         String s3 = carManager.queryCustomerInfo(id, customerId);
          sb.append(s1);
          sb.append(s2);
          sb.append(s3);

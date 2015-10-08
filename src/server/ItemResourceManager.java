@@ -385,7 +385,7 @@ public class ItemResourceManager implements ResourceManager {
 
             final PreparedStatement stmt = connection.prepareStatement(
                     "DELETE FROM item AS i " +
-                    "WHERE i.name = ? "
+                    "WHERE i.location = ? "
             );
             stmt.setString(1, location);
             stmt.executeUpdate();
@@ -563,8 +563,9 @@ public class ItemResourceManager implements ResourceManager {
             connection.setAutoCommit(false);
 
             final PreparedStatement stmt = connection.prepareStatement(
-                    "DELETE FROM customer AS c " +
-                    "WHERE c.id = ? "
+                    "DELETE FROM item AS i " +
+                    "USING item_reservation ir " +
+                    "WHERE i.id = ir.item_id AND ir.customer_id = ? "
             );
             stmt.setInt(1, customerId);
 
@@ -589,13 +590,47 @@ public class ItemResourceManager implements ResourceManager {
                 )
         );
 
+        String column = null;
+
+        try(final Connection connection = database.getConnection()) {
+            final PreparedStatement stmt = connection.prepareStatement(
+                    "SELECT COUNT(location) FROM item LIMIT 1"
+            );
+            final ResultSet rs = stmt.executeQuery();
+            rs.next();
+            final int count = rs.getInt(1);
+
+            // If no exceptions have been thrown at this point, then the
+            // location column exists
+            column = "location";
+        }
+        catch(SQLException e) {
+        }
+
+        if(column == null) {
+            try(final Connection connection = database.getConnection()) {
+                final PreparedStatement stmt = connection.prepareStatement(
+                        "SELECT COUNT(flight_number) FROM item LIMIT 1"
+                );
+                final ResultSet rs = stmt.executeQuery();
+                rs.next();
+                final int count = rs.getInt(1);
+
+                column = "flight_number";
+            }
+            catch(SQLException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
+        }
+
+
         StringBuffer sb = new StringBuffer();
 
         try(final Connection connection = database.getConnection()) {
             connection.setAutoCommit(false);
 
             final PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT i.price " +
+                    "SELECT i.price, i." + column + "::text " +
                     "FROM item i, item_reservation ir " +
                     "WHERE i.id = ir.item_id " +
                     "  AND ir.customer_id = ? "
@@ -606,9 +641,11 @@ public class ItemResourceManager implements ResourceManager {
 
             while(rs.next()) {
                 final int price = rs.getInt(1);
+                final String name = rs.getString(2);
                 sb.append(
                         String.format(
-                            "$%d.00\n",
+                            "%s -- $%d.00\n",
+                            name,
                             price
                         )
                 );
