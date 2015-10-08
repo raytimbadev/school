@@ -44,7 +44,6 @@ public class ResourceManagerImpl implements ResourceManager {
                     BufferedReader br = new BufferedReader(new FileReader("sql.secrets"));
                   dbUrl=br.readLine();
                    dbUsername=br.readLine();
-                   dbPassword=br.readLine();
                         } else {
                                 System.out.println("secrets file not found in project root directory");
                         }
