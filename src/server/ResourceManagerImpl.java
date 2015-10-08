@@ -27,7 +27,8 @@ import java.sql.Statement;
 import common.UncheckedThrow;
 import java.util.*;
 import org.apache.commons.dbcp2.BasicDataSource;
-@WebService(endpointInterface="server.ws.ResourceManager") 
+
+@WebService(endpointInterface="server.ws.ResourceManager")
 public class ResourceManagerImpl implements ResourceManager {
     public BasicDataSource database;
     boolean initialized = false;
@@ -44,7 +45,6 @@ public class ResourceManagerImpl implements ResourceManager {
                     BufferedReader br = new BufferedReader(new FileReader("sql.secrets"));
                   dbUrl=br.readLine();
                    dbUsername=br.readLine();
-                   dbPassword=br.readLine();
                         } else {
                                 System.out.println("secrets file not found in project root directory");
                         }
@@ -60,6 +60,7 @@ public class ResourceManagerImpl implements ResourceManager {
         initialized=true;
     }
 
+
     // Flight operations //
 
     // Create a new flight, or add seats to existing flight.
@@ -68,10 +69,9 @@ public class ResourceManagerImpl implements ResourceManager {
     @Override
     public boolean addFlight(int id, int flightNumber,
                              int numSeats, int flightPrice) {
-	  try{
-                initializeEnv();
-        }catch(Exception e){e.printStackTrace();}
-
+	try{
+		initializeEnv(); 
+	}catch(Exception e){e.printStackTrace();}
         Trace.info("RM::addFlight(" + id + ", " + flightNumber
                 + ", $" + flightPrice + ", " + numSeats + ") called.");
 
@@ -299,6 +299,7 @@ public class ResourceManagerImpl implements ResourceManager {
 	  try{
                 initializeEnv();
         }catch(Exception e){e.printStackTrace();}
+
         Trace.info(
                 String.format(
                     "RM::queryCars(%d, %s)",
@@ -340,6 +341,7 @@ public class ResourceManagerImpl implements ResourceManager {
 	  try{
                 initializeEnv();
         }catch(Exception e){e.printStackTrace();}
+
         Trace.info(
                 String.format(
                     "RM::queryCarsPrice(%d, %s)",
@@ -398,6 +400,7 @@ public class ResourceManagerImpl implements ResourceManager {
 	  try{
                 initializeEnv();
         }catch(Exception e){e.printStackTrace();}
+
         Trace.info(
                 String.format(
                     "RM::addRooms(%d, %s, %d, $%d)",
@@ -435,6 +438,7 @@ public class ResourceManagerImpl implements ResourceManager {
 	  try{
                 initializeEnv();
         }catch(Exception e){e.printStackTrace();}
+
         Trace.info(
                 String.format(
                     "RM::deleteRooms(%d, %s)",
@@ -448,7 +452,7 @@ public class ResourceManagerImpl implements ResourceManager {
 
             final PreparedStatement stmt = connection.prepareStatement(
                     "DELETE FROM item AS i " +
-                    "WHERE i.name = ? "
+                    "WHERE i.location = ? "
             );
             stmt.setString(1, location);
             stmt.executeUpdate();
@@ -467,6 +471,7 @@ public class ResourceManagerImpl implements ResourceManager {
 	  try{
                 initializeEnv();
         }catch(Exception e){e.printStackTrace();}
+
         Trace.info(
                 String.format(
                     "RM::queryRooms(%d, %s)",
@@ -508,6 +513,7 @@ public class ResourceManagerImpl implements ResourceManager {
 	  try{
                 initializeEnv();
         }catch(Exception e){e.printStackTrace();}
+
         Trace.info(
                 String.format(
                     "RM::queryRoomsPrice(%d, %s)",
@@ -559,6 +565,7 @@ public class ResourceManagerImpl implements ResourceManager {
 	  try{
                 initializeEnv();
         }catch(Exception e){e.printStackTrace();}
+
         Trace.info(
                 String.format(
                     "INFO: RM::newCustomer(%d)",
@@ -588,11 +595,14 @@ public class ResourceManagerImpl implements ResourceManager {
         }
     }
 
+
+
     @Override
     public boolean newCustomerId(int id, int customerId) {
 	  try{
                 initializeEnv();
         }catch(Exception e){e.printStackTrace();}
+
         Trace.info(
                 String.format(
                     "RM::newCustomerId(%d, %d)",
@@ -629,6 +639,7 @@ public class ResourceManagerImpl implements ResourceManager {
 	  try{
                 initializeEnv();
         }catch(Exception e){e.printStackTrace();}
+
         Trace.info(
                 String.format(
                     "RM::deleteCustomer(%d, %d)",
@@ -641,8 +652,9 @@ public class ResourceManagerImpl implements ResourceManager {
             connection.setAutoCommit(false);
 
             final PreparedStatement stmt = connection.prepareStatement(
-                    "DELETE FROM customer AS c " +
-                    "WHERE c.id = ? "
+                    "DELETE FROM item AS i " +
+                    "USING item_reservation ir " +
+                    "WHERE i.id = ir.item_id AND ir.customer_id = ? "
             );
             stmt.setInt(1, customerId);
 
@@ -658,11 +670,11 @@ public class ResourceManagerImpl implements ResourceManager {
 
     // Return a bill.
     @Override
-    public String queryCustomerInfo(int id, int customerId) {
-	  try{
-                initializeEnv();
-        }catch(Exception e){e.printStackTrace();}
-        Trace.warn(
+       public String queryCustomerInfo(int id, int customerId) {
+	try{
+	initializeEnv(); 
+	} catch(Exception e) {e.printStackTrace();}
+        Trace.info(
                 String.format(
                     "RM::queryCustomerInfo(%d, %d)",
                     id,
@@ -670,12 +682,81 @@ public class ResourceManagerImpl implements ResourceManager {
                 )
         );
 
-        throw new UnsupportedOperationException();
-    }
+        String column = null;
 
+        try(final Connection connection = database.getConnection()) {
+            final PreparedStatement stmt = connection.prepareStatement(
+                    "SELECT COUNT(location) FROM item LIMIT 1"
+            );
+            final ResultSet rs = stmt.executeQuery();
+            rs.next();
+            final int count = rs.getInt(1);
+
+            // If no exceptions have been thrown at this point, then the
+            // location column exists
+            column = "location";
+        }
+        catch(SQLException e) {
+        }
+
+        if(column == null) {
+            try(final Connection connection = database.getConnection()) {
+                final PreparedStatement stmt = connection.prepareStatement(
+                        "SELECT COUNT(flight_number) FROM item LIMIT 1"
+                );
+                final ResultSet rs = stmt.executeQuery();
+                rs.next();
+                final int count = rs.getInt(1);
+
+                column = "flight_number";
+            }
+            catch(SQLException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
+        }
+
+
+        StringBuffer sb = new StringBuffer();
+
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final PreparedStatement stmt = connection.prepareStatement(
+                    "SELECT i.price, i." + column + "::text " +
+                    "FROM item i, item_reservation ir " +
+                    "WHERE i.id = ir.item_id " +
+                    "  AND ir.customer_id = ? "
+            );
+            stmt.setInt(1, customerId);
+
+            final ResultSet rs = stmt.executeQuery();
+
+            while(rs.next()) {
+                final int price = rs.getInt(1);
+                final String name = rs.getString(2);
+                sb.append(
+                        String.format(
+                            "%s -- $%d.00\n",
+                            name,
+                            price
+                        )
+                );
+            }
+
+            connection.commit();
+            return sb.toString();
+        }
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
+    }
     // Add flight reservation to this customer.
     @Override
     public boolean reserveFlight(int id, int customerId, int flightNumber) {
+	  try{
+                initializeEnv();
+        }catch(Exception e){e.printStackTrace();}
+
         Trace.info(
                 String.format(
                     "RM::reserveFlight(%d, %d, %d)",
@@ -708,6 +789,7 @@ public class ResourceManagerImpl implements ResourceManager {
 	  try{
                 initializeEnv();
         }catch(Exception e){e.printStackTrace();}
+
         Trace.info(
                 String.format(
                     "RM::reserveCar(%d, %d, %s)",
@@ -740,6 +822,7 @@ public class ResourceManagerImpl implements ResourceManager {
 	  try{
                 initializeEnv();
         }catch(Exception e){e.printStackTrace();}
+
         Trace.info(
                 String.format(
                     "RM::reserveRoom(%d, %d, %s)",

@@ -215,7 +215,7 @@
     </target>
     <target name="generate-client" depends="setup">
         <wsimport
-                quiet="false"
+                quiet="true"
                 keep="true"
                 destdir="${basedir}/build/classes"
                 package="client"

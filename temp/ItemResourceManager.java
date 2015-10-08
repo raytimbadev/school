@@ -670,11 +670,10 @@ public class ResourceManagerImpl implements ResourceManager {
 
     // Return a bill.
     @Override
-    public String queryCustomerInfo(int id, int customerId) {
-	  try{
-                initializeEnv();
-        }catch(Exception e){e.printStackTrace();}
-
+       public String queryCustomerInfo(int id, int customerId) {
+	try{
+	initializeEnv(); 
+	} catch(Exception e) {e.printStackTrace();}
         Trace.info(
                 String.format(
                     "RM::queryCustomerInfo(%d, %d)",
@@ -683,13 +682,47 @@ public class ResourceManagerImpl implements ResourceManager {
                 )
         );
 
+        String column = null;
+
+        try(final Connection connection = database.getConnection()) {
+            final PreparedStatement stmt = connection.prepareStatement(
+                    "SELECT COUNT(location) FROM item LIMIT 1"
+            );
+            final ResultSet rs = stmt.executeQuery();
+            rs.next();
+            final int count = rs.getInt(1);
+
+            // If no exceptions have been thrown at this point, then the
+            // location column exists
+            column = "location";
+        }
+        catch(SQLException e) {
+        }
+
+        if(column == null) {
+            try(final Connection connection = database.getConnection()) {
+                final PreparedStatement stmt = connection.prepareStatement(
+                        "SELECT COUNT(flight_number) FROM item LIMIT 1"
+                );
+                final ResultSet rs = stmt.executeQuery();
+                rs.next();
+                final int count = rs.getInt(1);
+
+                column = "flight_number";
+            }
+            catch(SQLException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
+        }
+
+
         StringBuffer sb = new StringBuffer();
 
         try(final Connection connection = database.getConnection()) {
             connection.setAutoCommit(false);
 
             final PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT i.price " +
+                    "SELECT i.price, i." + column + "::text " +
                     "FROM item i, item_reservation ir " +
                     "WHERE i.id = ir.item_id " +
                     "  AND ir.customer_id = ? "
@@ -700,9 +733,11 @@ public class ResourceManagerImpl implements ResourceManager {
 
             while(rs.next()) {
                 final int price = rs.getInt(1);
+                final String name = rs.getString(2);
                 sb.append(
                         String.format(
-                            "$%d.00\n",
+                            "%s -- $%d.00\n",
+                            name,
                             price
                         )
                 );
@@ -715,7 +750,6 @@ public class ResourceManagerImpl implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(e);
         }
     }
-
     // Add flight reservation to this customer.
     @Override
     public boolean reserveFlight(int id, int customerId, int flightNumber) {
