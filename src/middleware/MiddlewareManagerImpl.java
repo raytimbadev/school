@@ -82,8 +82,8 @@ public class MiddlewareManagerImpl implements server.ws.ResourceManager {
 
 	URL customerWsdlLocation = new URL(
 		"http",
-		roomHost,
-		roomPort,
+		customerHost,
+		customerPort,
 		"/" + rmServiceName + "/service?wsdl"
 	);
 	ResourceManagerImplService customerService = new ResourceManagerImplService(
