@@ -65,15 +65,19 @@ public class Server implements Runnable {
         String address = args[0];
         int port = Integer.parseInt(args[1]);
         String serverType = args[2];
-        String dbName = args[3];
+        String dbUser = args[3];
+        String dbPass = args[4];
+        String dbHost = args[5];
+        int dbPort = Integer.parseInt(args[6]);
+        String dbName = args[7];
 
         // TODO read a file with this configuration
         ResourceManager resourceManager = null;
         if(serverType.equals("customer")) {
             resourceManager = new CustomerResourceManager(
-                    "jax",
-                    "",
-                    "jdbc:postgresql://localhost:5432/jax"
+                    dbUser,
+                    dbPass,
+                    "jdbc:postgresql://" + dbHost + ":" + dbPort + "/" + dbName
             );
         }
         else if(serverType.equals("item")) {

@@ -5,6 +5,10 @@
     <property name="server.listenPort" value="8080"/>
     <property name="server.type" value="item"/>
     <property name="server.db.name" value="jax"/>
+    <property name="server.db.user" value="jax"/>
+    <property name="server.db.pass" value=""/>
+    <property name="server.db.host" value="localhost"/>
+    <property name="server.db.port" value="5432"/>
 
     <property name="middleware.hostname" value="localhost"/>
     <property name="middleware.bindAddress" value="0.0.0.0"/>
@@ -97,6 +101,10 @@
             <arg value="${server.bindAddress}" />
             <arg value="${server.listenPort}" />
             <arg value="${server.type}" />
+            <arg value="${server.db.user}" />
+            <arg value="${server.db.pass}" />
+            <arg value="${server.db.host}" />
+            <arg value="${server.db.port}" />
             <arg value="${server.db.name}" />
         </java>
     </target>
