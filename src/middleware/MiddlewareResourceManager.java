@@ -189,17 +189,29 @@ public class MiddlewareResourceManager implements ResourceManager {
     /* Return a bill. */
     @Override
     public String queryCustomerInfo(int id, int customerId) {
-     StringBuilder sb = new StringBuilder();
-         sb.append("\nFlights:\n");
-         sb.append(flightManager.queryCustomerInfo(id, customerId));
+        final StringBuilder sb = new StringBuilder();
+        final boolean exists = customerManager.newCustomerId(id, customerId); 
 
-         sb.append("\nRooms:\n");
-         sb.append(roomManager.queryCustomerInfo(id, customerId));
+        if(exists) {
+            sb.append("\nFlights:\n");
+            sb.append(flightManager.queryCustomerInfo(id, customerId));
 
-         sb.append("\nCars:\n");
-         sb.append(carManager.queryCustomerInfo(id, customerId));
+            sb.append("\nRooms:\n");
+            sb.append(roomManager.queryCustomerInfo(id, customerId));
 
-         return sb.toString();
+            sb.append("\nCars:\n");
+            sb.append(carManager.queryCustomerInfo(id, customerId));
+        }
+        else {
+            sb.append(
+                    String.format(
+                        "\nNo customer with id %d.",
+                        customerId
+                    )
+            );
+        }
+
+        return sb.toString();
     }
 
     /* Reserve a seat on this flight. */
