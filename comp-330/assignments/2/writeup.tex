@@ -13,6 +13,8 @@
 
 \begin{document}
 
+\maketitle
+
 \begin{enumerate}
     \item
         Give regular expressions for the following languages over $\{a, b\}$.
@@ -30,11 +32,13 @@
                 (b(a + b))^*(b + \epsilon)
                 $$
 
-            \item 
+            \item
                 $\{w | w \text{ contains at least two $a$s and at most one $b$}\}$
 
                 $$
-                a^*aaa^*ba^* + a^*ba^*aaa^* + a^*abaa^*
+                a^*aaa^*(b+\epsilon)a^* +
+                a^*(b+\epsilon)a^*aaa^* +
+                a^*a(b+\epsilon)aa^*
                 $$
         \end{enumerate}
 
@@ -110,7 +114,7 @@
         $\{a, b\}$.
 
         \begin{enumerate}
-            \item 
+            \item
                 $\{xwx^R | x \in \Sigma^*, w \in \Sigma^*, |x| > 0, |w| > 0\}$
                 where $x^R$ means $x$ reversed.
 
