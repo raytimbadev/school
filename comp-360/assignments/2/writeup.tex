@@ -1,0 +1,95 @@
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{amsthm,amsmath,amssymb}
+\usepackage[margin=2.0cm]{geometry}
+
+\newtheorem{proposition}{Proposition}
+
+\newcommand{\R}{\mathbb{R}}
+
+\author{Jacob Thomas Errington}
+\title{Assignment \#2 \\ Algorithm Design -- COMP 360}
+\date{13 October 2015}
+
+\begin{document}
+
+\maketitle
+
+\begin{enumerate}
+
+    \item TODO
+
+
+    \item The following linear program determines the minimum weight of food
+        to pack while satisfying all of Gerlinde Kaltenbrunner's requirements.
+
+        \begin{align*}
+            \text{minimize} \quad
+                & x_A + x_B + x_C + x_D + x_E                                                         \\
+            \text{subject to} \quad
+                & T    \leq (5000)(21)                                                                \\
+                & 0.50 \leq \frac{2500x_A + 1500x_B + 2500x_C + 3500x_D + 1000x_E}{T} \leq 0.65       \\
+                & 0.20 \leq \frac{3500x_A + 100x_B  + 100x_C  + 1800x_D + 2900x_E}{T} \leq 0.35       \\
+                & 0.15 \leq \frac{500x_A  + 3500x_B + 2500x_C + 200x_D  + 500x_E }{T} \leq 0.20       \\
+                & x_A  \geq 0                                                                         \\
+                & x_B  \geq 0                                                                         \\
+                & x_C  \geq 0                                                                         \\
+                & x_D  \geq 0                                                                         \\
+                & x_E  \geq 0                                                                         \\
+            \text{where} \quad
+                & T    = (2500 + 3500 + 500) x_A + (1500 + 100 + 3500) x_B + (2500 + 100 + 2500) x_C  \\
+                &      + (3500 + 1800 + 200) x_D + (1000 + 2900 + 500) x_E
+        \end{align*}
+
+    \item TODO
+
+    \item
+
+        \begin{proposition}
+            If $x,x^\prime \in \R^n$ are feasible solutions to a given linear
+            program, then all points on the line between $x$ and $x^\prime$ are
+            also solutions to that linear program.
+        \end{proposition}
+
+        \begin{proof}
+            First suppose all constraints in the linear program are of the form
+            $$
+            x \cdot a \leq b
+            $$
+            where $a \in \R^n$ and $b \in \R$.
+
+            Second, all points on the line between $x$ and $x^\prime$ are identified by
+            $\alpha \in [0,1]$ as follows.
+            $$
+            \alpha x + (1-\alpha)x^\prime
+            $$
+
+            Third, we examine some resulting inequalities.
+            \begin{align}
+                (1 - \alpha)x^\prime \cdot a & \leq (1 - \alpha) b \label{ineq:oneminusalphax} \\
+                \alpha x \cdot a \leq \alpha b \label{ineq:alphax}
+            \end{align}
+
+            Finally, we consider the following equality, which is a
+            reformulation of what it means to lie on the line between $x$ and
+            $x^\prime$.
+            \begin{align}
+                (\alpha x \cdot a + (1 - \alpha) x^\prime) \cdot a
+                &= \alpha x \cdot a + (1 - \alpha) \cdot a \notag \\
+                &= \alpha x \cdot a + x^\prime \cdot a - \alpha x^\prime \cdot a \label{eq:qed}
+            \end{align}
+
+            Adding up inequalities \eqref{ineq:oneminusalphax} and
+            \eqref{ineq:alphax}, we arrive at the statement we wish to prove,
+            which completes the proof.
+
+            Alternatively, suppose that a point on the line between $x$ and
+            $x^\prime$ were not a feasible solution. Geometrically, that would
+            be a contradiction of the convexity of the feasible region. Hence,
+            all points on a line between any two feasible solutions must be
+            feasible solutions.
+        \end{proof}
+
+\end{enumerate}
+
+\end{document}
