@@ -12,12 +12,12 @@ struct SpoolData *data = NULL;
 
 void signal_handler(int signo)
 {
-    fprintf(stderr, "shutting down.");
+    fprintf(stderr, "Shutting down.\n");
 
     if(signo == SIGINT || signo == SIGSEGV) 
     {
         if(data != NULL)
-            spool_destroy();
+            spool_destroy(data);
         exit(EXIT_SUCCESS);
     }
 

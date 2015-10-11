@@ -111,10 +111,23 @@ void spool_create(struct SpoolData **data, int size)
     return;
 }
 
-void spool_destroy()
+int spool_destroy(struct SpoolData *data)
 {
-    shm_unlink(SPOOL_SHM_NAME);
-    shm_unlink(JOBS_SHM_NAME);
+    sem_wait(&data->spool->jobs_lock);
+
+    data->spool->printer_counter --;
+
+    int count = data->spool->printer_counter;
+    if(count == 0)
+    {
+        fprintf(stderr, "Last server exiting. Cleaning up shared memory.\n");
+        shm_unlink(SPOOL_SHM_NAME);
+        shm_unlink(JOBS_SHM_NAME);
+    }
+
+    sem_post(&data->spool->jobs_lock);
+
+    return count;
 }
 
 void spool_get(struct SpoolData **data)

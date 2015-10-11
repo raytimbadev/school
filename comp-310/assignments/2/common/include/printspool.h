@@ -145,7 +145,7 @@ struct PrintJob *spool_tail(struct SpoolData *data);
 /**
  * Destroys a print spool.
  */
-void spool_destroy();
+int spool_destroy(struct SpoolData *data);
 
 /**
  * Enqueues a print job to a spool, blocking until space becomes available in
