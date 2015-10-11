@@ -42,13 +42,15 @@ struct Spool *spool_create(int size)
         exit(1);
     }
 
-    ftruncate(shm_fd, sizeof(*spool_map));
-    ftruncate(jobs_shm_fd, sizeof(*spool_map->jobs) * size);
+    const int spool_shm_size = sizeof(*spool_map);
+    const int jobs_shm_size = sizeof(*spool_map->jobs) * size;
+
+    ftruncate(shm_fd, spool_shm_size);
+    ftruncate(jobs_shm_fd, jobs_shm_size);
 
     // Map the shared memory for the spool into this process.
     spool_map = 
-        mmap(0, sizeof(*spool_map), PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd,
-                0);
+        mmap(0, spool_shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
 
     if(spool_map == MAP_FAILED)
     {
@@ -56,18 +58,16 @@ struct Spool *spool_create(int size)
         exit(1);
     }
 
-    printf("mapped spool, size: %d\n", (int)(sizeof(struct Spool)));
+    printf("mapped spool, size: %d\n", spool_shm_size);
 
     spool_map->size = size;
 
-    printf("going to map jobs, size %d\n", (int)(sizeof(struct PrintJob) * size));
-
     // Map the shared memory for the jobs into this process
     spool_map->jobs =
-        mmap(0, sizeof(struct PrintJob) * size, PROT_READ | PROT_WRITE,
-                MAP_SHARED, jobs_shm_fd, 0);
+        mmap(0, jobs_shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, jobs_shm_fd,
+                0);
 
-    printf("mapped jobs\n");
+    printf("mapped jobs, size: %d\n", jobs_shm_size);
 
     // Initialize the semaphores in the spool
     sem_init(&spool_map->enqueue_lock, 1, size);
@@ -122,10 +122,15 @@ struct Spool *spool_get()
         exit(1);
     }
 
+    const int spool_shm_size = sizeof(*spool_map);
+
     // Map the shared memory for the spool into this process.
     spool_map = 
-        mmap(0, sizeof(*spool_map), PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd,
+        mmap(0, spool_shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd,
                 0);
+
+    printf("mapped spool, size: %d\n", spool_shm_size);
+
 
     if(spool_map == MAP_FAILED)
     {
@@ -133,16 +138,20 @@ struct Spool *spool_get()
         exit(1);
     }
 
+    const int jobs_shm_size = sizeof(*spool_map->jobs) * spool_map->size;
+
     // Map the shared memory for the jobs into this process
     spool_map->jobs =
-        mmap(0, sizeof(*spool_map->jobs) * spool_map->size,
-                PROT_READ | PROT_WRITE, MAP_SHARED, jobs_shm_fd, 0);
+        mmap(0, jobs_shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, jobs_shm_fd,
+                0);
 
     if(spool_map->jobs == MAP_FAILED)
     {
         fprintf(stderr, "jobs mmap failed: %s\n", strerror(errno));
         exit(1);
     }
+
+    printf("mapped jobs, size: %d\n", jobs_shm_size);
 
     return spool_map;
 }
