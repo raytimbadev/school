@@ -39,6 +39,12 @@ int main(int argc, char **argv)
 
     spool_create(&data, size);
 
+    if(data == NULL)
+    {
+        fprintf(stderr, "Unable to start print server.\n");
+        exit(EXIT_FAILURE);
+    }
+
     int character_duration, i, len;
 
     if(

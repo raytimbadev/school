@@ -34,7 +34,8 @@ void spool_create(struct SpoolData **data, int size)
         }
 
         fprintf(stderr, "Error opening shared memory: %s\n", strerror(errno));
-        exit(1);
+        *data = NULL;
+        return;
     }
 
     // Create a shared memory object for the jobs array
@@ -49,7 +50,8 @@ void spool_create(struct SpoolData **data, int size)
         fprintf(stderr,
                 "Error opening jobs shared memory: %s\n",
                 strerror(errno));
-        exit(1);
+        *data = NULL;
+        return;
     }
 
     struct Spool *spool_map;
@@ -68,7 +70,8 @@ void spool_create(struct SpoolData **data, int size)
     if(spool_map == MAP_FAILED)
     {
         fprintf(stderr, "spool mmap failed\n");
-        exit(EXIT_FAILURE);
+        *data = NULL;
+        return;
     }
 
     spool_map->size = size;
@@ -80,7 +83,8 @@ void spool_create(struct SpoolData **data, int size)
     if(jobs == MAP_FAILED)
     {
         fprintf(stderr, "jobs mmap failed\n");
-        exit(EXIT_FAILURE);
+        *data = NULL;
+        return;
     }
 
     // Initialize the semaphores in the spool
@@ -145,7 +149,8 @@ void spool_get(struct SpoolData **data)
     {
         fprintf(stderr, "Error opening spool shared memory: %s\n",
                 strerror(errno));
-        exit(1);
+        *data = NULL;
+        return;
     }
 
     // Create a shared memory object for the jobs array
@@ -159,20 +164,21 @@ void spool_get(struct SpoolData **data)
         fprintf(stderr,
                 "Error opening jobs shared memory: %s\n",
                 strerror(errno));
-        exit(1);
+        *data = NULL;
+        return;
     }
 
     const int spool_shm_size = sizeof(*spool_map);
 
     // Map the shared memory for the spool into this process.
-    spool_map = 
-        mmap(0, spool_shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd,
-                0);
+    spool_map = mmap(0, spool_shm_size, PROT_READ | PROT_WRITE, MAP_SHARED,
+            shm_fd, 0);
 
     if(spool_map == MAP_FAILED)
     {
         fprintf(stderr, "spool mmap failed: %s\n", strerror(errno));
-        exit(1);
+        *data = NULL;
+        return;
     }
 
     const int jobs_shm_size = sizeof(*jobs) * spool_map->size;
@@ -184,7 +190,8 @@ void spool_get(struct SpoolData **data)
     if(jobs == MAP_FAILED)
     {
         fprintf(stderr, "jobs mmap failed: %s\n", strerror(errno));
-        exit(1);
+        *data = NULL;
+        return;
     }
 
     if(*data == NULL)

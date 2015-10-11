@@ -12,7 +12,7 @@ int main(int argc, char **argv)
     if(argc != 3)
     {
         fprintf(stderr, "usage: %s <duration> <message>\n", argv[0]);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     int duration = atoi(argv[1]);
@@ -21,12 +21,17 @@ int main(int argc, char **argv)
 
     spool_get(&data);
 
+    if(data == NULL)
+    {
+        fprintf(stderr, "No print servers are running.\n");
+        exit(EXIT_FAILURE);
+    }
+
     struct PrintJob job = spool_enqueue_job(data, duration, message);
 
     printf("Enqueued job #%d to slot %d.\n", job.client_id, job.slot_no);
 
     free(data);
-
     return EXIT_SUCCESS;
 }
 
