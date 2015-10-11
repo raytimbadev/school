@@ -17,12 +17,16 @@ int main(int argc, char **argv)
 
     int duration = atoi(argv[1]);
     char *message = argv[2];
+    struct SpoolData *data = NULL;
 
-    struct Spool *spool = spool_get();
+    spool_get(&data);
 
-    spool_enqueue_job(spool, duration, message);
+    struct PrintJob job = spool_enqueue_job(data, duration, message);
 
-    printf("Message sent.\n");
+    printf("Enqueued job #%d to slot %d.\n", job.client_id, job.slot_no);
+
+    free(data);
+
     return EXIT_SUCCESS;
 }
 

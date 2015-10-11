@@ -13,7 +13,8 @@
 
 #define SHM_MODE ((mode_t)0600)
 
-struct PrintJob {
+struct PrintJob
+{
     /**
      * The duration of the print job, in seconds.
      */
@@ -29,14 +30,22 @@ struct PrintJob {
      * this is set to 0; when they are created, this is set to a nonzero value.
      */
     char available;
+
+    /**
+     * An identifier for the client.
+     */
+    int client_id;
+
+    /**
+     * The slot that the job was written to.
+     */
+    int slot_no;
 };
 
-struct Spool {
-    /**
-     * The first and last jobs in the print spool.
-     */
-    struct PrintJob *jobs;
+typedef struct PrintJob * Jobs;
 
+struct Spool
+{
     /**
      * The name of the shared memory object used to store the jobs array.
      */
@@ -70,6 +79,19 @@ struct Spool {
     int size;
 
     /**
+     * A counter for the number of jobs printed in this spool.
+     *
+     * Clients use this number to determine the identifier for new jobs to
+     * submit.
+     */
+    int job_counter;
+
+    /**
+     * A counter for the number of attached printers.
+     */
+    int printer_counter;
+
+    /**
      * The lock on the print jobs held by the pool.
      */
     sem_t enqueue_lock;
@@ -85,43 +107,58 @@ struct Spool {
     sem_t jobs_lock;
 };
 
+struct SpoolData
+{
+    struct Spool *spool;
+    Jobs jobs;
+};
+
 /**
  * Creates a new print spool.
  */
-struct Spool *spool_create(int size);
+void spool_create(struct SpoolData **data, int size);
 
 /**
  * Get a print spool.
  *
  * If no spool server is running, the return value is NULL.
  */
-struct Spool *spool_get();
+void spool_get(struct SpoolData **data);
+
+/**
+ * Attach a printer to a spool.
+ *
+ * A new printer identifier is returned.
+ */
+int spool_attach_printer(struct Spool *spool);
 
 /**
  * Get the PrintJob slot at the head of the spool.
  */
-struct PrintJob *spool_head(struct Spool *spool);
+struct PrintJob *spool_head(struct SpoolData *data);
 
 /**
  * Get the PrintJob slot at the tail of the spool.
  */
-struct PrintJob *spool_tail(struct Spool *spool);
+struct PrintJob *spool_tail(struct SpoolData *data);
 
 /**
  * Destroys a print spool.
  */
-void spool_destroy(struct Spool *spool);
+void spool_destroy();
 
 /**
  * Enqueues a print job to a spool, blocking until space becomes available in
  * the spool.
+ *
+ * A copy of the created print job is returned.
  */
-void spool_enqueue_job(struct Spool *spool, int duration, char *text);
+struct PrintJob spool_enqueue_job(struct SpoolData *data, int duration, char *text);
 
 /**
  * Dequeues a print job from a spool, or blocks until a job arrives in the
  * spool.
  */
-struct PrintJob spool_dequeue_job(struct Spool *spool);
+struct PrintJob spool_dequeue_job(struct SpoolData *data);
 
 #endif
