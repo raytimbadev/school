@@ -115,6 +115,72 @@
             feasible solutions.
         \end{proof}
 
+    \item For a graph in which each edge is given a load and the load of a
+        vertex is given by the sum of the loads of its edges, we seek to find
+        an assignment of edges loads that sum to $1$ but minimize the maximal
+        vertex load. To do so with linear programming, the set of variables
+        consists of the edge loads as well as an additional variable to
+        represent the maximal vertex load due to the current assignment of edge
+        loads.
+
+        \begin{enumerate}
+            \item For a graph on four vertices $a$, $b$, $c$, $d$ with edges
+                $(a, b)$, $(a, c)$, $(b, c)$, $(b, d)$, $(c, d)$, solutions
+                to the following linear program provide assignments to the
+                edge loads that minimize the maximum load on any vertex.
+
+                \begin{align*}
+                    \text{minimize} \quad &
+                        M \\
+                    \text{subject to} \quad
+                        & M \geq x_{ab} + x_{ac} \\
+                        & M \geq x_{ab} + x_{bc} + x_{bd} \\
+                        & M \geq x_{ac} + x_{bc} + x_{cd} \\
+                        & M \geq x_{bd} + x_{cd} \\
+                        & x_{ab} + x_{ac} + x_{bc} + x_{bd} + x_{cd} = 1 \\
+                        & M \geq 0 \\
+                        & x_{ab} \geq 0 \\
+                        & x_{ac} \geq 0 \\
+                        & x_{bc} \geq 0 \\
+                        & x_{bd} \geq 0 \\
+                        & x_{cd} \geq 0
+                \end{align*}
+
+            \item The dual of the above linear program is the following.
+
+                \begin{align*}
+                    \text{maximize} \quad
+                        & (0, 0, 0, 0, 1, -1) y \\
+                    \text{subject to} \quad &
+                    \left(
+                        \begin{array}{cccccc}
+                            1  & 1  & 1  & 1  & 0 & 0 \\
+                            -1 & -1 & 0  & 0  & 1 & -1 \\
+                            -1 & 0  & -1 & 0  & 1 & -1 \\
+                            0  & -1 & -1 & 0  & 1 & -1 \\
+                            0  & -1 & 0  & -1 & 1 & -1 \\
+                            0  & 0  & -1 & -1 & 1 & -1
+                        \end{array}
+                    \right)
+                    y
+                    \leq
+                    \left(
+                        \begin{array}{c}
+                            1 \\
+                            0 \\
+                            0 \\
+                            0 \\
+                            0 \\
+                            0
+                        \end{array}
+                    \right)
+                \end{align*}
+
+                In order, the rows of the dual matrix are due to $M$, $x_{ab}$,
+                $x_{ac}$, $x_{bc}$, $x_{bd}$, $x_{cd}$.
+
+        \end{enumerate}
+
 \end{enumerate}
 
 \end{document}
