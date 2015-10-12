@@ -179,6 +179,26 @@
                 In order, the rows of the dual matrix are due to $M$, $x_{ab}$,
                 $x_{ac}$, $x_{bc}$, $x_{bd}$, $x_{cd}$.
 
+            \item Now, we formulate the problem for a general graph
+                $G = (V, E)$.
+
+                The variables of the program in this case are $x_{uv}$
+                for each $\{u, v\} \in E$, i.e. the loads given to each edge.
+                We define the load on a vertex as
+                $$
+                l_v = \sum_{\{u, v\}} {l_{\{u, v\}}}
+                $$
+
+                The linear program is the following.
+                \begin{alignat*}{3}
+                    \text{minimize} \quad
+                        & M \\
+                    \text{subject to} \quad
+                        & M \geq l_v & \text{for } v \in V \\
+                        & \sum_{e \in E} l_e = 1 \\
+                        & M \geq 0 \\
+                        & l_e \geq 0 & \text{for } e \in E
+                \end{alignat*}
         \end{enumerate}
 
 \end{enumerate}
