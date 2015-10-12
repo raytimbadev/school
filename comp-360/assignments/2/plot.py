@@ -75,26 +75,16 @@ if __name__ == '__main__':
 
     verts = list(verts)
 
-    print("The intersection points of the contraints are:")
+    print("The intersection points of the contraints lines are:")
     for p in verts:
         print(p)
 
-    hull = [verts[i] for i in ConvexHull([v.v for v in verts]).vertices]
-
-    p = Polygon(np.array([[float(x) for x in h.v] for h in hull]))
-
-    fig = plt.figure()
-    ax = fig.add_subplot(1, 1, 1)
-    ax.add_patch(p)
-
-    ax.set_xlim(
-            left=float(min(v[0] for v in verts) - 1.0),
-            right=float(max(v[0] for v in verts)) + 1.0,
+    p = plot_implicit(
+            And(*constraints),
+            x_var=x1,
+            y_var=x2
     )
 
-    ax.set_ylim(
-            bottom=float(min(v[0] for v in verts) - 1.0),
-            top=float(max(v[0] for v in verts)) + 1.0,
-    )
+    p.title = "The feasible region of the linear program"
 
-    fig.savefig('fig.pdf')
+    p.save('plot.pdf')
