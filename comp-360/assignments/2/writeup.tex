@@ -3,6 +3,7 @@
 \usepackage{amsthm,amsmath,amssymb}
 \usepackage[margin=2.0cm]{geometry}
 \usepackage{graphicx,float}
+\usepackage{tikz}
 
 \newtheorem{proposition}{Proposition}
 
@@ -18,8 +19,123 @@
 
 \begin{enumerate}
 
-    \item TODO
+    \item Our solution to solving the direction assignment problem using
+        maximum flow builds a flow network from the given graph $G = (V, E)$ in
+        the following way.
 
+        For each edge $e \in E$ that is undirected, we create a vertex $v_e$
+        in the flow network, and create an edge to it from the source with
+        capacity $1$. Let $V_1$ be the set of these vertices. For each
+        $p_{uv} \in V_1$, we create two vertices -- one is called $q_{uv}$ and
+        the other is called $q_{vu}$ -- and we create an edge from $p_{uv}$ to
+        each of these with capacity $1$. Let $V_2$ be the set of these
+        vertices. Then, for each $v \in V$, i.e. the vertices of the original
+        graph, create a vertex $v$ in the flow network and let $V_3$ be the set
+        of these new vertices. For each $v \in V_3$, create an edge with
+        capacity $1$ from each $q_{uv}$. Finally, for each $v \in V_3$, create
+        an edge to the sink with capacity equal to the number of (additional)
+        incoming edges required to achieve a balance of incoming and outgoing
+        edges on that vertex. If the vertex in question has odd degree, or if
+        it has enough edges with predetermined directions such that no balance
+        can be achieved, then we immediate abort since no solution would be
+        found. If the edges leading into the sink are saturated, then a
+        solution has been found, and examining the edges from $V_2$ to $V_3$
+        indicates which edges need to be set in which direction.
+
+        The intuition for this solution is the following. The vertices in sets
+        $V_1$ and $V_2$ are designed to make maximizing the flow in the network
+        choose the direction for each edge in the original graph. Indeed,
+        elements of $V_2$ represent the possible choices of direction for their
+        corresponding element in $V_1$. The vertices in $V_3$ collect the
+        choices to add incoming flow and effectively sum them. That sum in turn
+        is the amount of flow that they would output.
+
+        Below is an an simple example graph and its corresponding flow network
+        constructed using this procedure.
+
+        \begin{figure}[H]
+            \centering
+
+            \begin{tikzpicture}[
+                    ->,
+                    shorten >=1pt,
+                    auto,
+                    node distance=2.8cm,
+                    semithick
+                ]
+                \node (A) {A} ;
+                \node (B) [below left of=A] {B} ;
+                \node (C) [below right of=A] {C} ;
+
+                \path
+                (A) edge node {} (C)
+                ;
+
+                \begin{scope}[-]
+                    \path
+                    (A) edge node {} (B)
+                    (B) edge node {} (C)
+                    ;
+                \end{scope}
+            \end{tikzpicture}
+
+            \label{fig:graph}
+
+            \caption{
+                A simple graph with some edges undirected. The direction of
+                these edges will be determined by the solution to a maximum
+                flow problem on the flow network in figure
+                \ref{fig:flownetwork}.
+            }
+        \end{figure}
+
+        \begin{figure}[H]
+            \centering
+
+            \begin{tikzpicture}[
+                    ->,
+                    shorten >=1pt,
+                    auto,
+                    node distance=2.0cm,
+                    semithick
+                ]
+                \node (S)   {$s$};
+                \node (AB)  [below right of=S]                         {$p_{AB}$};
+                \node (BC)  [below left  of=S]                         {$p_{BC}$};
+                \node (ABe) [below right of=AB]                        {$q_{AB}$};
+                \node (BAe) [below       of=AB, node distance=1.414cm] {$q_{BA}$};
+                \node (BCe) [below       of=BC, node distance=1.414cm] {$q_{BC}$};
+                \node (CBe) [below left  of=BC]                        {$q_{CB}$};
+                \node (A)   [below       of=CBe,node distance=1.414cm] {$A$};
+                \node (B)   [right       of=A,  node distance=2.828cm] {$B$};
+                \node (C)   [below       of=ABe,node distance=1.414cm] {$C$};
+                \node (T)   [below       of=B,  node distance=1.414cm] {$t$};
+
+                \path
+                (S) edge node {} (AB)
+                (S) edge node {} (BC)
+                (BC) edge node {} (CBe)
+                (BC) edge node {} (BCe)
+                (AB) edge node {} (BAe)
+                (AB) edge node {} (ABe)
+                (CBe) edge node {} (B)
+                (BCe) edge node {} (C)
+                (BAe) edge node {} (A)
+                (ABe) edge node {} (B)
+                (A) edge node {$1$} (T)
+                (B) edge node {$1$} (T)
+                (C) edge node {$0$} (T)
+                ;
+            \end{tikzpicture}
+
+            \label{fig:flownetwork}
+
+            \caption{
+                The flow network corresponding to the simple graph in figure
+                \ref{fig:graph}. All edges have capacity $1$ unless otherwise
+                indicated.
+            }
+        \end{figure}
 
     \item The following linear program determines the minimum weight of food
         to pack while satisfying all of Gerlinde Kaltenbrunner's requirements.
