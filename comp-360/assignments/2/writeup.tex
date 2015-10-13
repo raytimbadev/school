@@ -362,6 +362,22 @@
                 \end{alignat*}
         \end{enumerate}
 
+    \item We wish to find solutions to systems of linear equations that are
+        maximimally flat, i.e. that minimize the maximal difference $x_i - x_j$
+        in the solution vector. The linear program that accomplishes that is
+        the following.
+
+        \begin{alignat*}{3}
+            \text{minimize} \quad
+                & M \\
+            \text{subject to} \quad
+                & A x = b \\
+                & M \geq x_i - x_j \quad
+                & \text{for } i = 1, \dots, n
+        \end{alignat*}
+        where $A$ is the matrix of coefficients of the linear systems and $n$
+        is the size of the vectors $x$ and $b$.
+
 \end{enumerate}
 
 \end{document}
