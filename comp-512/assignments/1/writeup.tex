@@ -1,0 +1,74 @@
+\documentclass{article}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{tikz}
+\usepackage[margin=2.0cm]{geometry}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#1\\Distributed Systems -- COMP 512}
+\date{20 October 2015}
+
+\newcommand{\ms}{\text{ ms}}
+
+\begin{document}
+
+\maketitle
+
+\section{Minis}
+
+\begin{enumerate}
+    \item
+        In an asynchronous system, a process $p$ requests the time from a time
+        server $S$, with a measured round-trip time of $24\ms$, and $p$
+        receives $t = 10:54:23:674$ from $S$.
+
+        \begin{enumerate}
+            \item
+                $p$ would set it's local clock to the received time, plus half
+                the round-trip time, i.e.
+                $$
+                ps
+                = t + \frac{T_\text{round}}{2}
+                = 10 : 54 : 23 : 674 + 0 : 0 : 0 : 12
+                = 10 : 54 : 23 : 698
+                $$
+
+            \item
+                If $p$'s local time upon receipt of the response from $S$ is
+                $ps = 10 : 54 : 24 : 005$, then setting its time to the value
+                calculated above would result in a ``jump back in time''. This
+                violates the expected monotonicity of the system clock. To
+                remedy this, the system can run it's local clock more slowly
+                for some time, to have it eventually become synchronized with
+                the received time.
+        \end{enumerate}
+
+    \item
+        There are many ways to marshal program data into a form suitable
+        for transmission: XML (similarly JSON), Java's serialization, and
+        Google Protocol Buffer, as well as others. For each of these three
+        methods, here is an advantage it has over the other two.
+
+        \begin{enumerate}
+            \item
+                XML and JSON have the advantage of being human-readable,
+                text formats; if data is inspected while in transit, it can
+                be understood without any additional tooling by a
+                developer.
+
+            \item
+                Java's built-in serialization has the advantage of being
+                extremely easy to use, from a developer's point of view.
+                No additional libraries are required, since the
+                functionality is built directly into the base Java Runtime
+                Environment.
+
+            \item
+                Google Protocol Buffer is a binary format, like Java's
+                built-in serialization, but is not tied to Java, so it can
+                be used to interact with non-Java environments. It is also
+                much faster than XML.
+        \end{enumerate}
+\end{enumerate}
+
+\end{document}
