@@ -180,8 +180,51 @@
                     (-1, 1) &\quad (1, 3)
                 \end{align*}
 
-            \item TODO
+            \item To maximize the objective function given by $x_1 + 2x_2$, the
+                simplex algorithm would proceed in one of the two following
+                ways if it starts at $(x_1, x_2) = (0, 0)$.
 
+                \begin{enumerate}
+                    \item
+                        \begin{enumerate}
+                            \item
+                                Set inequality $1$ to equality
+                                and move to better feasible point $(-1, 1)$.
+                            \item
+                                Set equality $1$ back to inequality,
+                                set inequality $3$ to equality,
+                                and move to better feasible point $(0, 2)$.
+                            \item
+                                Set equality $3$ back to inequality,
+                                set inequality $5$ to equality,
+                                and move to better feasible point $(2, 3)$.
+                            \item
+                                Set equality $5$ back to inequality,
+                                set inquality $2$ to equality. \\
+                                There are no better feasible points along that
+                                line,
+                                so set equality $2$ back to inequality. \\
+                                $(2, 3)$ is the optimum.
+                        \end{enumerate}
+
+                    \item
+                        \begin{enumerate}
+                            \item
+                                Set inequality $4$ to equality
+                                and move to better feasible point $(3, 1)$.
+                            \item
+                                Set equality $4$ back to inequality,
+                                set inequality $2$ to equality,
+                                and move to better feasible point $(2, 3)$.
+                            \item
+                                Set equality $2$ back in equality
+                                and set inequality $5$ to equality. \\
+                                There are no better feasible points along that
+                                line,
+                                so set equality $5$ back to inequality. \\
+                                $(2, 3)$ is the optimum.
+                        \end{enumerate}
+                \end{enumerate}
         \end{enumerate}
 
     \item We wish to show a proposition about the line between two feasible
