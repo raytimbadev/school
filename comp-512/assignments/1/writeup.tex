@@ -3,6 +3,7 @@
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{tikz}
 \usepackage[margin=2.0cm]{geometry}
+\usepackage{float}
 
 \author{Jacob Thomas Errington (260636023)}
 \title{Assignment \#1\\Distributed Systems -- COMP 512}
@@ -71,14 +72,15 @@
         \end{enumerate}
 
     \item
-        Below are timestamped diagrams of the communications between three
-        processes. The first diagram uses a Lamport clock, whereas the
-        second diagram uses a vector clock.
+        Figures \ref{fig:lamporttimestamp} and \ref{fig:vectortimestamp} are
+        timestamped diagrams of the communications between three processes. The
+        first diagram uses a Lamport clock, whereas the second diagram uses a
+        vector clock.
 
-        \begin{figure}
+        \begin{figure}[ht]
             \centering
 
-            \label{fig:lamport-timestamp}
+            \label{fig:lamporttimestamp}
 
             \begin{tikzpicture}
                 [
@@ -164,7 +166,7 @@
                       {};
 
                 \node (m4 recv)
-                      [msg recv slow, right of=m5 send, label=90:$7$]
+                      [node distance=3.775cm, right of=m5 send, label=90:$7$]
                       {};
 
                 \node (m3 recv)
@@ -176,11 +178,11 @@
                       {};
 
                 \path
-                (m1 send) edge node {$m_1$} (m1 recv)
-                (m2 send) edge node {$m_2$} (m2 recv)
-                (m3 send) edge [pos=0.2] node {$m_3$} (m3 recv)
+                (m1 send) edge            node {$m_1$} (m1 recv)
+                (m2 send) edge            node {$m_2$} (m2 recv)
+                (m3 send) edge [pos=0.20] node {$m_3$} (m3 recv)
                 (m4 send) edge [pos=0.25] node {$m_4$} (m4 recv)
-                (m5 send) edge [pos=0.2] node {$m_5$} (m5 recv)
+                (m5 send) edge [pos=0.20] node {$m_5$} (m5 recv)
                 ;
 
             \end{tikzpicture}
@@ -188,6 +190,124 @@
             \caption{
                 A time series diagram of three intercommunicating processes
                 with events annotated with their Lamport timestamps.
+            }
+        \end{figure}
+
+        \begin{figure}[ht]
+            \centering
+
+            \label{fig:vectortimestamp}
+
+            \begin{tikzpicture}
+                [
+                    ->,
+                    shorten >=1pt,
+                    auto,
+                    node distance=3.0cm,
+                    semithick,
+                    event/.style={shape=circle, fill=gray},
+                    event delayed/.style={event, node distance=3.5cm},
+                    timeline/.style={color=blue!70, very thin, -},
+                    time endpoint/.style={node distance=16cm},
+                    msg send/.style={node distance=2.0cm},
+                    msg recv/.style={node distance=2.0cm},
+                    msg send slow/.style={node distance=4.0cm},
+                    msg recv slow/.style={node distance=4.0cm},
+                    msg send very slow/.style={node distance=6.0cm},
+                    msg recv very slow/.style={node distance=6.0cm}
+                ]
+                \node (p1)                                    {$p_1$};
+                \node (p2) [below of=p1, node distance=2.5cm] {$p_2$};
+                \node (p3) [below of=p2, node distance=2.5cm] {$p_3$};
+
+                \node (end p1)
+                      [right of=p1, time endpoint]
+                      {};
+                \node (end p2)
+                      [right of=p2, time endpoint]
+                      {};
+                \node (end p3)
+                      [right of=p3, time endpoint]
+                      {};
+
+
+                \path
+                (p1) edge [timeline] node {} (end p1)
+                (p2) edge [timeline] node {} (end p2)
+                (p3) edge [timeline] node {} (end p3)
+                ;
+
+                \node (event p1 1)
+                    [event, right of=p1, label=90:{$(1,0,0)$}]
+                    {};
+
+                \node (event p2 1)
+                    [event, right of=p2, event delayed, label=90:{$(0,1,0)$}]
+                    {};
+
+                \node (event p1 2)
+                    [event, right of=event p1 1, label=270:{$(3,0,0)$}]
+                    {};
+
+                \node (m1 send)
+                    [msg send, right of=event p1 1, label=90:{$(2,0,0)$}]
+                    {};
+
+                \node (m1 recv)
+                    [msg recv, right of=event p2 1, label=270:{$(2,2,0)$}]
+                    {};
+
+                \node (m2 send)
+                    [msg send, right of=m1 recv, label=90:{$(2,3,0)$}]
+                    {};
+
+                \node (m2 recv)
+                    [msg recv, right of=p3, node distance=8cm,
+                        label=270:{$(2,3,1)$}]
+                    {};
+
+                \node (m3 send)
+                    [msg send, right of=m2 send, label=270:{$(2,4,0)$}]
+                    {};
+
+                \node (m5 send)
+                    [msg send, right of=event p1 2, label=90:{$(4,0,0)$}]
+                    {};
+
+                \node (m4 send)
+                    [msg send, right of=m2 recv, label=270:{$(2,3,2)$}]
+                    {};
+
+                \node (m5 recv)
+                    [msg recv slow, right of=m3 send, label=270:{$(4,5,0)$}]
+                    {};
+
+                \node (m4 recv)
+                    [node distance=3.775cm, right of=m5 send,
+                        label=90:{$(5,3,2)$}]
+                    {};
+
+                \node (m3 recv)
+                    [msg recv, right of=m4 recv, label=90:{$(6,4,2)$}]
+                    {};
+
+                \node (event p3 1)
+                    [event, right of=m4 send, label=90:{$(2,3,3)$}]
+                    {};
+
+                \path
+                (m1 send) edge            node {$m_1$} (m1 recv)
+                (m2 send) edge            node {$m_2$} (m2 recv)
+                (m3 send) edge [pos=0.20] node {$m_3$} (m3 recv)
+                (m4 send) edge [pos=0.25] node {$m_4$} (m4 recv)
+                (m5 send) edge [pos=0.20] node {$m_5$} (m5 recv)
+                ;
+
+            \end{tikzpicture}
+
+            \caption{
+                A time series diagram of three intercommunicating processes
+                with events annotated with their vector clock timestamps.
             }
         \end{figure}
 \end{enumerate}
