@@ -5,6 +5,8 @@
 \usepackage[margin=2.0cm]{geometry}
 \usepackage{float}
 
+\newtheorem{proposition}{Proposition}
+
 \author{Jacob Thomas Errington (260636023)}
 \title{Assignment \#1\\Distributed Systems -- COMP 512}
 \date{20 October 2015}
@@ -310,6 +312,136 @@
 
             \label{fig:vectortimestamp}
         \end{figure}
+\end{enumerate}
+
+\section{Eventual consistency}
+
+Our algorithm to guarantee eventual consistency uses a vector clock to
+timestamp the data $x_i$ held by process $p_i$ whenever a write occurs. Let
+$v_i$ be a variable held locally by each process $i$ representing the last
+write time to the data $x_i$ according to the vector clock. Each process $p_i$
+also stores $k_i$ which is the process identifier of the \emph{originator} of
+the write. When processes interact, they will exchange their data along with
+the their metadata, i.e. its last write time and its originator identifier.
+
+Suppose processes $i$ and $j$ exchange information and $k_i < k_j$. There are
+three possibilities for how to handle the data.
+
+\begin{enumerate}
+    \item If $v_i < v_j$, then $p_j$ will accept $x_i$, overwriting its data
+        $x_j$, and it will update $v_j$ to $v_i$. Process $p_j$ will also set
+        $k_j := k_i$.
+
+    \item If $v_i > v_j$, then $p_j$ will reject $x_i$, keeping its data as is.
+
+    \item If $v_i$ cannot be compared with $v_j$, then the data writes happened
+        concurrently. We must then examine the originators of the writes. Since
+        $k_i < k_j$, $p_j$ will accept the data of $p_i$, setting $x_j := x_i$,
+        $v_j := v_i$, and $k_j := k_i$.
+\end{enumerate}
+
+When writes occur locally in a process $p_i$, the timestamp is updated and the
+originator is set $k_i := i$.
+
+Using the concept of originators in this way allows processes with higher
+identifiers to retransmit the data of processes with lower identifiers should
+timestamps be incomparable in future exchanges, provided that local writes do
+not occur in between the receipt of data and the retransmission. This will be
+essential to the eventual consistency of the system.
+
+\begin{proposition}
+    Such a system is eventually consistent using the above communications
+    algorithm.
+\end{proposition}
+
+\begin{proof}
+    Consider the ordering on data items $x_i \sqsubseteq x_j$ defined by the
+    following.
+    $$
+    x_i \sqsubseteq x_j
+    \text{ if }
+    v_i > v_j \lor (v_i \nless v_j \land k_i < k_j)
+    $$
+
+    It precisely captures the notion of comparing first based on time and if
+    doing so is impossible, then comparing based on originator. Indeed, our
+    algorithm uses this linear ordering to choose whether to accept or reject
+    updates.
+
+    Some process $p_i$ has the most recent data $x_i$ according to this
+    relation. And given sufficient time, it will have communicated with every
+    other process $p_j$, either directly or indirectly via originator metadata,
+    causing $p_j$ to install $x_i$ on top of its own data.
+\end{proof}
+
+\section{Performance evaluation}
+
+\begin{enumerate}
+    \item
+        In figure 1(a), RMI I appears to outperform RMI II in all types of
+        serialization. In the case of bulk serialization, this difference is
+        less important, probably because most of the serialization time is just
+        spent copying the data array, so the overhead due to the different
+        serialization strategies is less represented. In the other cases, the
+        serialization overheads are more obvious: in the case of embedded
+        objects especially, we see that as the complexity of the embedded
+        objects increases, the time required by RMI II increases much more than
+        the time required by RMI I.
+
+        The most likely cause for this in my opinion is that RMI II includes a
+        lot of metadata in the serialized form; including this data simply
+        requires more time.
+
+    \item
+        In figure 1(b), we see that overall, HTTP is slower than raw TCP, as
+        one would expect since it adds an extra layer. RMI I is tremendously
+        slower than RMI II for this test, which involves fifty thousand calls.
+        In the case of RMI I, that means fifty thousand new connections; the
+        overhead of establishing TCP connections is certainly to blame for the
+        major difference in time used by the RMI methods over HTTP. Over raw
+        TCP, the difference is less pronounced, since both methods reuse
+        sockets. Indeed, RMI I outperforms RMI II when using TCP.
+
+        Those observations further support my idea that RMI II is including
+        more metadata. More metadata means bigger messages, which could explain
+        the difference seen in the case of messages sent over TCP in this
+        figure.
+
+    \item
+        In figure 1(c), the size of the payload of the test is much larger and
+        the number of messages sent is smaller, so the overheads are less
+        important. Both RMI methods have similar time elapsed when transported
+        over raw TCP.
+
+        This puts the observation in the TCP half figure 1(b) into perspective.
+        It suggests that RMI II uses some application-level handshaking that is
+        creating a lot of overhead over the fifty thousand calls made in test
+        1, whereas in test 2, the overhead of these handshakes is less
+        important since there are only ten calls. Hence, both methods spend all
+        their time simply copying the data array into the socket buffers.
+
+        As for the HTTP part of figure 1(c), RMI II outperforms RMI I. It
+        remains likely that the reason for this is the overhead incurred by
+        creating new sockets for each HTTP request in RMI I. Indeed, over fifty
+        thousand calls, this resulted in a major difference in elapsed time.
+        Now over just ten calls, that difference ought to still be quite
+        noticeable.
+
+    \item
+        In figure 1(d), we first observe that for each RMI type, the TCP
+        version outperforms the HTTP version. In the case of RMI I, this is
+        especially obvious, and like due to the connection reuse in its TCP
+        variant. On the other hand, in the case of RMI II, the difference
+        appears practically negligeable.
+
+        As the complexity of the embedded objects grows, the elapsed time for
+        RMI II grows faster than the elapsed time for RMI I; this is likely due
+        to the serialization times as discussed before.
+
+        It is curious that the HTTP variant of RMI I is faster than the HTTP
+        variant of RMI II, however. I believe that this occurs because the
+        serialization overhead in RMI II outweighs the penalty incurred on RMI
+        I by having to open new sockets for each invocation.
 \end{enumerate}
 
 \end{document}
