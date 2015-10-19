@@ -257,7 +257,6 @@ struct PrintJob spool_enqueue_job(struct SpoolData *data, int duration, char *te
 
 struct PrintJob spool_dequeue_job(struct SpoolData *data)
 {
-    fprintf(stderr, "dequeuing...\n");
     // Acquire a lock on the spool and require a dequeue
     sem_wait(&data->spool->dequeue_lock);
     sem_wait(&data->spool->jobs_lock);
