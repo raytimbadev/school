@@ -12,7 +12,7 @@ clean:
 	@-rm -vf obj/*
 
 bin/client: obj/main.o
-	$(CC) -o $@ $(LDFLAGS) $^ ../common/lib/libprintspool.a
+	$(CC) -o $@ $^ ../common/lib/libprintspool.a $(LDFLAGS)
 
 obj/main.o: src/main.c
 	$(CC) -o $@ $(CFLAGS) $<
