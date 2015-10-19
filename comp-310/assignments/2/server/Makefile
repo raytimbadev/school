@@ -8,8 +8,8 @@ all: bin/server
 
 .PHONY: clean
 clean:
-	@rm -v bin/*
-	@rm -v obj/*
+	@-rm -vf bin/*
+	@-rm -vf obj/*
 
 bin/server: obj/main.o
 	$(CC) $(LDFLAGS) -o $@ $^ ../common/lib/libprintspool.a

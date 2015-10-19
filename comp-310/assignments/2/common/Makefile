@@ -8,8 +8,8 @@ all: lib/libprintspool.a
 
 .PHONY: clean
 clean:
-	@rm -v lib/*
-	@rm -v obj/*
+	@-rm -vf lib/*
+	@-rm -vf obj/*
 
 lib/libprintspool.a: obj/printspool.o
 	$(AR) $(ARFLAGS) $@ $^
