@@ -42,15 +42,17 @@ struct PrintJob
     int slot_no;
 };
 
+/**
+ * A convenient type synonym for the jobs list.
+ */
 typedef struct PrintJob * Jobs;
 
+/**
+ * The Spool type merely holds the metadata about the print jobs and the
+ * semaphores.
+ */
 struct Spool
 {
-    /**
-     * The name of the shared memory object used to store the jobs array.
-     */
-    char *jobs_shm_name;
-
     /**
      * The position of the head of the printer within the queue.
      *
@@ -107,6 +109,9 @@ struct Spool
     sem_t jobs_lock;
 };
 
+/**
+ * A simple aggregate of the both the spool and jobs buffer.
+ */
 struct SpoolData
 {
     struct Spool *spool;
