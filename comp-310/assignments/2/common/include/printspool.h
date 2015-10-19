@@ -9,7 +9,10 @@
 
 #define SPOOL_SHM_NAME "/comp-310-print-spool"
 #define JOBS_SHM_NAME "/comp-310-print-jobs"
+
+#ifndef MSG_MAX_SIZE
 #define MSG_MAX_SIZE 100
+#endif
 
 #define SHM_MODE ((mode_t)0600)
 
