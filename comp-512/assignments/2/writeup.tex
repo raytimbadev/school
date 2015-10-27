@@ -1,0 +1,105 @@
+\documentclass{article}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#2\\Distributed Systems -- COMP 512}
+\date{28 October 2015}
+
+\usepackage{float}
+\usepackage{float}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{algorithm,algorithmicx,algpseudocode}
+
+\begin{document}
+
+\maketitle
+
+\section{Total order multicast}
+
+Given is a group of nodes organized into clusters. Let $g_1, \cdots, g_n$
+denote these clusters. Each cluster $g_i$ contains a single distinguished
+process denoted $p^\prime_i$ called the control process. Now we can establish
+the two kinds of communication groups in this system.
+
+\begin{enumerate}
+    \item A \emph{regular communication group} consists of all members of
+        a group $g_i$. There are $i$ such groups under consideration.
+    \item The \emph{control group} $g^\prime$ consists of all the control
+        processes, i.e. $g^\prime = \{p^\prime_1, \cdots, p^\prime_n\}$. There
+        is exactly one control group, and it has $n$ members.
+\end{enumerate}
+
+Messages are to be transmitted between all nodes in a totally ordered fashion.
+To achieve this, the control process of each cluster will act as a sequencer
+within its cluster, and the control group will operate using a token ring
+approach. Below are the different scenarios that can arise in this scheme.
+
+\begin{enumerate}
+    \item
+        When a regular process wants to multicast a message, it simply sends it
+        to the control process of its cluster.
+
+    \item
+        When a control process receives a message from an ordinary process in
+        its cluster, it will add it to a queue $Q$.
+
+    \item
+        When a regular process receives a message from its associated control
+        process, it delivers it in the order given by the sequence number of
+        the message.
+
+    \item
+        When a control process receives a message from another control process,
+        it simply adds it to a queue $P$ prioritized on the sequence numbers of
+        received messages. Notice that this priority queue is separate from the
+        queue of cluster-local messages.
+
+    \item
+        When a control process receives the token from another control process,
+        it multicasts its enqueued messages to each of the processes in its
+        cluster and to every other control node, assigning sequence numbers to
+        the messages according to the sequence number contained by the token.
+\end{enumerate}
+
+Of these scenarios, only the last one's implementation is nontrivial, so it is
+given in full in algorithm \ref{alg:token-receive}.
+
+\begin{algorithm}[h]
+    \caption{A control process receives the token.}
+    \label{alg:token-receive}
+    \begin{algorithmic}
+        \Require{
+            The token $t$,
+            the remote message queue $P$,
+            the cluster-local queue $Q$,
+            the next control process ID $j$.
+        }
+        \Ensure{
+            Messages in $Q$ are transmitted to all processes in the local
+            cluster and to all other control processes, and messages in $P$ are
+            delivered to all processes in the local cluster.
+        }
+        \State ~
+        \While{$|P| > 0$}
+            \State $m, seq \gets$ \Call{Dequeue}{P}
+            \For{each process $p$ in the local cluster}
+                \State \Call{Send}{$p$, $\left\langle m, seq\right\rangle$}
+            \EndFor
+        \EndWhile
+        \State $n \gets t.seq$
+        \While{$|Q| > 0$}
+            \State $m \gets$ \Call{Dequeue}{Q}
+            \For{each process $p$ in the local cluster}
+                \State \Call{Send}{$p$, $\left\langle m, n\right\rangle$}
+            \EndFor
+            \For{each other control process $p^\prime$}
+                \State \Call{Send}{$p$, $\left\langle m, n\right\rangle$}
+            \EndFor
+            \State $n \gets n + 1$
+        \EndWhile
+        \State $t.seq \gets n$
+        \State \Call{SendToken}{$t$, $p_j$}
+    \end{algorithmic}
+\end{algorithm}
+
+\end{document}
