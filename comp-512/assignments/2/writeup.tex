@@ -113,6 +113,51 @@ Given are the following schedules.
         \ref{fig:dependency-graph-s1} and \ref{fig:dependency-graph-s2},
         respectively.
 
+        \begin{figure}[ht]
+            \centering
+            \begin{tikzpicture}[
+                    ->,
+                    shorten >=1pt,
+                    auto,
+                    node distance=3.0cm,
+                    semithick
+                ]
+                \node (T1) {$T_1$};
+                \node (T2) [below left of=T1] {$T_2$};
+                \node (T3) [below right of=T1] {$T_3$};
+
+                \path
+                (T3) edge node {} (T1)
+                (T1) edge node {} (T2)
+                ;
+            \end{tikzpicture}
+            \caption{The dependency graph for the schedule $S_1$.}
+            \label{fig:dependency-graph-s1}
+        \end{figure}
+
+        \begin{figure}[ht]
+            \centering
+            \begin{tikzpicture}[
+                    ->,
+                    shorten >=1pt,
+                    auto,
+                    node distance=3.0cm,
+                    semithick
+                ]
+                \node (T1) {$T_1$};
+                \node (T2) [below left of=T1] {$T_2$};
+                \node (T3) [below right of=T1] {$T_3$};
+
+                \path
+                (T1) edge node {} (T3)
+                (T3) edge node {} (T2)
+                (T2) edge node {} (T1)
+                ;
+            \end{tikzpicture}
+            \caption{The dependency graph for the schedule $S_2$.}
+            \label{fig:dependency-graph-s2}
+        \end{figure}
+
         The schedule $S_1$ is serializable. There is one equivalent serial
         schedule.
 
