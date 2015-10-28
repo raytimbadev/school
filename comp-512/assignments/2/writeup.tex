@@ -342,4 +342,34 @@ show the form of the dependency graph of the transactions.
 
 \section{Location of lock manager}
 
+We will analyze different setups where the location of the lock manager
+differs. Each case has certain advantages and disadvantages in terms of
+overhead, complexity, deadlock detection, etc.
+
+\begin{itemize}
+    \item
+        By using a middleware layer equipped with a lock manager, we centralize
+        the concurrency management, simplifying things quite a lot. However,
+        this creates a more significant single point of failure in the
+        distributed system. Deadlock detection is also significantly easier
+        since all the locking logic is in one place.
+
+    \item
+        In a homogeneous system allowing clients to connect to any node,
+        there are some performance benefits since the load is more evenly
+        distributed and there is no single point of failure as with the
+        middleware. However, for complicated transactions, nodes will have to
+        communicate among each other, and synchronize locking metadata, which
+        can be more costly in terms of network communications than with a
+        more centralized approach involving a middleware layer.
+
+    \item
+        The above two approaches can be mixed, allowing clients to connect to
+        any node, but having nodes contact a centralized lock management node
+        for concurrency control. This appears to offer a best of both worlds,
+        as it offers better load balancing than having clients contact the
+        middleware for all requests, but preserves the simplicity of
+        centralizing the concurrency logic.
+\end{itemize}
+
 \end{document}
