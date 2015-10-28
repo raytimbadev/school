@@ -184,6 +184,36 @@ Given are the following schedules.
             r_1 (b) &\to w_2 (b) \\
             r_3 (c) &\to w_2 (c)
         \end{align*}
+
+    \item
+        Figure \ref{fig:execution-s1} shows the execution of the schedule $S_1$
+        on a homogeneous distributed system and includes a conflict-equivalent
+        serial schedule.
+
+        \begin{figure}[ht]
+            \includegraphics[width=0.8\textwidth]{homogeneous.jpg}
+
+            \caption{
+                The execution of the schedule $S_1$ using two-phase locking in
+                a homogeneous distributed system.
+            }
+            \label{fig:execution-s1}
+        \end{figure}
+
+    \item
+        Figure \ref{fig:execution-s2} shows the execution of the schedule $S_2$
+        on a distributed system using a middleware and includes a
+        conflict-equivalent serial schedule.
+
+        \begin{figure}[ht]
+            \includegraphics[width=0.8\textwidth]{middleware.jpg}
+
+            \caption{
+                The execution of the schedule $S_2$ using two-phase locking in
+                a distributed system using a middleware layer.
+            }
+            \label{fig:execution-s2}
+        \end{figure}
 \end{enumerate}
 
 \section{Serializability}
