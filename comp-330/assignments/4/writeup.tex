@@ -1,0 +1,79 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington}
+\date{5 November 2015}
+\title{Assignment \#4\\Theory of Computing -- COMP 330}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{qtree}
+
+\begin{document}
+
+\maketitle
+
+\begin{enumerate}
+    \item % TODO
+
+    \item
+        To show that the language for simple C-style expressions is ambiguous,
+        we will present a string having multiple valid parses.
+
+        The string we will consider is $a+++b$, and some possible parses for
+        it are shown in figures \ref{fig:postincrement} and
+        \ref{fig:preincrement}.
+
+        \begin{figure}
+            \Tree
+            [.S
+                [.V
+                    [.Post
+                        [.I
+                            $a$
+                        ]
+                        $+$
+                        $+$
+                    ]
+                ]
+                $+$
+                [.V
+                    [.I
+                        $b$
+                    ]
+                ]
+            ]
+
+            \caption{
+                A parse tree for the postincrement interpretation of $a+++b$.
+            }
+            \label{fig:postincrement}
+        \end{figure}
+
+        \begin{figure}
+            \Tree
+            [.S
+                [.V
+                    [.I
+                        $a$
+                    ]
+                ]
+                $+$
+                [.V
+                    [.Pre
+                        [.I
+                            $b$
+                        ]
+                        $+$
+                        $+$
+                    ]
+                ]
+            ]
+
+            \caption{
+                A parse tree for the preincrement interpretation of $a+++b$.
+            }
+            \label{fig:preincrement}
+        \end{figure}
+
+\end{enumerate}
+
+\end{document}
