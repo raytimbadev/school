@@ -18,9 +18,9 @@
         To show that the language for simple C-style expressions is ambiguous,
         we will present a string having multiple valid parses.
 
-        The string we will consider is $a+++b$, and some possible parses for
-        it are shown in figures \ref{fig:postincrement} and
-        \ref{fig:preincrement}.
+        We will consider the string $a+++b$, and show that there is more than
+        one possible parse for it, as seen in the parse trees in figures
+        \ref{fig:postincrement} and \ref{fig:preincrement}.
 
         \begin{figure}
             \Tree
@@ -73,6 +73,33 @@
             }
             \label{fig:preincrement}
         \end{figure}
+
+        Since the given grammar is not recursive, the unary incrementing
+        operators cannot be nested; the only ambiguous string is
+        $a+++b$. We can write unambiguous grammars for each interpretation by
+        exhausting all the possible parses, of which there are only finitely
+        many due to the lack of recursion, and then eliminating common
+        subexpressions of rules by introducing new rules for them. We have used
+        that procedure in the following two unambiguous grammars.
+
+        First, here is a grammar that will parse $a+++b$ as including a
+        post-increment.
+        \begin{align*}
+            S &\to (I | \langle Pre \rangle) + (I | P ) \\
+            S &\to \langle Post \rangle + P \\
+            S &\to \langle Pre \rangle | \langle Post \rangle
+        \end{align*}
+
+        Next, we will write a grammar to parse $a+++b$ as including a
+        pre-increment.
+        \begin{align*}
+            S &\to I + ( I | \langle Post \rangle ) \\
+            S &\to P + (I | P) \\
+            P &\to \langle Pre \rangle | \langle Post \rangle
+        \end{align*}
+
+        The $I$, $\langle Pre \rangle$, and $\langle Post \rangle$ productions
+        are exactly as in the original grammar.
 
 \end{enumerate}
 
