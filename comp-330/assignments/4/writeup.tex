@@ -7,12 +7,43 @@
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{qtree}
 
+\newtheorem{proposition}{Proposition}
+
 \begin{document}
 
 \maketitle
 
 \begin{enumerate}
-    \item % TODO
+    \item Let $\#_x(s)$ represent the number of occurrences of the letter $x$
+        in the string $s$.
+
+        \begin{proposition}
+            The given grammar generates the set of all strings $w \in \Sigma^*$
+            such that $\#_a(w) = \#_b(w)$.
+        \end{proposition}
+
+        \begin{proof}
+            Suppose we have a string having an equal number of occurrences of
+            $a$s and $b$s. Of course, somewhere in this string, we will
+            encounter the substring $ab$ or $ba$, which we will replace with an
+            $S$, as this matches a rule in the grammar. Then, we may replace
+            this $S$ with $\epsilon$, since that is a possible string generated
+            by $S$. This procedure effectively reduces the length of the given
+            string by $2$ on each iteration, and furthermore preserves the
+            invariant that the string have equal occurrences of $a$ and $b$.
+            Because the length is strictly decreasing, we arrive at the empty
+            string, concluding that the string is recognized by the grammar.
+
+            Now to show that the given grammar generates all strings of having
+            equal occurrences of $a$ and $b$, we will use a form of induction.
+            Of course, $\epsilon$ has equal occurrences of $a$ and $b$, and is
+            a possible production of $S$. Now suppose $s$ and $s^\prime$ have
+            equal occurrences of $a$ and $b$. Then, $asb$ and $bsa$ have equal
+            occurrences of $a$ and $b$ since in each case, one of each letter
+            is added. Also, $ss^\prime$ has equal occurrences of $a$ and $b$
+            since $\#_a(s) + \#_a(s^\prime) = \#_a(ss^\prime)$ and
+            $\#_b(s) + \#_b(s^\prime) = \#_b(ss^\prime$.
+        \end{proof}
 
     \item
         To show that the language for simple C-style expressions is ambiguous,
