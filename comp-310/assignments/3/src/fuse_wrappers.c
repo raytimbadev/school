@@ -27,7 +27,7 @@ fuse_getattr(
     if (strcmp(path, "/") == 0) {
         stbuf->st_mode = S_IFDIR | 0755;
         stbuf->st_nlink = 2;
-    } else if((size = sfs_GetFileSize(path)) != -1) {
+    } else if((size = sfs_get_file_size(path)) != -1) {
         stbuf->st_mode = S_IFREG | 0666;
         stbuf->st_nlink = 1;
         stbuf->st_size = size;
@@ -52,8 +52,10 @@ fuse_readdir(
     
     filler(buf, ".", NULL, 0);
     filler(buf, "..", NULL, 0);
+
+    dirloc d = NULL;
     
-    while(sfs_get_next_filename(file_name)) {
+    while(sfs_get_next_filename(file_name, &d)) {
         filler(buf, &file_name[1], NULL, 0);
     }
     
@@ -111,7 +113,7 @@ fuse_read(
     if (fd == -1)
         return -errno;
     
-    if(sfs_fseek(fd, offset) == -1)
+    if(sfs_fseek(fd, offset, SFS_START) == -1)
         return -errno;
     
     res = sfs_fread(fd, buf, size);
@@ -141,7 +143,7 @@ fuse_write(
     if (fd == -1) 
         return -errno;
     
-    if(sfs_fseek(fd, offset) == -1)
+    if(sfs_fseek(fd, offset, SFS_START) == -1)
         return -errno;
     
     res = sfs_fwrite(fd, buf, size);
@@ -221,7 +223,7 @@ fuse_operations xmp_oper = {
 int
 main(int argc, char *argv[])
 {
-    mksfs(1);
+    mksfs(SFS_FRESH);
     
     return fuse_main(argc, argv, &xmp_oper, NULL);
 }
