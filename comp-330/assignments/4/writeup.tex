@@ -257,28 +257,34 @@
 
             Demon picks $p$.
 
-            I pick $s = a^{2p} b^{p+1} c^{p+1}$. Clearly, $s \in \min{(L)}$
-            since $p+1 = \min{(p+1, 2p)}$.
+            I pick $s = a^{p+1} b^{p+1} c^{p+1}$. Clearly, $s \in \min{(L)}$
+            since $p+1 = \min{(p+1, p+1)}$.
 
             Demon picks $u,v,w,x,y \in \Sigma^*$ such that $s = uvwxy$ and
             $|vx| > 0$ and $|vwx| \leq p$.
 
-            I pick $i = 2$.
-
-            Now we will analyze the possible splits chosen by the demon to show
+            Our choice of $i$ will depend on the split chosen by the demon;
+            we will analyze the possible splits chosen by the demon to show
             that our choice of $i$ will always result in a string not in the
             language.
+
+            If the demon chooses both $v$ and $x$ to both lie within the region
+            of $a$s or the region of $b$s, then we can pick $i = 0$. This will
+            reduce the number of letters in that region by at least $1$,
+            resulting in a new minimum not matched by the number of $c$s,
+            so the resulting string is not in the language.
+
+            If the demon chooses both $v$ and $x$ to both lie in the region
+            of $c$s, then we can pick $i = 2$, making the number of $c$s
+            greater than the minimum, which results in a string not in the
+            language.
+
+            For all the following cases, we can pick $i = 2$.
 
             If the demon chooses $v$ or $x$ to straddle the boundary between
             two different letters, then pumping up will result in an
             alternation of letters. We thus need not concern ourselves with
             those cases.
-
-            If the demon chooses both $v$ and $x$ to lie within the same
-            region of letters, then we will have one of
-            $a^{(2i)(2p)}b^{p+1}c^{p+1}$, $a^{2p} b^{(2i)(p+1)} c^{p+1}$, or
-            $a^{2p} b^{p+1} c^{(2i)(p+1)}$. All of these are not in the
-            language.
 
             If the demon chooses $v$ in the region of $a$s and $x$ in the
             region of $b$s, then the number of $c$s will be less than the
