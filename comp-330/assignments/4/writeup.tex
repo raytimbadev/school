@@ -7,6 +7,11 @@
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{qtree}
 
+\usepackage[margin=2.0cm]{geometry}
+
+\usepackage{tikz}
+\usetikzlibrary{automata}
+
 \newtheorem{proposition}{Proposition}
 
 \begin{document}
@@ -131,6 +136,166 @@
 
         The $I$, $\langle Pre \rangle$, and $\langle Post \rangle$ productions
         are exactly as in the original grammar.
+
+    \item
+        Here is a Chomsky Normal Form grammar for the language of matched
+        brackets with two kinds of brackets.
+        \begin{align*}
+            S &\to \epsilon \\
+            S &\to AS \\
+            A &\to P_1 Q_1 \\
+            P_1 &\to P_1^\prime S \\
+            P_1^\prime &\to ( \\
+            Q_1 &\to ) \\
+            A &\to P_2 Q_2 \\
+            P_2 &\to P_2^\prime S \\
+            P_2^\prime &\to [ \\
+            Q_2 &\to ] \\
+        \end{align*}
+
+    \item Figure \ref{fig:pda} shows a pushdown automaton for the grammar given
+        in the previous answer.
+
+        \begin{figure}
+            \centering
+
+            \begin{tikzpicture}[
+                    ->,
+                    shorten >=1pt,
+                    auto,
+                    node distance=2.8cm,
+                    semithick,
+                    looseness=12
+                ]
+                \tikzstyle{every state}=[
+                    fill=white,
+                    draw=black,
+                    text=black
+                ]
+
+                \node[initial, state] (A) {} ;
+
+                \path
+                (A) edge [out=30, in=60]
+                    node [above]
+                    {$(,\epsilon \to ($}
+                    (A)
+                (A) edge [out=120, in=150]
+                    node [above]
+                    {$[,\epsilon \to [$}
+                    (A)
+                (A) edge [out=210, in=240]
+                    node [below]
+                    {$),( \to \epsilon$}
+                    (A)
+                (A) edge [out=300, in=330]
+                    node [below]
+                    {$],[ \to \epsilon$}
+                    (A)
+                ;
+            \end{tikzpicture}
+
+            \caption{
+                A pushdown automaton for recognizing the language of balanced
+                braces with two types of braces.
+            }
+
+            \label{fig:pda}
+        \end{figure}
+
+    \item
+        The following is a grammar for the language
+        $\{a^n b^m c^p | n \leq p \lor m \leq p\}$.
+        \begin{align*}
+            S &\to A_1 \\
+            S &\to A_2 B_2 \\
+            A_1 &\to a A C | B \\
+            B_1 &\to \epsilon | b B \\
+            C_1 &\to c | c C \\
+            A_2 &\to \epsilon | a A_2 \\
+            B_2 &\to \epsilon | b B_2 C_2 \\
+            C_2 &\to c | c C_2
+        \end{align*}
+
+        Our strategy for building this grammar was to recognize that
+        context-free languages are closed under union. Indeed, this grammar is
+        built as the union of the two important cases, as the productions for
+        $S$.
+
+        The first group of productions is made to recognize the case where
+        $\#_a \leq \#_c$, by placing one $C$ for each $a$, and inserting the
+        $B$ production between the group of $a$s and the group of $C$s. Thus,
+        we can have an arbitrary number of $b$s while ensuring that the number
+        of $a$s is at most the number of $c$s.
+
+        The second group of productions is made to recognize the case where
+        $\#_b \leq \#_c$, by producing arbitrarily many $a$s and then producing
+        an equal number of $b$s and $C$s. Each $C$ in turn can expand to
+        arbitrarily many $c$s, but this ensures that there are at most as many
+        $b$s as $c$s.
+
+    \item
+        Consider the language
+        $L = \{a^n b^m c^p | (n \leq p \lor m \leq p), n > 0, m > 0, p > 0\}$.
+        We notice that
+        $\min{(L)} = \{a^n b^m c^p | p = \min{(n, m)}, n > 0, m > 0, p > 0\}$.
+        Indeed, the most that this minimization process can conceptually do is
+        remove extraneous occurrences of $c$ from the ends of strings.
+
+        We will show that $\min{(L)}$ is not context-free, hence showing that
+        the set of context-free languages is not closed under the $\min$
+        operation. To do so, we will use the pumping lemma for context-free
+        languages.
+
+        \begin{proposition}
+            The set of context-free languages is not closed under the $\min$
+            operation.
+        \end{proposition}
+
+        \begin{proof}
+            By the pumping lemma for context-free languages.
+
+            Demon picks $p$.
+
+            I pick $s = a^{2p} b^{p+1} c^{p+1}$. Clearly, $s \in \min{(L)}$
+            since $p+1 = \min{(p+1, 2p)}$.
+
+            Demon picks $u,v,w,x,y \in \Sigma^*$ such that $s = uvwxy$ and
+            $|vx| > 0$ and $|vwx| \leq p$.
+
+            I pick $i = 2$.
+
+            Now we will analyze the possible splits chosen by the demon to show
+            that our choice of $i$ will always result in a string not in the
+            language.
+
+            If the demon chooses $v$ or $x$ to straddle the boundary between
+            two different letters, then pumping up will result in an
+            alternation of letters. We thus need not concern ourselves with
+            those cases.
+
+            If the demon chooses both $v$ and $x$ to lie within the same
+            region of letters, then we will have one of
+            $a^{(2i)(2p)}b^{p+1}c^{p+1}$, $a^{2p} b^{(2i)(p+1)} c^{p+1}$, or
+            $a^{2p} b^{p+1} c^{(2i)(p+1)}$. All of these are not in the
+            language.
+
+            If the demon chooses $v$ in the region of $a$s and $x$ in the
+            region of $b$s, then the number of $c$s will be less than the
+            number of $a$s and the number of $b$s. Hence the resulting string
+            is not in the language.
+
+            If the demon chooses $v$ in the region of $a$s and $x$ in the
+            region of $c$s, then we have $a^{4p} b^{p+1} c^{2p+2}$ and
+            $2p+2 > p + 1$. The resulting string is thus not in the language.
+
+            Finally, if the demon chooses $v$ in the region of $b$s and $x$ in
+            the region of $c$s, then we have $a^{2p} b^{2p + 2} c^{2p + 2}$ and
+            $2p + 2 > 2p$. The resulting string is thus not in the language.
+
+            Hence, $\min{(L)}$ is not context-free, and the set of context-free
+            languages is not closed under the $\min$ operation.
+        \end{proof}
 
 \end{enumerate}
 
