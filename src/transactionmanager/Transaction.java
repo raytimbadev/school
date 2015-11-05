@@ -21,7 +21,7 @@ public class Transaction {
     /**
      * The resource managers association with this transaction.
      */
-    private final Set<int> resourceManagers;
+    private final Set<Integer> resourceManagers;
     
     /**
      * The time to live of this transaction.
@@ -29,8 +29,8 @@ public class Transaction {
     private int timeToLive;
 
     public Transaction() {
-        id = Transaction.getNextTransactionId++;
-        resourceManagers = new HashSet<int>();
+        id = Transaction.getNextTransactionId();
+        resourceManagers = new HashSet<Integer>();
 
         // TODO find a good way to initialize this.
         timeToLive = 100;
@@ -58,8 +58,10 @@ public class Transaction {
         if(o == null)
             return false;
 
-        if(o instanceof Transaction)
-            return o.id == this.id;
+        if(o instanceof Transaction) {
+            final Transaction p = (Transaction)o;
+            return p.id == this.id;
+        }
 
         return false;
     }

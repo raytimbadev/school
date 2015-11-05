@@ -1,5 +1,7 @@
 package lockmanager;
 
+import transactionmanager.Transaction;
+
 public class Lock {
     final String datumName;
     final Transaction transaction;
@@ -9,6 +11,10 @@ public class Lock {
         this.datumName = datumName;
         this.transaction = transaction;
         this.lockType = lockType;
+    }
+
+    public Transaction getTransaction() {
+        return transaction;
     }
 
     @Override
@@ -21,10 +27,12 @@ public class Lock {
         if(o == null)
             return false;
 
-        if(o instanceof Lock)
-            return o.datumName == this.datumName
-                && o.transaction.equals(this.transaction)
-                && o.lockType.equals(this.lockType);
+        if(o instanceof Lock) {
+            final Lock p = (Lock)o;
+            return p.datumName == this.datumName
+                && p.transaction.equals(this.transaction)
+                && p.lockType.equals(this.lockType);
+        }
 
         return false;
     }

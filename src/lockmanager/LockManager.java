@@ -22,24 +22,36 @@ public class LockManager {
             Transaction transaction,
             LockType lockType)
     {
-        final Map<Transaction, Lock> transactionMap = lockMap.get(datumName);
+        Map<Transaction, Lock> transactionMap = lockMap.get(datumName);
         final Lock lock = new Lock(datumName, transaction, lockType);
 
         if(transactionMap == null) {
             transactionMap = new Hashtable<Transaction, Lock>();
-            lockMap.put(transaction, transactionMap);
+            lockMap.put(datumName, transactionMap);
         }
 
         if(lockType == LockType.LOCK_WRITE) {
-            while(!canAcquireWrite(transaction, transactionMap))
-                wait();
+            while(!canAcquireWrite(transaction, transactionMap)) {
+                try {
+                    wait();
+                }
+                catch(InterruptedException e) {
+                    return null;
+                }
+            }
 
             transactionMap.put(transaction, lock);
             return lock;
         }
         else if(lockType == LockType.LOCK_READ) {
-            while(!canAcquireRead(transactionMap))
-                wait();
+            while(!canAcquireRead(transactionMap)) {
+                try {
+                    wait();
+                }
+                catch(InterruptedException e) {
+                    return null;
+                }
+            }
 
             transactionMap.put(transaction, lock);
             return lock;
@@ -48,7 +60,7 @@ public class LockManager {
         return null;
     }
 
-    public synchronized Lock releaseTransaction(Transaction transaction) {
+    public synchronized void releaseTransaction(Transaction transaction) {
         for(final Map<Transaction, Lock> transactionMap : lockMap.values())
             transactionMap.remove(transaction);
         notifyAll();

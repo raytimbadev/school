@@ -7,10 +7,10 @@ public class TransactionManager {
     /**
      * Maps transaction IDs to transactions.
      */
-    private Map<int, Transaction> transactionMap;
+    private Map<Integer, Transaction> transactionMap;
 
     public TransactionManager() {
-        transactionMap = new Hashtable<int, Transaction>();
+        transactionMap = new Hashtable<Integer, Transaction>();
     }
 
     public synchronized Transaction begin() {
