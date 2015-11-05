@@ -47,5 +47,21 @@ public class Transaction {
     public void enlist(int resourceManagerId) {
         resourceManagers.add(resourceManagerId);
     }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(o == null)
+            return false;
+
+        if(o instanceof Transaction)
+            return o.id == this.id;
+
+        return false;
+    }
 }
 
