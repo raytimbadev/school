@@ -1,12 +1,40 @@
 #ifndef SFS_API_H
 #define SFS_API_H
 
+#include <stddef.h>
+
 /**
  * Filesystem layout:
  * superblock, inode table, data blocks, inode bitmap, data bitmap
  */
 
-#include <stddef.h>
+// COMPILE-TIME PARAMETERS //
+
+#ifndef SFS_WRITEBUF_SIZE
+#define SFS_WRITEBUF_SIZE 1024
+#endif
+
+#ifndef MAGIC
+#define MAGIC 0xAABB0005
+#endif
+
+#ifndef SFS_DIRECT_PTR_COUNT
+#define SFS_DIRECT_PTR_COUNT 12
+#endif
+
+#ifndef SFS_BLOCK_SIZE
+#define SFS_BLOCK_SIZE ((size_t)512)
+#endif
+
+#ifndef SFS_INODE_ALLOC_HEURISTIC
+#define SFS_INODE_ALLOC_HEURISTIC 100
+#endif
+
+#ifndef MAXFILENAME
+#define MAXFILENAME 20
+#endif
+
+// CONSTANTS //
 
 #define SFS_DIR_START NULL
 
@@ -26,7 +54,12 @@
 #define MODE_A_X 0x0100000000
 #define MODE_D   0x1000000000
 
-typedef int file_id;
+#define SFS_NULL ((sfs_block_ptr)0)
+#define SFS_INODE_NULL ((sfs_inode_n)0)
+
+// TYPES //
+
+typedef unsigned short file_id;
 
 typedef unsigned short sfs_mode;
 typedef unsigned short sfs_link_count;
@@ -37,27 +70,51 @@ typedef unsigned int sfs_inode_n;
 
 typedef unsigned int sfs_magic;
 
-#define MAGIC ((sfs_magic)0xAABB0005)
-
-#define SFS_NULL ((sfs_block_ptr)0)
-#define SFS_INODE_NULL ((sfs_inode_n)0)
-
-#define SFS_DIRECT_PTR_COUNT 12
-
-#define SFS_BLOCK_SIZE ((size_t)512)
-
-#define SFS_INODE_ALLOC_HEURISTIC 100
-
-#define MAXFILENAME 20
-
 struct sfs_inode
 {
+    /**
+     * The number of this inode, which is its position within the inode table.
+     */
+    sfs_inode_n n;
+
+    /**
+     * The permissions of the file represented by the inode.
+     */
     sfs_mode mode;
+
+    /**
+     * The number of directory entries pointing to this inode.
+     */
     sfs_link_count link_count;
+
+    /**
+     * The id of the creator of the inode.
+     */
     sfs_uid uid;
+
+    /**
+     * The id of the group of the inode.
+     */
     sfs_gid gid;
+
+    /**
+     * The size of the file represented by the inode.
+     */
     size_t size;
+
+    /**
+     * The direct block pointers holding file data. The block pointer after the
+     * last used direct block pointer, if any, has the special value SFS_NULL.
+     */
     sfs_block_ptr direct_blocks[SFS_DIRECT_PTR_COUNT];
+
+    /**
+     * The indirect block pointer holding more file data. If no indirect block
+     * is in use, then this attribute has the special value SFS_NULL.
+     *
+     * The indirect block is itself merely a 0-terminated array of
+     * sfs_block_ptr values.
+     */
     sfs_block_ptr indirect_block;
 };
 
@@ -122,9 +179,52 @@ struct sfs_dir_iter
     int position;
 };
 
+/**
+ * Represents a file on disk for random-access reading and writing.
+ *
+ * Writes are buffered internally. The write buffer is flushed to disk under
+ * the following circumstances:
+ *
+ * * A read is performed.
+ * * A seek is performed.
+ * * A write would overflow the buffer.
+ * * The buffer capacity is shrunk to less than its current size.
+ * * The file is closed.
+ * * An explicit flush is requested.
+ *
+ * If the write buffer is empty, but a write would overflow it, then the write
+ * will fail. The buffer should be resized before trying again.
+ */
+struct sfs_file
+{
+    /**
+     * The inode of the file, holding metadata about it.
+     */
+    struct sfs_inode *inode;
 
+    /**
+     * The offset within the file. This is modified when seeking.
+     */
+    unsigned int file_offset;
 
-typedef struct sfs_dir_iter * dirloc;
+    /**
+     * The offset within the buffer. This value increases when writes are
+     * performed and resets to zero when the buffer is flushed.
+     */
+    unsigned int buf_offset;
+
+    /**
+     * The write buffer.
+     */
+    void *buf;
+
+    /**
+     * The size of the buffer.
+     */
+    size_t buf_size;
+};
+
+// SFS API //
 
 /**
  * Formats a file in the host file system to SFS.
@@ -148,12 +248,12 @@ int mksfs(int fresh);
  * Upon the function's first use, it should point to the symbolic constant
  * SFS_DIR_START.
  *
- * When you are done listing the directory, you must free the `dirloc`.
+ * If the
  *
  * The function will return zero if and only if there are no more files in the
  * directory.
  */
-int sfs_get_next_filename(const char *fname, dirloc *loc);
+int sfs_get_next_filename(const char *path, char *fname, struct sfs_dir_iter **loc);
 
 /**
  * Gets the size of the file identified by a path.
@@ -176,6 +276,13 @@ file_id sfs_fopen(const char *path);
  * The return value is 0 only if the operation succeeds.
  */
 int sfs_fclose(file_id fd);
+
+/**
+ * Flushes any dirty write buffers for a file to disk.
+ *
+ * Returns the number of bytes written by the flush operation.
+ */
+int sfs_fflush(file_id fd);
 
 /**
  * Writes a given number of bytes from a given buffer to an open file.
