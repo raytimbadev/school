@@ -1,12 +1,14 @@
 .PHONY: all
 
+$(shell mkdir -p obj bin)
+
 all: bin/fuse_wrappers bin/sfs_test bin/sfs_test2
 
 CFLAGS=-Iinclude -g -D_FILE_OFFSET_BITS=64
 LDFLAGS=
 CC=gcc
 
-bin/fuse_wrappers: obj/fuse_wrappers.o
+bin/fuse_wrappers: obj/fuse_wrappers.o obj/sfs_api.o obj/sfs_helpers.o
 	$(CC) $< -o $@ $(LDFLAGS)
 
 bin/sfs_test: obj/sfs_test.o
@@ -16,4 +18,10 @@ bin/sfs_test2: obj/sfs_test2.o
 	$(CC) $< -o $@ $(LDFLAGS)
 
 obj/fuse_wrappers.o: src/fuse_wrappers.c include/disk_emu.h include/sfs_api.h
+	$(CC) $< -c -o $@ $(CFLAGS)
+
+obj/sfs_api.o: src/sfs_api.c include/sfs_api.h include/sfs_helpers.h
+	$(CC) $< -c -o $@ $(CFLAGS)
+
+obj/sfs_helpers.o: src/sfs_helpers.c include/sfs_api.h include/sfs_helpers.h
 	$(CC) $< -c -o $@ $(CFLAGS)

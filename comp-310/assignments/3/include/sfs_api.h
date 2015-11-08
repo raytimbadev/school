@@ -1,9 +1,16 @@
 #ifndef SFS_API_H
 #define SFS_API_H
 
+/**
+ * Filesystem layout:
+ * superblock, inode table, data blocks, inode bitmap, data bitmap
+ */
+
 #include <stddef.h>
 
 #define SFS_DIR_START NULL
+
+#define SFS_SUPERBLOCK_COUNT ((size_t)1)
 
 #define SFS_REUSE 0
 #define SFS_FRESH 1
@@ -20,7 +27,6 @@
 #define MODE_D   0x1000000000
 
 typedef int file_id;
-typedef int * dirloc;
 
 typedef unsigned short sfs_mode;
 typedef unsigned short sfs_link_count;
@@ -31,15 +37,16 @@ typedef unsigned int sfs_inode_n;
 
 typedef unsigned int sfs_magic;
 
-#define MAGIC ((magic)0xAABB0005)
+#define MAGIC ((sfs_magic)0xAABB0005)
 
 #define SFS_NULL ((sfs_block_ptr)0)
+#define SFS_INODE_NULL ((sfs_inode_n)0)
 
 #define SFS_DIRECT_PTR_COUNT 12
 
 #define SFS_BLOCK_SIZE ((size_t)512)
 
-#define SFS_INODE_ALLOC_HEURISITC 100
+#define SFS_INODE_ALLOC_HEURISTIC 100
 
 #define MAXFILENAME 20
 
@@ -54,12 +61,44 @@ struct sfs_inode
     sfs_block_ptr indirect_block;
 };
 
+/**
+ * Represents the on-disk structure of the superblock.
+ */
 struct sfs_superblock
 {
+    /**
+     * The magic number for the SFS filesystem type.
+     */
     sfs_magic magic;
+
+    /**
+     * The size of blocks on disk.
+     */
     size_t block_size;
+
+    /**
+     * The number of blocks used for data in the system.
+     */
     size_t block_count;
+
+    /**
+     * The number of blocks used as inodes.
+     */
     size_t inode_blocks;
+
+    /**
+     * The number of blocks used for the free inode list.
+     */
+    size_t inode_bitmap_count;
+
+    /**
+     * The number of blocks used for the free data block list.
+     */
+    size_t block_bitmap_count;
+
+    /**
+     * The inode number of the root directory.
+     */
     sfs_inode_n root;
 };
 
@@ -69,6 +108,23 @@ typedef enum
     SFS_END,
     SFS_HERE
 } sfs_seek_origin;
+
+struct sfs_dir_entry
+{
+    sfs_inode_n inode;
+    char filename[MAXFILENAME];
+};
+
+struct sfs_dir_iter
+{
+    struct sfs_dir_entry *entries;
+    size_t size;
+    int position;
+};
+
+
+
+typedef struct sfs_dir_iter * dirloc;
 
 /**
  * Formats a file in the host file system to SFS.
@@ -91,6 +147,8 @@ int mksfs(int fresh);
  * The `loc` pointer is used to maintain state between calls to this function.
  * Upon the function's first use, it should point to the symbolic constant
  * SFS_DIR_START.
+ *
+ * When you are done listing the directory, you must free the `dirloc`.
  *
  * The function will return zero if and only if there are no more files in the
  * directory.
