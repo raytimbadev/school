@@ -1,0 +1,166 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment 3\\Algorithm Design -- COMP 360}
+\date{10 November 2015}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{algorithmicx,algorithm,algpseudocode}
+
+\begin{document}
+
+\begin{enumerate}
+    \item
+        --
+
+    \item
+        We notice that the constraints $|x_i| \geq 1$, $x_i \geq -1$, and
+        $x_i \leq 1$ imply that $x_i \in \{-1, 1\}$, which in turn allows us to
+        solve integer programs. In general, solving integer programs is
+        $NP$-complete, so this augmented form of linear programming is thus
+        also $NP$-complete.
+
+    \item
+        \begin{enumerate}
+            \item
+                This problem is $NP$-complete.
+
+                A YES certificate for this problem is a truth assignment. We
+                can verify it by first seeing if there are $M$ variables
+                assigned to \texttt{true} and then checking that the assignment
+                satisfies $\phi$.
+
+                To show completeness we will reduce SAT to this problem. Given
+                is a CNF $\phi$ of $n$ variables. We run the oracle for each 
+                $i \in \{1, \cdots, n\}$. If for some $i$ it outputs YES, then
+                we output YES. Else, we output NO.
+
+            \item
+                This problem is $NP$-complete.
+
+                A YES certificate for this problem is a subset
+                $S \in \{1, \cdots, n\}$. Given such a certificate, it suffices
+                to compute the sum and check that it is equal to one of 
+                $M - 1$, $M$, or $M + 1$.
+
+                To show completeness we we will reduce the subset sum problem
+                to this problem. Given are positive integers
+                $A = \{a_1, \cdots, a_n\}$ and some $M$. We wish to decide
+                whether there is $S \subseteq A$ such that
+                $\sum_{s \in S} s = M$. It suffices to use our oracle three
+                times: once on $M-1$, once on $M$, and once on $M+1$.
+                If all of them come out YES, we output YES. Else, we
+                output NO.
+
+            \item
+                This problem is in $P$. Here is a polytime algorithm for
+                solving it.
+
+                \begin{algorithm}[ht]
+                    \caption{
+                        A polytime algorithm to decide whether there exists a
+                        truth assignment for a given CNF that satisfies none of
+                        its clauses.
+                    }
+
+                    \begin{algorithmic}
+                        \Require{A CNF $\phi$.}
+                        \Ensure{
+                            Whether there exists a truth assignment satisfying
+                            none of the clauses of $\phi$.
+                        }
+
+                        \State Initialize an empty dictionary $T$.
+
+                        \For{each clause $C$ in $\phi$}
+                            \For{each literal $x$ in $C$}
+                                \If{$x$ is of the form $\neg x^\prime$}
+                                    \Comment{
+                                        We need to assign \texttt{true} to
+                                        $x^\prime$ to make $x$ false.
+                                    }
+                                    \If{$x^\prime \in T$ and $T[x^\prime] = 0$}
+                                        \Comment{
+                                            But a previous iteration assigned
+                                            \texttt{false} to $x^\prime$!
+                                        }
+                                        \State \Return \texttt{false}
+                                    \Else
+                                        \State $T[x^\prime] \gets 0$
+                                    \EndIf
+                                \Else
+                                    \Comment{
+                                        We need to assign \texttt{false} to
+                                        $x^\prime$ to make $x$ false.
+                                    }
+                                    \If{$x^\prime \in T$ and $T[x^\prime] = 1$}
+                                        \Comment{
+                                            But a previous iteration assigned
+                                            \texttt{true} to $x^\prime$!
+                                        }
+                                        \State \Return \texttt{false}
+                                    \Else
+                                        \State $T[x^\prime] \gets 1$
+                                    \EndIf
+                                \EndIf
+                            \EndFor
+                        \EndFor
+
+                        \State \Return \texttt{true}
+                        \Comment{
+                            $T$ is the assignment ensuring that no clause is
+                            satisfied.
+                        }
+                    \end{algorithmic}
+                \end{algorithm}
+                
+            \item
+                Since the number of two-colorings on a graph is unique up to
+                a renaming of the colors, it suffices to color the graph and
+                count the number of vertices of each color to see whether the
+                graph admits a two-coloring with a given number of vertices
+                having a certain color. Hence, the problem is in $P$.
+
+            \item
+                This problem is in $P$.
+
+                Our algorithm is a simple modified version of the two-coloring
+                algorithm in which we using only the color $R$ when we have no
+                other choice. This in turn will result in a $3$-coloring where
+                the number of vertices colored $R$ is minimal. If that number
+                is at most $100$, output YES. Else, output NO.
+
+            \item
+                This problem is $NP$-complete.
+
+                A certificate for this problem is twofold: it consists of a
+                path $P$ and two sets of vertices $A$ and $B$. To verify the
+                certificate, we travel along the path $P$ checking that each
+                new vertex we visit has not been visited before, e.g. by
+                marking them as we visit them, and that we finally return to
+                the start point having visited all vertices. This shows that
+                there is a hamiltonian cycle. Then we check that the graph is
+                bipartite by ensuring that no vertex from $A$ is adjacent to
+                another vertex from $A$, and likewise for $B$.
+
+                To show completeness, we will reduce the general hamiltonian
+                cycle problem to this problem. We can in fact transform an
+                arbitrary graph $G$ into a bipartite graph by splitting each
+                vertex $v_i$ into four vertices, each one connected to the
+                next. All the edges that used to go to $v_i$ will go to the
+                first vertex and to the last vertex of this split. The result
+                is that we can partition the vertex set of this new graph into
+                the set of all first and third vertices resulting from the
+                split and into the set of all second and fourth vertices
+                resulting from the split. Running the oracle on this new graph
+                will thus only determine whether the graph contains a
+                hamiltonian cycle; the fact that the algorithm also determine
+                bipartiteness is now irrelevant since we know the graph to be
+                bipartite anyway. If the new graph contains a hamiltonian
+                cycle, then the original one must as well, since we can
+                collapsing the new graph according to the way we constructed it
+                preserves hamiltonian cycles.
+        \end{enumerate}
+\end{enumerate}
+\end{document}
