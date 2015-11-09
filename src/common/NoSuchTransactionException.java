@@ -1,4 +1,4 @@
-package transactionmanager;
+package common;
 
 public class NoSuchTransactionException extends Exception {
     private Integer transactionId;

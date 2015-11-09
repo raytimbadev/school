@@ -1,5 +1,7 @@
 package client;
+
 import common.ResourceManager;
+import common.NoSuchTransactionException;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -17,7 +19,9 @@ public class ScriptedClient {
         try {
             if (args.length != 5) {
                 System.out.println("Usage: MyClient <service-name> "
-                        + "<service-host> <service-port>" + "<loop count>" +"<transactions per second>"+"<test 0(single) or test 1(multi)");
+                        + "<service-host> <service-port> " +
+                        "<loop count> " + "<transactions per second> " +
+                        "<test 0(single) or test 1(multi)>");
                 System.exit(-1);
             }
 
@@ -85,24 +89,40 @@ public class ScriptedClient {
     /*Flight transaction used for single RM, single client test case*/
     private void flightTransaction(int id) {
         int tid = proxy.start();
+
         proxy.addFlight(tid,1,1,100);
         proxy.addFlight(tid,2,1,100);
         proxy.reserveFlight(tid,id,1);
         proxy.reserveFlight(tid,id,2);
         proxy.addFlight(tid,3,1,100);
         proxy.reserveFlight(tid,id,3);
-        proxy.commit(tid);
+
+        try {
+            proxy.commit(tid);
+        }
+        catch(NoSuchTransactionException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 
     /*Multi transaction used for multiple RM single client test case*/
     private void multiTransaction(int id) {
         int tid = proxy.start();
+
         proxy.addFlight(tid,1,1,100);
         proxy.reserveFlight(tid,id,1);
         proxy.addCars(tid,"montreal",1,100);
         proxy.reserveCar(tid,id,"montreal");
         proxy.addRooms(tid,"montreal",1,100);
         proxy.reserveRoom(tid,id,"montreal");
-        proxy.commit(tid);
+
+        try {
+            proxy.commit(tid);
+        }
+        catch(NoSuchTransactionException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 }

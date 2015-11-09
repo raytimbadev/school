@@ -2,7 +2,8 @@ package server;
 
 import lockmanager.*;
 import common.*;
-import common.operations.*; 
+import common.operations.*;
+
 import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.sql.Connection;
@@ -18,6 +19,8 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     protected final LockManager lockManager;
     protected final BasicDataSource database;
 
+    protected final Hashtable<Integer, List<Operation<Object>>> transactions;
+
     public DatabaseResourceManager(
             String dbUsername,
             String dbPassword,
@@ -30,6 +33,8 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         database.setUsername(dbUsername);
         database.setPassword(dbPassword);
         database.setUrl(dbUrl);
+
+        transactions = new Hashtable<Integer, List<Operation<Object>>>();
     }
 
     // Flight operations //
@@ -352,23 +357,33 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     //start
     @Override
     public int start() {
+        // database resource managers can't start transactions independently;
+        // the middleware does this and then informs the DRM that the
+        // transaction has started via the start(int transactionId) methods.
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean start(int transactionId) {
+    public boolean start(int transactionId)
+    throws RedundantTransactionException {
+        if(transactions.get(transactionId) != null)
+            throw new RedundantTransactionException(transactionId);
+
+        transactions.put(transactionId, new ArrayList<Operation<Object>>());
         throw new UnsupportedOperationException();
     }
 
     //commit
     @Override
-    public boolean commit(int id) {
+    public boolean commit(int id)
+    throws NoSuchTransactionException {
         throw new UnsupportedOperationException();
     }
 
     //abort
     @Override
-    public boolean abort(int id) {
+    public boolean abort(int id)
+    throws NoSuchTransactionException {
         throw new UnsupportedOperationException();
     }
 }

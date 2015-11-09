@@ -1,6 +1,7 @@
 package transactionmanager;
 
 import common.ResourceManager;
+import common.NoSuchTransactionException;
 
 import java.util.Hashtable;
 import java.util.Set;

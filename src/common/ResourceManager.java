@@ -15,6 +15,7 @@
  */
 
 package common;
+
 import java.util.*;
 
 public interface ResourceManager {
@@ -166,15 +167,18 @@ public interface ResourceManager {
      * transaction.
      * @return Whether the transaction was successfully started or not.
      */
-    public boolean start(int transactionId);
+    public boolean start(int transactionId)
+        throws RedundantTransactionException;
 
     /**
      * Commits the transaction associated with the given id.
      */
-    public boolean commit(int id);
+    public boolean commit(int id)
+        throws NoSuchTransactionException;
 
     /**
      * Abort the transaction associated with id.
      */
-    public boolean abort(int id);
+    public boolean abort(int id)
+        throws NoSuchTransactionException;
 }
