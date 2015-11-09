@@ -27,7 +27,8 @@ public class SocketResourceManager implements ResourceManager {
             int id,
             int flightNumber,
             int numSeats,
-            int flightPrice) {
+            int flightPrice,
+            int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
@@ -36,6 +37,7 @@ public class SocketResourceManager implements ResourceManager {
                         .primitive(flightNumber)
                         .primitive(numSeats)
                         .primitive(flightPrice)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -50,13 +52,14 @@ public class SocketResourceManager implements ResourceManager {
     }
 
     @Override
-    public boolean deleteFlight(int id, int flightNumber) {
+    public boolean deleteFlight(int id, int flightNumber, int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
                         .withMethod("deleteFlight")
                         .primitive(id)
                         .primitive(flightNumber)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -72,13 +75,14 @@ public class SocketResourceManager implements ResourceManager {
 
     // Returns the number of empty seats on this flight.
     @Override
-    public int queryFlight(int id, int flightNumber) {
+    public int queryFlight(int id, int flightNumber, int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
                         .withMethod("queryFlight")
                         .primitive(id)
                         .primitive(flightNumber)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -93,13 +97,14 @@ public class SocketResourceManager implements ResourceManager {
     }
 
     // Returns price of this flight.
-    public int queryFlightPrice(int id, int flightNumber) {
+    public int queryFlightPrice(int id, int flightNumber, int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
                         .withMethod("queryFlightPrice")
                         .primitive(id)
                         .primitive(flightNumber)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -119,7 +124,7 @@ public class SocketResourceManager implements ResourceManager {
     // Note: if price <= 0 and the car location already exists, it maintains
     // its current price.
     @Override
-    public boolean addCars(int id, String location, int numCars, int carPrice) {
+    public boolean addCars(int id, String location, int numCars, int carPrice, int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
@@ -128,6 +133,7 @@ public class SocketResourceManager implements ResourceManager {
                         .parameter(location)
                         .primitive(numCars)
                         .primitive(carPrice)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -143,13 +149,14 @@ public class SocketResourceManager implements ResourceManager {
 
     // Delete cars from a location.
     @Override
-    public boolean deleteCars(int id, String location) {
+    public boolean deleteCars(int id, String location, int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
                         .withMethod("deleteCars")
                         .primitive(id)
                         .parameter(location)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -165,13 +172,14 @@ public class SocketResourceManager implements ResourceManager {
 
     // Returns the number of cars available at a location.
     @Override
-    public int queryCars(int id, String location) {
+    public int queryCars(int id, String location, int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
                         .withMethod("queryCars")
                         .primitive(id)
                         .parameter(location)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -187,13 +195,14 @@ public class SocketResourceManager implements ResourceManager {
 
     // Returns price of cars at this location.
     @Override
-    public int queryCarsPrice(int id, String location) {
+    public int queryCarsPrice(int id, String location, int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
                         .withMethod("queryCarsPrice")
                         .primitive(id)
                         .parameter(location)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -214,7 +223,7 @@ public class SocketResourceManager implements ResourceManager {
     // Note: if price <= 0 and the room location already exists, it maintains
     // its current price.
     @Override
-    public boolean addRooms(int id, String location, int numRooms, int roomPrice) {
+    public boolean addRooms(int id, String location, int numRooms, int roomPrice, int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
@@ -223,6 +232,7 @@ public class SocketResourceManager implements ResourceManager {
                         .parameter(location)
                         .primitive(numRooms)
                         .primitive(roomPrice)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -238,13 +248,14 @@ public class SocketResourceManager implements ResourceManager {
 
     // Delete rooms from a location.
     @Override
-    public boolean deleteRooms(int id, String location) {
+    public boolean deleteRooms(int id, String location, int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
                         .withMethod("deleteRooms")
                         .primitive(id)
                         .parameter(location)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -260,13 +271,14 @@ public class SocketResourceManager implements ResourceManager {
 
     // Returns the number of rooms available at a location.
     @Override
-    public int queryRooms(int id, String location) {
+    public int queryRooms(int id, String location, int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
                         .withMethod("queryRooms")
                         .primitive(id)
                         .parameter(location)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -282,13 +294,14 @@ public class SocketResourceManager implements ResourceManager {
 
     // Returns room price at this location.
     @Override
-    public int queryRoomsPrice(int id, String location) {
+    public int queryRoomsPrice(int id, String location, int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
                         .withMethod("queryRoomsPrice")
                         .primitive(id)
                         .parameter(location)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -305,12 +318,13 @@ public class SocketResourceManager implements ResourceManager {
     // Customer operations //
 
     @Override
-    public int newCustomer(int id) {
+    public int newCustomer(int id, int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
                         .withMethod("newCustomer")
                         .primitive(id)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -326,13 +340,14 @@ public class SocketResourceManager implements ResourceManager {
 
     // This method makes testing easier.
     @Override
-    public boolean newCustomerId(int id, int customerId) {
+    public boolean newCustomerId(int id, int customerId, int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
                         .withMethod("newCustomerId")
                         .primitive(id)
                         .primitive(customerId)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -348,13 +363,14 @@ public class SocketResourceManager implements ResourceManager {
 
     // Delete customer from the database.
     @Override
-    public boolean deleteCustomer(int id, int customerId) {
+    public boolean deleteCustomer(int id, int customerId, int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
                         .withMethod("deleteCustomer")
                         .primitive(id)
                         .primitive(customerId)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -370,13 +386,14 @@ public class SocketResourceManager implements ResourceManager {
 
     // Return a bill.
     @Override
-    public String queryCustomerInfo(int id, int customerId) {
+    public String queryCustomerInfo(int id, int customerId, int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
                         .withMethod("queryCustomerInfo")
                         .primitive(id)
                         .primitive(customerId)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -392,7 +409,7 @@ public class SocketResourceManager implements ResourceManager {
 
     // Add flight reservation to this customer.
     @Override
-    public boolean reserveFlight(int id, int customerId, int flightNumber) {
+    public boolean reserveFlight(int id, int customerId, int flightNumber, int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
@@ -400,6 +417,7 @@ public class SocketResourceManager implements ResourceManager {
                         .primitive(id)
                         .primitive(customerId)
                         .primitive(flightNumber)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -415,7 +433,7 @@ public class SocketResourceManager implements ResourceManager {
 
     // Add car reservation to this customer.
     @Override
-    public boolean reserveCar(int id, int customerId, String location) {
+    public boolean reserveCar(int id, int customerId, String location, int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
@@ -423,6 +441,7 @@ public class SocketResourceManager implements ResourceManager {
                         .primitive(id)
                         .primitive(customerId)
                         .parameter(location)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -438,7 +457,7 @@ public class SocketResourceManager implements ResourceManager {
 
     // Add room reservation to this customer.
     @Override
-    public boolean reserveRoom(int id, int customerId, String location) {
+    public boolean reserveRoom(int id, int customerId, String location, int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
@@ -446,6 +465,7 @@ public class SocketResourceManager implements ResourceManager {
                         .primitive(id)
                         .primitive(customerId)
                         .parameter(location)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -467,7 +487,8 @@ public class SocketResourceManager implements ResourceManager {
             Vector flightNumbers,
             String location,
             boolean car,
-            boolean room) {
+            boolean room,
+            int transaction) {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
@@ -478,6 +499,7 @@ public class SocketResourceManager implements ResourceManager {
                         .parameter(location)
                         .primitive(car)
                         .primitive(room)
+                        .primitive(transaction)
                         .build()
             );
 
@@ -494,16 +516,60 @@ public class SocketResourceManager implements ResourceManager {
 	//start
 	@Override
 	public int start() {
-		throw UncheckedThrow.throwUnchecked(new UnsupportedOperationException());
+        try {
+            final Response response = network.invoke(
+                    new Request.RequestBuilder()
+                        .withMethod("start")
+                        .build()
+            );
+
+            if(response.isSuccessful())
+                return (Integer)response.getResult();
+            else
+                throw UncheckedThrow.throwUnchecked(response.getError());
+        }
+        catch(Exception e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
 	}
 	
 	//commit
 	public boolean commit(int id)  {
-		throw UncheckedThrow.throwUnchecked(new UnsupportedOperationException()); 
+        try {
+            final Response response = network.invoke(
+                    new Request.RequestBuilder()
+                        .withMethod("start")
+                        .primitive(id)
+                        .build()
+            );
+
+            if(response.isSuccessful())
+                return (Boolean)response.getResult();
+            else
+                throw UncheckedThrow.throwUnchecked(response.getError());
+        }
+        catch(Exception e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
 	}
 
 	//abort
 	public boolean abort(int id)  {
-		throw UncheckedThrow.throwUnchecked(new UnsupportedOperationException());
+        try {
+            final Response response = network.invoke(
+                    new Request.RequestBuilder()
+                        .withMethod("start")
+                        .primitive(id)
+                        .build()
+            );
+
+            if(response.isSuccessful())
+                return (Boolean)response.getResult();
+            else
+                throw UncheckedThrow.throwUnchecked(response.getError());
+        }
+        catch(Exception e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
 	}
 }

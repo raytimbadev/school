@@ -100,7 +100,7 @@ public class Client {
                     numSeats = getInt(arguments.elementAt(3));
                     flightPrice = getInt(arguments.elementAt(4));
 
-                    if (proxy.addFlight(id, flightNumber, numSeats, flightPrice))
+                    if (proxy.addFlight(id, flightNumber, numSeats, flightPrice, -1))
                         System.out.println("Flight added");
                     else
                         System.out.println("Flight could not be added");
@@ -127,7 +127,7 @@ public class Client {
                     numCars = getInt(arguments.elementAt(3));
                     price = getInt(arguments.elementAt(4));
 
-                    if (proxy.addCars(id, location, numCars, price))
+                    if (proxy.addCars(id, location, numCars, price, -1))
                         System.out.println("cars added");
                     else
                         System.out.println("cars could not be added");
@@ -154,7 +154,7 @@ public class Client {
                     numRooms = getInt(arguments.elementAt(3));
                     price = getInt(arguments.elementAt(4));
 
-                    if (proxy.addRooms(id, location, numRooms, price))
+                    if (proxy.addRooms(id, location, numRooms, price, -1))
                         System.out.println("rooms added");
                     else
                         System.out.println("rooms could not be added");
@@ -174,7 +174,7 @@ public class Client {
                 System.out.println("Adding a new Customer using id: " + arguments.elementAt(1));
                 try {
                     id = getInt(arguments.elementAt(1));
-                    int customer = proxy.newCustomer(id);
+                    int customer = proxy.newCustomer(id, -1);
                     System.out.println("new customer id: " + customer);
                 }
                 catch(Exception e) {
@@ -195,7 +195,7 @@ public class Client {
                     id = getInt(arguments.elementAt(1));
                     flightNumber = getInt(arguments.elementAt(2));
 
-                    if (proxy.deleteFlight(id, flightNumber))
+                    if (proxy.deleteFlight(id, flightNumber, -1))
                         System.out.println("Flight Deleted");
                     else
                         System.out.println("Flight could not be deleted");
@@ -218,7 +218,7 @@ public class Client {
                     id = getInt(arguments.elementAt(1));
                     location = getString(arguments.elementAt(2));
 
-                    if (proxy.deleteCars(id, location))
+                    if (proxy.deleteCars(id, location, -1))
                         System.out.println("cars Deleted");
                     else
                         System.out.println("cars could not be deleted");
@@ -241,7 +241,7 @@ public class Client {
                     id = getInt(arguments.elementAt(1));
                     location = getString(arguments.elementAt(2));
 
-                    if (proxy.deleteRooms(id, location))
+                    if (proxy.deleteRooms(id, location, -1))
                         System.out.println("rooms Deleted");
                     else
                         System.out.println("rooms could not be deleted");
@@ -264,7 +264,7 @@ public class Client {
                     id = getInt(arguments.elementAt(1));
                     int customer = getInt(arguments.elementAt(2));
 
-                    if (proxy.deleteCustomer(id, customer))
+                    if (proxy.deleteCustomer(id, customer, -1))
                         System.out.println("Customer Deleted");
                     else
                         System.out.println("Customer could not be deleted");
@@ -286,7 +286,7 @@ public class Client {
                 try {
                     id = getInt(arguments.elementAt(1));
                     flightNumber = getInt(arguments.elementAt(2));
-                    int seats = proxy.queryFlight(id, flightNumber);
+                    int seats = proxy.queryFlight(id, flightNumber, -1);
                     System.out.println("Number of seats available: " + seats);
                 }
                 catch(Exception e) {
@@ -307,7 +307,7 @@ public class Client {
                     id = getInt(arguments.elementAt(1));
                     location = getString(arguments.elementAt(2));
 
-                    numCars = proxy.queryCars(id, location);
+                    numCars = proxy.queryCars(id, location, -1);
                     System.out.println("number of cars at this location: " + numCars);
                 }
                 catch(Exception e) {
@@ -328,7 +328,7 @@ public class Client {
                     id = getInt(arguments.elementAt(1));
                     location = getString(arguments.elementAt(2));
 
-                    numRooms = proxy.queryRooms(id, location);
+                    numRooms = proxy.queryRooms(id, location, -1);
                     System.out.println("number of rooms at this location: " + numRooms);
                 }
                 catch(Exception e) {
@@ -349,7 +349,7 @@ public class Client {
                     id = getInt(arguments.elementAt(1));
                     int customer = getInt(arguments.elementAt(2));
 
-                    String bill = proxy.queryCustomerInfo(id, customer);
+                    String bill = proxy.queryCustomerInfo(id, customer, -1);
                     System.out.println("Customer info: " + bill);
                 }
                 catch(Exception e) {
@@ -370,7 +370,7 @@ public class Client {
                     id = getInt(arguments.elementAt(1));
                     flightNumber = getInt(arguments.elementAt(2));
 
-                    price = proxy.queryFlightPrice(id, flightNumber);
+                    price = proxy.queryFlightPrice(id, flightNumber, -1);
                     System.out.println("Price of a seat: " + price);
                 }
                 catch(Exception e) {
@@ -391,7 +391,7 @@ public class Client {
                     id = getInt(arguments.elementAt(1));
                     location = getString(arguments.elementAt(2));
 
-                    price = proxy.queryCarsPrice(id, location);
+                    price = proxy.queryCarsPrice(id, location, -1);
                     System.out.println("Price of a car at this location: " + price);
                 }
                 catch(Exception e) {
@@ -412,7 +412,7 @@ public class Client {
                     id = getInt(arguments.elementAt(1));
                     location = getString(arguments.elementAt(2));
 
-                    price = proxy.queryRoomsPrice(id, location);
+                    price = proxy.queryRoomsPrice(id, location, -1);
                     System.out.println("Price of rooms at this location: " + price);
                 }
                 catch(Exception e) {
@@ -435,7 +435,7 @@ public class Client {
                     int customer = getInt(arguments.elementAt(2));
                     flightNumber = getInt(arguments.elementAt(3));
 
-                    if (proxy.reserveFlight(id, customer, flightNumber))
+                    if (proxy.reserveFlight(id, customer, flightNumber, -1))
                         System.out.println("Flight Reserved");
                     else
                         System.out.println("Flight could not be reserved.");
@@ -460,7 +460,7 @@ public class Client {
                     int customer = getInt(arguments.elementAt(2));
                     location = getString(arguments.elementAt(3));
 
-                    if (proxy.reserveCar(id, customer, location))
+                    if (proxy.reserveCar(id, customer, location, -1))
                         System.out.println("car Reserved");
                     else
                         System.out.println("car could not be reserved.");
@@ -485,7 +485,7 @@ public class Client {
                     int customer = getInt(arguments.elementAt(2));
                     location = getString(arguments.elementAt(3));
 
-                    if (proxy.reserveRoom(id, customer, location))
+                    if (proxy.reserveRoom(id, customer, location, -1))
                         System.out.println("room Reserved");
                     else
                         System.out.println("room could not be reserved.");
@@ -520,7 +520,7 @@ public class Client {
                     room = getBoolean(arguments.elementAt(arguments.size()-1));
 
                     if (proxy.reserveItinerary(id, customer, flightNumbers,
-                            location, car, room))
+                            location, car, room, -1))
                         System.out.println("Itinerary Reserved");
                     else
                         System.out.println("Itinerary could not be reserved.");
@@ -551,7 +551,7 @@ public class Client {
                     id = getInt(arguments.elementAt(1));
                     int customer = getInt(arguments.elementAt(2));
 
-                    boolean c = proxy.newCustomerId(id, customer);
+                    boolean c = proxy.newCustomerId(id, customer, -1);
                     System.out.println("new customer id: " + customer);
                 }
                 catch(Exception e) {
