@@ -1,7 +1,20 @@
 package common.operations;
+import common.*;
+
+import java.beans.PropertyVetoException;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.*;
+import org.apache.commons.dbcp2.BasicDataSource;
 
 import java.util.List;
 import java.util.ArrayList;
+
 
 public class ReserveRoomOperation implements Operation<Boolean> {
     int id;
@@ -23,8 +36,48 @@ public class ReserveRoomOperation implements Operation<Boolean> {
     }
 
     @Override
-    public Boolean invoke() {
-        return null;
+    public Boolean invoke(BasicDataSource database) {
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            final int insertedRows = insertRoomReservation(
+                    connection,
+                    customerId,
+                    location
+            ).executeUpdate();
+
+            connection.commit();
+            return insertedRows > 0;
+        }
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
+
     }
+    private PreparedStatement insertRoomReservation(
+            Connection connection,
+            int customerId,
+            String location
+    ) throws SQLException {
+        final PreparedStatement stmt = connection.prepareStatement(
+                "INSERT INTO item_reservation " +
+                "            ( item_id, customer_id ) " +
+                "SELECT i.id, ? " +
+                "FROM item i " +
+                "WHERE NOT EXISTS ( " +
+                "        SELECT 1 " +
+                "        FROM item_reservation ir " +
+                "        WHERE ir.item_id = i.id " +
+                "      ) " +
+                "  AND i.location = ? " +
+                "ORDER BY i.price ASC " +
+                "LIMIT 1 "
+        );
+        stmt.setInt(1, customerId);
+        stmt.setString(2, location);
+
+        return stmt;
+    }
+
 }
 

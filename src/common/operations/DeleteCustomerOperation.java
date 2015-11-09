@@ -1,5 +1,5 @@
 package common.operations;
-
+import org.apache.commons.dbcp2.BasicDataSource;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -20,7 +20,7 @@ public class DeleteCustomerOperation implements Operation<Boolean> {
     }
 
     @Override
-    public Boolean invoke() {
+    public Boolean invoke(BasicDataSource database) {
         return null;
     }
 }

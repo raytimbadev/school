@@ -1,4 +1,16 @@
 package common.operations;
+import common.*;
+
+import java.beans.PropertyVetoException;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.*;
+import org.apache.commons.dbcp2.BasicDataSource;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -28,7 +40,25 @@ public class AddFlightOperation implements Operation<Boolean> {
     }
 
     @Override
-    public Boolean invoke() {
-        return null;
+    public Boolean invoke(BasicDataSource database) {
+        try(final Connection connection = database.getConnection()) {
+            connection.setAutoCommit(false);
+
+            for(int i = 0; i < numSeats; i++) {
+                final PreparedStatement stmt = connection.prepareStatement(
+                        "INSERT INTO item ( flight_number, price ) " +
+                        "VALUES ( ?, ? ) "
+                );
+                stmt.setInt(1, flightNumber);
+                stmt.setInt(2, flightPrice);
+                stmt.executeUpdate();
+            }
+
+            connection.commit();
+            return true;
+        }
+        catch(SQLException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
 }

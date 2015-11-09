@@ -15,11 +15,11 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import java.util.List;
 import java.util.ArrayList;
 
-public class DeleteRoomsOperation implements Operation<Boolean> {
+public class QueryRoomPriceOperation implements Operation<Integer> {
     int id;
     String location;
 
-    public DeleteRoomsOperation(int id, String location) {
+    public QueryRoomPriceOperation(int id, String location) {
         this.id = id;
         this.location = location;
     }
@@ -33,19 +33,36 @@ public class DeleteRoomsOperation implements Operation<Boolean> {
     }
 
     @Override
-    public Boolean invoke(BasicDataSource database) {
+    public Integer invoke(BasicDataSource database) {
         try(final Connection connection = database.getConnection()) {
             connection.setAutoCommit(false);
 
             final PreparedStatement stmt = connection.prepareStatement(
-                    "DELETE FROM item AS i " +
-                    "WHERE i.name = ? "
+                    "SELECT MIN(i.price) " +
+                    "FROM item i " +
+                    "WHERE i.location = ? "
             );
             stmt.setString(1, location);
-            stmt.executeUpdate();
+
+            final ResultSet rs = stmt.executeQuery();
+            rs.next();
+
+            final int price = rs.getInt(1);
+
+            if(rs.wasNull()) {
+                Trace.warn(
+                        String.format(
+                            "RM::queryRoomsPrice(%d, %s): " +
+                            "no rooms for minimum price",
+                            id,
+                            location
+                        )
+                );
+                return -1; // indicates error to the client
+            }
 
             connection.commit();
-            return true;
+            return price;
         }
         catch(SQLException e) {
             throw UncheckedThrow.throwUnchecked(e);

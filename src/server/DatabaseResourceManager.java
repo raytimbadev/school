@@ -2,7 +2,7 @@ package server;
 
 import lockmanager.*;
 import common.*;
-
+import common.operations.*; 
 import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.sql.Connection;
@@ -42,26 +42,13 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                              int numSeats, int flightPrice) {
         Trace.info("RM::addFlight(" + id + ", " + flightNumber
                 + ", $" + flightPrice + ", " + numSeats + ") called.");
+		AddFlightOperation op = new AddFlightOperation(id,flightNumber,numSeats,flightPrice); 	
+		if(id == -1) {
+			return op.invoke(database); 
+		}
 
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            for(int i = 0; i < numSeats; i++) {
-                final PreparedStatement stmt = connection.prepareStatement(
-                        "INSERT INTO item ( flight_number, price ) " +
-                        "VALUES ( ?, ? ) "
-                );
-                stmt.setInt(1, flightNumber);
-                stmt.setInt(2, flightPrice);
-                stmt.executeUpdate();
-            }
-
-            connection.commit();
-            return true;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+		//TODO add to list
+		return true;
     }
 
     @Override
@@ -73,25 +60,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     flightNumber
                 )
         );
+		DeleteFlightOperation op = new DeleteFlightOperation(id,flightNumber);
+		if(id == -1) {
+			return op.invoke(database);
+		}
+		
+		//TODO add to list
+		return true; 
 
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "DELETE FROM item " +
-                    "WHERE flight_number = ? "
-            );
-            stmt.setInt(1, flightNumber);
-            stmt.executeUpdate();
-
-            // Cascading deletes ensure that reservations are released.
-
-            connection.commit();
-            return true;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
     }
 
     // Returns the number of empty seats on this flight.
@@ -104,32 +80,13 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     flightNumber
                 )
         );
-
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT COUNT(i.id) " +
-                    "FROM item i " +
-                    "WHERE NOT EXISTS ( " +
-                    "        SELECT 1 " +
-                    "        FROM item_reservation ir " +
-                    "        WHERE ir.item_id = i.id " +
-                    "      ) " +
-                    "  AND i.flight_number = ? "
-            );
-            stmt.setInt(1, flightNumber);
-
-            final ResultSet rs = stmt.executeQuery();
-            rs.next();
-            final int count = rs.getInt(1);
-
-            connection.commit();
-            return count;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+		QueryFlightOperation op = new QueryFlightOperation(id,flightNumber); 
+		if(id == -1) {
+			return op.invoke(database); 
+		}
+		
+		//TODO add to list
+		return 0; 
     }
 
     // Returns price of this flight.
@@ -141,45 +98,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     flightNumber
                 )
         );
-
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT MIN(i.price) " +
-                    "FROM item i " +
-                    "WHERE NOT EXISTS ( " +
-                    "        SELECT 1 " +
-                    "        FROM item_reservation ir " +
-                    "        WHERE ir.item_id = i.id " +
-                    "      ) " +
-                    "  AND i.flight_number = ? "
-            );
-            stmt.setInt(1, flightNumber);
-
-            final ResultSet rs = stmt.executeQuery();
-            rs.next();
-
-            final int price = rs.getInt(1);
-
-            if(rs.wasNull()) {
-                Trace.warn(
-                        String.format(
-                            "RM::queryFlightPrice(%d, %s): " +
-                            "no flight for minimum price",
-                            id,
-                            flightNumber
-                        )
-                );
-                return -1; // indicates error to the client
-            }
-
-            connection.commit();
-            return price;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+		QueryFlightPriceOperation op = new QueryFlightPriceOperation(id,flightNumber); 
+		if(id == -1) {
+			return op.invoke(database);
+		}
+		//TODO add to list
+		return 0; 
     }
 
     // Car operations //
@@ -191,25 +115,13 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     public boolean addCars(int id, String location, int numCars, int carPrice) {
         Trace.info("RM::addCars(" + id + ", " + location + ", "
                 + numCars + ", $" + carPrice + ") called.");
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            for(int i = 0; i < numCars; i++) {
-                final PreparedStatement stmt = connection.prepareStatement(
-                        "INSERT INTO item ( location, price ) " +
-                        "VALUES ( ?, ? ) "
-                );
-                stmt.setString(1, location);
-                stmt.setInt(2, carPrice);
-                stmt.executeUpdate();
-            }
-
-            connection.commit();
-            return true;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+		AddCarsOperation op = new AddCarsOperation(id,location,numCars,carPrice); 
+		if(id == -1) {
+		 return op.invoke(database); 
+		}
+		
+		//TODO add to list
+		return true; 
     }
 
     // Delete cars from a location.
@@ -222,23 +134,13 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     location
                 )
         );
-
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "DELETE FROM item AS i " +
-                    "WHERE i.location = ? "
-            );
-            stmt.setString(1, location);
-            stmt.executeUpdate();
-
-            connection.commit();
-            return true;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+		DeleteCarsOperation op = new DeleteCarsOperation(id,location); 
+		if(id == -1) {
+			op.invoke(database); 
+		}
+		
+		//TODO add to list
+		return true; 
     }
 
     // Returns the number of cars available at a location.
@@ -251,32 +153,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     location
                 )
         );
-
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT COUNT(1) " +
-                    "FROM item i " +
-                    "WHERE i.location = ? " +
-                    "  AND NOT EXISTS ( " +
-                    "        SELECT 1 " +
-                    "        FROM item_reservation ir " +
-                    "        WHERE ir.item_id = i.id " +
-                    "      ) "
-            );
-            stmt.setString(1, location);
-
-            final ResultSet rs = stmt.executeQuery();
-            rs.next();
-            final int count = rs.getInt(1);
-
-            connection.commit();
-            return count;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+		QueryCarsOperation op = new QueryCarsOperation(id,location); 
+		if(id == -1) {
+			op.invoke(database); 
+		}
+		//TODO add to list
+		return 0; 
     }
 
     // Returns price of cars at this location.
@@ -290,44 +172,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 )
         );
 
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT MIN(i.price) " +
-                    "FROM item i" +
-                    "WHERE i.location = ? " +
-                    "  AND NOT EXISTS ( " +
-                    "        SELECT 1 " +
-                    "        FROM item_reservation ir " +
-                    "        WHERE ir.item_id = i.id " +
-                    "      ) "
-            );
-            stmt.setString(1, location);
-
-            final ResultSet rs = stmt.executeQuery();
-            rs.next();
-
-            final int price = rs.getInt(1);
-
-            if(rs.wasNull()) {
-                Trace.warn(
-                        String.format(
-                            "RM::queryCarsPrice(%d, %s): " +
-                            "no cars for minimum price",
-                            id,
-                            location
-                        )
-                );
-                return -1; // indicates error to the client
-            }
-
-            connection.commit();
-            return price;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+		QueryCarsPriceOperation op = new QueryCarsPriceOperation(id,location); 
+		if(id == 01) {
+			op.invoke(database);
+		}
+		//TODO add to list
+		return 0; 
     }
 
     // Room operations //
@@ -346,26 +196,13 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     roomPrice
                 )
         );
+		AddRoomsOperation op = new AddRoomsOperation(id,location,numRooms,roomPrice); 
+		if(id == -1) {
+			op.invoke(database);
+		}
+		//TODO add to list
+		return true; 
 
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            for(int i = 0; i < numRooms; i++) {
-                final PreparedStatement stmt = connection.prepareStatement(
-                        "INSERT INTO item ( location, price ) " +
-                        "VALUES ( ?, ? ) "
-                );
-                stmt.setString(1, location);
-                stmt.setInt(2, roomPrice);
-                stmt.executeUpdate();
-            }
-
-            connection.commit();
-            return true;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
     }
 
     // Delete rooms from a location.
@@ -378,23 +215,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     location
                 )
         );
-
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "DELETE FROM item AS i " +
-                    "WHERE i.name = ? "
-            );
-            stmt.setString(1, location);
-            stmt.executeUpdate();
-
-            connection.commit();
-            return true;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+		DeleteRoomsOperation op = new DeleteRoomsOperation(id,location); 
+		if(id == -1) {
+			op.invoke(database); 
+		}
+		//TODO add to list
+		return true; 
     }
 
     // Returns the number of rooms available at a location.
@@ -407,32 +233,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     location
                 )
         );
-
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT COUNT(1) " +
-                    "FROM item i " +
-                    "WHERE i.location = ? " +
-                    "  AND NOT EXISTS ( " +
-                    "        SELECT 1 " +
-                    "        FROM item_reservation ir " +
-                    "        WHERE ir.room_id = i.id " +
-                    "      ) "
-            );
-            stmt.setString(1, location);
-
-            final ResultSet rs = stmt.executeQuery();
-            rs.next();
-            final int count = rs.getInt(1);
-
-            connection.commit();
-            return count;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+		QueryRoomOperation op = new QueryRoomOperation(id,location); 
+		if(id == -1) {
+            op.invoke(database); 
+		}
+        //TODO add to list
+        return 0; 
     }
 
     // Returns room price at this location.
@@ -445,40 +251,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     location
                 )
         );
-
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT MIN(i.price) " +
-                    "FROM item i " +
-                    "WHERE i.location = ? "
-            );
-            stmt.setString(1, location);
-
-            final ResultSet rs = stmt.executeQuery();
-            rs.next();
-
-            final int price = rs.getInt(1);
-
-            if(rs.wasNull()) {
-                Trace.warn(
-                        String.format(
-                            "RM::queryRoomsPrice(%d, %s): " +
-                            "no rooms for minimum price",
-                            id,
-                            location
-                        )
-                );
-                return -1; // indicates error to the client
-            }
-
-            connection.commit();
-            return price;
+		QueryRoomPriceOperation op = new QueryRoomPriceOperation(id,location); 
+		if(id == -1) {
+            return op.invoke(database);
         }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        //TODO add to list
+        return 0; 
     }
 
     @Override
@@ -489,27 +267,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     id
                 )
         );
+	    NewCustomerOperation op = new NewCustomerOperation(id); 
+		if( id != -1) {
+			throw new UnsupportedOperationException(); 
+		}
+		return op.invoke(database); 
 
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "INSERT INTO customer " +
-                    "DEFAULT VALUES " +
-                    "RETURNING id "
-            );
-
-            final ResultSet rs = stmt.executeQuery();
-            rs.next();
-
-            final int customerId = rs.getInt(1);
-
-            connection.commit();
-            return customerId;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
     }
 
     @Override
@@ -521,27 +284,11 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     customerId
                 )
         );
-
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT COUNT(1) " +
-                    "FROM customer c " +
-                    "WHERE c.id = ? "
-            );
-            stmt.setInt(1, customerId);
-
-            final ResultSet rs = stmt.executeQuery();
-            rs.next();
-            final int count = rs.getInt(1);
-
-            return count == 1;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
-
+		NewCustomerIdOperation op = new NewCustomerIdOperation(id,customerId);
+		if(id != -1) {
+            throw new UnsupportedOperationException();
+         }
+         return op.invoke(database); 
     }
 
     // Add flight reservation to this customer.
@@ -555,22 +302,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     flightNumber
                 )
         );
-
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final int insertedRows = insertFlightReservation(
-                    connection,
-                    customerId,
-                    flightNumber
-            ).executeUpdate();
-
-            connection.commit();
-            return insertedRows > 0;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        ReserveFlightOperation op = new ReserveFlightOperation(id,customerId,flightNumber); 
+		if(id == -1) {
+			return op.invoke(database); 
+		}
+		//TODO add to list
+		return true; 
     }
 
     // Add car reservation to this customer.
@@ -584,22 +321,13 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     location
                 )
         );
+		ReserveCarOperation op = new ReserveCarOperation(id,customerId,location); 
+	    if(id == -1) {
+		    return op.invoke(database); 
+	    }
+        //TODO add to list
+        return true; 
 
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final int insertedRows = insertCarReservation(
-                    connection,
-                    customerId,
-                    location
-            ).executeUpdate();
-
-            connection.commit();
-            return insertedRows > 0;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
     }
 
     // Add room reservation to this customer.
@@ -613,97 +341,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     location
                 )
         );
-
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final int insertedRows = insertRoomReservation(
-                    connection,
-                    customerId,
-                    location
-            ).executeUpdate();
-
-            connection.commit();
-            return insertedRows > 0;
+        ReserveRoomOperation op = new ReserveRoomOperation(id,customerId,location);
+		if(id == -1) {
+            return op.invoke(database);
         }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
-    }
-
-    private PreparedStatement insertFlightReservation(
-            Connection connection,
-            int customerId,
-            int flightNumber
-    ) throws SQLException {
-        final PreparedStatement stmt = connection.prepareStatement(
-                "INSERT INTO item_reservation " +
-                "            ( item_id, customer_id ) " +
-                "SELECT i.id, ? " +
-                "FROM item i " +
-                "WHERE NOT EXISTS ( " +
-                "        SELECT 1 " +
-                "        FROM item_reservation ir " +
-                "        WHERE ir.item_id = i.id " +
-                "      ) " +
-                "  AND i.flight_number = ? " +
-                "ORDER BY i.price ASC " +
-                "LIMIT 1 "
-        );
-        stmt.setInt(1, customerId);
-        stmt.setInt(2, flightNumber);
-
-        return stmt;
-    }
-
-    private PreparedStatement insertCarReservation(
-            Connection connection,
-            int customerId,
-            String location
-    ) throws SQLException {
-        final PreparedStatement stmt = connection.prepareStatement(
-                "INSERT INTO item_reservation " +
-                "            ( item_id, customer_id ) " +
-                "SELECT i.id, ? " +
-                "FROM item i " +
-                "WHERE NOT EXISTS ( " +
-                "        SELECT 1 " +
-                "        FROM item_reservation ir " +
-                "        WHERE ir.item_id = i.id " +
-                "      ) " +
-                "  AND i.location = ? " +
-                "ORDER BY i.price ASC " +
-                "LIMIT 1 "
-        );
-        stmt.setInt(1, customerId);
-        stmt.setString(2, location);
-
-        return stmt;
-    }
-
-    private PreparedStatement insertRoomReservation(
-            Connection connection,
-            int customerId,
-            String location
-    ) throws SQLException {
-        final PreparedStatement stmt = connection.prepareStatement(
-                "INSERT INTO item_reservation " +
-                "            ( item_id, customer_id ) " +
-                "SELECT i.id, ? " +
-                "FROM item i " +
-                "WHERE NOT EXISTS ( " +
-                "        SELECT 1 " +
-                "        FROM item_reservation ir " +
-                "        WHERE ir.item_id = i.id " +
-                "      ) " +
-                "  AND i.location = ? " +
-                "ORDER BY i.price ASC " +
-                "LIMIT 1 "
-        );
-        stmt.setInt(1, customerId);
-        stmt.setString(2, location);
-
-        return stmt;
+        //TODO add to list 
+        return true; 
     }
 
     //start
