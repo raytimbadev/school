@@ -41,11 +41,17 @@ public class CustomerResourceManager extends DatabaseResourceManager {
                     customerId
                 )
         );
-	DeleteCustomerOperation op = new DeleteCustomerOperation(id,customerId);
-	if( id == -1) {
-            return op.invoke(database);
-        }
-        //TODO add to list
+        DeleteCustomerOperation op = new DeleteCustomerOperation(id,customerId);
+        if( id == -1) {
+                return op.invoke(database);
+            }
+
+        final List<Operation> ops = transactions.get(id);
+        if(ops == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+        ops.add(op);
         return true;
     }
 

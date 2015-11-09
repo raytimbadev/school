@@ -44,7 +44,13 @@ public class ItemResourceManager extends DatabaseResourceManager {
         if(id == -1) {
             op.invoke(database);
         }
-        //TODO add to list
+
+        final List<Operation> ops = transactions.get(id);
+        if(ops == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+        ops.add(op);
         return true; 
 
     }
@@ -63,7 +69,13 @@ public class ItemResourceManager extends DatabaseResourceManager {
         if(id == -1) {
             op.invoke(database); 
         }
-        //TODO add to list
+
+        final List<Operation> ops = transactions.get(id);
+        if(ops == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+        ops.add(op);
         return ""; 
     }
 
