@@ -75,7 +75,21 @@
             </classpath>
         </javac>
     </target>
-
+	
+	<target name ="build-test-client" depends="setup">
+		<javac
+			fork="true"
+			debug="true"
+			verbose="${verbose}"
+			destdir="${basedir}/build/client"
+			srcdir="${basedir}/src"
+			includes="common/**, client/**, transactionmanager/**"
+			sourcepath="${basedir}/src">
+			<classpath>
+				<path refid="dbcp"/>
+			</classpath>
+		</javac>
+	</target>
     <target name="build-middleware" depends="setup">
         <javac
             fork="true"
