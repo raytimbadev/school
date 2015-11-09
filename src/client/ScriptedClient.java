@@ -48,7 +48,7 @@ public class ScriptedClient {
 	ArrayList<int[]> transactionTimes = new ArrayList<int[]>();  
 	
 	for(int i=0; i < loopCount; i++) {
-	    int id = proxy.newCustomer(0,-1); 
+	    int id = proxy.newCustomer(-1); 
 	    int time = (int)System.currentTimeMillis();
 	    if(i%2==0) {
 		flightTransaction(id);
@@ -81,23 +81,23 @@ public class ScriptedClient {
     /*Flight transaction used for single RM, single client test case*/
     private void flightTransaction(int id) {	
 	int tid = proxy.start(); 
-	proxy.addFlight(id,1,1,100,tid);
-	proxy.addFlight(id,2,1,100,tid); 
-	proxy.reserveFlight(id,id,1,tid);
-	proxy.reserveFlight(id,id,2,tid); 
-	proxy.addFlight(id,3,1,100,tid);
-	proxy.reserveFlight(id,id,3,tid); 
+	proxy.addFlight(tid,1,1,100);
+	proxy.addFlight(tid,2,1,100); 
+	proxy.reserveFlight(tid,id,1);
+	proxy.reserveFlight(tid,id,2); 
+	proxy.addFlight(tid,3,1,100);
+	proxy.reserveFlight(tid,id,3); 
 	proxy.commit(tid); 	
     }
     /*Multi transaction used for multiple RM single client test case*/
     private void multiTransaction(int id) {
 	int tid = proxy.start();    
-	proxy.addFlight(id,1,1,100,tid);
-	proxy.reserveFlight(id,id,1,tid); 
-	proxy.addCars(id,"montreal",1,100,tid); 
-	proxy.reserveCar(id,id,"montreal", tid); 
-	proxy.addRooms(id,"montreal",1,100,tid);
-	proxy.reserveRoom(id,id,"montreal",tid); 
+	proxy.addFlight(tid,1,1,100);
+	proxy.reserveFlight(tid,id,1); 
+	proxy.addCars(tid,"montreal",1,100); 
+	proxy.reserveCar(tid,id,"montreal"); 
+	proxy.addRooms(tid,"montreal",1,100);
+	proxy.reserveRoom(tid,id,"montreal"); 
 	proxy.commit(tid); 
     }
     
