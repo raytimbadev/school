@@ -364,7 +364,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     }
 
     @Override
-    public boolean start(int transactionId)
+    public synchronized boolean start(int transactionId)
     throws RedundantTransactionException {
         if(transactions.get(transactionId) != null)
             throw new RedundantTransactionException(transactionId);
@@ -375,15 +375,36 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
     //commit
     @Override
-    public boolean commit(int id)
+    public synchronized boolean commit(int id)
     throws NoSuchTransactionException {
-        throw new UnsupportedOperationException();
+        final List<Operation<Object>> ops = transactions.get(id);
+
+        if(ops == null)
+            throw new NoSuchTransactionException(id);
+
+        for(final Operation<Object> op : ops)
+            op.invoke(database);
+
+        transactions.remove(id);
+
+        // TODO release locks
+
+        return true;
     }
 
     //abort
     @Override
-    public boolean abort(int id)
+    public synchronized boolean abort(int id)
     throws NoSuchTransactionException {
-        throw new UnsupportedOperationException();
+        final List<Operation<Object>> ops = transactions.get(id);
+
+        if(ops == null)
+            throw new NoSuchTransactionException(id);
+
+        transactions.remove(id);
+
+        // TODO release locks
+
+        return true;
     }
 }
