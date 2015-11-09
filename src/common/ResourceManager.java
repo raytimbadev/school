@@ -113,5 +113,12 @@ public interface ResourceManager {
     /* Reserve an itinerary. */
     public boolean reserveItinerary(int id, int customerId, Vector flightNumbers,
                                     String location, boolean car, boolean room);
-    			
+    /* Start a transaction*/
+    public int start();
+
+    /*commit the transaction associated with id */
+    public boolean commit(int id);
+    
+    /*abort the transaction associated with id*/
+    public boolean abort(int id);  			
 }

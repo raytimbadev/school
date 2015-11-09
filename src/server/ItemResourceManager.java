@@ -150,4 +150,21 @@ public class ItemResourceManager extends DatabaseResourceManager {
             boolean room) {
         throw new UnsupportedOperationException();
     }
+   //start a transaction
+    @Override
+    public int start() {
+        throw new UnsupportedOperationException(); 
+	}
+
+	//commit a transaction
+	@Override
+	public boolean commit(int id) {
+		throw new UnsupportedOperationException(); 
+	}
+	
+	//abort a transaction
+	@Override
+	public boolean abort(int id) {
+		throw new UnsupportedOperationException(); 
+	}
 }

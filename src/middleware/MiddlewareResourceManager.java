@@ -1,7 +1,7 @@
 package middleware;
 
 import common.ResourceManager;
-
+import common.UncheckedThrow; 
 import java.util.*;
 import javax.jws.WebService;
 import javax.naming.Context;
@@ -287,4 +287,24 @@ public class MiddlewareResourceManager implements ResourceManager {
 
         return true;
     }
+
+
+	/*Start a transaction*/
+	public int start() {
+		UncheckedThrow.throwUnchecked(new UnsupportedOperationException()); 
+		return -666;
+	}
+
+	/*Commit a transaction with specified id*/
+	public boolean commit(int id) {
+		UncheckedThrow.throwUnchecked(new UnsupportedOperationException()); 
+		return false;
+	}
+
+	/*aborts a transaction witha  specified id*/
+	public boolean abort(int id)  {
+		UncheckedThrow.throwUnchecked(new UnsupportedOperationException()); 
+		return false; 
+	}	
 }
+

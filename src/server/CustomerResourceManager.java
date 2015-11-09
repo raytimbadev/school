@@ -84,4 +84,22 @@ public class CustomerResourceManager extends DatabaseResourceManager {
             boolean room) {
         throw new UnsupportedOperationException();
     }
+	
+	//start
+	@Override
+	public int start() {
+		throw new UnsupportedOperationException(); 
+	}
+	
+	//commit
+	@Override
+	public boolean commit(int id) {
+		throw new UnsupportedOperationException();  
+	}
+	
+	//abort
+	@Override
+	public boolean abort(int id) {
+		throw new UnsupportedOperationException(); 
+	}
 }

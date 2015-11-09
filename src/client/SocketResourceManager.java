@@ -490,5 +490,20 @@ public class SocketResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(e);
         }
     }
+		
+	//start
+	@Override
+	public int start() {
+		throw UncheckedThrow.throwUnchecked(new UnsupportedOperationException());
+	}
+	
+	//commit
+	public boolean commit(int id)  {
+		throw UncheckedThrow.throwUnchecked(new UnsupportedOperationException()); 
+	}
 
+	//abort
+	public boolean abort(int id)  {
+		throw UncheckedThrow.throwUnchecked(new UnsupportedOperationException());
+	}
 }
