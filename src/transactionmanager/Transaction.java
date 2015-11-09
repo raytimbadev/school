@@ -21,7 +21,7 @@ public class Transaction {
     /**
      * The resource managers association with this transaction.
      */
-    private final Set<Integer> resourceManagers;
+    private final Set<ResourceManager> resourceManagers;
     
     /**
      * The time to live of this transaction.
@@ -44,8 +44,8 @@ public class Transaction {
         return timeToLive;
     }
 
-    public void enlist(int resourceManagerId) {
-        resourceManagers.add(resourceManagerId);
+    public void enlist(ResourceManager rm) {
+        resourceManagers.add(rm);
     }
 
     @Override

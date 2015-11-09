@@ -18,16 +18,35 @@ public class TransactionManager {
         transactionMap.put(txn.getId(), txn);
         return txn;
     }
+
     /**
     * Commits a the transaction associated with the passed ID's
     * It does this by sending the commit signal to the appropriate
     * middleware
     */
-    public synchronized void commit(int transactionId) {
-        
+    public synchronized boolean commit(int transactionId) {
+        final Transaction tx = transactionMap.get(transactionId);
+        final Set<ResourceManager> rms = tx.getResourceManagers();
+        for(final ResourceManager rm : rms) {
+            rm.commit(transactionId);
+        }
+        transactionMap.remove(transactionId);
+
+        return true;
     }
 
-    public synchronized void abort(int transactionId) {
+    public synchronized boolean abort(int transactionId) {
+        final Transaction tx = transactionMap.get(transactionId);
+        final Set<ResourceManager> rms = tx.getResourceManagers();
+        for(final ResourceManager rm : rms) {
+            rm.commit(transactionId);
+        }
+        transactionMap.remove(transactionId);
 
+        return true;
+    }
+
+    public synchronized void enlist(int transactionId, ResourceManager rm) {
+        transactionMap.get(transactionId).enlist(rm);
     }
 }

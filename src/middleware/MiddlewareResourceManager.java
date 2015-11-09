@@ -17,6 +17,8 @@ public class MiddlewareResourceManager implements ResourceManager {
     final ResourceManager roomManager;
     final ResourceManager customerManager;
 
+    final TransactionManager transactionManager;
+
     public MiddlewareResourceManager(
             ResourceManager flightManager,
             ResourceManager carManager,
@@ -26,6 +28,8 @@ public class MiddlewareResourceManager implements ResourceManager {
         this.carManager = carManager;
         this.roomManager = roomManager;
         this.customerManager = customerManager;
+
+        transactionManager = new TransactionManager();
     }
 
     // Flight operations //

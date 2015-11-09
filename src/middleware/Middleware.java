@@ -14,8 +14,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Middleware implements Runnable {
-
-
     public static final int BACKLOG_MULTIPLIER = 5;
 
     public final int THREAD_COUNT;
