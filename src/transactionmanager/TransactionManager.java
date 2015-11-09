@@ -86,5 +86,12 @@ public class TransactionManager {
         if(tx == null)
             throw new NoSuchTransactionException();
         tx.enlist(rm);
+
+        try {
+            rm.start(tx.getId());
+        }
+        catch(RedundantTransactionException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
 }
