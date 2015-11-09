@@ -48,7 +48,7 @@ public class MiddlewareResourceManager implements ResourceManager {
             int numSeats,
             int flightPrice,
 			int tid) {
-			if(id != -1){ //we are part of a transaction
+			if(tid != -1){ //we are part of a transaction
 				transactionManager.enlist(tid,flightManager);
 			}
 			return flightManager.addFlight(
