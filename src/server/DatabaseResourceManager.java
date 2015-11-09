@@ -19,7 +19,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     protected final LockManager lockManager;
     protected final BasicDataSource database;
 
-    protected final Hashtable<Integer, List<Operation<Object>>> transactions;
+    protected final Hashtable<Integer, List<Operation>> transactions;
 
     public DatabaseResourceManager(
             String dbUsername,
@@ -34,7 +34,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         database.setPassword(dbPassword);
         database.setUrl(dbUrl);
 
-        transactions = new Hashtable<Integer, List<Operation<Object>>>();
+        transactions = new Hashtable<Integer, List<Operation>>();
     }
 
     // Flight operations //
@@ -52,7 +52,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 			return op.invoke(database); 
 		}
 
-		//TODO add to list
+        final List<Operation> ops = transactions.get(id);
+        if(ops == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+
+        ops.add(op);
+
 		return true;
     }
 
@@ -70,7 +77,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 			return op.invoke(database);
 		}
 		
-		//TODO add to list
+        final List<Operation> ops = transactions.get(id);
+        if(ops == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+
+        ops.add(op);
+
 		return true; 
 
     }
@@ -90,7 +104,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 			return op.invoke(database); 
 		}
 		
-		//TODO add to list
+        final List<Operation> ops = transactions.get(id);
+        if(ops == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+
+        ops.add(op);
+
 		return 0; 
     }
 
@@ -107,7 +128,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 		if(id == -1) {
 			return op.invoke(database);
 		}
-		//TODO add to list
+        final List<Operation> ops = transactions.get(id);
+        if(ops == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+
+        ops.add(op);
+
 		return 0; 
     }
 
@@ -125,7 +153,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 		 return op.invoke(database); 
 		}
 		
-		//TODO add to list
+        final List<Operation> ops = transactions.get(id);
+        if(ops == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+
+        ops.add(op);
+
 		return true; 
     }
 
@@ -144,7 +179,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 			op.invoke(database); 
 		}
 		
-		//TODO add to list
+        final List<Operation> ops = transactions.get(id);
+        if(ops == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+
+        ops.add(op);
+
 		return true; 
     }
 
@@ -162,7 +204,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 		if(id == -1) {
 			op.invoke(database); 
 		}
-		//TODO add to list
+        final List<Operation> ops = transactions.get(id);
+        if(ops == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+
+        ops.add(op);
+
 		return 0; 
     }
 
@@ -181,7 +230,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 		if(id == 01) {
 			op.invoke(database);
 		}
-		//TODO add to list
+        final List<Operation> ops = transactions.get(id);
+        if(ops == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+
+        ops.add(op);
+
 		return 0; 
     }
 
@@ -205,7 +261,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 		if(id == -1) {
 			op.invoke(database);
 		}
-		//TODO add to list
+        final List<Operation> ops = transactions.get(id);
+        if(ops == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+
+        ops.add(op);
+
 		return true; 
 
     }
@@ -224,7 +287,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 		if(id == -1) {
 			op.invoke(database); 
 		}
-		//TODO add to list
+        final List<Operation> ops = transactions.get(id);
+        if(ops == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+
+        ops.add(op);
+
 		return true; 
     }
 
@@ -242,7 +312,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 		if(id == -1) {
             op.invoke(database); 
 		}
-        //TODO add to list
+        final List<Operation> ops = transactions.get(id);
+        if(ops == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+
+        ops.add(op);
+
         return 0; 
     }
 
@@ -260,7 +337,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 		if(id == -1) {
             return op.invoke(database);
         }
-        //TODO add to list
+        final List<Operation> ops = transactions.get(id);
+        if(ops == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+
+        ops.add(op);
+
         return 0; 
     }
 
@@ -311,7 +395,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 		if(id == -1) {
 			return op.invoke(database); 
 		}
-		//TODO add to list
+        final List<Operation> ops = transactions.get(id);
+        if(ops == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+
+        ops.add(op);
+
 		return true; 
     }
 
@@ -330,7 +421,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 	    if(id == -1) {
 		    return op.invoke(database); 
 	    }
-        //TODO add to list
+        final List<Operation> ops = transactions.get(id);
+        if(ops == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+
+        ops.add(op);
+
         return true; 
 
     }
@@ -350,7 +448,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 		if(id == -1) {
             return op.invoke(database);
         }
-        //TODO add to list 
+        final List<Operation> ops = transactions.get(id);
+        if(ops == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+
+        ops.add(op);
+
         return true; 
     }
 
@@ -369,7 +474,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         if(transactions.get(transactionId) != null)
             throw new RedundantTransactionException(transactionId);
 
-        transactions.put(transactionId, new ArrayList<Operation<Object>>());
+        transactions.put(transactionId, new ArrayList<Operation>());
         throw new UnsupportedOperationException();
     }
 
@@ -377,12 +482,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     @Override
     public synchronized boolean commit(int id)
     throws NoSuchTransactionException {
-        final List<Operation<Object>> ops = transactions.get(id);
+        final List<Operation> ops = transactions.get(id);
 
         if(ops == null)
             throw new NoSuchTransactionException(id);
 
-        for(final Operation<Object> op : ops)
+        for(final Operation op : ops)
             op.invoke(database);
 
         transactions.remove(id);
@@ -396,7 +501,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     @Override
     public synchronized boolean abort(int id)
     throws NoSuchTransactionException {
-        final List<Operation<Object>> ops = transactions.get(id);
+        final List<Operation> ops = transactions.get(id);
 
         if(ops == null)
             throw new NoSuchTransactionException(id);
