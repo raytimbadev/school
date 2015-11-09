@@ -1,5 +1,5 @@
 package middleware;
-
+import transactionmanager.*; 
 import common.ResourceManager;
 import common.UncheckedThrow; 
 import java.util.*;
@@ -46,12 +46,18 @@ public class MiddlewareResourceManager implements ResourceManager {
             int id,
             int flightNumber,
             int numSeats,
-            int flightPrice) {
-        return flightManager.addFlight(
+            int flightPrice,
+			int tid) {
+			if(id != -1){ //we are part of a transaction
+				transactionManager.enlist(tid,flightManager);
+			}
+			return flightManager.addFlight(
                 id,
                 flightNumber,
                 numSeats,
-                flightPrice);
+                flightPrice,
+				tid);
+		
     }
 
     /**
@@ -62,26 +68,38 @@ public class MiddlewareResourceManager implements ResourceManager {
      * @return success.
      */
     @Override
-    public boolean deleteFlight(int id, int flightNumber) {
+    public boolean deleteFlight(int id, int flightNumber,int tid) {
+		if(tid != -1) { //part of a transaction
+			transactionManager.enlist(tid,flightManager); 
+		}
         return flightManager.deleteFlight(
                 id,
-                flightNumber);
+                flightNumber,
+				tid);
     }
 
     /* Return the number of empty seats in this flight. */
     @Override
-    public int queryFlight(int id, int flightNumber) {
+    public int queryFlight(int id, int flightNumber, int tid) {
+		if(tid != -1) {
+			transactionManager.enlist(tid,flightManager); 
+		}
         return flightManager.queryFlight(
                 id,
-                flightNumber);
+                flightNumber,
+				tid);
     }
 
     /* Return the price of a seat on this flight. */
     @Override
-    public int queryFlightPrice(int id, int flightNumber) {
+    public int queryFlightPrice(int id, int flightNumber, int tid) {
+		if(tid != -1) { 
+			transactionManager.enlist(tid,flightManager); 
+		}
         return flightManager.queryFlightPrice(
                 id,
-                flightNumber);
+                flightNumber,
+				tid);
     }
 
 
@@ -92,38 +110,54 @@ public class MiddlewareResourceManager implements ResourceManager {
      * instead of a flight number.
      */
     @Override
-    public boolean addCars(int id, String location, int numCars, int carPrice) {
+    public boolean addCars(int id, String location, int numCars, int carPrice, int tid) {
+		if(tid != -1) {
+			transactionManager.enlist(tid,carManager);
+		}
         return carManager.addCars(
                 id,
                 location,
                 numCars,
-                carPrice);
+                carPrice, 
+				tid);
     }
 
     /* Delete all cars from a location.
      * It should not succeed if there are reservations for this location.
      */
     @Override
-    public boolean deleteCars(int id, String location) {
+    public boolean deleteCars(int id, String location, int tid) {
+		if(tid != -1) {
+			transactionManager.enlist(tid,carManager);
+		}
         return carManager.deleteCars(
                 id,
-                location);
+                location
+				,tid);
     }
 
     /* Return the number of cars available at this location. */
     @Override
-    public int queryCars(int id, String location) {
+    public int queryCars(int id, String location, int tid) {
+		if(tid != -1) {
+			transactionManager.enlist(tid,carManager);
+		}
         return carManager.queryCars(
                 id,
-                location);
+                location,
+				tid);
     }
 
     /* Return the price of a car at this location. */
     @Override
-    public int queryCarsPrice(int id, String location) {
+    public int queryCarsPrice(int id, String location, int tid) {
+		if(tid != -1) {
+			transactionManager.enlist(tid,carManager); 
+		}
         return carManager.queryCarsPrice(
                 id,
-                location);
+                location,
+				tid);
     }
 
     // Room operations //
@@ -133,78 +167,112 @@ public class MiddlewareResourceManager implements ResourceManager {
      * instead of a flight number.
      */
     @Override
-    public boolean addRooms(int id, String location, int numRooms, int roomPrice) {
+    public boolean addRooms(int id, String location, int numRooms, int roomPrice, int tid) {
+		if(tid != -1) {
+			transactionManager.enlist(tid,roomManager); 
+		}
         return roomManager.addRooms(
                 id,
                 location,
                 numRooms,
-                roomPrice);
+                roomPrice,
+				tid);
     }
 
     /* Delete all rooms from a location.
      * It should not succeed if there are reservations for this location.
      */
     @Override
-    public boolean deleteRooms(int id, String location) {
+    public boolean deleteRooms(int id, String location,int tid) {
+		if(tid != -1) {
+			transactionManager.enlist(tid,roomManager);
+		}
         return roomManager.deleteRooms(
                 id,
-                location);
+                location,
+				tid);
     }
 
     /* Return the number of rooms available at this location. */
     @Override
-    public int queryRooms(int id, String location) {
+    public int queryRooms(int id, String location, int tid) {
+		if(tid != -1) {
+			transactionManager.enlist(tid, roomManager);
+		}
         return roomManager.queryRooms(
                 id,
-                location);
+                location,
+				tid);
     }
 
     /* Return the price of a room at this location. */
     @Override
-    public int queryRoomsPrice(int id, String location) {
+    public int queryRoomsPrice(int id, String location, int tid) {
+		if(tid != -1) {
+			transactionManager.enlist(tid, roomManager); 
+		}
         return roomManager.queryRoomsPrice(
                 id,
-                location);
+                location,
+				tid);
     }
 
     // Customer operations //
 
     /* Create a new customer and return their unique identifier. */
     @Override
-    public int newCustomer(int id) {
-        return customerManager.newCustomer(id);
+    public int newCustomer(int id, int tid) {
+		if( tid != -1) {
+			transactionManager.enlist(tid,customerManager); 
+		}
+        return customerManager.newCustomer(id, tid);
     }
 
     /* Create a new customer with the provided identifier. */
     @Override
-    public boolean newCustomerId(int id, int customerId){
-       return customerManager.newCustomerId(id, customerId);
+    public boolean newCustomerId(int id, int customerId, int tid){
+		if( tid != -1) {
+			transactionManager.enlist(tid,customerManager); 
+		}
+        return customerManager.newCustomerId(id, customerId,tid);
     }
 
     /* Remove this customer and all their associated reservations. */
     @Override
-    public boolean deleteCustomer(int id, int customerId) {
-        roomManager.deleteCustomer(id, customerId);
-        flightManager.deleteCustomer(id, customerId);
-        carManager.deleteCustomer(id, customerId);
-        return customerManager.deleteCustomer(id,customerId);
+    public boolean deleteCustomer(int id, int customerId,int tid) {
+		if(tid != -1) {
+			transactionManager.enlist(tid,customerManager);
+			transactionManager.enlist(tid,flightManager);
+			transactionManager.enlist(tid,carManager);
+			transactionManager.enlist(tid,roomManager); 
+		}
+        roomManager.deleteCustomer(id, customerId,tid);
+        flightManager.deleteCustomer(id, customerId,tid);
+        carManager.deleteCustomer(id, customerId,tid);
+        return customerManager.deleteCustomer(id,customerId,tid);
     }
 
     /* Return a bill. */
     @Override
-    public String queryCustomerInfo(int id, int customerId) {
-        final StringBuilder sb = new StringBuilder();
-        final boolean exists = customerManager.newCustomerId(id, customerId); 
+    public String queryCustomerInfo(int id, int customerId,int tid) {
 
+        final StringBuilder sb = new StringBuilder();
+        final boolean exists = customerManager.newCustomerId(id, customerId,tid); 
+		if( tid != -1) {
+			transactionManager.enlist(tid, customerManager);
+			transactionManager.enlist(tid, flightManager);
+			transactionManager.enlist(tid, carManager);
+			transactionManager.enlist(tid, roomManager);
+		}
         if(exists) {
             sb.append("\nFlights:\n");
-            sb.append(flightManager.queryCustomerInfo(id, customerId));
+            sb.append(flightManager.queryCustomerInfo(id, customerId, tid));
 
             sb.append("\nRooms:\n");
-            sb.append(roomManager.queryCustomerInfo(id, customerId));
+            sb.append(roomManager.queryCustomerInfo(id, customerId, tid));
 
             sb.append("\nCars:\n");
-            sb.append(carManager.queryCustomerInfo(id, customerId));
+            sb.append(carManager.queryCustomerInfo(id, customerId, tid));
         }
         else {
             sb.append(
@@ -220,38 +288,51 @@ public class MiddlewareResourceManager implements ResourceManager {
 
     /* Reserve a seat on this flight. */
     @Override
-    public boolean reserveFlight(int id, int customerId, int flightNumber) {
-    if(customerManager.newCustomerId(id, customerId)==false){
+    public boolean reserveFlight(int id, int customerId, int flightNumber, int tid) {
+	
+	if(tid != -1) {
+		transactionManager.enlist(tid,flightManager);
+	}
+    if(customerManager.newCustomerId(id, customerId,tid)==false){
         return false;
     }
         return flightManager.reserveFlight(
                 id,
                 customerId,
-                flightNumber);
+                flightNumber,
+				tid);
     }
 
     /* Reserve a car at this location. */
         @Override
-    public boolean reserveCar(int id, int customerId, String location) {
-    if(customerManager.newCustomerId(id, customerId) == false) {
+    public boolean reserveCar(int id, int customerId, String location, int tid) {
+    if(customerManager.newCustomerId(id, customerId,tid) == false) {
         return false;
     }
+	if(tid != -1) {
+		transactionManager.enlist(tid, carManager);
+	}
         return carManager.reserveCar(
                 id,
                 customerId,
-                location);
+                location,
+				tid);
     }
 
     /* Reserve a room at this location. */
     @Override
-    public boolean reserveRoom(int id, int customerId, String location) {
-    if(customerManager.newCustomerId(id, customerId) == false) {
+    public boolean reserveRoom(int id, int customerId, String location, int tid) {
+	if(tid != -1) {
+		transactionManager.enlist(tid,carManager); 
+	}
+    if(customerManager.newCustomerId(id, customerId,tid) == false) {
         return false;
     }
         return roomManager.reserveRoom(
                 id,
                 customerId,
-                location);
+                location,
+				tid);
     }
 
 
@@ -263,28 +344,36 @@ public class MiddlewareResourceManager implements ResourceManager {
             Vector flightNumbers,
             String location,
             boolean car,
-            boolean room) {
-        if(customerManager.newCustomerId(id,customerId) == false)
+            boolean room, int tid) {
+		if (tid != -1) {
+			transactionManager.enlist(tid,flightManager);
+			transactionManager.enlist(tid,customerManager); 
+			if(car) 
+				transactionManager.enlist(tid,carManager);
+			if(room) 
+				transactionManager.enlist(tid,roomManager);  	
+		}
+        if(customerManager.newCustomerId(id,customerId,tid) == false)
             return false; // customer does not exist
 
         for(int i=0; i < flightNumbers.size(); i++) {
             final int flightNumber = Integer.parseInt((String)flightNumbers.get(i));
             final boolean success =
-                flightManager.reserveFlight(id, customerId, flightNumber);
+                flightManager.reserveFlight(id, customerId, flightNumber, tid);
             if(!success)
                 return false;
         }
 
         if(car) {
             final boolean success =
-                carManager.reserveCar(id, customerId, location);
+                carManager.reserveCar(id, customerId, location,tid);
             if(!success)
                 return false;
         }
 
         if(room) {
             final boolean success =
-                roomManager.reserveCar(id, customerId, location);
+                roomManager.reserveCar(id, customerId, location,tid);
             if(!success)
                 return false;
         }
