@@ -6,6 +6,8 @@
 package server;
 
 import common.*;
+import lockmanager.*;  
+import transactionmanager.Transaction; 
 
 import java.beans.PropertyVetoException;
 import java.io.IOException;
@@ -31,7 +33,7 @@ public class ItemResourceManager extends DatabaseResourceManager {
 
     // Delete customer from the database.
     @Override
-    public boolean deleteCustomer(int id, int customerId) {
+    public boolean deleteCustomer(int id, int customerId, Transaction transaction) {
         Trace.info(
                 String.format(
                     "RM::deleteCustomer(%d, %d)",
@@ -61,7 +63,7 @@ public class ItemResourceManager extends DatabaseResourceManager {
 
     // Return a bill.
     @Override
-    public String queryCustomerInfo(int id, int customerId) {
+    public String queryCustomerInfo(int id, int customerId, Transaction transaction) {
         Trace.info(
                 String.format(
                     "RM::queryCustomerInfo(%d, %d)",
@@ -147,7 +149,8 @@ public class ItemResourceManager extends DatabaseResourceManager {
             Vector flightNumbers,
             String location,
             boolean car,
-            boolean room) {
+            boolean room,
+	    Transaction transaction) {
         throw new UnsupportedOperationException();
     }
    //start a transaction

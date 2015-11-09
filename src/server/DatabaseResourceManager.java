@@ -2,6 +2,7 @@ package server;
 
 import lockmanager.*;
 import common.*;
+import transactionmanager.Transaction; 
 
 import java.beans.PropertyVetoException;
 import java.io.IOException;
@@ -39,7 +40,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     // its current price.
     @Override
     public boolean addFlight(int id, int flightNumber,
-                             int numSeats, int flightPrice) {
+                             int numSeats, int flightPrice, Transaction transaction) {
         Trace.info("RM::addFlight(" + id + ", " + flightNumber
                 + ", $" + flightPrice + ", " + numSeats + ") called.");
 
@@ -65,7 +66,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     }
 
     @Override
-    public boolean deleteFlight(int id, int flightNumber) {
+    public boolean deleteFlight(int id, int flightNumber, Transaction transaction) {
         Trace.info(
                 String.format(
                     "RM::deleteFlight(%d, %d)",
@@ -96,7 +97,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
     // Returns the number of empty seats on this flight.
     @Override
-    public int queryFlight(int id, int flightNumber) {
+    public int queryFlight(int id, int flightNumber, Transaction transaction) {
         Trace.info(
                 String.format(
                     "RM::queryFlight(%d, %d)",
@@ -133,7 +134,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     }
 
     // Returns price of this flight.
-    public int queryFlightPrice(int id, int flightNumber) {
+    public int queryFlightPrice(int id, int flightNumber, Transaction transaction) {
         Trace.info(
                 String.format(
                     "RM::queryFlightPrice(%d, %d)",
@@ -188,7 +189,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     // Note: if price <= 0 and the car location already exists, it maintains
     // its current price.
     @Override
-    public boolean addCars(int id, String location, int numCars, int carPrice) {
+    public boolean addCars(int id, String location, int numCars, int carPrice, Transaction transaction) {
         Trace.info("RM::addCars(" + id + ", " + location + ", "
                 + numCars + ", $" + carPrice + ") called.");
         try(final Connection connection = database.getConnection()) {
@@ -214,7 +215,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
     // Delete cars from a location.
     @Override
-    public boolean deleteCars(int id, String location) {
+    public boolean deleteCars(int id, String location, Transaction transaction) {
         Trace.info(
                 String.format(
                     "RM::deleteCars(%d, %s)",
@@ -243,7 +244,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
     // Returns the number of cars available at a location.
     @Override
-    public int queryCars(int id, String location) {
+    public int queryCars(int id, String location, Transaction transaction) {
         Trace.info(
                 String.format(
                     "RM::queryCars(%d, %s)",
@@ -281,7 +282,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
     // Returns price of cars at this location.
     @Override
-    public int queryCarsPrice(int id, String location) {
+    public int queryCarsPrice(int id, String location, Transaction transaction) {
         Trace.info(
                 String.format(
                     "RM::queryCarsPrice(%d, %s)",
@@ -336,7 +337,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     // Note: if price <= 0 and the room location already exists, it maintains
     // its current price.
     @Override
-    public boolean addRooms(int id, String location, int numRooms, int roomPrice) {
+    public boolean addRooms(int id, String location, int numRooms, int roomPrice, Transaction transaction) {
         Trace.info(
                 String.format(
                     "RM::addRooms(%d, %s, %d, $%d)",
@@ -370,7 +371,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
     // Delete rooms from a location.
     @Override
-    public boolean deleteRooms(int id, String location) {
+    public boolean deleteRooms(int id, String location, Transaction transaction) {
         Trace.info(
                 String.format(
                     "RM::deleteRooms(%d, %s)",
@@ -399,7 +400,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
     // Returns the number of rooms available at a location.
     @Override
-    public int queryRooms(int id, String location) {
+    public int queryRooms(int id, String location, Transaction transation) {
         Trace.info(
                 String.format(
                     "RM::queryRooms(%d, %s)",
@@ -437,7 +438,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
     // Returns room price at this location.
     @Override
-    public int queryRoomsPrice(int id, String location) {
+    public int queryRoomsPrice(int id, String location, Transaction transaction) {
         Trace.info(
                 String.format(
                     "RM::queryRoomsPrice(%d, %s)",
@@ -482,7 +483,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     }
 
     @Override
-    public int newCustomer(int id) {
+    public int newCustomer(int id, Transaction transaction) {
         Trace.info(
                 String.format(
                     "INFO: RM::newCustomer(%d)",
@@ -513,7 +514,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     }
 
     @Override
-    public boolean newCustomerId(int id, int customerId) {
+    public boolean newCustomerId(int id, int customerId, Transaction transaction) {
         Trace.info(
                 String.format(
                     "RM::newCustomerId(%d, %d)",
@@ -546,7 +547,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
     // Add flight reservation to this customer.
     @Override
-    public boolean reserveFlight(int id, int customerId, int flightNumber) {
+    public boolean reserveFlight(int id, int customerId, int flightNumber, Transaction transaction) {
         Trace.info(
                 String.format(
                     "RM::reserveFlight(%d, %d, %d)",
@@ -575,7 +576,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
     // Add car reservation to this customer.
     @Override
-    public boolean reserveCar(int id, int customerId, String location) {
+    public boolean reserveCar(int id, int customerId, String location, Transaction transaction) {
         Trace.info(
                 String.format(
                     "RM::reserveCar(%d, %d, %s)",
@@ -604,7 +605,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
     // Add room reservation to this customer.
     @Override
-    public boolean reserveRoom(int id, int customerId, String location) {
+    public boolean reserveRoom(int id, int customerId, String location, Transaction transaction) {
         Trace.info(
                 String.format(
                     "RM::reserveRoom(%d, %d, %s)",

@@ -68,7 +68,7 @@
             verbose="${verbose}"
             destdir="${basedir}/build/client"
             srcdir="${basedir}/src"
-            includes="common/**, client/**"
+            includes="common/**, client/**, transactionmanager/**"
             sourcepath="${basedir}/src">
             <classpath>
                 <path refid="dbcp" />
