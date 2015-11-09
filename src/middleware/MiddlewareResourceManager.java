@@ -491,6 +491,11 @@ public class MiddlewareResourceManager implements ResourceManager {
         return txn.getId();
 	}
 
+    @Override
+    public boolean start(int transactionId) {
+        throw new UnsupportedOperationException();
+    }
+
 	/*Commit a transaction with specified id*/
     @Override
 	public boolean commit(int id) {

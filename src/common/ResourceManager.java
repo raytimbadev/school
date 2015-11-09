@@ -157,6 +157,18 @@ public interface ResourceManager {
     public int start();
 
     /**
+     * Starts a new transaction with a given identifier.
+     *
+     * This method will fail if the given transaction identifier is already in
+     * use.
+     *
+     * @param transactionId The identifier with which to create the new
+     * transaction.
+     * @return Whether the transaction was successfully started or not.
+     */
+    public boolean start(int transactionId);
+
+    /**
      * Commits the transaction associated with the given id.
      */
     public boolean commit(int id);
