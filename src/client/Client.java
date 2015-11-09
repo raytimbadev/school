@@ -560,6 +560,27 @@ public class Client {
                     e.printStackTrace();
                 }
                 break;
+            case 23: //start
+               if(arguments.size() != 1) {
+                   wrongNumber();
+                   break;
+               }
+               System.out.println("Start");
+               break;
+            case 24: //commit
+                if(arguments.size() != 1) {
+                    wrongNumber();   
+					break;
+				}
+				System.out.println("Commit");
+				break;
+			case 25: //abort
+				if(arguments.size() != 1) {
+					wrongNumber();
+					break;
+				}
+				System.out.println("abort");
+				break;
 
             default:
                 System.out.println("The interface does not support this command.");
@@ -625,6 +646,12 @@ public class Client {
             return 21;
         else if (argument.compareToIgnoreCase("newcustomerid") == 0)
             return 22;
+        else if (argument.compareToIgnoreCase("start") == 0)
+            return 23;
+        else if (argument.compareToIgnoreCase("commit") == 0)
+            return 24; 
+        else if (argument.compareToIgnoreCase("abort") == 0)
+            return 25;
         else
             return 666;
     }
@@ -636,7 +663,7 @@ public class Client {
         System.out.println("newflight\nnewcar\nnewroom\nnewcustomer\nnewcustomerid\ndeleteflight\ndeletecar\ndeleteroom");
         System.out.println("deletecustomer\nqueryflight\nquerycar\nqueryroom\nquerycustomer");
         System.out.println("queryflightprice\nquerycarprice\nqueryroomprice");
-        System.out.println("reserveflight\nreservecar\nreserveroom\nitinerary");
+        System.out.println("reserveflight\nreservecar\nreserveroom\nitinerary\nstart\ncommit\nabort");
         System.out.println("quit");
         System.out.println("\ntype help, <commandname> for detailed info (note the use of comma).");
     }
@@ -822,6 +849,18 @@ public class Client {
             System.out.println("\nUsage: ");
             System.out.println("\tnewcustomerid, <id>, <customerid>");
             break;
+
+            case 23:
+			System.out.println("Starts a transaction");
+            break;
+            
+            case 24:
+            System.out.println("Commits a transaction");
+            break;
+
+            case 25:
+            System.out.println("Aborts a transaction");
+            break; 
 
             default:
             System.out.println(command);

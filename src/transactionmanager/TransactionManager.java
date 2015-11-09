@@ -18,7 +18,11 @@ public class TransactionManager {
         transactionMap.put(txn.getId(), txn);
         return txn;
     }
-
+    /**
+    * Commits a the transaction associated with the passed ID's
+    * It does this by sending the commit signal to the appropriate
+    * middleware
+    */
     public synchronized void commit(int transactionId) {
         
     }
