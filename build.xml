@@ -106,7 +106,7 @@
     </target>
 
     <target name="server" depends="build-server">
-        <echo message="Lauching ${server.type} server."/>
+        <echo message="Launching ${server.type} server."/>
         <java classname="server.sockets.Server">
             <classpath>
                 <pathelement location="${basedir}/build/server" />
