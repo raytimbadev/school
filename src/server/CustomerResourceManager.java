@@ -8,7 +8,7 @@ package server;
 import common.*;
 import lockmanager.*; 
 import transactionmanager.Transaction;
-
+import common.operations.*; 
 import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.sql.Connection;
@@ -41,24 +41,12 @@ public class CustomerResourceManager extends DatabaseResourceManager {
                     customerId
                 )
         );
-
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "DELETE FROM customer AS c " +
-                    "WHERE c.id = ? "
-            );
-            stmt.setInt(1, customerId);
-
-            final int rowCount = stmt.executeUpdate();
-
-            connection.commit();
-            return rowCount > 0;
+	DeleteCustomerOperation op = new DeleteCustomerOperation(id,customerId);
+	if( id == -1) {
+            return op.invoke(database);
         }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        //TODO add to list
+        return true;
     }
 
     // Return a bill.

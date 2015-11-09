@@ -7,7 +7,7 @@ package server;
 
 import common.*;
 import lockmanager.*;  
-
+import common.operations.*; 
 import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.sql.Connection;
@@ -40,24 +40,13 @@ public class ItemResourceManager extends DatabaseResourceManager {
                     customerId
                 )
         );
-
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "DELETE FROM item_reservation AS ir " +
-                    "WHERE ir.customer_id = ? "
-            );
-            stmt.setInt(1, customerId);
-
-            final int rowCount = stmt.executeUpdate();
-
-            connection.commit();
-            return rowCount > 0;
+        DeleteItemOperation op = new DeleteItemOperation(id,customerId);
+        if(id == -1) {
+            op.invoke(database);
         }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        //TODO add to list
+        return true; 
+
     }
 
     // Return a bill.
@@ -70,74 +59,12 @@ public class ItemResourceManager extends DatabaseResourceManager {
                     customerId
                 )
         );
-
-        String column = null;
-
-        try(final Connection connection = database.getConnection()) {
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT COUNT(location) FROM item LIMIT 1"
-            );
-            final ResultSet rs = stmt.executeQuery();
-            rs.next();
-            final int count = rs.getInt(1);
-
-            // If no exceptions have been thrown at this point, then the
-            // location column exists
-            column = "location";
+        QueryCustomerInfoOperation op = new QueryCustomerInfoOperation(id,customerId); 
+        if(id == -1) {
+            op.invoke(database); 
         }
-        catch(SQLException e) {
-        }
-
-        if(column == null) {
-            try(final Connection connection = database.getConnection()) {
-                final PreparedStatement stmt = connection.prepareStatement(
-                        "SELECT COUNT(flight_number) FROM item LIMIT 1"
-                );
-                final ResultSet rs = stmt.executeQuery();
-                rs.next();
-                final int count = rs.getInt(1);
-
-                column = "flight_number";
-            }
-            catch(SQLException e) {
-                throw UncheckedThrow.throwUnchecked(e);
-            }
-        }
-
-
-        StringBuffer sb = new StringBuffer();
-
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT i.price, i." + column + "::text " +
-                    "FROM item i, item_reservation ir " +
-                    "WHERE i.id = ir.item_id " +
-                    "  AND ir.customer_id = ? "
-            );
-            stmt.setInt(1, customerId);
-
-            final ResultSet rs = stmt.executeQuery();
-
-            while(rs.next()) {
-                final int price = rs.getInt(1);
-                final String name = rs.getString(2);
-                sb.append(
-                        String.format(
-                            "%s -- $%d.00\n",
-                            name,
-                            price
-                        )
-                );
-            }
-
-            connection.commit();
-            return sb.toString();
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        //TODO add to list
+        return ""; 
     }
 
     // Reserve an itinerary.

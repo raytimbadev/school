@@ -15,11 +15,11 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import java.util.List;
 import java.util.ArrayList;
 
-public class DeleteCustomerOperation implements Operation<Boolean> {
+public class DeleteItemOperation implements Operation<Boolean> {
     int id;
     int customerId;
 
-    public DeleteCustomerOperation(int id, int customerId) {
+    public DeleteItemOperation(int id, int customerId) {
         this.id = id;
         this.customerId = customerId;
     }
@@ -33,12 +33,12 @@ public class DeleteCustomerOperation implements Operation<Boolean> {
 
     @Override
     public Boolean invoke(BasicDataSource database) {
-          try(final Connection connection = database.getConnection()) {
+        try(final Connection connection = database.getConnection()) {
             connection.setAutoCommit(false);
 
             final PreparedStatement stmt = connection.prepareStatement(
-                    "DELETE FROM customer AS c " +
-                    "WHERE c.id = ? "
+                    "DELETE FROM item_reservation AS ir " +
+                    "WHERE ir.customer_id = ? "
             );
             stmt.setInt(1, customerId);
 
@@ -50,5 +50,6 @@ public class DeleteCustomerOperation implements Operation<Boolean> {
         catch(SQLException e) {
             throw UncheckedThrow.throwUnchecked(e);
         }
+
     }
 }
