@@ -16,7 +16,7 @@ public class TransactionManager {
         transactionMap = new Hashtable<Integer, Transaction>();
     }
 
-    public synchronized Transaction begin() {
+    public synchronized Transaction start() {
         final Transaction txn = new Transaction();
         transactionMap.put(txn.getId(), txn);
         return txn;
@@ -27,8 +27,12 @@ public class TransactionManager {
     * It does this by sending the commit signal to the appropriate
     * middleware
     */
-    public synchronized boolean commit(int transactionId) {
+    public synchronized boolean commit(int transactionId)
+    throws NoSuchTransactionException {
         final Transaction tx = transactionMap.get(transactionId);
+        if(tx == null)
+            throw new NoSuchTransactionException();
+
         final Set<ResourceManager> rms = tx.getResourceManagers();
         for(final ResourceManager rm : rms) {
             rm.commit(transactionId);
@@ -38,8 +42,12 @@ public class TransactionManager {
         return true;
     }
 
-    public synchronized boolean abort(int transactionId) {
+    public synchronized boolean abort(int transactionId)
+    throws NoSuchTransactionException {
         final Transaction tx = transactionMap.get(transactionId);
+        if(tx == null)
+            throw new NoSuchTransactionException();
+
         final Set<ResourceManager> rms = tx.getResourceManagers();
         for(final ResourceManager rm : rms) {
             rm.commit(transactionId);
@@ -49,7 +57,11 @@ public class TransactionManager {
         return true;
     }
 
-    public synchronized void enlist(int transactionId, ResourceManager rm) {
-        transactionMap.get(transactionId).enlist(rm);
+    public synchronized void enlist(int transactionId, ResourceManager rm)
+    throws NoSuchTransactionException {
+        final Transaction tx = transactionMap.get(transactionId);
+        if(tx == null)
+            throw new NoSuchTransactionException();
+        tx.enlist(rm);
     }
 }

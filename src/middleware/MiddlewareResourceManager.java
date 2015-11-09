@@ -1,7 +1,7 @@
 package middleware;
-import transactionmanager.*; 
+import transactionmanager.*;
 import common.ResourceManager;
-import common.UncheckedThrow; 
+import common.UncheckedThrow;
 import java.util.*;
 import javax.jws.WebService;
 import javax.naming.Context;
@@ -49,7 +49,12 @@ public class MiddlewareResourceManager implements ResourceManager {
             int flightPrice,
 			int tid) {
 			if(tid != -1){ //we are part of a transaction
-				transactionManager.enlist(tid,flightManager);
+                try {
+                    transactionManager.enlist(tid, flightManager);
+                }
+                catch(NoSuchTransactionException e) {
+                    throw UncheckedThrow.throwUnchecked(e);
+                }
 			}
 			return flightManager.addFlight(
                 id,
@@ -57,7 +62,7 @@ public class MiddlewareResourceManager implements ResourceManager {
                 numSeats,
                 flightPrice,
 				tid);
-		
+
     }
 
     /**
@@ -68,9 +73,14 @@ public class MiddlewareResourceManager implements ResourceManager {
      * @return success.
      */
     @Override
-    public boolean deleteFlight(int id, int flightNumber,int tid) {
+    public boolean deleteFlight(int id, int flightNumber, int tid) {
 		if(tid != -1) { //part of a transaction
-			transactionManager.enlist(tid,flightManager); 
+            try {
+                transactionManager.enlist(tid, flightManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
 		}
         return flightManager.deleteFlight(
                 id,
@@ -82,7 +92,12 @@ public class MiddlewareResourceManager implements ResourceManager {
     @Override
     public int queryFlight(int id, int flightNumber, int tid) {
 		if(tid != -1) {
-			transactionManager.enlist(tid,flightManager); 
+            try {
+                transactionManager.enlist(tid, flightManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
 		}
         return flightManager.queryFlight(
                 id,
@@ -93,8 +108,13 @@ public class MiddlewareResourceManager implements ResourceManager {
     /* Return the price of a seat on this flight. */
     @Override
     public int queryFlightPrice(int id, int flightNumber, int tid) {
-		if(tid != -1) { 
-			transactionManager.enlist(tid,flightManager); 
+		if(tid != -1) {
+            try {
+                transactionManager.enlist(tid, flightManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
 		}
         return flightManager.queryFlightPrice(
                 id,
@@ -112,13 +132,18 @@ public class MiddlewareResourceManager implements ResourceManager {
     @Override
     public boolean addCars(int id, String location, int numCars, int carPrice, int tid) {
 		if(tid != -1) {
-			transactionManager.enlist(tid,carManager);
+            try {
+                transactionManager.enlist(tid, carManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
 		}
         return carManager.addCars(
                 id,
                 location,
                 numCars,
-                carPrice, 
+                carPrice,
 				tid);
     }
 
@@ -128,7 +153,12 @@ public class MiddlewareResourceManager implements ResourceManager {
     @Override
     public boolean deleteCars(int id, String location, int tid) {
 		if(tid != -1) {
-			transactionManager.enlist(tid,carManager);
+            try {
+                transactionManager.enlist(tid, carManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
 		}
         return carManager.deleteCars(
                 id,
@@ -140,7 +170,12 @@ public class MiddlewareResourceManager implements ResourceManager {
     @Override
     public int queryCars(int id, String location, int tid) {
 		if(tid != -1) {
-			transactionManager.enlist(tid,carManager);
+            try {
+                transactionManager.enlist(tid, carManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
 		}
         return carManager.queryCars(
                 id,
@@ -152,7 +187,12 @@ public class MiddlewareResourceManager implements ResourceManager {
     @Override
     public int queryCarsPrice(int id, String location, int tid) {
 		if(tid != -1) {
-			transactionManager.enlist(tid,carManager); 
+            try {
+                transactionManager.enlist(tid, carManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
 		}
         return carManager.queryCarsPrice(
                 id,
@@ -169,7 +209,12 @@ public class MiddlewareResourceManager implements ResourceManager {
     @Override
     public boolean addRooms(int id, String location, int numRooms, int roomPrice, int tid) {
 		if(tid != -1) {
-			transactionManager.enlist(tid,roomManager); 
+            try {
+                transactionManager.enlist(tid, roomManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
 		}
         return roomManager.addRooms(
                 id,
@@ -183,9 +228,14 @@ public class MiddlewareResourceManager implements ResourceManager {
      * It should not succeed if there are reservations for this location.
      */
     @Override
-    public boolean deleteRooms(int id, String location,int tid) {
+    public boolean deleteRooms(int id, String location, int tid) {
 		if(tid != -1) {
-			transactionManager.enlist(tid,roomManager);
+            try {
+                transactionManager.enlist(tid, roomManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
 		}
         return roomManager.deleteRooms(
                 id,
@@ -197,7 +247,12 @@ public class MiddlewareResourceManager implements ResourceManager {
     @Override
     public int queryRooms(int id, String location, int tid) {
 		if(tid != -1) {
-			transactionManager.enlist(tid, roomManager);
+            try {
+                transactionManager.enlist(tid, roomManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
 		}
         return roomManager.queryRooms(
                 id,
@@ -209,7 +264,12 @@ public class MiddlewareResourceManager implements ResourceManager {
     @Override
     public int queryRoomsPrice(int id, String location, int tid) {
 		if(tid != -1) {
-			transactionManager.enlist(tid, roomManager); 
+            try {
+                transactionManager.enlist(tid, roomManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
 		}
         return roomManager.queryRoomsPrice(
                 id,
@@ -222,8 +282,13 @@ public class MiddlewareResourceManager implements ResourceManager {
     /* Create a new customer and return their unique identifier. */
     @Override
     public int newCustomer(int id, int tid) {
-		if( tid != -1) {
-			transactionManager.enlist(tid,customerManager); 
+		if(tid != -1) {
+            try {
+                transactionManager.enlist(tid, customerManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
 		}
         return customerManager.newCustomer(id, tid);
     }
@@ -231,38 +296,53 @@ public class MiddlewareResourceManager implements ResourceManager {
     /* Create a new customer with the provided identifier. */
     @Override
     public boolean newCustomerId(int id, int customerId, int tid){
-		if( tid != -1) {
-			transactionManager.enlist(tid,customerManager); 
+		if(tid != -1) {
+            try {
+                transactionManager.enlist(tid, customerManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
 		}
-        return customerManager.newCustomerId(id, customerId,tid);
+        return customerManager.newCustomerId(id, customerId, tid);
     }
 
     /* Remove this customer and all their associated reservations. */
     @Override
-    public boolean deleteCustomer(int id, int customerId,int tid) {
+    public boolean deleteCustomer(int id, int customerId, int tid) {
 		if(tid != -1) {
-			transactionManager.enlist(tid,customerManager);
-			transactionManager.enlist(tid,flightManager);
-			transactionManager.enlist(tid,carManager);
-			transactionManager.enlist(tid,roomManager); 
+            try {
+                transactionManager.enlist(tid, customerManager);
+                transactionManager.enlist(tid, flightManager);
+                transactionManager.enlist(tid, carManager);
+                transactionManager.enlist(tid, roomManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
 		}
-        roomManager.deleteCustomer(id, customerId,tid);
-        flightManager.deleteCustomer(id, customerId,tid);
-        carManager.deleteCustomer(id, customerId,tid);
-        return customerManager.deleteCustomer(id,customerId,tid);
+        roomManager.deleteCustomer(id, customerId, tid);
+        flightManager.deleteCustomer(id, customerId, tid);
+        carManager.deleteCustomer(id, customerId, tid);
+        return customerManager.deleteCustomer(id, customerId, tid);
     }
 
     /* Return a bill. */
     @Override
-    public String queryCustomerInfo(int id, int customerId,int tid) {
+    public String queryCustomerInfo(int id, int customerId, int tid) {
 
         final StringBuilder sb = new StringBuilder();
-        final boolean exists = customerManager.newCustomerId(id, customerId,tid); 
+        final boolean exists = customerManager.newCustomerId(id, customerId, tid);
 		if( tid != -1) {
-			transactionManager.enlist(tid, customerManager);
-			transactionManager.enlist(tid, flightManager);
-			transactionManager.enlist(tid, carManager);
-			transactionManager.enlist(tid, roomManager);
+            try {
+                transactionManager.enlist(tid, customerManager);
+                transactionManager.enlist(tid, flightManager);
+                transactionManager.enlist(tid, carManager);
+                transactionManager.enlist(tid, roomManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
 		}
         if(exists) {
             sb.append("\nFlights:\n");
@@ -289,50 +369,67 @@ public class MiddlewareResourceManager implements ResourceManager {
     /* Reserve a seat on this flight. */
     @Override
     public boolean reserveFlight(int id, int customerId, int flightNumber, int tid) {
-	
-	if(tid != -1) {
-		transactionManager.enlist(tid,flightManager);
-	}
-    if(customerManager.newCustomerId(id, customerId,tid)==false){
-        return false;
-    }
+        if(tid != -1) {
+            try {
+                transactionManager.enlist(tid, flightManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
+        }
+
+        if(customerManager.newCustomerId(id, customerId, tid) == false){
+            return false;
+        }
+
         return flightManager.reserveFlight(
                 id,
                 customerId,
                 flightNumber,
-				tid);
+                tid);
     }
 
     /* Reserve a car at this location. */
         @Override
     public boolean reserveCar(int id, int customerId, String location, int tid) {
-    if(customerManager.newCustomerId(id, customerId,tid) == false) {
-        return false;
-    }
-	if(tid != -1) {
-		transactionManager.enlist(tid, carManager);
-	}
-        return carManager.reserveCar(
-                id,
-                customerId,
-                location,
-				tid);
+        if(customerManager.newCustomerId(id, customerId, tid) == false)
+            return false;
+
+        if(tid != -1) {
+            try {
+                transactionManager.enlist(tid, carManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
+        }
+            return carManager.reserveCar(
+                    id,
+                    customerId,
+                    location,
+                    tid);
     }
 
     /* Reserve a room at this location. */
     @Override
     public boolean reserveRoom(int id, int customerId, String location, int tid) {
-	if(tid != -1) {
-		transactionManager.enlist(tid,carManager); 
-	}
-    if(customerManager.newCustomerId(id, customerId,tid) == false) {
-        return false;
-    }
+        if(tid != -1) {
+            try {
+                transactionManager.enlist(tid, carManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
+        }
+
+        if(customerManager.newCustomerId(id, customerId, tid) == false)
+            return false;
+
         return roomManager.reserveRoom(
                 id,
                 customerId,
                 location,
-				tid);
+                tid);
     }
 
 
@@ -346,18 +443,24 @@ public class MiddlewareResourceManager implements ResourceManager {
             boolean car,
             boolean room, int tid) {
 		if (tid != -1) {
-			transactionManager.enlist(tid,flightManager);
-			transactionManager.enlist(tid,customerManager); 
-			if(car) 
-				transactionManager.enlist(tid,carManager);
-			if(room) 
-				transactionManager.enlist(tid,roomManager);  	
+            try {
+                transactionManager.enlist(tid, flightManager);
+                if(car)
+                    transactionManager.enlist(tid, carManager);
+                if(room)
+                    transactionManager.enlist(tid, roomManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
 		}
-        if(customerManager.newCustomerId(id,customerId,tid) == false)
+
+        if(customerManager.newCustomerId(id, customerId, tid) == false)
             return false; // customer does not exist
 
         for(int i=0; i < flightNumbers.size(); i++) {
-            final int flightNumber = Integer.parseInt((String)flightNumbers.get(i));
+            final int flightNumber =
+                Integer.parseInt((String)flightNumbers.get(i));
             final boolean success =
                 flightManager.reserveFlight(id, customerId, flightNumber, tid);
             if(!success)
@@ -366,14 +469,14 @@ public class MiddlewareResourceManager implements ResourceManager {
 
         if(car) {
             final boolean success =
-                carManager.reserveCar(id, customerId, location,tid);
+                carManager.reserveCar(id, customerId, location, tid);
             if(!success)
                 return false;
         }
 
         if(room) {
             final boolean success =
-                roomManager.reserveCar(id, customerId, location,tid);
+                roomManager.reserveCar(id, customerId, location, tid);
             if(!success)
                 return false;
         }
@@ -381,23 +484,41 @@ public class MiddlewareResourceManager implements ResourceManager {
         return true;
     }
 
-
 	/*Start a transaction*/
+    @Override
 	public int start() {
-		UncheckedThrow.throwUnchecked(new UnsupportedOperationException()); 
-		return -666;
+        final Transaction txn = transactionManager.start();
+        return txn.getId();
 	}
 
 	/*Commit a transaction with specified id*/
+    @Override
 	public boolean commit(int id) {
-		UncheckedThrow.throwUnchecked(new UnsupportedOperationException()); 
-		return false;
+        boolean result = false;
+
+        try {
+            result = transactionManager.commit(id);
+        }
+        catch(NoSuchTransactionException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
+
+        return result;
 	}
 
 	/*aborts a transaction witha  specified id*/
+    @Override
 	public boolean abort(int id)  {
-		UncheckedThrow.throwUnchecked(new UnsupportedOperationException()); 
-		return false; 
-	}	
+        boolean result = false;
+
+        try {
+            result = transactionManager.abort(id);
+        }
+        catch(NoSuchTransactionException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
+
+        return result;
+	}
 }
 
