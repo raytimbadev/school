@@ -33,7 +33,7 @@ public class CustomerResourceManager extends DatabaseResourceManager {
 
     // Delete customer from the database.
     @Override
-    public boolean deleteCustomer(int id, int customerId, int transaction) {
+    public boolean deleteCustomer(int id, int customerId) {
         Trace.info(
                 String.format(
                     "RM::deleteCustomer(%d, %d)",
@@ -63,7 +63,7 @@ public class CustomerResourceManager extends DatabaseResourceManager {
 
     // Return a bill.
     @Override
-    public String queryCustomerInfo(int id, int customerId, int transaction) {
+    public String queryCustomerInfo(int id, int customerId) {
         Trace.warn(
                 String.format(
                     "RM::queryCustomerInfo(%d, %d)",
@@ -83,26 +83,7 @@ public class CustomerResourceManager extends DatabaseResourceManager {
             Vector flightNumbers,
             String location,
             boolean car,
-            boolean room,
-	    int transaction) {
+            boolean room) {
         throw new UnsupportedOperationException();
     }
-	
-	//start
-	@Override
-	public int start() {
-		throw new UnsupportedOperationException(); 
-	}
-	
-	//commit
-	@Override
-	public boolean commit(int id) {
-		throw new UnsupportedOperationException();  
-	}
-	
-	//abort
-	@Override
-	public boolean abort(int id) {
-		throw new UnsupportedOperationException(); 
-	}
 }
