@@ -20,7 +20,9 @@ import java.util.*;
 public interface ResourceManager {
     // Flight operations //
 
-    /* Add seats to a flight.
+    /**
+     * Adds seats to a flight.
+     *
      * In general, this will be used to create a new flight, but it should be
      * possible to add seats to an existing flight.  Adding to an existing
      * flight should overwrite the current price of the available seats.
@@ -30,7 +32,8 @@ public interface ResourceManager {
     public boolean addFlight(int id, int flightNumber, int numSeats, int flightPrice, int transaction);
 
     /**
-     * Delete the entire flight.
+     * Deletes the entire flight.
+     *
      * This implies deletion of this flight and all its seats.  If there is a
      * reservation on the flight, then the flight cannot be deleted.
      *
@@ -38,91 +41,132 @@ public interface ResourceManager {
      */
     public boolean deleteFlight(int id, int flightNumber, int transaction);
 
-    /* Return the number of empty seats in this flight. */
+    /**
+     * Gets the number of empty seats in this flight.
+     */
     public int queryFlight(int id, int flightNumber, int transaction);
 
-    /* Return the price of a seat on this flight. */
+    /**
+     * Gets the minimum price of a seat on this flight.
+     */
     public int queryFlightPrice(int id, int flightNumber, int transaction);
 
 
     // Car operations //
 
-    /* Add cars to a location.
+    /**
+     * Adds cars to a location.
+     *
      * This should look a lot like addFlight, only keyed on a string location
      * instead of a flight number.
      */
     public boolean addCars(int id, String location, int numCars, int carPrice, int transaction);
 
-    /* Delete all cars from a location.
+    /**
+     * Deletes all cars from a location.
+     *
      * It should not succeed if there are reservations for this location.
-     */		
+     */
     public boolean deleteCars(int id, String location, int transaction);
 
-    /* Return the number of cars available at this location. */
+    /**
+     * Gets the number of cars available at this location.
+     */
     public int queryCars(int id, String location, int transaction);
 
-    /* Return the price of a car at this location. */
+    /**
+     * Gets the price of a car at this location.
+     */
     public int queryCarsPrice(int id, String location, int transaction);
 
 
     // Room operations //
 
-    /* Add rooms to a location.
+    /**
+     * Adds rooms to a location.
+     *
      * This should look a lot like addFlight, only keyed on a string location
      * instead of a flight number.
      */
-    public boolean addRooms(int id, String location, int numRooms, int roomPrice, int transaction); 			
+    public boolean addRooms(int id, String location, int numRooms, int roomPrice, int transaction);
 
-    /* Delete all rooms from a location.
+    /**
+     * Deletes all rooms from a location.
+     *
      * It should not succeed if there are reservations for this location.
      */
     public boolean deleteRooms(int id, String location, int transaction);
 
-    /* Return the number of rooms available at this location. */
+    /**
+     * Gets the number of rooms available at this location.
+     */
     public int queryRooms(int id, String location, int transaction);
 
-    /* Return the price of a room at this location. */
+    /**
+     * Return the price of a room at this location.
+     */
     public int queryRoomsPrice(int id, String location, int transaction);
-
 
     // Customer operations //
 
-    /* Create a new customer and return their unique identifier. */
+    /**
+     * Create a new customer and return their unique identifier.
+     */
     public int newCustomer(int id, int transaction);
 
-    /* Create a new customer with the provided identifier. */
+    /**
+     * Create a new customer with the provided identifier.
+     */
     public boolean newCustomerId(int id, int customerId, int transaction);
 
-    /* Remove this customer and all their associated reservations. */
+    /**
+     * Remove this customer and all their associated reservations.
+     */
     public boolean deleteCustomer(int id, int customerId, int transaction);
 
-    /* Return a bill. */
+    /**
+     * Return a bill.
+     */
     public String queryCustomerInfo(int id, int customerId, int transaction);
 
-    /* Reserve a seat on this flight. */
-    public boolean reserveFlight(int id, int customerId, int flightNumber, 
+    /**
+     * Reserve a seat on this flight.
+     */
+    public boolean reserveFlight(int id, int customerId, int flightNumber,
             int transaction);
 
-    /* Reserve a car at this location. */
-    public boolean reserveCar(int id, int customerId, String location, 
+    /**
+     * Reserve a car at this location.
+     */
+    public boolean reserveCar(int id, int customerId, String location,
             int transaction);
 
-    /* Reserve a room at this location. */
-    public boolean reserveRoom(int id, int customerId, String location, 
+    /**
+     * Reserve a room at this location.
+     */
+    public boolean reserveRoom(int id, int customerId, String location,
             int transaction);
 
 
-    /* Reserve an itinerary. */
+    /**
+     * Reserves an itinerary.
+     */
     public boolean reserveItinerary(int id, int customerId, Vector
-            flightNumbers, String location, boolean car, boolean room, 
+            flightNumbers, String location, boolean car, boolean room,
             int transaction);
 
-    /* Start a transaction*/
+    /**
+     * Starts a transaction.
+     */
     public int start();
 
-    /*commit the transaction associated with id */
+    /**
+     * Commits the transaction associated with the given id.
+     */
     public boolean commit(int id);
-    
-    /*abort the transaction associated with id*/
-    public boolean abort(int id);			
+
+    /**
+     * Abort the transaction associated with id.
+     */
+    public boolean abort(int id);
 }
