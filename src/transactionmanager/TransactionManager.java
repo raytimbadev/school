@@ -1,6 +1,9 @@
 package transactionmanager;
 
+import common.ResourceManager;
+
 import java.util.Hashtable;
+import java.util.Set;
 import java.util.Map;
 
 public class TransactionManager {

@@ -15,7 +15,6 @@
  */
 
 package common;
-import transactionmanager.Transaction;
 import java.util.*;
 
 public interface ResourceManager {
@@ -28,7 +27,7 @@ public interface ResourceManager {
      *
      * @return success.
      */
-    public boolean addFlight(int id, int flightNumber, int numSeats, int flightPrice, Transaction transaction);
+    public boolean addFlight(int id, int flightNumber, int numSeats, int flightPrice, int transaction);
 
     /**
      * Delete the entire flight.
@@ -37,13 +36,13 @@ public interface ResourceManager {
      *
      * @return success.
      */
-    public boolean deleteFlight(int id, int flightNumber, Transaction transaction);
+    public boolean deleteFlight(int id, int flightNumber, int transaction);
 
     /* Return the number of empty seats in this flight. */
-    public int queryFlight(int id, int flightNumber, Transaction transaction);
+    public int queryFlight(int id, int flightNumber, int transaction);
 
     /* Return the price of a seat on this flight. */
-    public int queryFlightPrice(int id, int flightNumber, Transaction transaction);
+    public int queryFlightPrice(int id, int flightNumber, int transaction);
 
 
     // Car operations //
@@ -52,18 +51,18 @@ public interface ResourceManager {
      * This should look a lot like addFlight, only keyed on a string location
      * instead of a flight number.
      */
-    public boolean addCars(int id, String location, int numCars, int carPrice, Transaction transaction);
+    public boolean addCars(int id, String location, int numCars, int carPrice, int transaction);
 
     /* Delete all cars from a location.
      * It should not succeed if there are reservations for this location.
      */		
-    public boolean deleteCars(int id, String location, Transaction transaction);
+    public boolean deleteCars(int id, String location, int transaction);
 
     /* Return the number of cars available at this location. */
-    public int queryCars(int id, String location, Transaction transaction);
+    public int queryCars(int id, String location, int transaction);
 
     /* Return the price of a car at this location. */
-    public int queryCarsPrice(int id, String location, Transaction transaction);
+    public int queryCarsPrice(int id, String location, int transaction);
 
 
     // Room operations //
@@ -72,47 +71,52 @@ public interface ResourceManager {
      * This should look a lot like addFlight, only keyed on a string location
      * instead of a flight number.
      */
-    public boolean addRooms(int id, String location, int numRooms, int roomPrice, Transaction transaction); 			
+    public boolean addRooms(int id, String location, int numRooms, int roomPrice, int transaction); 			
 
     /* Delete all rooms from a location.
      * It should not succeed if there are reservations for this location.
      */
-    public boolean deleteRooms(int id, String location, Transaction transaction);
+    public boolean deleteRooms(int id, String location, int transaction);
 
     /* Return the number of rooms available at this location. */
-    public int queryRooms(int id, String location, Transaction transaction);
+    public int queryRooms(int id, String location, int transaction);
 
     /* Return the price of a room at this location. */
-    public int queryRoomsPrice(int id, String location, Transaction transaction);
+    public int queryRoomsPrice(int id, String location, int transaction);
 
 
     // Customer operations //
 
     /* Create a new customer and return their unique identifier. */
-    public int newCustomer(int id, Transaction transaction);
+    public int newCustomer(int id, int transaction);
 
     /* Create a new customer with the provided identifier. */
-    public boolean newCustomerId(int id, int customerId, Transaction transaction);
+    public boolean newCustomerId(int id, int customerId, int transaction);
 
     /* Remove this customer and all their associated reservations. */
-    public boolean deleteCustomer(int id, int customerId, Transaction transaction);
+    public boolean deleteCustomer(int id, int customerId, int transaction);
 
     /* Return a bill. */
-    public String queryCustomerInfo(int id, int customerId, Transaction transaction);
+    public String queryCustomerInfo(int id, int customerId, int transaction);
 
     /* Reserve a seat on this flight. */
-    public boolean reserveFlight(int id, int customerId, int flightNumber, Transaction transaction);
+    public boolean reserveFlight(int id, int customerId, int flightNumber, 
+            int transaction);
 
     /* Reserve a car at this location. */
-    public boolean reserveCar(int id, int customerId, String location, Transaction transaction);
+    public boolean reserveCar(int id, int customerId, String location, 
+            int transaction);
 
     /* Reserve a room at this location. */
-    public boolean reserveRoom(int id, int customerId, String location, Transaction transaction);
+    public boolean reserveRoom(int id, int customerId, String location, 
+            int transaction);
 
 
     /* Reserve an itinerary. */
-    public boolean reserveItinerary(int id, int customerId, Vector flightNumbers,
-                                    String location, boolean car, boolean room, Transaction transaction);
+    public boolean reserveItinerary(int id, int customerId, Vector
+            flightNumbers, String location, boolean car, boolean room, 
+            int transaction);
+
     /* Start a transaction*/
     public int start();
 

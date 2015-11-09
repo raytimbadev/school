@@ -1,5 +1,7 @@
 package transactionmanager;
 
+import common.ResourceManager;
+
 import java.util.Set;
 import java.util.HashSet;
 
@@ -30,7 +32,7 @@ public class Transaction {
 
     public Transaction() {
         id = Transaction.getNextTransactionId();
-        resourceManagers = new HashSet<Integer>();
+        resourceManagers = new HashSet<ResourceManager>();
 
         // TODO find a good way to initialize this.
         timeToLive = 100;
@@ -46,6 +48,10 @@ public class Transaction {
 
     public void enlist(ResourceManager rm) {
         resourceManagers.add(rm);
+    }
+
+    public Set<ResourceManager> getResourceManagers() {
+        return resourceManagers;
     }
 
     @Override
