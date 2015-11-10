@@ -1,5 +1,4 @@
-import LockManager.*;
-
+import LockManagerOld.*; 
 class LockManagerTest {
     public static void main (String[] args) {
         MyThread t1, t2;
@@ -24,6 +23,7 @@ class MyThread extends Thread {
         if (threadId == 1) {
 	    try {
 		lm.Lock (1, "a", LockManager.READ);
+		System.out.println("lock aquired on 1, a"); 
 	    }
 	    catch (DeadlockException e) {
 	        System.out.println ("Deadlock.... ");
@@ -36,6 +36,7 @@ class MyThread extends Thread {
 
 	    try {
 		lm.Lock (1, "b", LockManager.WRITE);
+		System.out.println("lock aquired on 1, b"); 
 	    }
 	    catch (DeadlockException e) {
 	        System.out.println ("Deadlock.... ");
