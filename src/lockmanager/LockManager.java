@@ -11,22 +11,22 @@ public class LockManager {
     /**
      * Maps row IDs to locks.
      */
-    private final Map<String, Map<Transaction, Lock>> lockMap;
+    private final Map<String, Map<Integer, Lock>> lockMap;
 
     public LockManager() {
-        lockMap = new Hashtable<String, Map<Transaction, Lock>>();
+        lockMap = new Hashtable<String, Map<Integer, Lock>>();
     }
 
     public synchronized Lock lock(
             String datumName,
-            Transaction transaction,
+            int transaction,
             LockType lockType)
     {
-        Map<Transaction, Lock> transactionMap = lockMap.get(datumName);
+        Map<Integer, Lock> transactionMap = lockMap.get(datumName);
         final Lock lock = new Lock(datumName, transaction, lockType);
 
         if(transactionMap == null) {
-            transactionMap = new Hashtable<Transaction, Lock>();
+            transactionMap = new Hashtable<Integer, Lock>();
             lockMap.put(datumName, transactionMap);
         }
 
@@ -42,6 +42,7 @@ public class LockManager {
 
             transactionMap.put(transaction, lock);
             return lock;
+
         }
         else if(lockType == LockType.LOCK_READ) {
             while(!canAcquireRead(transactionMap)) {
@@ -60,14 +61,14 @@ public class LockManager {
         return null;
     }
 
-    public synchronized void releaseTransaction(Transaction transaction) {
-        for(final Map<Transaction, Lock> transactionMap : lockMap.values())
+    public synchronized void releaseTransaction(Integer transaction) {
+        for(final Map<Integer, Lock> transactionMap : lockMap.values())
             transactionMap.remove(transaction);
         notifyAll();
     }
 
     private synchronized boolean canAcquireRead(
-            Map<Transaction, Lock> transactionMap)
+            Map<Integer, Lock> transactionMap)
     {
         if(transactionMap.isEmpty())
             return true;
@@ -80,16 +81,15 @@ public class LockManager {
     }
 
     private synchronized boolean canAcquireWrite(
-        final Transaction transaction,
-        Map<Transaction, Lock> transactionMap)
+        final Integer transaction,
+        Map<Integer, Lock> transactionMap)
     {
         for(final Lock lock : transactionMap.values())
             if(lock.lockType != LockType.LOCK_READ
-                    || ! lock.getTransaction().equals(transaction))
+                    || lock.getTransaction() != transaction)
                 return false;
 
         return true;
 
     }
 }
-

@@ -57,9 +57,8 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
+        lockManager.lock(String.valueOf(flightNumber),id,LockType.LOCK_WRITE);
         ops.add(op);
-
 		return true;
     }
 
@@ -82,7 +81,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
+          lockManager.lock(String.valueOf(flightNumber),id,LockType.LOCK_WRITE);
         ops.add(op);
 
 		return true; 
@@ -109,7 +108,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
+        lockManager.lock(String.valueOf(flightNumber),id,LockType.LOCK_READ);
         ops.add(op);
 
 		return 0; 
@@ -133,7 +132,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
+        lockManager.lock(String.valueOf(flightNumber),id,LockType.LOCK_READ);
         ops.add(op);
 
 		return 0; 
@@ -158,7 +157,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
+        lockManager.lock(location,id,LockType.LOCK_WRITE);
         ops.add(op);
 
 		return true; 
@@ -184,7 +183,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
+        lockManager.lock(location,id,LockType.LOCK_WRITE);
         ops.add(op);
 
 		return true; 
@@ -209,7 +208,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
+        lockManager.lock(location,id,LockType.LOCK_READ);
         ops.add(op);
 
 		return 0; 
@@ -235,7 +234,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
+        lockManager.lock(location,id,LockType.LOCK_READ);
         ops.add(op);
 
 		return 0; 
@@ -266,7 +265,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
+        lockManager.lock(location,id,LockType.LOCK_WRITE);
         ops.add(op);
 
 		return true; 
@@ -292,7 +291,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
+        lockManager.lock(location+"room",id,LockType.LOCK_WRITE);
         ops.add(op);
 
 		return true; 
@@ -316,8 +315,8 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         if(ops == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
-            );
-
+            );  
+        lockManager.lock(location+"room",id,LockType.LOCK_READ);
         ops.add(op);
 
         return 0; 
@@ -342,7 +341,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
+        lockManager.lock(location+"room",id,LockType.LOCK_READ);
         ops.add(op);
 
         return 0; 
@@ -400,7 +399,8 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
+        //check operation is possible
+        lockManager.lock(String.valueOf(flightNumber),id,LockType.LOCK_WRITE);
         ops.add(op);
 
 		return true; 
@@ -426,7 +426,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
+        lockManager.lock(location,id,LockType.LOCK_WRITE);
         ops.add(op);
 
         return true; 
@@ -453,7 +453,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
+        lockManager.lock(location,id,LockType.LOCK_WRITE); 
         ops.add(op);
 
         return true; 
@@ -492,7 +492,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
         transactions.remove(id);
 
-        // TODO release locks
+        lockManager.releaseTransaction(id);
 
         return true;
     }

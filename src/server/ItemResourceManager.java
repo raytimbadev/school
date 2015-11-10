@@ -50,7 +50,9 @@ public class ItemResourceManager extends DatabaseResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
+        lockManager.lock(String.valueOf(customerId),id,LockType.LOCK_WRITE);
         ops.add(op);
+        //TODO FIX THIS SHIT (ERRRR)
         return true; 
 
     }
@@ -75,6 +77,7 @@ public class ItemResourceManager extends DatabaseResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
+        lockManager.lock(String.valueOf(customerId),id,LockType.LOCK_WRITE);
         ops.add(op);
         return ""; 
     }

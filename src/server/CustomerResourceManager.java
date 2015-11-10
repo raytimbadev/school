@@ -4,7 +4,7 @@
 // -------------------------------
 
 package server;
-
+import lockmanager.*; 
 import common.*;
 import lockmanager.*; 
 import transactionmanager.Transaction;
@@ -45,7 +45,7 @@ public class CustomerResourceManager extends DatabaseResourceManager {
         if( id == -1) {
                 return op.invoke(database);
             }
-
+        lockManager.lock(String.valueOf(customerId),id,LockType.LOCK_WRITE); 
         final List<Operation> ops = transactions.get(id);
         if(ops == null)
             throw UncheckedThrow.throwUnchecked(
