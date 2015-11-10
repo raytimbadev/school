@@ -1,5 +1,4 @@
 package LockManager;
-
 import java.util.BitSet;
 import java.util.Vector;
 
@@ -62,7 +61,11 @@ public class LockManager
                          
                         if (bConvert.get(0) == true) {
                             // lock conversion 
-                            // *** ADD CODE HERE *** to carry out the lock conversion in the
+                            //ADD CODE HERE
+                            TrxnObj trxnQueryObj = new TrxnObj(xid, strData, 0);
+                            this.lockTable.remove(trxnQueryObj); 
+                            this.lockTable.add(trxnObj);
+                            this.lockTable.add(dataObj); 
                             // lock table
                         } else {
                             // a lock request that is not lock conversion
@@ -203,6 +206,12 @@ public class LockManager
                     // (2) transaction already had a WRITE lock
                     // Seeing the comments at the top of this function might be helpful
                     // *** ADD CODE HERE *** to take care of both these cases
+                    if(this.lockTable.contains(new TrxnObj(dataObj.getXid(),dataObj.getDataName(), 1))) {
+                        throw new RedundantLockRequestException(dataObj.getXId(), "Redundant READ lock request");
+                    }else { //its increasing the lock
+                        bitset.set(0)=true; 
+                    }
+
                 }
             } 
             else {

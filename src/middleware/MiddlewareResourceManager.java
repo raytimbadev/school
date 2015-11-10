@@ -1,6 +1,7 @@
 package middleware;
 import transactionmanager.*;
 import common.ResourceManager;
+import common.NoSuchTransactionException; 
 import common.UncheckedThrow;
 import java.util.*;
 import javax.jws.WebService;
