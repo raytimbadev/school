@@ -21,7 +21,7 @@ public class Transaction {
     private final int id;
 
     /**
-     * The resource managers association with this transaction.
+     * The resource managers associated with this transaction.
      */
     private final Set<ResourceManager> resourceManagers;
     
