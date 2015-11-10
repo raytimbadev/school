@@ -20,12 +20,7 @@ import java.util.*;
 import org.apache.commons.dbcp2.BasicDataSource;
 
 public class ItemResourceManager extends DatabaseResourceManager {
-    public ItemResourceManager(
-            String dbUsername,
-            String dbPassword,
-            String dbUrl
-    ) throws IOException, SQLException, PropertyVetoException {
-        super(dbUsername, dbPassword, dbUrl);
+    public ItemResourceManager() {
     }
 
     // Customer operations //
@@ -42,7 +37,7 @@ public class ItemResourceManager extends DatabaseResourceManager {
         );
         DeleteItemOperation op = new DeleteItemOperation(id,customerId);
         if(id == -1) {
-            op.invoke(database);
+            op.invoke(mainData);
         }
 
         final List<Operation> ops = transactions.get(id);
@@ -69,7 +64,7 @@ public class ItemResourceManager extends DatabaseResourceManager {
         );
         QueryCustomerInfoOperation op = new QueryCustomerInfoOperation(id,customerId); 
         if(id == -1) {
-            op.invoke(database); 
+            op.invoke(mainData); 
         }
 
         final List<Operation> ops = transactions.get(id);

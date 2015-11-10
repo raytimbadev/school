@@ -40,25 +40,20 @@ public class AddFlightOperation implements Operation<Boolean> {
     }
 
     @Override
-    public Boolean invoke(BasicDataSource database) {
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
+    public Boolean invoke(Hashtable<String, ItemGroup> data) {
+        final String key = String.valueOf(flightNumber);
 
-            for(int i = 0; i < numSeats; i++) {
-                final PreparedStatement stmt = connection.prepareStatement(
-                        "INSERT INTO item ( flight_number, price ) " +
-                        "VALUES ( ?, ? ) "
-                );
-                stmt.setInt(1, flightNumber);
-                stmt.setInt(2, flightPrice);
-                stmt.executeUpdate();
-            }
+        ItemGroup g = data.get(key);
+        if(g == null) {
+            g = new ItemGroup("flight", key, numSeats, flightPrice);
+            data.put(key, g);
+        }
+        else {
+            if(flightPrice > 0)
+                g.setPrice(flightPrice);
+            g.setCount(g.getCount() + numSeats);
+        }
 
-            connection.commit();
-            return true;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return true;
     }
 }

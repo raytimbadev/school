@@ -1,9 +1,11 @@
 package common.operations;
 
+import common.ItemGroup;
+
 import java.util.List;
-import org.apache.commons.dbcp2.BasicDataSource;
+import java.util.Hashtable;
 
 public interface Operation<T> {
-    T invoke(BasicDataSource database); 
+    T invoke(Hashtable<String, ItemGroup> database); 
     List<Object> getParameters();
 }

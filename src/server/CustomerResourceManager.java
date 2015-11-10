@@ -21,12 +21,7 @@ import java.util.*;
 import org.apache.commons.dbcp2.BasicDataSource;
 
 public class CustomerResourceManager extends DatabaseResourceManager {
-    public CustomerResourceManager(
-            String dbUsername,
-            String dbPassword,
-            String dbUrl
-    ) throws IOException, SQLException, PropertyVetoException {
-        super(dbUsername, dbPassword, dbUrl);
+    public CustomerResourceManager() {
     }
 
     // Customer operations //
@@ -43,7 +38,7 @@ public class CustomerResourceManager extends DatabaseResourceManager {
         );
         DeleteCustomerOperation op = new DeleteCustomerOperation(id,customerId);
         if( id == -1) {
-                return op.invoke(database);
+                return op.invoke(mainData);
             }
         lockManager.lock(String.valueOf(customerId),id,LockType.LOCK_WRITE); 
         final List<Operation> ops = transactions.get(id);

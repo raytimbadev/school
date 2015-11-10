@@ -4,37 +4,23 @@ import lockmanager.*;
 import common.*;
 import common.operations.*;
 
-import java.beans.PropertyVetoException;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.*;
-import org.apache.commons.dbcp2.BasicDataSource;
 
 public abstract class DatabaseResourceManager implements ResourceManager {
+    protected final Hashtable<String, ItemGroup> mainData;
     protected final LockManager lockManager;
-    protected final BasicDataSource database;
 
-    protected final Hashtable<Integer, List<Operation>> transactions;
+    protected final Hashtable<Integer, Hashtable<String, ItemGroup>>
+        transactions;
 
-    public DatabaseResourceManager(
-            String dbUsername,
-            String dbPassword,
-            String dbUrl
-    ) throws IOException, SQLException, PropertyVetoException {
+    protected synchronized void mergeData(Hashtable<String, ItemGroup> data) {
+        mainData.putAll(data);
+    }
+
+    public DatabaseResourceManager() {
         lockManager = new LockManager();
-
-        database = new BasicDataSource();
-        database.setDriverClassName("org.postgresql.Driver");
-        database.setUsername(dbUsername);
-        database.setPassword(dbPassword);
-        database.setUrl(dbUrl);
-
-        transactions = new Hashtable<Integer, List<Operation>>();
+        transactionData =
+            new Hashtable<Integer, Hashtable<String, ItemGroup>>();
     }
 
     // Flight operations //
@@ -47,19 +33,29 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                              int numSeats, int flightPrice) {
         Trace.info("RM::addFlight(" + id + ", " + flightNumber
                 + ", $" + flightPrice + ", " + numSeats + ") called.");
-		AddFlightOperation op = new AddFlightOperation(id,flightNumber,numSeats,flightPrice); 	
+		AddFlightOperation op = new AddFlightOperation(
+                id,
+                flightNumber,
+                numSeats,
+                flightPrice);
+
 		if(id == -1) {
-			return op.invoke(database); 
+			return op.invoke(mainData);
 		}
 
-        final List<Operation> ops = transactions.get(id);
-        if(ops == null)
+        final Hashtable<String, ItemGroup> txData = transactions.get(id);
+
+        if(txData == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-        lockManager.lock(String.valueOf(flightNumber),id,LockType.LOCK_WRITE);
-        ops.add(op);
-		return true;
+
+        lockManager.lock(
+                String.valueOf(flightNumber),
+                id,
+                LockType.LOCK_WRITE);
+
+		return op.invoke(txData);
     }
 
     @Override
@@ -73,10 +69,10 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         );
 		DeleteFlightOperation op = new DeleteFlightOperation(id,flightNumber);
 		if(id == -1) {
-			return op.invoke(database);
+			return op.invoke(mainData);
 		}
 		
-        final List<Operation> ops = transactions.get(id);
+        final Hashtable<String, ItemGroup> ops = transactions.get(id);
         if(ops == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
@@ -100,10 +96,10 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         );
 		QueryFlightOperation op = new QueryFlightOperation(id,flightNumber); 
 		if(id == -1) {
-			return op.invoke(database); 
+			return op.invoke(mainData); 
 		}
 		
-        final List<Operation> ops = transactions.get(id);
+        final Hashtable<String, ItemGroup> ops = transactions.get(id);
         if(ops == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
@@ -125,9 +121,9 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         );
 		QueryFlightPriceOperation op = new QueryFlightPriceOperation(id,flightNumber); 
 		if(id == -1) {
-			return op.invoke(database);
+			return op.invoke(mainData);
 		}
-        final List<Operation> ops = transactions.get(id);
+        final Hashtable<String, ItemGroup> ops = transactions.get(id);
         if(ops == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
@@ -149,10 +145,10 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 + numCars + ", $" + carPrice + ") called.");
 		AddCarsOperation op = new AddCarsOperation(id,location,numCars,carPrice); 
 		if(id == -1) {
-		 return op.invoke(database); 
+		 return op.invoke(mainData); 
 		}
 		
-        final List<Operation> ops = transactions.get(id);
+        final Hashtable<String, ItemGroup> ops = transactions.get(id);
         if(ops == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
@@ -175,10 +171,10 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         );
 		DeleteCarsOperation op = new DeleteCarsOperation(id,location); 
 		if(id == -1) {
-			op.invoke(database); 
+			op.invoke(mainData); 
 		}
 		
-        final List<Operation> ops = transactions.get(id);
+        final Hashtable<String, ItemGroup> ops = transactions.get(id);
         if(ops == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
@@ -201,9 +197,9 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         );
 		QueryCarsOperation op = new QueryCarsOperation(id,location); 
 		if(id == -1) {
-			op.invoke(database); 
+			op.invoke(mainData); 
 		}
-        final List<Operation> ops = transactions.get(id);
+        final Hashtable<String, ItemGroup> ops = transactions.get(id);
         if(ops == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
@@ -227,9 +223,9 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
 		QueryCarsPriceOperation op = new QueryCarsPriceOperation(id,location); 
 		if(id == 01) {
-			op.invoke(database);
+			op.invoke(mainData);
 		}
-        final List<Operation> ops = transactions.get(id);
+        final Hashtable<String, ItemGroup> ops = transactions.get(id);
         if(ops == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
@@ -258,9 +254,9 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         );
 		AddRoomsOperation op = new AddRoomsOperation(id,location,numRooms,roomPrice); 
 		if(id == -1) {
-			op.invoke(database);
+			op.invoke(mainData);
 		}
-        final List<Operation> ops = transactions.get(id);
+        final Hashtable<String, ItemGroup> ops = transactions.get(id);
         if(ops == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
@@ -284,9 +280,9 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         );
 		DeleteRoomsOperation op = new DeleteRoomsOperation(id,location); 
 		if(id == -1) {
-			op.invoke(database); 
+			op.invoke(mainData); 
 		}
-        final List<Operation> ops = transactions.get(id);
+        final Hashtable<String, ItemGroup> ops = transactions.get(id);
         if(ops == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
@@ -309,9 +305,9 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         );
 		QueryRoomOperation op = new QueryRoomOperation(id,location); 
 		if(id == -1) {
-            op.invoke(database); 
+            op.invoke(mainData); 
 		}
-        final List<Operation> ops = transactions.get(id);
+        final Hashtable<String, ItemGroup> ops = transactions.get(id);
         if(ops == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
@@ -334,9 +330,9 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         );
 		QueryRoomPriceOperation op = new QueryRoomPriceOperation(id,location); 
 		if(id == -1) {
-            return op.invoke(database);
+            return op.invoke(mainData);
         }
-        final List<Operation> ops = transactions.get(id);
+        final Hashtable<String, ItemGroup> ops = transactions.get(id);
         if(ops == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
@@ -392,9 +388,9 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         );
         ReserveFlightOperation op = new ReserveFlightOperation(id,customerId,flightNumber); 
 		if(id == -1) {
-			return op.invoke(database); 
+			return op.invoke(mainData); 
 		}
-        final List<Operation> ops = transactions.get(id);
+        final Hashtable<String, ItemGroup> ops = transactions.get(id);
         if(ops == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
@@ -419,9 +415,9 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         );
 		ReserveCarOperation op = new ReserveCarOperation(id,customerId,location); 
 	    if(id == -1) {
-		    return op.invoke(database); 
+		    return op.invoke(mainData); 
 	    }
-        final List<Operation> ops = transactions.get(id);
+        final Hashtable<String, ItemGroup> ops = transactions.get(id);
         if(ops == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
@@ -446,9 +442,9 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         );
         ReserveRoomOperation op = new ReserveRoomOperation(id,customerId,location);
 		if(id == -1) {
-            return op.invoke(database);
+            return op.invoke(mainData);
         }
-        final List<Operation> ops = transactions.get(id);
+        final Hashtable<String, ItemGroup> ops = transactions.get(id);
         if(ops == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
@@ -474,7 +470,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         if(transactions.get(transactionId) != null)
             throw new RedundantTransactionException(transactionId);
 
-        transactions.put(transactionId, new ArrayList<Operation>());
+        transactions.put(transactionId, new Hashtable<String, ItemGroup>());
         throw new UnsupportedOperationException();
     }
 
@@ -482,16 +478,13 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     @Override
     public synchronized boolean commit(int id)
     throws NoSuchTransactionException {
-        final List<Operation> ops = transactions.get(id);
+        final Hashtable<String, ItemGroup> ops = transactions.get(id);
 
         if(ops == null)
             throw new NoSuchTransactionException(id);
 
-        for(final Operation op : ops)
-            op.invoke(database);
-
+        mergeData(ops);
         transactions.remove(id);
-
         lockManager.releaseTransaction(id);
 
         return true;
@@ -501,14 +494,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     @Override
     public synchronized boolean abort(int id)
     throws NoSuchTransactionException {
-        final List<Operation> ops = transactions.get(id);
+        final Hashtable<String, ItemGroup> ops = transactions.get(id);
 
         if(ops == null)
             throw new NoSuchTransactionException(id);
 
         transactions.remove(id);
 
-        // TODO release locks
+        lockManager.releaseTransaction(id);
 
         return true;
     }

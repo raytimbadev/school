@@ -74,18 +74,10 @@ public class Server implements Runnable {
         // TODO read a file with this configuration
         ResourceManager resourceManager = null;
         if(serverType.equals("customer")) {
-            resourceManager = new CustomerResourceManager(
-                    dbUser,
-                    dbPass,
-                    "jdbc:postgresql://" + dbHost + ":" + dbPort + "/" + dbName
-            );
+            resourceManager = new CustomerResourceManager();
         }
         else if(serverType.equals("item")) {
-            resourceManager = new ItemResourceManager(
-                    dbUser,
-                    dbPass,
-                    "jdbc:postgresql://" + dbHost + ":" + dbPort + "/" + dbName
-            );
+            resourceManager = new ItemResourceManager();
         }
         else
             throw new RuntimeException("Please give the server a type: 'customer' or 'item'.");
