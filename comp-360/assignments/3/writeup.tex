@@ -10,6 +10,8 @@
 
 \begin{document}
 
+\maketitle
+
 \begin{enumerate}
     \item
         --
@@ -54,8 +56,8 @@
                 output NO.
 
             \item
-                This problem is in $P$. Here is a polytime algorithm for
-                solving it.
+                This problem is in $P$. Algorithm \ref{alg} shows how to solve
+                it.
 
                 \begin{algorithm}[ht]
                     \caption{
@@ -63,6 +65,7 @@
                         truth assignment for a given CNF that satisfies none of
                         its clauses.
                     }
+                    \label{alg}
 
                     \begin{algorithmic}
                         \Require{A CNF $\phi$.}
