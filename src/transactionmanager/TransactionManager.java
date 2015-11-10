@@ -8,20 +8,27 @@ import common.UncheckedThrow;
 import java.util.Hashtable;
 import java.util.Set;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class TransactionManager {
+    final ScheduledExecutorService ttlChecker;
+
     /**
      * Maps transaction IDs to transactions.
      */
-    private Map<Integer, Transaction> transactionMap;
+    private final Map<Integer, Transaction> transactionMap;
 
     public TransactionManager() {
         transactionMap = new Hashtable<Integer, Transaction>();
+        ttlChecker = Executors.newScheduledThreadPool(1);
     }
 
     public synchronized Transaction start() {
         final Transaction txn = new Transaction();
         transactionMap.put(txn.getId(), txn);
+
         return txn;
     }
 
@@ -38,10 +45,7 @@ public class TransactionManager {
         if(tx == null)
             throw new NoSuchTransactionException();
 
-        final Set<ResourceManager> rms = tx.getResourceManagers();
-        for(final ResourceManager rm : rms) {
-            rm.commit(transactionId);
-        }
+        tx.commit();
         transactionMap.remove(transactionId);
 
         return true;
@@ -94,6 +98,39 @@ public class TransactionManager {
         }
         catch(RedundantTransactionException e) {
             throw UncheckedThrow.throwUnchecked(e);
+        }
+    }
+
+    private class TtlChecker implements Runnable {
+        final Transaction transaction;
+
+        public TtlChecker(Transaction transaction) {
+            this.transaction = transaction;
+        }
+
+        @Override
+        public void run() {
+            synchronized(transaction) {
+                // If the transaction is finished
+                if(transaction.getState() != Transaction.State.PENDING)
+                    // Then we don't do anything.
+                    return;
+
+                long ttl = transaction.getTimeToLive();
+
+                // If the transaction has expired
+                if(ttl <= 0)
+                    // abort it on all associated RMs
+                    transaction.abort();
+                else
+                    // Else, the transaction has not expired. Someone must have
+                    // used `touch` behind our backs! Pesky clients.
+                    // We just schedule another check after ttl seconds elapse.
+                    // That'll show them.
+                    ttlChecker.schedule(
+                            new TtlChecker(transaction), ttl, TimeUnit.SECONDS
+                    );
+            }
         }
     }
 }
