@@ -122,13 +122,14 @@ public class TransactionManager {
                 if(ttl <= 0)
                     // abort it on all associated RMs
                     transaction.abort();
-
-                // Else, the transaction has not expired. Someone must have
-                // used `touch` behind our backs! Pesky clients.
-                // We just schedule another check after ttl seconds elapse.
-                // That'll show them.
-                ttlChecker.schedule(
-                        new TtlChecker(transaction), ttl, TimeUnit.SECONDS);
+                else
+                    // Else, the transaction has not expired. Someone must have
+                    // used `touch` behind our backs! Pesky clients.
+                    // We just schedule another check after ttl seconds elapse.
+                    // That'll show them.
+                    ttlChecker.schedule(
+                            new TtlChecker(transaction), ttl, TimeUnit.SECONDS
+                    );
             }
         }
     }
