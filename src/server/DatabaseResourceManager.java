@@ -160,7 +160,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 + numCars + ", $" + carPrice + ") called.");
 		AddCarsOperation op = new AddCarsOperation(id,location,numCars,carPrice); 
 		if(id == -1) {
-		 return op.invoke(mainData); 
+		    return op.invoke(mainData);
 		}
 		
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
@@ -184,7 +184,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         );
 		DeleteCarsOperation op = new DeleteCarsOperation(id,location); 
 		if(id == -1) {
-			op.invoke(mainData); 
+			op.invoke(mainData);
 		}
 		
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
@@ -209,7 +209,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 		QueryCarsOperation op = new QueryCarsOperation(id,location); 
 
 		if(id == -1) {
-			op.invoke(mainData); 
+			return op.invoke(mainData);
 		}
 
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
@@ -241,7 +241,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 		QueryCarsPriceOperation op = new QueryCarsPriceOperation(id, location);
 
 		if(id == 1) {
-			op.invoke(mainData);
+			return op.invoke(mainData);
 		}
 
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
@@ -277,7 +277,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         );
 		AddRoomsOperation op = new AddRoomsOperation(id,location,numRooms,roomPrice); 
 		if(id == -1) {
-			op.invoke(mainData);
+			return op.invoke(mainData);
 		}
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
         if(txData == null)
@@ -300,7 +300,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         );
 		DeleteRoomsOperation op = new DeleteRoomsOperation(id,location); 
 		if(id == -1) {
-			op.invoke(mainData); 
+			return op.invoke(mainData);
 		}
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
         if(txData == null)
@@ -324,7 +324,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 		QueryRoomOperation op = new QueryRoomOperation(id,location);
 
 		if(id == -1) {
-            op.invoke(mainData); 
+            return op.invoke(mainData);
 		}
 
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
@@ -386,12 +386,15 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     customerId
                 )
         );
+
+		if(id != -1) {
+            return op.invoke(mainData);
+        }
+
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
 		NewCustomerIdOperation op = new NewCustomerIdOperation(id,customerId);
-		if(id != -1) {
-            op.invoke(mainData); 
-         }
-         return op.invoke(txData); 
+
+        return op.invoke(txData);
     }
 
     // Add flight reservation to this customer.
@@ -407,7 +410,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         );
         ReserveFlightOperation op = new ReserveFlightOperation(id,customerId,flightNumber); 
 		if(id == -1) {
-			return op.invoke(mainData); 
+			return op.invoke(mainData);
 		}
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
         if(txData == null)
@@ -432,7 +435,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         );
 		ReserveCarOperation op = new ReserveCarOperation(id,customerId,location); 
 	    if(id == -1) {
-		    return op.invoke(mainData); 
+		    return op.invoke(mainData);
 	    }
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
         if(txData == null)
@@ -478,13 +481,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     }
 
     @Override
-    public synchronized boolean start(int transactionId)
-    throws RedundantTransactionException {
+    public synchronized boolean start(int transactionId) {
         if(transactions.get(transactionId) != null)
-            throw new RedundantTransactionException(transactionId);
+            return false;
 
         transactions.put(transactionId, new Hashtable<String, ItemGroup>());
-        throw new UnsupportedOperationException();
+        return true;
     }
 
     //commit
