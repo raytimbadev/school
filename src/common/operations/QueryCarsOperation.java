@@ -33,33 +33,12 @@ public class QueryCarsOperation implements Operation<Integer> {
     }
 
     @Override
-    public Integer invoke(BasicDataSource database) {
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT COUNT(1) " +
-                    "FROM item i " +
-                    "WHERE i.location = ? " +
-                    "  AND NOT EXISTS ( " +
-                    "        SELECT 1 " +
-                    "        FROM item_reservation ir " +
-                    "        WHERE ir.item_id = i.id " +
-                    "      ) "
-            );
-            stmt.setString(1, location);
-
-            final ResultSet rs = stmt.executeQuery();
-            rs.next();
-            final int count = rs.getInt(1);
-
-            connection.commit();
-            return count;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
-
+    public Integer invoke(Hashtable<String, ItemGroup> data) {
+        ItemGroup g = data.get(location);
+        if(g == null)
+            return 0;
+        else
+            return g.getAvailableCount();
     }
 }
 
