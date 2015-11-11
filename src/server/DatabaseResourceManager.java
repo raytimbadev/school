@@ -387,12 +387,13 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 )
         );
 
+		NewCustomerIdOperation op = new NewCustomerIdOperation(id,customerId);
+
 		if(id != -1) {
             return op.invoke(mainData);
         }
 
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
-		NewCustomerIdOperation op = new NewCustomerIdOperation(id,customerId);
 
         return op.invoke(txData);
     }
