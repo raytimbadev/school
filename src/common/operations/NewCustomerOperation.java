@@ -33,21 +33,15 @@ public class NewCustomerOperation implements Operation<Integer> {
         int max =0;
         String customerId="";
 
-        for(Enumeration<String> e = v.keys; e.hasMoreElements();) {
+        for(Enumeration<String> e = data.keys(); e.hasMoreElements();) {
             int temp = Integer.parseInt(e.nextElement());
-            max = max > temp ? max, temp;
+            max = max > temp ? max:temp;
         }
         customerId = string.value(max+1); 
         final String key = customerId;
 
-        ItemGroup g = data.get(key);
-        if(g == null) {
-            g = new ItemGroup("customer", key, 0, 0);
-            data.put(key, g);
-        }
-        else { //customer already exists
-            throw new RuntimeException("attempted to create existing customer");
-        }
+        ItemGroup g = new ItemGroup("customer", key, 0, 0);
+        data.put(key, g);
         return true;
     }
 }
