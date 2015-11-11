@@ -32,14 +32,14 @@ public class DeleteCustomerOperation implements Operation<Boolean> {
 
     @Override
     public Boolean invoke(Hashtable<String, ItemGroup> data) {
-    final String key = String.valueOf(id);
-    ItemGroup g = data.get(key);
-    
-    if(g==null){
-        return true; 
-    }
+        final String key = String.valueOf(id);
+        ItemGroup g = data.get(key);
+        
+        if(g==null){
+            return true; 
+        }
 
-    data.remove(key);
-    return true;
+        data.remove(key);
+        return true;
     }
 }

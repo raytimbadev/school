@@ -8,6 +8,7 @@ package server;
 import common.*;
 import lockmanager.*;  
 import common.operations.*; 
+
 import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.sql.Connection;
@@ -35,19 +36,24 @@ public class ItemResourceManager extends DatabaseResourceManager {
                     customerId
                 )
         );
-        DeleteItemOperation op = new DeleteItemOperation(id,customerId);
-        if(id == -1) {
-            op.invoke(mainData);
+        Hashtable<String, ItemGroup> data = null;
+            
+        if(id == -1)
+            data = mainData;
+        else {
+            final Hashtable<String, ItemGroup> txData = transactions.get(id);
+            if(txData == null)
+                throw UncheckedThrow.throwUnchecked(
+                        new NoSuchTransactionException(id)
+                );
+            lockManager.lock(String.valueOf(customerId),id,LockType.LOCK_WRITE);
+            data = txData;
         }
 
-        final List<Operation> txData = transactions.get(id);
-        if(ops == null)
-            throw UncheckedThrow.throwUnchecked(
-                    new NoSuchTransactionException(id)
-            );
-        lockManager.lock(String.valueOf(customerId),id,LockType.LOCK_WRITE);
-        op.invoke(txData);
+        for(final ItemGroup g : data.values())
+            g.cancel(customerId);
 
+        return true; 
     }
 
     // Return a bill.
@@ -68,7 +74,7 @@ public class ItemResourceManager extends DatabaseResourceManager {
             op.invoke(mainData);
         }
 
-        final List<Operation> txData = transactions.get(id);
+        final Hashtable<String, ItemGroup> txData = transactions.get(id);
 
         if(txData == null)
             throw UncheckedThrow.throwUnchecked(

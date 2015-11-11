@@ -19,7 +19,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
     public DatabaseResourceManager() {
         lockManager = new LockManager();
-        transactionData =
+        transactions =
             new Hashtable<Integer, Hashtable<String, ItemGroup>>();
     }
 
@@ -83,7 +83,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 id,
                 LockType.LOCK_WRITE);
 
-        return op.invoke(txData)
+        return op.invoke(txData);
 
     }
 
@@ -115,7 +115,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 id,
                 LockType.LOCK_READ);
 
-		return ops.invoke(txData);
+		return op.invoke(txData);
     }
 
     // Returns price of this flight.
@@ -133,9 +133,9 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 			return op.invoke(mainData);
 		}
 
-        final Hashtable<String, ItemGroup> ops = transactions.get(id);
+        final Hashtable<String, ItemGroup> txData = transactions.get(id);
 
-        if(ops == null)
+        if(txData == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
@@ -187,12 +187,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 		}
 		
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
-        if(ops == null)
+        if(txData == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
         lockManager.lock(location,id,LockType.LOCK_WRITE);
-        return op.invoke(txData)
+        return op.invoke(txData);
     }
 
     // Returns the number of cars available at a location.
@@ -409,13 +409,13 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 			return op.invoke(mainData); 
 		}
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
-        if(ops == null)
+        if(txData == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
         //check operation is possible
         lockManager.lock(String.valueOf(flightNumber),id,LockType.LOCK_WRITE);
-        return ops.invoke(txData); 
+        return op.invoke(txData); 
     }
 
     // Add car reservation to this customer.
@@ -434,7 +434,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 		    return op.invoke(mainData); 
 	    }
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
-        if(ops == null)
+        if(txData == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
@@ -459,7 +459,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             return op.invoke(mainData);
         }
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
-        if(ops == null)
+        if(txData == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
@@ -490,12 +490,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     @Override
     public synchronized boolean commit(int id)
     throws NoSuchTransactionException {
-        final Hashtable<String, ItemGroup> ops = transactions.get(id);
+        final Hashtable<String, ItemGroup> txData = transactions.get(id);
 
-        if(ops == null)
+        if(txData == null)
             throw new NoSuchTransactionException(id);
 
-        mergeData(ops);
+        mergeData(txData);
         transactions.remove(id);
         lockManager.releaseTransaction(id);
 
@@ -506,9 +506,9 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     @Override
     public synchronized boolean abort(int id)
     throws NoSuchTransactionException {
-        final Hashtable<String, ItemGroup> ops = transactions.get(id);
+        final Hashtable<String, ItemGroup> txData = transactions.get(id);
 
-        if(ops == null)
+        if(txData == null)
             throw new NoSuchTransactionException(id);
 
         transactions.remove(id);

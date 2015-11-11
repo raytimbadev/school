@@ -32,18 +32,19 @@ public class DeleteFlightOperation implements Operation<Boolean> {
     }
     @Override
     public Boolean invoke(Hashtable<String, ItemGroup> data) {
-    final String key = String.valueof(flightNumber);
-    ItemGroup g = data.get(key);
-    
-    if(g==null){
-        return true; 
-    }
+        final String key = String.valueOf(flightNumber);
+        final ItemGroup g = data.get(key);
+        
+        if(g == null) {
+            return true; 
+        }
 
-    if(g.getReservedCount != 0) {
-        data.remove(key);
-        return true;
-    }
-    return false;
+        if(g.getReservedCount() == 0) {
+            data.remove(key);
+            return true;
+        }
+
+        return false;
     }
 }
 

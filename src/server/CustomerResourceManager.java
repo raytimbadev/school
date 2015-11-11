@@ -41,8 +41,8 @@ public class CustomerResourceManager extends DatabaseResourceManager {
                 return op.invoke(mainData);
             }
         lockManager.lock(String.valueOf(customerId),id,LockType.LOCK_WRITE); 
-        final List<Operation> txData = transactions.get(id);
-        if(ops == null)
+        final Hashtable<String, ItemGroup> txData = transactions.get(id);
+        if(txData == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );

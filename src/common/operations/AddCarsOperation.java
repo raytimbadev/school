@@ -47,7 +47,7 @@ public class AddCarsOperation implements Operation<Boolean> {
             data.put(key, g);
         }
         else {
-            if(flightPrice > 0)
+            if(price > 0)
                 g.setPrice(price);
             g.setCount(g.getCount() + count);
         }

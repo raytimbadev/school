@@ -43,11 +43,11 @@ public class AddRoomsOperation implements Operation<Boolean> {
 
     ItemGroup g = data.get(key);
     if(g == null) {
-        g = new ItemGroup("room", key, count, location);
+        g = new ItemGroup("room", key, count, price);
         data.put(key, g);
     }
     else {
-        if(flightPrice > 0)
+        if(price > 0)
             g.setPrice(price);
         g.setCount(g.getCount() + count);
     }

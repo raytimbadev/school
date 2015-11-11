@@ -32,7 +32,7 @@ public class QueryRoomOperation implements Operation<Integer> {
     }
 
     @Override
-    public Integer invoke(BasicDataSource database) {
+    public Integer invoke(Hashtable<String, ItemGroup> data) {
         ItemGroup g = data.get(location);
         if(g == null)
             throw new RuntimeException("No such location '" + location + "'.");

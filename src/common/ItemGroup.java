@@ -54,10 +54,9 @@ public class ItemGroup {
      * @param customerId The ID of the customer for which to reserve the item.
      * @return The total number of items now reserved by that customer.
      */
-    public synchronized int reserve(int customerId) {
+    public synchronized boolean reserve(int customerId) {
         if(reservedCount == itemCount)
-            throw new RuntimeException(
-                    "Insufficient items available to perform reservation.");
+            return false;
 
         Integer currentCount = reservations.get(customerId);
         if(currentCount == null)
@@ -66,7 +65,7 @@ public class ItemGroup {
         reservedCount++;
 
         reservations.put(customerId, currentCount);
-        return currentCount;
+        return true;
     }
 
     /**

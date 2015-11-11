@@ -33,9 +33,10 @@ public class QueryFlightPriceOperation implements Operation<Integer> {
 
     @Override
     public Integer invoke(Hashtable<String, ItemGroup> data) {
-        ItemGroup g = data.get(location);
+        final String key = String.valueOf(flightNumber);
+        final ItemGroup g = data.get(key);
         if(g == null)
-            throw new RuntimeException("No such location '" + location + "'.");
+            throw new RuntimeException("No such location '" + key + "'.");
         else
             return g.getPrice();
     }

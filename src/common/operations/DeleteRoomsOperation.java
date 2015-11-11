@@ -39,7 +39,7 @@ public class DeleteRoomsOperation implements Operation<Boolean> {
         return true; 
     }
 
-    if(g.getReservedCount != 0) {
+    if(g.getReservedCount() == 0) {
         data.remove(key);
         return true;
     }

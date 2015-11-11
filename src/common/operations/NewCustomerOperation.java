@@ -28,19 +28,18 @@ public class NewCustomerOperation implements Operation<Integer> {
     }
 
     @Override
-    public Boolean invoke(Hashtable<String, ItemGroup> data) {
+    public Integer invoke(Hashtable<String, ItemGroup> data) {
         int max =0;
-        String customerId="";
 
         for(Enumeration<String> e = data.keys(); e.hasMoreElements();) {
             int temp = Integer.parseInt(e.nextElement());
             max = max > temp ? max:temp;
         }
-        customerId = string.value(max+1); 
-        final String key = customerId;
+        final int customerId = max + 1;
+        String key = String.valueOf(customerId); 
 
         ItemGroup g = new ItemGroup("customer", key, 0, 0);
         data.put(key, g);
-        return true;
+        return customerId;
     }
 }
