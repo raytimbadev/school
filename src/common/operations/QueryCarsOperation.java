@@ -36,7 +36,7 @@ public class QueryCarsOperation implements Operation<Integer> {
     public Integer invoke(Hashtable<String, ItemGroup> data) {
         ItemGroup g = data.get(location);
         if(g == null)
-            return 0;
+            throw new RuntimeException("No such location '" + location + "'.");
         else
             return g.getAvailableCount();
     }

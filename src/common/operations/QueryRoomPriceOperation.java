@@ -34,39 +34,10 @@ public class QueryRoomPriceOperation implements Operation<Integer> {
 
     @Override
     public Integer invoke(BasicDataSource database) {
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT MIN(i.price) " +
-                    "FROM item i " +
-                    "WHERE i.location = ? "
-            );
-            stmt.setString(1, location);
-
-            final ResultSet rs = stmt.executeQuery();
-            rs.next();
-
-            final int price = rs.getInt(1);
-
-            if(rs.wasNull()) {
-                Trace.warn(
-                        String.format(
-                            "RM::queryRoomsPrice(%d, %s): " +
-                            "no rooms for minimum price",
-                            id,
-                            location
-                        )
-                );
-                return -1; // indicates error to the client
-            }
-
-            connection.commit();
-            return price;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
-
+        ItemGroup g = data.get(location);
+        if(g == null)
+            throw new RuntimeException("No such location '" + location + "'.");
+        else
+            return g.getPrice();
     }
 }

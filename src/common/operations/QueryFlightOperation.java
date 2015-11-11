@@ -33,31 +33,12 @@ public class QueryFlightOperation implements Operation<Integer> {
     }
 
     @Override
-    public Integer invoke(BasicDataSource database) {   
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
-
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT COUNT(i.id) " +
-                    "FROM item i " +
-                    "WHERE NOT EXISTS ( " +
-                    "        SELECT 1 " +
-                    "        FROM item_reservation ir " +
-                    "        WHERE ir.item_id = i.id " +
-                    "      ) " +
-                    "  AND i.flight_number = ? "
-            );
-            stmt.setInt(1, flightNumber);
-
-            final ResultSet rs = stmt.executeQuery();
-            rs.next();
-            final int count = rs.getInt(1);
-
-            connection.commit();
-            return count;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+    public Integer invoke(Hashtable<String, ItemGroup> data) {
+        ItemGroup g = data.get(String.valueOf(flightNumber));
+        if(g == null)
+            throw new RuntimeException(
+                    String.format("No such flight: %d.", flightNumber));
+        else
+            return g.getAvailableCount();
     }
 }
