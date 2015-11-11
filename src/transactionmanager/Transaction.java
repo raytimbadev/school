@@ -50,6 +50,7 @@ public class Transaction {
         id = Transaction.getNextTransactionId();
         resourceManagers = new HashSet<ResourceManager>();
         timeToLive = DEFAULT_TTL;
+        state = State.PENDING;
     }
 
     /**

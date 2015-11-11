@@ -1,6 +1,7 @@
 package client;
 
 import common.ResourceManager;
+import common.NoSuchTransactionException;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -565,21 +566,40 @@ public class Client {
                    wrongNumber();
                    break;
                }
-               System.out.println("Start");
+               int xid = proxy.start();
+               System.out.println("Started transaction: " + xid);
                break;
             case 24: //commit
-                if(arguments.size() != 1) {
+                if(arguments.size() != 2) {
                     wrongNumber();   
 					break;
 				}
-				System.out.println("Commit");
+
+                try {
+                    proxy.abort(getInt(arguments.elementAt(1)));
+                    System.out.println("COMMIT");
+                }
+                catch(Exception e) {
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
+                    e.printStackTrace();
+                }
 				break;
 			case 25: //abort
-				if(arguments.size() != 1) {
+				if(arguments.size() != 2) {
 					wrongNumber();
 					break;
 				}
-				System.out.println("abort");
+
+                try {
+                    proxy.abort(getInt(arguments.elementAt(1)));
+                    System.out.println("ROLLBACK");
+                }
+                catch(Exception e) {
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
+                    e.printStackTrace();
+                }
 				break;
 
             default:

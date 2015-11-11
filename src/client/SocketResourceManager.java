@@ -513,7 +513,22 @@ public class SocketResourceManager implements ResourceManager {
 
     @Override
     public boolean start(int id) {
-        throw new UnsupportedOperationException();
+        try {
+            final Response response = network.invoke(
+                    new Request.RequestBuilder()
+                        .withMethod("start")
+                        .primitive(id)
+                        .build()
+            );
+
+            if(response.isSuccessful())
+                return (Boolean)response.getResult();
+            else
+                throw UncheckedThrow.throwUnchecked(response.getError());
+        }
+        catch(Exception e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
 	
 	//commit
@@ -521,8 +536,7 @@ public class SocketResourceManager implements ResourceManager {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
-                        .withMethod("start")
-                        .primitive(id)
+                        .withMethod("commit") .primitive(id)
                         .build()
             );
 
@@ -541,7 +555,7 @@ public class SocketResourceManager implements ResourceManager {
         try {
             final Response response = network.invoke(
                     new Request.RequestBuilder()
-                        .withMethod("start")
+                        .withMethod("abort")
                         .primitive(id)
                         .build()
             );

@@ -1,5 +1,6 @@
 package lockmanager;
 
+import common.Trace;
 import transactionmanager.Transaction;
 
 import java.util.Hashtable;
@@ -20,12 +21,20 @@ public class LockManager {
     public synchronized Lock lock(
             String datumName,
             int transaction,
-            LockType lockType)
-    {
+            LockType lockType) {
         Map<Integer, Lock> transactionMap = lockMap.get(datumName);
         final Lock lock = new Lock(datumName, transaction, lockType);
 
+        Trace.info(String.format(
+                    "Locking %s",
+                    datumName));
+
         if(transactionMap == null) {
+            Trace.info(String.format(
+                        "Creating transaction map: %s -> %d -> Lock",
+                        datumName,
+                        transaction));
+
             transactionMap = new Hashtable<Integer, Lock>();
             lockMap.put(datumName, transactionMap);
         }
@@ -41,11 +50,17 @@ public class LockManager {
             }
 
             transactionMap.put(transaction, lock);
+
+            Trace.info(String.format(
+                        "Grant WRITE lock for %s to %d",
+                        datumName,
+                        transaction));
+
             return lock;
 
         }
         else if(lockType == LockType.LOCK_READ) {
-            while(!canAcquireRead(transactionMap)) {
+            while(!canAcquireRead(transaction, transactionMap)) {
                 try {
                     wait();
                 }
@@ -54,7 +69,20 @@ public class LockManager {
                 }
             }
 
-            transactionMap.put(transaction, lock);
+            if(transactionMap.get(transaction) == null) {
+                transactionMap.put(transaction, lock);
+
+                Trace.info(String.format(
+                            "Grant READ lock for %s to %d",
+                            datumName,
+                            transaction));
+            }
+            else
+                Trace.info(String.format(
+                            "Existing lock for %s to %d",
+                            datumName,
+                            transaction));
+
             return lock;
         }
 
@@ -68,26 +96,25 @@ public class LockManager {
     }
 
     private synchronized boolean canAcquireRead(
+            final Integer transaction,
             Map<Integer, Lock> transactionMap)
     {
-        if(transactionMap.isEmpty())
-            return true;
-
         for(final Lock lock : transactionMap.values())
             if(lock.lockType == LockType.LOCK_WRITE)
-                return false;
+                return lock.getTransaction() == transaction;
 
         return true;
     }
 
     private synchronized boolean canAcquireWrite(
-        final Integer transaction,
-        Map<Integer, Lock> transactionMap)
-    {
+            final Integer transaction,
+            Map<Integer, Lock> transactionMap) {
         for(final Lock lock : transactionMap.values())
-            if(lock.lockType != LockType.LOCK_READ
-                    || lock.getTransaction() != transaction)
+            if(lock.getTransaction() == transaction)
+                continue;
+            else
                 return false;
+
 
         return true;
 

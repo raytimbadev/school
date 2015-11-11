@@ -1,10 +1,13 @@
 package middleware;
 
 import transactionmanager.*;
+
 import common.ResourceManager;
 import common.NoSuchTransactionException; 
 import common.UncheckedThrow;
 import common.NoSuchTransactionException;
+import common.Trace;
+
 import java.util.*;
 import javax.jws.WebService;
 import javax.naming.Context;
@@ -50,20 +53,26 @@ public class MiddlewareResourceManager implements ResourceManager {
             int flightNumber,
             int numSeats,
             int flightPrice) {
-			if(id != -1){ //we are part of a transaction
-                try {
-                    transactionManager.enlist(id, flightManager);
-                }
-                catch(NoSuchTransactionException e) {
-                    throw UncheckedThrow.throwUnchecked(e);
-                }
-			}
-			return flightManager.addFlight(
-                id,
-                flightNumber,
-                numSeats,
-                flightPrice);
+        Trace.info(String.format(
+                    "addFlight(%d, %d, %d, %d)",
+                    id,
+                    flightNumber,
+                    numSeats,
+                    flightPrice));
 
+        if(id != -1){ //we are part of a transaction
+            try {
+                transactionManager.enlist(id, flightManager);
+            }
+            catch(NoSuchTransactionException e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
+        }
+        return flightManager.addFlight(
+            id,
+            flightNumber,
+            numSeats,
+            flightPrice);
     }
 
     /**
@@ -475,6 +484,12 @@ public class MiddlewareResourceManager implements ResourceManager {
     @Override
 	public int start() {
         final Transaction txn = transactionManager.start();
+        Trace.info(String.format(
+                    "started transaction %d in state %s (should be %s)",
+                    txn.getId(),
+                    txn.getState(),
+                    Transaction.State.PENDING)
+                );
         return txn.getId();
 	}
 
