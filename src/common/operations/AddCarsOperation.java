@@ -39,26 +39,20 @@ public class AddCarsOperation implements Operation<Boolean> {
     }
 
     @Override
-    public Boolean invoke(BasicDataSource database) {
-        try(final Connection connection = database.getConnection()) {
-        connection.setAutoCommit(false);
+    public Boolean invoke(Hashtable<String, ItemGroup> data) {
+        final String key = location;
 
-        for(int i = 0; i < count; i++) {
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "INSERT INTO item ( location, price ) " +
-                    "VALUES ( ?, ? ) "
-            );
-            stmt.setString(1, location);
-            stmt.setInt(2, price);
-            stmt.executeUpdate();
+        ItemGroup g = data.get(key);
+        if(g == null) {
+            g = new ItemGroup("car", key, count, price);
+            data.put(key, g);
+        }
+        else {
+            if(flightPrice > 0)
+                g.setPrice(price);
+            g.setCount(g.getCount() + count);
         }
 
-        connection.commit();
         return true;
-    }
-    catch(SQLException e) {
-        throw UncheckedThrow.throwUnchecked(e);
-    }
-
     }
 }

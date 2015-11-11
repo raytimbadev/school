@@ -31,25 +31,19 @@ public class DeleteRoomsOperation implements Operation<Boolean> {
         l.add(location);
         return l;
     }
-
     @Override
-    public Boolean invoke(BasicDataSource database) {
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
+    public Boolean invoke(Hashtable<String, ItemGroup> data) {
+    final String key = location;
+    ItemGroup g = data.get(key);
+    
+    if(g==null){
+        return true; 
+    }
 
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "DELETE FROM item AS i " +
-                    "WHERE i.name = ? "
-            );
-            stmt.setString(1, location);
-            stmt.executeUpdate();
-
-            connection.commit();
-            return true;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
-
+    if(g.getReservedCount != 0) {
+        data.remove(key);
+        return true;
+    }
+    return false;
     }
 }

@@ -32,23 +32,15 @@ public class DeleteCustomerOperation implements Operation<Boolean> {
     }
 
     @Override
-    public Boolean invoke(BasicDataSource database) {
-          try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
+    public Boolean invoke(Hashtable<String, ItemGroup> data) {
+    final String key = String.valueOf(id);
+    ItemGroup g = data.get(key);
+    
+    if(g==null){
+        return true; 
+    }
 
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "DELETE FROM customer AS c " +
-                    "WHERE c.id = ? "
-            );
-            stmt.setInt(1, customerId);
-
-            final int rowCount = stmt.executeUpdate();
-
-            connection.commit();
-            return rowCount > 0;
-        }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+    data.remove(key);
+    return true;
     }
 }

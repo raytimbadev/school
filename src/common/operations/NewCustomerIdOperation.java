@@ -32,26 +32,17 @@ public class NewCustomerIdOperation implements Operation<Boolean> {
     }
 
     @Override
-    public Boolean invoke(BasicDataSource database) {
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
+    public Boolean invoke(Hashtable<String, ItemGroup> data) {
+        final String key = String.valueOf(customerId);
 
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT COUNT(1) " +
-                    "FROM customer c " +
-                    "WHERE c.id = ? "
-            );
-            stmt.setInt(1, customerId);
-
-            final ResultSet rs = stmt.executeQuery();
-            rs.next();
-            final int count = rs.getInt(1);
-
-            return count == 1;
+        ItemGroup g = data.get(key);
+        if(g == null) {
+            g = new ItemGroup("customer", key, 0, 0);
+            data.put(key, g);
         }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
+        else { //customer already exists
+            throw new RuntimeException("attempted to create existing customer");
         }
-
+        return true;
     }
 }

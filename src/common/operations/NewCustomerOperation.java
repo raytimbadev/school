@@ -29,27 +29,25 @@ public class NewCustomerOperation implements Operation<Integer> {
     }
 
     @Override
-    public Integer invoke(BasicDataSource database) {
-        try(final Connection connection = database.getConnection()) {
-            connection.setAutoCommit(false);
+    public Boolean invoke(Hashtable<String, ItemGroup> data) {
+        int max =0;
+        String customerId="";
 
-            final PreparedStatement stmt = connection.prepareStatement(
-                    "INSERT INTO customer " +
-                    "DEFAULT VALUES " +
-                    "RETURNING id "
-            );
-
-            final ResultSet rs = stmt.executeQuery();
-            rs.next();
-
-            final int customerId = rs.getInt(1);
-
-            connection.commit();
-            return customerId;
+        for(Enumeration<String> e = v.keys; e.hasMoreElements();) {
+            int temp = Integer.parseInt(e.nextElement());
+            max = max > temp ? max, temp;
         }
-        catch(SQLException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        customerId = string.value(max+1); 
+        final String key = customerId;
 
+        ItemGroup g = data.get(key);
+        if(g == null) {
+            g = new ItemGroup("customer", key, 0, 0);
+            data.put(key, g);
+        }
+        else { //customer already exists
+            throw new RuntimeException("attempted to create existing customer");
+        }
+        return true;
     }
 }
