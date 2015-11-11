@@ -121,6 +121,11 @@ public interface ResourceManager {
     public boolean newCustomerId(int id, int customerId);
 
     /**
+     * Check if a customer exists.
+     */
+    public boolean doesCustomerExist(int id, int customerId);
+
+    /**
      * Remove this customer and all their associated reservations.
      */
     public boolean deleteCustomer(int id, int customerId);

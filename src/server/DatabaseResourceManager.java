@@ -7,6 +7,12 @@ import common.operations.*;
 import java.util.*;
 
 public abstract class DatabaseResourceManager implements ResourceManager {
+    private static int nextCustomerId = 0;
+
+    private static synchronized int getNextCustomerId() {
+        return nextCustomerId++;
+    }
+
     protected final Hashtable<String, ItemGroup> mainData;
     protected final LockManager lockManager;
 
@@ -374,7 +380,20 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
     @Override //intercepted in middleware
     public int newCustomer(int id) {
-        throw new UnsupportedOperationException(); 
+        Trace.info(
+                String.format(
+                    "RM::newCustomer(%d)",
+                    id
+                )
+        );
+
+        int customerId = getNextCustomerId();
+        boolean result = newCustomerId(id, customerId);
+        if(result)
+            return customerId;
+        else
+            throw new RuntimeException(
+                    "Customer " + customerId + " already exists.");
     }
 
     @Override
@@ -389,13 +408,49 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
 		NewCustomerIdOperation op = new NewCustomerIdOperation(id,customerId);
 
-		if(id != -1) {
+		if(id == -1) {
             return op.invoke(mainData);
         }
 
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
 
+        if(txData == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+
         return op.invoke(txData);
+    }
+
+    @Override
+    public boolean doesCustomerExist(int id, int customerId) {
+        Trace.info(
+                String.format(
+                    "RM::doesCustomerExist(%d, %d)",
+                    id,
+                    customerId
+                )
+        );
+
+        Hashtable<String, ItemGroup> data;
+
+        if(id == -1)
+            data = mainData;
+        else {
+            data = transactions.get(id);
+            if(data == null)
+                throw UncheckedThrow.throwUnchecked(
+                        new NoSuchTransactionException(id)
+                );
+        }
+
+        lockManager.lock(
+                String.valueOf(customerId),
+                id,
+                LockType.LOCK_READ);
+
+        final ItemGroup g = data.get(String.valueOf(customerId));
+        return g != null;
     }
 
     // Add flight reservation to this customer.
@@ -434,16 +489,22 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     location
                 )
         );
+
 		ReserveCarOperation op = new ReserveCarOperation(id,customerId,location); 
+
 	    if(id == -1) {
 		    return op.invoke(mainData);
 	    }
+
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
+
         if(txData == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
+
         lockManager.lock(location,id,LockType.LOCK_WRITE);
+
         return op.invoke(txData); 
 
     }
@@ -459,17 +520,23 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     location
                 )
         );
+
         ReserveRoomOperation op = new ReserveRoomOperation(id,customerId,location);
+
 		if(id == -1) {
             return op.invoke(mainData);
         }
+
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
+
         if(txData == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
+
         lockManager.lock(location,id,LockType.LOCK_WRITE); 
-       return op.invoke(txData);  
+
+        return op.invoke(txData);
     }
 
     //start

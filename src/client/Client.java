@@ -175,7 +175,7 @@ public class Client {
                 System.out.println("Adding a new Customer using id: " + arguments.elementAt(1));
                 try {
                     id = getInt(arguments.elementAt(1));
-                    int customer = proxy.newCustomer(-1);
+                    int customer = proxy.newCustomer(id);
                     System.out.println("new customer id: " + customer);
                 }
                 catch(Exception e) {
@@ -552,7 +552,7 @@ public class Client {
                     id = getInt(arguments.elementAt(1));
                     int customer = getInt(arguments.elementAt(2));
 
-                    boolean c = proxy.newCustomerId(-1, customer);
+                    boolean c = proxy.newCustomerId(id, customer);
                     System.out.println("new customer id: " + customer);
                 }
                 catch(Exception e) {

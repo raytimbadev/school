@@ -40,7 +40,7 @@ public class NewCustomerIdOperation implements Operation<Boolean> {
             data.put(key, g);
         }
         else { //customer already exists
-            throw new RuntimeException("attempted to create existing customer");
+            return false;
         }
         return true;
     }

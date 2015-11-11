@@ -71,7 +71,7 @@ public class ItemResourceManager extends DatabaseResourceManager {
             new QueryCustomerInfoOperation(id,customerId);
 
         if(id == -1) {
-            op.invoke(mainData);
+            return op.invoke(mainData);
         }
 
         final Hashtable<String, ItemGroup> txData = transactions.get(id);

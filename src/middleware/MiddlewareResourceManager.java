@@ -17,6 +17,11 @@ import java.net.URL;
 import java.net.MalformedURLException;
 
 public class MiddlewareResourceManager implements ResourceManager {
+    private static int nextCustomerId = 0;
+
+    private static synchronized int getNextCustomerId() {
+        return nextCustomerId++;
+    }
 
     final ResourceManager flightManager;
     final ResourceManager carManager;
@@ -289,6 +294,7 @@ public class MiddlewareResourceManager implements ResourceManager {
                 throw UncheckedThrow.throwUnchecked(e);
             }
 		}
+
         return customerManager.newCustomer(id);
     }
 
@@ -304,6 +310,11 @@ public class MiddlewareResourceManager implements ResourceManager {
             }
 		}
         return customerManager.newCustomerId(id, customerId);
+    }
+
+    @Override
+    public boolean doesCustomerExist(int id, int customerId) {
+        throw new UnsupportedOperationException();
     }
 
     /* Remove this customer and all their associated reservations. */
@@ -331,7 +342,7 @@ public class MiddlewareResourceManager implements ResourceManager {
     public String queryCustomerInfo(int id, int customerId) {
 
         final StringBuilder sb = new StringBuilder();
-        final boolean exists = customerManager.newCustomerId(id, customerId);
+        final boolean exists = customerManager.doesCustomerExist(id, customerId);
 		if(id != -1) {
             try {
                 transactionManager.enlist(id, customerManager);
@@ -377,7 +388,7 @@ public class MiddlewareResourceManager implements ResourceManager {
             }
         }
 
-        if(customerManager.newCustomerId(id, customerId) == false){
+        if(customerManager.doesCustomerExist(id, customerId) == false){
             return false;
         }
 
@@ -390,7 +401,7 @@ public class MiddlewareResourceManager implements ResourceManager {
     /* Reserve a car at this location. */
         @Override
     public boolean reserveCar(int id, int customerId, String location) {
-        if(customerManager.newCustomerId(id, customerId) == false)
+        if(customerManager.doesCustomerExist(id, customerId) == false)
             return false;
 
         if(id != -1) {
@@ -419,7 +430,7 @@ public class MiddlewareResourceManager implements ResourceManager {
             }
         }
 
-        if(customerManager.newCustomerId(id, customerId) == false)
+        if(customerManager.doesCustomerExist(id, customerId) == false)
             return false;
 
         return roomManager.reserveRoom(
@@ -451,7 +462,7 @@ public class MiddlewareResourceManager implements ResourceManager {
             }
 		}
 
-        if(customerManager.newCustomerId(id, customerId) == false)
+        if(customerManager.doesCustomerExist(id, customerId) == false)
             return false; // customer does not exist
 
         for(int i=0; i < flightNumbers.size(); i++) {

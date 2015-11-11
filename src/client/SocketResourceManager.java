@@ -346,6 +346,27 @@ public class SocketResourceManager implements ResourceManager {
         }
     }
 
+    @Override
+    public boolean doesCustomerExist(int id, int customerId) {
+        try {
+            final Response response = network.invoke(
+                    new Request.RequestBuilder()
+                        .withMethod("doesCustomerExist")
+                        .primitive(id)
+                        .primitive(customerId)
+                        .build()
+            );
+
+            if(response.isSuccessful())
+                return (Boolean)response.getResult();
+            else
+                throw UncheckedThrow.throwUnchecked(response.getError());
+        }
+        catch(Exception e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
+    }
+
     // Delete customer from the database.
     @Override
     public boolean deleteCustomer(int id, int customerId) {
