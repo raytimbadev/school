@@ -60,17 +60,23 @@ public class ItemResourceManager extends DatabaseResourceManager {
                     customerId
                 )
         );
-        QueryCustomerInfoOperation op = new QueryCustomerInfoOperation(id,customerId); 
+
+        QueryCustomerInfoOperation op =
+            new QueryCustomerInfoOperation(id,customerId);
+
         if(id == -1) {
-            op.invoke(mainData); 
+            op.invoke(mainData);
         }
 
         final List<Operation> txData = transactions.get(id);
-        if(ops == null)
+
+        if(txData == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
+
         lockManager.lock(String.valueOf(customerId),id,LockType.LOCK_WRITE);
+
         return op.invoke(txData);
     }
 

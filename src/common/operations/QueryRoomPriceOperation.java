@@ -10,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
-import org.apache.commons.dbcp2.BasicDataSource;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -33,7 +32,7 @@ public class QueryRoomPriceOperation implements Operation<Integer> {
     }
 
     @Override
-    public Integer invoke(BasicDataSource database) {
+    public Integer invoke(Hashtable<String, ItemGroup> database) {
         ItemGroup g = data.get(location);
         if(g == null)
             throw new RuntimeException("No such location '" + location + "'.");

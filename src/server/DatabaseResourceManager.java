@@ -97,18 +97,25 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     flightNumber
                 )
         );
-		QueryFlightOperation op = new QueryFlightOperation(id,flightNumber); 
+		QueryFlightOperation op = new QueryFlightOperation(id,flightNumber);
+
 		if(id == -1) {
 			return op.invoke(mainData); 
 		}
 		
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
+
         if(txData == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-        lockManager.lock(String.valueOf(flightNumber),id,LockType.LOCK_READ);
-        return op.invoke(ops)
+
+        lockManager.lock(
+                String.valueOf(flightNumber),
+                id,
+                LockType.LOCK_READ);
+
+		return ops.invoke(txData);
     }
 
     // Returns price of this flight.
@@ -121,16 +128,24 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 )
         );
 		QueryFlightPriceOperation op = new QueryFlightPriceOperation(id,flightNumber); 
+
 		if(id == -1) {
 			return op.invoke(mainData);
 		}
-        final Hashtable<String, ItemGroup> txData = transactions.get(id);
-        if(txData == null)
+
+        final Hashtable<String, ItemGroup> ops = transactions.get(id);
+
+        if(ops == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-        lockManager.lock(String.valueOf(flightNumber),id,LockType.LOCK_READ);
-        return ops.invoke(txData); 
+
+        lockManager.lock(
+                String.valueOf(flightNumber),
+                id,
+                LockType.LOCK_READ);
+
+		return op.invoke(txData);
     }
 
     // Car operations //
@@ -191,16 +206,24 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 )
         );
 		QueryCarsOperation op = new QueryCarsOperation(id,location); 
+
 		if(id == -1) {
 			op.invoke(mainData); 
 		}
+
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
-        if(ops == null)
+
+        if(txData == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-        lockManager.lock(location,id,LockType.LOCK_READ);
-        return op.invoke(txData); 
+
+        lockManager.lock(
+                location,
+                id,
+                LockType.LOCK_READ);
+
+		return op.invoke(txData);
     }
 
     // Returns price of cars at this location.
@@ -214,17 +237,25 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 )
         );
 
-		QueryCarsPriceOperation op = new QueryCarsPriceOperation(id,location); 
-		if(id == 01) {
+		QueryCarsPriceOperation op = new QueryCarsPriceOperation(id, location);
+
+		if(id == 1) {
 			op.invoke(mainData);
 		}
+
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
+
         if(txData == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-        lockManager.lock(location,id,LockType.LOCK_READ);
-        return op.invoke(mainData);
+
+        lockManager.lock(
+                location,
+                id,
+                LockType.LOCK_READ);
+
+		return op.invoke(txData);
     }
 
     // Room operations //
@@ -289,17 +320,25 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     location
                 )
         );
-		QueryRoomOperation op = new QueryRoomOperation(id,location); 
+		QueryRoomOperation op = new QueryRoomOperation(id,location);
+
 		if(id == -1) {
             op.invoke(mainData); 
 		}
+
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
+
         if(txData == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
-            );  
-        lockManager.lock(location+"room",id,LockType.LOCK_READ);
-        return op.invoke(txData); 
+            );
+
+        lockManager.lock(
+                location,
+                id,
+                LockType.LOCK_READ);
+
+        return op.invoke(txData);
     }
 
     // Returns room price at this location.
@@ -312,17 +351,24 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     location
                 )
         );
-		QueryRoomPriceOperation op = ` QueryRoomPriceOperation(id,location); 
+		QueryRoomPriceOperation op = new QueryRoomPriceOperation(id,location); 
+
 		if(id == -1) {
             return op.invoke(mainData);
         }
-        final Hashtable<String, ItemGroup> ops = transactions.get(id);
-        if(ops == null)
+
+        final Hashtable<String, ItemGroup> txData = transactions.get(id);
+
+        if(txData == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-        lockManager.lock(location+"room",id,LockType.LOCK_READ);
-        return op.invoke(txData); 
+
+        lockManager.lock(location,
+                id,
+                LockType.LOCK_READ);
+
+        return op.invoke(txData);
     }
 
     @Override //intercepted in middleware
