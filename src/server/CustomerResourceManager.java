@@ -41,13 +41,12 @@ public class CustomerResourceManager extends DatabaseResourceManager {
                 return op.invoke(mainData);
             }
         lockManager.lock(String.valueOf(customerId),id,LockType.LOCK_WRITE); 
-        final List<Operation> ops = transactions.get(id);
+        final List<Operation> txData = transactions.get(id);
         if(ops == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-        ops.add(op);
-        return true;
+        return op.invoke(txData);
     }
 
     // Return a bill.

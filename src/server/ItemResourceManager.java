@@ -40,15 +40,13 @@ public class ItemResourceManager extends DatabaseResourceManager {
             op.invoke(mainData);
         }
 
-        final List<Operation> ops = transactions.get(id);
+        final List<Operation> txData = transactions.get(id);
         if(ops == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
         lockManager.lock(String.valueOf(customerId),id,LockType.LOCK_WRITE);
-        ops.add(op);
-        //TODO FIX THIS SHIT (ERRRR)
-        return true; 
+        op.invoke(txData);
 
     }
 
@@ -67,14 +65,13 @@ public class ItemResourceManager extends DatabaseResourceManager {
             op.invoke(mainData); 
         }
 
-        final List<Operation> ops = transactions.get(id);
+        final List<Operation> txData = transactions.get(id);
         if(ops == null)
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
         lockManager.lock(String.valueOf(customerId),id,LockType.LOCK_WRITE);
-        ops.add(op);
-        return ""; 
+        return op.invoke(txData);
     }
 
     // Reserve an itinerary.
