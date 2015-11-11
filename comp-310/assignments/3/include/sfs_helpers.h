@@ -90,11 +90,15 @@ int read_whole_file(const struct sfs_inode *inode, void **buf);
  *
  * If the value pointed to by `inode` is NULL, then an sfs_inode will be
  * allocated. Else, the given sfs_inode will be overwritten.
+ *
+ * If the given file doesn't exist, then [if `mode` is SFS_NO_MODE, then an
+ * error results, else a new file is created with that mode].
  */
 int follow_path(
         char *path,
         struct sfs_inode **inode,
-        struct sfs_inode *parent);
+        struct sfs_inode *parent,
+        const sfs_mode mode);
 
 /**
  * Interprets a buffer as a directory listing.
@@ -123,8 +127,33 @@ void free_dir_iter(struct sfs_dir_iter *iter);
 /**
  * Opens a file for read/write, seeks to the end of it, and allocates an
  * in-memory buffer for writes.
+ *
+ * The file object will get a copy of the given inode to use internally.
  */
-int file_open(const char *path, struct sfs_file **file);
+int file_open(
+        const struct sfs_inode *inode,
+        struct sfs_file **file);
+
+/**
+ * Adds or overwrites a directory entry in a directory.
+ */
+int link_create(
+        const struct sfs_inode *dir_inode,
+        const struct sfs_dir_entry *entry);
+
+/**
+ * Removes a file from a directory, decrementing the link count of the file's
+ * inode.
+ *
+ * If the link count of the file reaches zero, then the file is fully deleted,
+ * i.e. its data blocks and its inode are released.
+ *
+ * If successful, returns the number of unlinked files, which is at most one.
+ * Else, returns a negative number.
+ */
+int link_remove(
+        const struct sfs_inode *dir_inode,
+        const char *filename);
 
 /**
  * Resize the write buffer of a file.
@@ -153,15 +182,18 @@ int file_read(struct sfs_file *file, void *buf, size_t size);
  *
  * If the write would overflow the buffer, then the buffer is flushed.
  * If the write would overflow an empty buffer, then -1 is returned.
+ * TODO don't die on big writes!!
  *
  * Returns the number of bytes flushed to disk, which is at least zero.
  */
-int file_write(struct sfs_file *file, void *buf, size_t count);
+int file_write(struct sfs_file *file, const void *buf, size_t count);
 
 /**
  * Seeks to a given offset from the start of the file.
+ *
+ * Returns the current file offset.
  */
-int file_seek(struct sfs_file *file, unsigned int offset);
+int file_seek(struct sfs_file *file, int offset, sfs_seek_origin origin);
 
 /**
  * Flushes the write buffer of a file to disk.
@@ -183,6 +215,42 @@ int file_flush(struct sfs_file *file);
 int file_close(struct sfs_file *file);
 
 /**
+ * Directly resizes an indirect block buffer from a given used block count
+ * to a given needed block count.
+ *
+ * Blocks are allocated or deallocated depending on the situation, and the
+ * pointers to the allocated blocks or deallocated blocks are added or removed
+ * from the indirect block buffer, respectively.
+ */
+int resize_direct(sfs_block_ptr *buf, size_t used_count, size_t needed_count);
+
+/**
+ * Resizes the indirect block of a file, automatically allocating or releasing
+ * an indirect block for the file if one is now or no longer respectively
+ * needed by it.
+ *
+ * Blocks will be allocated or freed for the file depending on the given values
+ * of `used_indirect_count` which represents the currently used number of
+ * indirect blocks and `needed_indirect_count` which is the target number of
+ * blocks the file should now have.
+ */
+int resize_indirect_block(
+        const struct sfs_superblock *sb,
+        struct sfs_inode *inode,
+        size_t used_indirect_count,
+        size_t needed_indirect_count);
+
+/**
+ * Truncates a file, changing its effective size on disk, allocating / freeing
+ * any blocks required to do so.
+ *
+ * If the file is truncated so that its current file pointer would go beyond
+ * the end of the file, then the file pointer is adjusted to point to the end
+ * of the file.
+ */
+int file_truncate(struct sfs_file *file, size_t new_size);
+
+/**
  * Checks whether a file is at the end.
  */
 int file_eof(struct sfs_file *file);
@@ -197,5 +265,105 @@ int basic_read(
         void *dst,
         size_t size,
         unsigned int src_offset);
+
+struct free_bitfield *load_bitfield(
+        size_t block_size,
+        size_t block_offset,
+        size_t block_count,
+        size_t item_count);
+
+/**
+ * Fetches the bitfield describing the free data blocks in the filesystem.
+ */
+struct free_bitfield *load_free_blocks_bitfield();
+
+/**
+ * Fetches the bitfield describing the free inodes in the filesystem.
+ */
+struct free_bitfield *load_free_inodes_bitfield();
+
+/**
+ * Writes a bitfield to disk at a given block offset.
+ */
+int bitfield_persist(
+        const struct sfs_superblock *sb,
+        const struct free_bitfield *field,
+        size_t block_offset);
+
+int inode_persist(
+        const struct sfs_superblock *sb,
+        const struct sfs_inode *inode);
+
+/**
+ * Converts a bitpack_scan, an opaque value used to scan a bitpack value, into
+ * an signed integer representing the index of the next free item in the
+ * bitpack. Returns -1 if the value of the bitpack_scan is BITPACK_SCAN_END.
+ */
+int bitpack_scan_conv(bitpack_scan scan);
+
+/**
+ * Scans a bitpack to find the next free item within it.
+ *
+ * Returns the index of the next free item within the bitpack. Returns -1 if
+ * the scan is finished.
+ *
+ * This function is reentrant. It should initially be called with position
+ * pointing to the value BITPACK_SCAN_START. When it ends, the value pointed
+ * to by position will be BITPACK_SCAN_END.
+ */
+int bitpack_next_free(bitpack pack, bitpack_scan *position);
+
+/**
+ * Finds the offsets of free items by lookup in a bitfield.
+ *
+ * Used to find free blocks or inodes by passing different bitfields.
+ */
+unsigned int *find_free_items(size_t count, struct free_bitfield *field);
+
+/**
+ * Marks each bit identified by successive pointers from a given list with
+ * a specified value in a bitfield.
+ */
+void bitfield_mark(
+        struct free_bitfield *field,
+        unsigned int *ptrs,
+        size_t count,
+        bitfield_value t);
+
+/**
+ * Allocates a given number of blocks in the filesystem.
+ *
+ * Upon successful return, these blocks are marked in use and can no longer be
+ * allocated. The return value is an array of block pointers, of which there
+ * are exactly `count`.
+ */
+sfs_block_ptr *balloc(size_t count);
+
+/**
+ * Frees blocks in the filesystem.
+ *
+ * The data associated with the blocks is not zeroed out! This just marks the
+ * blocks as free, so that subsequent calls to balloc will use them. If you
+ * require that the blocks be zeroed out, then this should be done right after
+ * allocating them.
+ */
+int bfree(sfs_block_ptr *blocks, size_t count);
+
+/**
+ * Allocates a new inode in the filesystem.
+ *
+ * The new inode is uninitialized! All this function does is mark the next free
+ * inode as used, and returns its number.
+ */
+sfs_inode_n ialloc();
+
+/**
+ * Frees inodes in the filesystem.
+ *
+ * The data blocks associated with an inode must be freed by the caller before
+ * freeing an inode, otherwise those blocks will remain marked "used", but will
+ * be unreachable by any file.
+ */
+int ifree(sfs_inode_n *inodes, size_t count);
 
 #endif

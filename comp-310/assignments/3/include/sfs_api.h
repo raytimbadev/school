@@ -2,6 +2,7 @@
 #define SFS_API_H
 
 #include <stddef.h>
+#include <limits.h>
 
 /**
  * Filesystem layout:
@@ -33,6 +34,12 @@
 #ifndef MAXFILENAME
 #define MAXFILENAME 20
 #endif
+
+#ifndef MAX_OPEN_FILES
+#define MAX_OPEN_FILES 150
+#endif
+
+#define SFS_NO_MORE_FILES (MAX_OPEN_FILES + 1)
 
 // CONSTANTS //
 
@@ -69,6 +76,10 @@ typedef unsigned int sfs_block_ptr;
 typedef unsigned int sfs_inode_n;
 
 typedef unsigned int sfs_magic;
+
+#define SFS_NO_MODE      ((sfs_mode)0)
+#define SFS_DEFAULT_MODE ((unsigned short)\
+    (MODE_O_R | MODE_O_W | MODE_G_R | MODE_A_R))
 
 struct sfs_inode
 {
@@ -139,6 +150,11 @@ struct sfs_superblock
     size_t block_count;
 
     /**
+     * The number of inodes in the filesystem.
+     */
+    size_t inode_count;
+
+    /**
      * The number of blocks used as inodes.
      */
     size_t inode_blocks;
@@ -200,7 +216,7 @@ struct sfs_file
     /**
      * The inode of the file, holding metadata about it.
      */
-    struct sfs_inode *inode;
+    struct sfs_inode inode;
 
     /**
      * The offset within the file. This is modified when seeking.
@@ -224,6 +240,33 @@ struct sfs_file
     size_t buf_size;
 };
 
+typedef char bitfield_value;
+
+#define BIT_USED ((bitfield_value)1)
+#define BIT_FREE ((bitfield_value)0)
+
+typedef unsigned int bitpack;
+typedef unsigned int bitpack_scan;
+
+#define BITPACK_MAX        UINT_MAX
+#define BITPACK_SCAN_START ((bitpack_scan)1)
+#define BITPACK_SCAN_END   ((bitpack_scan)0)
+
+struct free_bitfield
+{
+    /**
+     * The number of bits in this bitfield.
+     * This should equal the total number of blocks or inodes, depending on
+     * use case.
+     */
+    size_t bit_count;
+
+    /**
+     * The actual data of the bitfield, packed as an array of unsigned int.
+     */
+    bitpack *bits;
+};
+
 // SFS API //
 
 /**
@@ -231,7 +274,7 @@ struct sfs_file
  *
  * The `fresh` argument should be one of the following symbolic constants:
  *
- * SFS_REUSE: 
+ * SFS_REUSE:
  *     Reopens an existing filesystem; if there is no file identified by the
  *     given path, then an error occurs and -1 is returned.
  * SFS_FRESH:

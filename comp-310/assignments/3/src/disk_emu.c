@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
@@ -29,7 +29,7 @@ int close_disk()
 int init_fresh_disk(char *filename, int block_size, int num_blocks)
 {
     int i, j;
-    
+
     /*Set up latency at 0.02 second*/
     L = 00000.f;
 
@@ -41,7 +41,7 @@ int init_fresh_disk(char *filename, int block_size, int num_blocks)
 
     BLOCK_SIZE = block_size;
     MAX_BLOCK = num_blocks;
-    
+
     /*Initializes the random number generator*/
     srand((unsigned int)(time( 0 )) );
     /*Creates a new file*/
@@ -52,7 +52,7 @@ int init_fresh_disk(char *filename, int block_size, int num_blocks)
         printf("Could not create new disk file %s\n\n", filename);
         return -1;
     }
-    
+
     /*Fills the file with 0's to its given size*/
     for (i = 0; i < MAX_BLOCK; i++)
     {
@@ -80,10 +80,10 @@ int init_disk(char *filename, int block_size, int num_blocks)
 
     BLOCK_SIZE = block_size;
     MAX_BLOCK = num_blocks;
-    
+
     // Initializes the random number generator
     srand((unsigned int)(time( 0 )) );
-    
+
     // Opens a file
     fp = fopen (filename, "r+b");
 
@@ -128,7 +128,7 @@ int read_blocks(int start_address, int nblocks, void *buffer)
 
         for (j = 0; j < BLOCK_SIZE; j++)
         {
-            memcpy(buffer+(i*BLOCK_SIZE), blockRead, BLOCK_SIZE);  
+            memcpy(buffer+(i*BLOCK_SIZE), blockRead, BLOCK_SIZE);
         }
     }
 

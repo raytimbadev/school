@@ -1,4 +1,4 @@
-/* sfs_test.c 
+/* sfs_test.c
  *
  * Written by Robert Vincent for Programming Assignment #1.
  */
@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "sfs_api.h"
+#include "sfs_helpers.h"
 
 /* The maximum file name length. We assume that filenames can contain
  * upper-case letters and periods ('.') characters. Feel free to
@@ -19,7 +20,7 @@
  * do not _require_ that you support this many files. This is just to
  * test the behavior of your code.
  */
-#define MAX_FD 100 
+#define MAX_FD 100
 
 /* The maximum number of bytes we'll try to write to a file. If you
  * support much shorter or larger files for some reason, feel free to
@@ -37,11 +38,11 @@ static char test_str[] = "The quick brown fox jumps over the lazy dog.\n";
  * each 'x' is a random upper-case letter (A-Z). Feel free to modify
  * this function if your implementation requires shorter filenames, or
  * supports longer or different file name conventions.
- * 
+ *
  * The return value is a pointer to the new string, which may be
  * released by a call to free() when you are done using the string.
  */
- 
+
 char *
 rand_name()
 {
@@ -153,13 +154,13 @@ main(int argc, char **argv)
             tmp = sfs_fwrite(fds[i], buffer, chunksize);
             if (tmp != chunksize) {
                 fprintf(stderr,
-                        "ERROR: Tried to write %d bytes, but wrote %d\n", 
+                        "ERROR: Tried to write %d bytes, but wrote %d\n",
                         chunksize, tmp);
                 error_count++;
             }
             free(buffer);
         }
-        int tmp = sfs_GetFileSize(names[i]);
+        int tmp = sfs_get_file_size(names[i]);
         if (filesize[i] != tmp) {
             fprintf(stderr,
                     "ERROR: mismatch file size %d, %d\n",
@@ -183,7 +184,7 @@ main(int argc, char **argv)
     printf("File %s now has length %d and %s now has length %d:\n",
                  names[0], filesize[0], names[1], filesize[1]);
 
-    /* Just to be cruel - attempt to read from a closed file handle. 
+    /* Just to be cruel - attempt to read from a closed file handle.
      */
     if (sfs_fread(fds[1], fixedbuf, sizeof(fixedbuf)) > 0) {
         fprintf(stderr, "ERROR: read from a closed file handle?\n");
@@ -191,10 +192,10 @@ main(int argc, char **argv)
     }
 
     fds[1] = sfs_fopen(names[1]);
-    
-    sfs_fseek(0, 0);
-    sfs_fseek(1, 0);
-    
+
+    sfs_fseek(0, 0, SFS_START);
+    sfs_fseek(1, 0, SFS_START);
+
     for (i = 0; i < 2; i++) {
         for (j = 0; j < filesize[i]; j += chunksize) {
             if ((filesize[i] - j) < 10) {
@@ -212,7 +213,7 @@ main(int argc, char **argv)
             if (readsize != chunksize) {
                 fprintf(stderr,
                         "ERROR: Requested %d bytes, read %d\n",
-                        chunksize, 
+                        chunksize,
                         readsize);
                 readsize = chunksize;
             }
@@ -282,7 +283,7 @@ main(int argc, char **argv)
     for (i = 0; i < nopen; i++) {
         tmp = sfs_fwrite(fds[i], test_str, strlen(test_str));
         if (tmp != strlen(test_str)) {
-            fprintf(stderr, "ERROR: Tried to write %d, returned %d\n", 
+            fprintf(stderr, "ERROR: Tried to write %d, returned %d\n",
                             (int)strlen(test_str), tmp);
             error_count++;
         }
@@ -303,7 +304,7 @@ main(int argc, char **argv)
     /* Now test the file contents.
      */
     for (i = 0; i < nopen; i++) {
-            sfs_fseek(fds[i], 0);
+            sfs_fseek(fds[i], 0, SFS_START);
     }
 
     for (j = 0; j < strlen(test_str); j++) {
@@ -339,7 +340,7 @@ main(int argc, char **argv)
 
     for (i = 0; i < nopen; i++) {
         fds[i] = sfs_fopen(names[i]);
-        sfs_fseek(fds[i], 0);
+        sfs_fseek(fds[i], 0, SFS_START);
         if (fds[i] >= 0) {
             readsize = sfs_fread(fds[i], fixedbuf, sizeof(fixedbuf));
             if (readsize != strlen(test_str)) {
@@ -349,7 +350,7 @@ main(int argc, char **argv)
 
             for (j = 0; j < strlen(test_str); j++) {
                 if (test_str[j] != fixedbuf[j]) {
-                    fprintf(stderr, "ERROR: Wrong byte in %s at %d (%d,%d)\n", 
+                    fprintf(stderr, "ERROR: Wrong byte in %s at %d (%d,%d)\n",
                                     names[i], j, fixedbuf[j], test_str[j]);
                     printf("%d\n", fixedbuf[1]);
                     error_count++;
@@ -402,7 +403,8 @@ main(int argc, char **argv)
     printf("Directory listing\n");
     char *filename = (char *)malloc(MAXFILENAME);
     int max = 0;
-    while (sfs_get_next_filename(filename)) {
+    struct sfs_dir_iter *loc = NULL;
+    while (sfs_get_next_filename("/", filename, &loc)) {
         if (strcmp(filename, names[max]) != 0) {
             printf("ERROR misnamed file %d: %s %s\n",
                     max, filename, names[max]);
@@ -410,13 +412,14 @@ main(int argc, char **argv)
         }
         max++;
     }
- 
+    free_dir_iter(loc);
+
     /* Now, having filled up the disk, try one more time to read the
      * contents of the files we created.
      */
     for (i = 0; i < nopen; i++) {
         fds[i] = sfs_fopen(names[i]);
-        sfs_fseek(fds[i], 0);
+        sfs_fseek(fds[i], 0, SFS_START);
         if (fds[i] >= 0) {
             readsize = sfs_fread(fds[i], fixedbuf, sizeof(fixedbuf));
             if (readsize < strlen(test_str)) {
@@ -445,11 +448,12 @@ main(int argc, char **argv)
         sfs_remove(names[i]);
     }
 
-    if (sfs_get_next_filename(filename)) {
+    loc = NULL;
+    if (sfs_get_next_filename("/", filename, &loc)) {
         fprintf(stderr, "ERROR: should be empty dir\n");
         error_count++;
     }
- 
+
     fprintf(stderr, "Test program exiting with %d errors\n", error_count);
     return (error_count);
 }
