@@ -21,6 +21,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         lockManager = new LockManager();
         transactions =
             new Hashtable<Integer, Hashtable<String, ItemGroup>>();
+        mainData = new Hashtable<String, ItemGroup>();
     }
 
     // Flight operations //

@@ -35,7 +35,8 @@ public class ReserveFlightOperation implements Operation<Boolean> {
 
     @Override
     public Boolean invoke(Hashtable<String, ItemGroup> data) {
-        ItemGroup g  = data.get(location);
+        final String key = String.valueOf(flightNumber);
+        ItemGroup g  = data.get(key);
         return g.reserve(customerId); 
     }
 
