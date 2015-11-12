@@ -1,5 +1,7 @@
 package common.operations;
+
 import common.*;
+import lockmanager.LockType;
 
 import java.beans.PropertyVetoException;
 import java.io.IOException;
@@ -15,36 +17,34 @@ import java.util.List;
 import java.util.ArrayList;
 
 
-public class AddCarsOperation implements Operation<Boolean> {
-    int id;
+public class AddCarsOperation extends TransactionOperation<Boolean> {
     String location;
     int count;
     int price;
 
-    public AddCarsOperation(int id, String location, int count, int price) {
-        this.id = id;
+    public AddCarsOperation(
+            TransactionDataStore data,
+            int id,
+            String location,
+            int count,
+            int price) {
+
+        super(data, id, LockType.LOCK_WRITE);
+
         this.location = location;
         this.count = count;
         this.price = price;
     }
 
-    public List<Object> getParameters() {
-        final List<Object> l = new ArrayList<Object>();
-        l.add(id);
-        l.add(location);
-        l.add(count);
-        l.add(price);
-        return l;
-    }
-
     @Override
-    public Boolean invoke(Hashtable<String, ItemGroup> data) {
+    public Boolean invoke() {
         final String key = location;
 
-        ItemGroup g = data.get(key);
+        ItemGroup g = getDatum(key);
+
         if(g == null) {
             g = new ItemGroup("car", key, count, price);
-            data.put(key, g);
+            putDatum(key, g);
         }
         else {
             if(price > 0)

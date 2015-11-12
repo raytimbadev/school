@@ -1,5 +1,7 @@
 package common.operations;
+
 import common.*;
+import lockmanager.LockType;
 
 import java.beans.PropertyVetoException;
 import java.io.IOException;
@@ -14,26 +16,20 @@ import java.util.*;
 import java.util.List;
 import java.util.ArrayList;
 
-public class QueryFlightOperation implements Operation<Integer> {
-    int id;
+public class QueryFlightOperation extends TransactionOperation<Integer> {
     int flightNumber;
 
-    public QueryFlightOperation(int id, int flightNumber) {
-        this.id = id;
+    public QueryFlightOperation(
+            TransactionDataStore data,
+            int id,
+            int flightNumber) {
+        super(data, id, LockType.LOCK_READ);
         this.flightNumber = flightNumber;
     }
 
     @Override
-    public List<Object> getParameters() {
-        final List<Object> l = new ArrayList<Object>();
-        l.add(id);
-        l.add(flightNumber);
-        return l;
-    }
-
-    @Override
-    public Integer invoke(Hashtable<String, ItemGroup> data) {
-        ItemGroup g = data.get(String.valueOf(flightNumber));
+    public Integer invoke() {
+        ItemGroup g = getDatum(String.valueOf(flightNumber));
         if(g == null)
             throw new RuntimeException(
                     String.format("No such flight: %d.", flightNumber));

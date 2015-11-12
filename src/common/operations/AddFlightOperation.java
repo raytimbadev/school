@@ -1,5 +1,7 @@
 package common.operations;
+
 import common.*;
+import lockmanager.LockType;
 
 import java.beans.PropertyVetoException;
 import java.io.IOException;
@@ -26,7 +28,7 @@ public class AddFlightOperation extends TransactionOperation<Boolean> {
             int numSeats,
             int flightPrice) {
 
-        super(tds, id);
+        super(tds, id, LockType.LOCK_WRITE);
 
         this.flightNumber = flightNumber;
         this.numSeats = numSeats;
@@ -37,11 +39,11 @@ public class AddFlightOperation extends TransactionOperation<Boolean> {
     public Boolean invoke() {
         final String key = String.valueOf(flightNumber);
 
-        ItemGroup g = data.get(key, LockType.LOCK_WRITE);
+        ItemGroup g = getDatum(key);
 
         if(g == null) {
             g = new ItemGroup("flight", key, numSeats, flightPrice);
-            data.put(key, g);
+            putDatum(key, g);
         }
         else {
             if(flightPrice > 0)

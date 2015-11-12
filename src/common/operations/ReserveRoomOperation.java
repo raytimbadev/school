@@ -1,5 +1,7 @@
 package common.operations;
+
 import common.*;
+import lockmanager.LockType;
 
 import java.beans.PropertyVetoException;
 import java.io.IOException;
@@ -15,28 +17,23 @@ import java.util.List;
 import java.util.ArrayList;
 
 
-public class ReserveRoomOperation implements Operation<Boolean> {
-    int id;
+public class ReserveRoomOperation extends TransactionOperation<Boolean> {
     int customerId;
     String location;
 
-    public ReserveRoomOperation(int id, int customerId, String location) {
-        this.id = id;
+    public ReserveRoomOperation(
+            TransactionDataStore data,
+            int id,
+            int customerId,
+            String location) {
+        super(data, id, LockType.LOCK_WRITE);
         this.customerId = customerId;
         this.location = location;
     }
 
-    public List<Object> getParameters() {
-        final List<Object> l = new ArrayList<Object>();
-        l.add(id);
-        l.add(customerId);
-        l.add(location);
-        return l;
-    }
-
     @Override
-    public Boolean invoke(Hashtable<String, ItemGroup> data) {
-        ItemGroup g  = data.get(location);
+    public Boolean invoke() {
+        ItemGroup g  = getDatum(location);
         return g.reserve(customerId); 
     }
 

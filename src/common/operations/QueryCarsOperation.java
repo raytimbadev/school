@@ -1,5 +1,7 @@
 package common.operations;
+
 import common.*;
+import lockmanager.LockType;
 
 import java.beans.PropertyVetoException;
 import java.io.IOException;
@@ -14,26 +16,21 @@ import java.util.*;
 import java.util.List;
 import java.util.ArrayList;
 
-public class QueryCarsOperation implements Operation<Integer> {
-    int id;
+public class QueryCarsOperation extends TransactionOperation<Integer> {
     String location;
 
-    public QueryCarsOperation(int id, String location) {
-        this.id = id;
+    public QueryCarsOperation(
+            TransactionDataStore data,
+            int id,
+            String location) {
+        super(data, id, LockType.LOCK_READ);
         this.location = location;
     }
 
     @Override
-    public List<Object> getParameters() {
-        final List<Object> l = new ArrayList<Object>();
-        l.add(id);
-        l.add(location);
-        return l;
-    }
+    public Integer invoke() {
+        ItemGroup g = getDatum(location);
 
-    @Override
-    public Integer invoke(Hashtable<String, ItemGroup> data) {
-        ItemGroup g = data.get(location);
         if(g == null)
             throw new RuntimeException("No such location '" + location + "'.");
         else

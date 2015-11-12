@@ -13,27 +13,21 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
-import java.util.List;
-import java.util.ArrayList;
-
-public class ReserveCarOperation extends TransactionOperation<Boolean> {
+public class DoesCustomerExistOperation extends TransactionOperation<Boolean> {
     int customerId;
-    String location;
 
-    public ReserveCarOperation(
+    public DoesCustomerExistOperation(
             TransactionDataStore data,
             int id,
-            int customerId,
-            String location) {
-        super(data, id, LockType.LOCK_WRITE);
+            int customerId) {
+        super(data, id, LockType.LOCK_READ);
         this.customerId = customerId;
-        this.location = location;
     }
 
     @Override
     public Boolean invoke() {
-        ItemGroup g = getDatum(location);
-        return g.reserve(customerId); 
+        final String key = String.valueOf(customerId);
+        final ItemGroup g = getDatum(key);
+        return g != null;
     }
-
 }

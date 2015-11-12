@@ -54,6 +54,32 @@ public class TransactionDataStore {
         txData.put(key, value);
     }
 
+    public synchronized Set<ItemGroup> values() {
+        lockManager.lock(
+                key,
+                transactionId,
+                LockType.LOCK_READ);
+
+        return txData.values();
+    }
+
+    public synchronized Set<ItemGroup> unsafeValues() {
+        return mainData.values();
+    }
+
+    /**
+     * Writes a key-value pair to the main data, with no consideration for
+     * transactions.
+     *
+     * @param key The key to write.
+     * @param value The value to write.
+     */
+    public synchronized void unsafePut(
+            String key,
+            ItemGroup value) {
+        mainData.put(key, value);
+    }
+
     /**
      * Fetches an ItemGroup in a transaction-oriented way, by acquiring the
      * necessary lock and using the transaction-local storage.

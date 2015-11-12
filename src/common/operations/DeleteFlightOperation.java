@@ -1,5 +1,7 @@
 package common.operations;
+
 import common.*;
+import lockmanager.LockType;
 
 import java.beans.PropertyVetoException;
 import java.io.IOException;
@@ -14,33 +16,30 @@ import java.util.*;
 import java.util.List;
 import java.util.ArrayList;
 
-public class DeleteFlightOperation implements Operation<Boolean> {
+public class DeleteFlightOperation extends TransactionOperation<Boolean> {
     int id;
     int flightNumber;
 
-    public DeleteFlightOperation(int id, int flightNumber) {
-        this.id = id;
+    public DeleteFlightOperation(
+            TransactionDataStore data,
+            int id,
+            int flightNumber) {
+        super(data, id, LockType.LOCK_WRITE);
+
         this.flightNumber = flightNumber;
     }
 
     @Override
-    public List<Object> getParameters() {
-        final List<Object> l = new ArrayList<Object>();
-        l.add(id);
-        l.add(flightNumber);
-        return l;
-    }
-    @Override
-    public Boolean invoke(Hashtable<String, ItemGroup> data) {
+    public Boolean invoke() {
         final String key = String.valueOf(flightNumber);
-        final ItemGroup g = data.get(key);
+        final ItemGroup g = getDatum(key);
         
         if(g == null) {
             return true; 
         }
 
         if(g.getReservedCount() == 0) {
-            data.remove(key);
+            removeDatum(key);
             return true;
         }
 

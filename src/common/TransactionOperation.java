@@ -26,11 +26,25 @@ public abstract class TransactionOperation<T> implements Operation<T> {
         this.id = id;
     }
 
-    public ItemGroup get(String key) {
+    public ItemGroup getDatum(String key) {
         if(this.isTransaction())
             return data.get(key, lockType);
         else
             return data.get(key);
+    }
+
+    public Set<ItemGroup> values() {
+        if(this.isTransaction())
+            return data.values();
+        else
+            return data.unsafeValues();
+    }
+
+    public void putDatum(String key, ItemGroup value) {
+        if(this.isTransaction())
+            data.put(key, value);
+        else
+            data.unsafePut(key, value);
     }
 
     public int getTransactionId() {
@@ -43,9 +57,5 @@ public abstract class TransactionOperation<T> implements Operation<T> {
 
     public LockType getLockType() {
         return lockType;
-    }
-
-    protected TransactionDataStore getData() {
-        return data;
     }
 }
