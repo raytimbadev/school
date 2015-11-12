@@ -37,15 +37,11 @@ public class CustomerResourceManager extends DatabaseResourceManager {
                 )
         );
         DeleteCustomerOperation op = new DeleteCustomerOperation(id,customerId);
-        if( id == -1) {
-                return op.invoke(mainData);
-            }
-        final Hashtable<String, ItemGroup> txData = transactions.get(id);
-        if(txData == null)
-            throw UncheckedThrow.throwUnchecked(
-                    new NoSuchTransactionException(id)
-            );
-        return op.invoke(txData);
+        return new DeleteCustomerOperation(
+            getTransactionData(id),
+            id,
+            customerId)
+        .invoke();
     }
 
     // Return a bill.

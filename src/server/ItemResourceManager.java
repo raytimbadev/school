@@ -36,24 +36,11 @@ public class ItemResourceManager extends DatabaseResourceManager {
                     customerId
                 )
         );
-        Hashtable<String, ItemGroup> data = null;
-            
-        if(id == -1)
-            data = mainData;
-        else {
-            final Hashtable<String, ItemGroup> txData = transactions.get(id);
-            if(txData == null)
-                throw UncheckedThrow.throwUnchecked(
-                        new NoSuchTransactionException(id)
-                );
-
-            data = txData;
-        }
-
-        for(final ItemGroup g : data.values())
-            g.cancel(customerId);
-
-        return true; 
+       return new DeleteItemOperation(
+            getTransactionData(id),
+            id,
+            customerId)
+        .invoke();
     }
 
     // Return a bill.
@@ -70,18 +57,11 @@ public class ItemResourceManager extends DatabaseResourceManager {
         QueryCustomerInfoOperation op =
             new QueryCustomerInfoOperation(id,customerId);
 
-        if(id == -1) {
-            return op.invoke(mainData);
-        }
-
-        final Hashtable<String, ItemGroup> txData = transactions.get(id);
-
-        if(txData == null)
-            throw UncheckedThrow.throwUnchecked(
-                    new NoSuchTransactionException(id)
-            );
-
-        return op.invoke(txData);
+        return new QueryCustomerInfoOperation(
+            getTransactionData(id),
+            id,
+            customerId)
+        .invoke();
     }
 
     // Reserve an itinerary.
