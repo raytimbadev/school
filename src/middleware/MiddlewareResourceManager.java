@@ -382,6 +382,7 @@ public class MiddlewareResourceManager implements ResourceManager {
         if(id != -1) {
             try {
                 transactionManager.enlist(id, flightManager);
+                transactionManager.enlist(id, customerManager); 
             }
             catch(NoSuchTransactionException e) {
                 throw UncheckedThrow.throwUnchecked(e);
@@ -407,6 +408,7 @@ public class MiddlewareResourceManager implements ResourceManager {
         if(id != -1) {
             try {
                 transactionManager.enlist(id, carManager);
+                transactionManager.enlist(id, customerManager);
             }
             catch(NoSuchTransactionException e) {
                 throw UncheckedThrow.throwUnchecked(e);
@@ -424,6 +426,7 @@ public class MiddlewareResourceManager implements ResourceManager {
         if(id != -1) {
             try {
                 transactionManager.enlist(id, carManager);
+                transactionManager.enlist(id, customerManager); 
             }
             catch(NoSuchTransactionException e) {
                 throw UncheckedThrow.throwUnchecked(e);
@@ -451,6 +454,7 @@ public class MiddlewareResourceManager implements ResourceManager {
             boolean room) {
 		if (id != -1) {
             try {
+                transaction.enlist(id,customerManager); 
                 transactionManager.enlist(id, flightManager);
                 if(car)
                     transactionManager.enlist(id, carManager);

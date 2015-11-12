@@ -65,7 +65,7 @@ public class ScriptedClient {
             int[] array = {time, i};
             transactionTimes.add(array);
             System.out.println("Completed Transaction: "+ i + ", of:" + loopCount);
-            if(test==1) {
+            if(false) {
                 try{
                     Thread.sleep(ms-time);
                 }

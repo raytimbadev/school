@@ -10,6 +10,10 @@
     <property name="server.db.host" value="localhost"/>
     <property name="server.db.port" value="5432"/>
 
+    <property name="test-loop-count" value="100"/>
+    <property name="test-tps" value="2"/>
+    <property name="test-setting" value="0"/>
+
     <property name="middleware.hostname" value="localhost"/>
     <property name="middleware.bindAddress" value="0.0.0.0"/>
     <property name="middleware.listenPort" value="8080"/>
@@ -76,10 +80,10 @@
         </javac>
     </target>
 	
-	<target name ="build-test-client" depends="setup">
+	<target name="build-test-client" depends="setup">
 		<javac
-			fork="true"
-			debug="true"
+            fork="true"
+            debug="true"
 			verbose="${verbose}"
 			destdir="${basedir}/build/client"
 			srcdir="${basedir}/src"
@@ -90,6 +94,7 @@
 			</classpath>
 		</javac>
 	</target>
+
     <target name="build-middleware" depends="setup">
         <javac
             fork="true"
@@ -133,6 +138,22 @@
             <arg value="${middleware.listenPort}" />
         </java>
     </target>
+
+
+    <target name="test-client" depends="build-test-client">
+        <java classname="client.ScriptedClient">
+            <classpath>
+                <pathelement location="${basedir}/build/client" />
+                <path refid="dbcp" />
+            </classpath>
+            <arg value="${middleware.hostname}" />
+            <arg value="${middleware.listenPort}" />
+            <arg value="${test-loop-count}"/>
+            <arg value="${test-tps}"/>
+            <arg value="${test-setting}"/>
+        </java>
+    </target>
+
 
     <target name="middleware" depends="build-middleware">
         <java classname="middleware.Middleware">
