@@ -14,8 +14,18 @@ public class LockManager {
      */
     private final Map<String, Map<Integer, Lock>> lockMap;
 
+    /**
+     * Set of finished transactions.
+     */
+    private final Set<Integer> finishedTransactions;
+
     public LockManager() {
         lockMap = new Hashtable<String, Map<Integer, Lock>>();
+        finishedTransactions = new HashSet<Integer>();
+    }
+
+    public synchronized void markFinished(int transaction) {
+        finishedTransactions.add(transaction);
     }
 
     public synchronized Lock lock(
@@ -45,7 +55,13 @@ public class LockManager {
                     wait();
                 }
                 catch(InterruptedException e) {
-                    return null;
+                    throw new InvalidLockException(
+                            String.format(
+                                "Lock request for %s to %d interrupted.",
+                                datumName,
+                                transaction
+                            )
+                    );
                 }
             }
 
@@ -65,7 +81,13 @@ public class LockManager {
                     wait();
                 }
                 catch(InterruptedException e) {
-                    return null;
+                    throw new InvalidLockException(
+                            String.format(
+                                "Lock request for %s to %d interrupted.",
+                                datumName,
+                                transaction
+                            )
+                    );
                 }
             }
 
@@ -86,12 +108,22 @@ public class LockManager {
             return lock;
         }
 
-        return null;
+        throw new InvalidLockException(
+                String.format(
+                    "Lock request for %s to %d reached impossible state.",
+                    datumName,
+                    transaction
+                )
+        );
     }
 
-    public synchronized void releaseTransaction(Integer transaction) {
+    public synchronized void releaseTransaction(int transaction) {
+        // remove all locks owned by the transaction
         for(final Map<Integer, Lock> transactionMap : lockMap.values())
             transactionMap.remove(transaction);
+        // mark the transaction as finished to cause any blocked threads to
+        // abort.
+        markFinished(transaction);
         notifyAll();
     }
 
@@ -99,6 +131,14 @@ public class LockManager {
             final Integer transaction,
             Map<Integer, Lock> transactionMap)
     {
+        if(finishedTransactions.contains(transaction))
+            throw new InvalidLockException(
+                    String.format(
+                        "No lock can be granted to finished transaction %d.",
+                        transaction
+                    )
+            );
+
         for(final Lock lock : transactionMap.values())
             if(lock.lockType == LockType.LOCK_WRITE)
                 return lock.getTransaction() == transaction;
@@ -109,6 +149,14 @@ public class LockManager {
     private synchronized boolean canAcquireWrite(
             final Integer transaction,
             Map<Integer, Lock> transactionMap) {
+        if(finishedTransactions.contains(transaction))
+            throw new InvalidLockException(
+                    String.format(
+                        "No lock can be granted to finished transaction %d.",
+                        transaction
+                    )
+            );
+
         for(final Lock lock : transactionMap.values())
             if(lock.getTransaction() == transaction)
                 continue;

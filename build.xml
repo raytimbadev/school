@@ -4,11 +4,7 @@
     <property name="server.bindAddress" value="localhost"/>
     <property name="server.listenPort" value="8080"/>
     <property name="server.type" value="item"/>
-    <property name="server.db.name" value="jax"/>
-    <property name="server.db.user" value="jax"/>
-    <property name="server.db.pass" value=""/>
-    <property name="server.db.host" value="localhost"/>
-    <property name="server.db.port" value="5432"/>
+    <property name="server.threadCount" value="4" />
 
     <property name="test-loop-count" value="1000"/>
     <property name="test-tps" value="10"/>
@@ -121,11 +117,7 @@
             <arg value="${server.bindAddress}" />
             <arg value="${server.listenPort}" />
             <arg value="${server.type}" />
-            <arg value="${server.db.user}" />
-            <arg value="${server.db.pass}" />
-            <arg value="${server.db.host}" />
-            <arg value="${server.db.port}" />
-            <arg value="${server.db.name}" />
+            <arg value="${server.threadCount}" />
         </java>
     </target>
 

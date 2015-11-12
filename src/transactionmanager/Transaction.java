@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.HashSet;
 
 public class Transaction {
-    public static final long DEFAULT_TTL = 30;
+    public static final long DEFAULT_TTL = 10;
 
     private static int nextId = 0;
 
