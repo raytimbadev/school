@@ -17,7 +17,7 @@ public class ScriptedClient {
 
     public static void main(String[] args) {
         try {
-            if (args.length != 5) {
+            if (args.length != 6) {
                 System.out.println("Usage: MyClient <service-name> "
                         + "<service-host> <service-port> " +
                         "<loop count> " + "<transactions per second> " +
@@ -30,6 +30,7 @@ public class ScriptedClient {
             int loopCount = Integer.parseInt(args[2]);
             int transactionPerSecond = Integer.parseInt(args[3]);
             int test = Integer.parseInt(args[4]);
+            String filename = args[5]; 
 
             if(test != 1 && test !=0) {
                 System.out.println("test identifier must be 0 or 1");
@@ -37,7 +38,7 @@ public class ScriptedClient {
             }
 
             ScriptedClient client = new ScriptedClient(address, servicePort);
-            client.run(loopCount, transactionPerSecond,test);
+            client.run(loopCount, transactionPerSecond,test,filename);
         }
         catch(Exception e) {
             e.printStackTrace();
@@ -47,7 +48,7 @@ public class ScriptedClient {
     /**
     * Runs a pre-determined set of actions in a transaction
     */
-    private void run(int loopCount, int transactionPerSecond,int test) {
+    private void run(int loopCount, int transactionPerSecond,int test,String filename) {
         int ms = 1000/transactionPerSecond;
         ArrayList<int[]> transactionTimes = new ArrayList<int[]>();
 
@@ -74,8 +75,8 @@ public class ScriptedClient {
                 }
             }
         }
-        try {
-            FileWriter writer= new FileWriter("log/log.txt", true);
+        try { 
+            FileWriter writer= new FileWriter(filename, true);
             for(int i =0; i < transactionTimes.size();i++) {
                 writer.write(transactionTimes.get(i)[0]+","+ transactionTimes.get(i)[1]+"\n");
             }
