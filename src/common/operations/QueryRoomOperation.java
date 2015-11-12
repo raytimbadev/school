@@ -23,7 +23,7 @@ public class QueryRoomOperation extends TransactionOperation<Integer> {
             TransactionDataStore data,
             int id,
             String location) {
-        super(data, id LockType.LOCK_READ);
+        super(data, id, LockType.LOCK_READ);
         this.location = location;
     }
 

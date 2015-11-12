@@ -29,15 +29,7 @@ public class DeleteCarsOperation extends TransactionOperation<Boolean> {
     }
 
     @Override
-    public List<Object> getParameters() {
-        final List<Object> l = new ArrayList<Object>();
-        l.add(id);
-        l.add(location);
-        return l;
-    }
-
-    @Override
-    public Boolean invoke(Hashtable<String, ItemGroup> data) {
+    public Boolean invoke() {
         final String key = location;
 
         final ItemGroup g = getDatum(key);

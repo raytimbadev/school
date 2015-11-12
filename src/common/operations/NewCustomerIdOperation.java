@@ -1,5 +1,7 @@
 package common.operations;
+
 import common.*;
+import lockmanager.LockType;
 
 import java.beans.PropertyVetoException;
 import java.io.IOException;
@@ -14,30 +16,26 @@ import java.util.*;
 import java.util.List;
 import java.util.ArrayList;
 
-public class NewCustomerIdOperation implements Operation<Boolean> {
+public class NewCustomerIdOperation extends TransactionOperation<Boolean> {
     int id;
     int customerId;
 
-    public NewCustomerIdOperation(int id, int customerId) {
-        this.id = id;
+    public NewCustomerIdOperation(
+            TransactionDataStore data,
+            int id,
+            int customerId) {
+        super(data, id, LockType.LOCK_WRITE);
         this.customerId = customerId;
     }
 
-    public List<Object> getParameters() {
-        final List<Object> l = new ArrayList<Object>();
-        l.add(id);
-        l.add(customerId);
-        return l;
-    }
-
     @Override
-    public Boolean invoke(Hashtable<String, ItemGroup> data) {
+    public Boolean invoke() {
         final String key = String.valueOf(customerId);
 
-        ItemGroup g = data.get(key);
+        ItemGroup g = getDatum(key);
         if(g == null) {
             g = new ItemGroup("customer", key, 0, 0);
-            data.put(key, g);
+            putDatum(key, g);
         }
         else { //customer already exists
             return false;

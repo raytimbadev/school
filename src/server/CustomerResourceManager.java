@@ -36,12 +36,11 @@ public class CustomerResourceManager extends DatabaseResourceManager {
                     customerId
                 )
         );
-        DeleteCustomerOperation op = new DeleteCustomerOperation(id,customerId);
         return new DeleteCustomerOperation(
-            getTransactionData(id),
-            id,
-            customerId)
-        .invoke();
+                getTransactionData(id),
+                id,
+                customerId)
+            .invoke();
     }
 
     // Return a bill.

@@ -82,6 +82,11 @@ public class ItemGroup {
         }
     }
 
+    public synchronized boolean hasReservation(int customerId) {
+        final Integer currentCount = reservations.get(customerId);
+        return currentCount == null || currentCount == 0;
+    }
+
     public int getReservedCountFor(int customerId) {
         final Integer n = reservations.get(customerId);
         if(n == null)

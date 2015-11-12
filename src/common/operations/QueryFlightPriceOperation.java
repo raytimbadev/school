@@ -23,7 +23,7 @@ public class QueryFlightPriceOperation extends TransactionOperation<Integer> {
             TransactionDataStore data,
             int id,
             int flightNumber) {
-        super(data, id LockType.LOCK_READ);
+        super(data, id, LockType.LOCK_READ);
         this.flightNumber = flightNumber;
     }
 

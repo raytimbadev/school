@@ -26,7 +26,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         if(id == TransactionOperation.NO_TRANSACTION)
             return mainDataStore;
 
-        final TransactionDataStore txData = transaction.get(id);
+        final TransactionDataStore txData = transactions.get(id);
 
         if(txData == null)
             throw UncheckedThrow.throwUnchecked(
@@ -74,8 +74,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     flightNumber
                 )
         );
-		DeleteFlightOperation op = new DeleteFlightOperation(id,flightNumber);
-		  return new DeleteFlightOperation(
+		return new DeleteFlightOperation(
                 getTransactionData(id),
                 id,
                 flightNumber)
@@ -329,13 +328,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     flightNumber
                 )
         );
-        ReserveFlightOperation op = new ReserveFlightOperation(id,customerId,flightNumber); 
 		return new ReserveFlightOperation(
-            getTransactionData(id),
-            id,
-            customerId,
-            flightNumber)
-        .invoke();
+                getTransactionData(id),
+                id,
+                customerId,
+                flightNumber)
+            .invoke();
     }
 
     // Add car reservation to this customer.
@@ -350,13 +348,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 )
         );
 
-		ReserveCarOperation op = new ReserveCarOperation(id,customerId,location); 
         return new ReserveCarOperation(
-            getTransactionData(id),
-            id,
-            customerId,
-            location)
-        .invoke();
+                getTransactionData(id),
+                id,
+                customerId,
+                location)
+            .invoke();
     }
 
     // Add room reservation to this customer.
@@ -371,13 +368,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 )
         );
 
-        ReserveRoomOperation op = new ReserveRoomOperation(id,customerId,location);
         return new ReserveRoomOperation(
-            getTransactionData(id),
-            id,
-            customerId,
-            flightNumber)
-        .invoke();
+                getTransactionData(id),
+                id,
+                customerId,
+                location)
+            .invoke();
     }
 
     //start

@@ -35,7 +35,7 @@ public class AddRoomsOperation extends TransactionOperation<Boolean> {
     }
 
     @Override
-    public Boolean invoke(Hashtable<String, ItemGroup> data) {
+    public Boolean invoke() {
         final String key = location;
 
         ItemGroup g = getDatum(key);

@@ -5,6 +5,9 @@ import lockmanager.LockType;
 
 import java.util.Map;
 import java.util.Hashtable;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Collection;
 
 public class TransactionDataStore {
     final Map<String, ItemGroup> mainData;
@@ -21,6 +24,14 @@ public class TransactionDataStore {
         this.lockManager = lockManager;
 
         txData = new Hashtable<String, ItemGroup>();
+    }
+
+    /**
+     * Writes all data from the transaction-local storage to the global
+     * storage.
+     */
+    public synchronized void merge() {
+        mainData.putAll(txData);
     }
 
     /**
@@ -54,16 +65,17 @@ public class TransactionDataStore {
         txData.put(key, value);
     }
 
-    public synchronized Set<ItemGroup> values() {
-        lockManager.lock(
-                key,
-                transactionId,
-                LockType.LOCK_READ);
-
+    public synchronized Collection<ItemGroup> values() {
         return txData.values();
     }
 
-    public synchronized Set<ItemGroup> unsafeValues() {
+    public synchronized Set<String> keys() {
+        Set<String> keys = new HashSet(txData.keySet());
+        keys.addAll(mainData.keySet());
+        return keys;
+    }
+
+    public synchronized Collection<ItemGroup> unsafeValues() {
         return mainData.values();
     }
 

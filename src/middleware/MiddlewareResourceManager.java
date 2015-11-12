@@ -454,7 +454,7 @@ public class MiddlewareResourceManager implements ResourceManager {
             boolean room) {
 		if (id != -1) {
             try {
-                transaction.enlist(id,customerManager); 
+                transactionManager.enlist(id,customerManager); 
                 transactionManager.enlist(id, flightManager);
                 if(car)
                     transactionManager.enlist(id, carManager);

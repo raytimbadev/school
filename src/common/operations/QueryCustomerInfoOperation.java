@@ -27,13 +27,6 @@ public class QueryCustomerInfoOperation extends TransactionOperation<String> {
         this.customerId = customerId;
     }
 
-    public List<Object> getParameters() {
-        final List<Object> l = new ArrayList<Object>();
-        l.add(id);
-        l.add(customerId);
-        return l;
-    }
-
     @Override
     public String invoke() {
         final StringBuffer sb = new StringBuffer();

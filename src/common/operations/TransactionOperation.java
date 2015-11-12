@@ -1,6 +1,11 @@
-package common;
+package common.operations;
 
+import common.TransactionDataStore;
+import common.ItemGroup;
 import lockmanager.LockType;
+
+import java.util.Set;
+import java.util.Collection;
 
 public abstract class TransactionOperation<T> implements Operation<T> {
     public static final int NO_TRANSACTION = -1;
@@ -16,6 +21,8 @@ public abstract class TransactionOperation<T> implements Operation<T> {
         this.data = tds;
         this.id = id;
     }
+
+    public abstract T invoke();
 
     public TransactionOperation(
             TransactionDataStore tds,
@@ -33,7 +40,14 @@ public abstract class TransactionOperation<T> implements Operation<T> {
             return data.get(key);
     }
 
-    public Set<ItemGroup> values() {
+    public void removeDatum(String key) {
+        if(this.isTransaction())
+            data.put(key, null);
+        else
+            data.unsafePut(key, null);
+    }
+
+    public Collection<ItemGroup> values() {
         if(this.isTransaction())
             return data.values();
         else
@@ -57,5 +71,9 @@ public abstract class TransactionOperation<T> implements Operation<T> {
 
     public LockType getLockType() {
         return lockType;
+    }
+
+    protected TransactionDataStore getDataStore() {
+        return data;
     }
 }

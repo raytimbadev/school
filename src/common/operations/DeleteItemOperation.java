@@ -27,8 +27,16 @@ public class DeleteItemOperation extends TransactionOperation<Boolean> {
 
     @Override
     public Boolean invoke() {
-        for(final ItemGroup g : this.values())
-            g.cancel(customerId);
+        final TransactionDataStore data = getDataStore();
+
+        for(final String k : data.keys()) {
+            ItemGroup g = data.get(k, LockType.LOCK_READ);
+            if(g.hasReservation(customerId)) {
+                g = data.get(k, LockType.LOCK_WRITE);
+                g.cancel(customerId);
+            }
+        }
 
         return true;
     }
+}
