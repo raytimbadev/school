@@ -4,3 +4,4 @@
 *.swp
 *wsdl
 *.secrets
+log*/
