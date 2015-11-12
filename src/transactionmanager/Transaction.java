@@ -3,12 +3,13 @@ package transactionmanager;
 import common.ResourceManager;
 import common.NoSuchTransactionException;
 import common.UncheckedThrow;
+import common.Trace;
 
 import java.util.Set;
 import java.util.HashSet;
 
 public class Transaction {
-    public static final long DEFAULT_TTL = 60;
+    public static final long DEFAULT_TTL = 30;
 
     private static int nextId = 0;
 
@@ -51,6 +52,8 @@ public class Transaction {
         resourceManagers = new HashSet<ResourceManager>();
         timeToLive = DEFAULT_TTL;
         state = State.PENDING;
+
+        touch();
     }
 
     /**
@@ -62,6 +65,8 @@ public class Transaction {
         resourceManagers = new HashSet<ResourceManager>();
         timeToLive = ttl;
         state = State.PENDING;
+
+        touch();
     }
 
     /**
@@ -72,7 +77,7 @@ public class Transaction {
     public long getTimeToLive() {
         final long now = System.currentTimeMillis();
         // expired: now - lastTouch > timeToLive * 1000
-        return lastTouch - now + timeToLive * 1000;
+        return (lastTouch - now + timeToLive * 1000) / 1000;
     }
 
     /**
@@ -99,6 +104,10 @@ public class Transaction {
             throw new RuntimeException(
                     "Trying to modify a finished transaction.");
 
+        Trace.info(String.format(
+                    "Enlisting ResourceManager to transaction %d.",
+                    this.getId()));
+
         resourceManagers.add(rm);
     }
 
@@ -106,6 +115,10 @@ public class Transaction {
         if(state != State.PENDING)
             throw new RuntimeException(
                     "Trying to commit a finished transaction.");
+
+        Trace.info(String.format(
+                    "Committing transaction %d.",
+                    this.getId()));
 
         try {
             for(final ResourceManager rm : resourceManagers)
@@ -122,6 +135,10 @@ public class Transaction {
         if(state != State.PENDING)
             throw new RuntimeException(
                     "Trying to commit a finished transaction.");
+
+        Trace.info(String.format(
+                    "Aborting transaction %d.",
+                    this.getId()));
 
         try {
             for(final ResourceManager rm : resourceManagers)

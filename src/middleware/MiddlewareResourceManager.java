@@ -514,6 +514,10 @@ public class MiddlewareResourceManager implements ResourceManager {
 	public boolean commit(int id) {
         boolean result = false;
 
+        Trace.info(String.format(
+                    "Committing transaction %d.",
+                    id));
+
         try {
             result = transactionManager.commit(id);
         }

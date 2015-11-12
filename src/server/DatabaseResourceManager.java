@@ -553,6 +553,10 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         if(transactions.get(transactionId) != null)
             return false;
 
+        Trace.info(String.format(
+                    "Starting transaction %d.",
+                    transactionId));
+
         transactions.put(transactionId, new Hashtable<String, ItemGroup>());
         return true;
     }
@@ -562,6 +566,10 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     public synchronized boolean commit(int id)
     throws NoSuchTransactionException {
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
+
+        Trace.info(String.format(
+                    "Committing transaction %d.",
+                    id));
 
         if(txData == null)
             throw new NoSuchTransactionException(id);
@@ -579,11 +587,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     throws NoSuchTransactionException {
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
 
+        Trace.info(String.format(
+                    "Aborting transaction %d.",
+                    id));
+
         if(txData == null)
             throw new NoSuchTransactionException(id);
 
         transactions.remove(id);
-
         lockManager.releaseTransaction(id);
 
         return true;

@@ -97,7 +97,7 @@
             verbose="${verbose}"
             destdir="${basedir}/build/middleware"
             srcdir="${basedir}/src"
-            includes="common/**, middleware/**, client/**, server/**"
+            includes="common/**, middleware/**, client/**, server/**, transactionmanager/**"
             sourcepath="${basedir}/src">
             <classpath>
                 <path refid="dbcp" />

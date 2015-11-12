@@ -4,6 +4,7 @@ import common.ResourceManager;
 import common.NoSuchTransactionException;
 import common.RedundantTransactionException;
 import common.UncheckedThrow;
+import common.Trace;
 
 import java.util.Hashtable;
 import java.util.Set;
@@ -28,6 +29,9 @@ public class TransactionManager {
     public synchronized Transaction start() {
         final Transaction txn = new Transaction();
         transactionMap.put(txn.getId(), txn);
+
+        // schedule a TTL check for the transaction.
+        scheduleTtlCheck(txn);
 
         return txn;
     }
@@ -67,10 +71,7 @@ public class TransactionManager {
         if(tx == null)
             throw new NoSuchTransactionException();
 
-        final Set<ResourceManager> rms = tx.getResourceManagers();
-        for(final ResourceManager rm : rms) {
-            rm.commit(transactionId);
-        }
+        tx.abort();
         transactionMap.remove(transactionId);
 
         return true;
@@ -82,6 +83,9 @@ public class TransactionManager {
      * The given resource manager is added to the set of resource managers
      * associated with the transaction identified by the transaction ID.
      *
+     * If the resource manager is already enlisted, then this method will
+     * simply touch the transaction, resetting its TTL.
+     *
      * @param transactionId The identifier of the transaction.
      * @param rm The resource manager to associate with the transaction.
      * @throws NoSuchTransaction The transaction identifier is invalid.
@@ -91,6 +95,7 @@ public class TransactionManager {
         final Transaction tx = transactionMap.get(transactionId);
         if(tx == null)
             throw new NoSuchTransactionException();
+        tx.touch();
         tx.enlist(rm);
 
         try {
@@ -99,6 +104,20 @@ public class TransactionManager {
         catch(RedundantTransactionException e) {
             throw UncheckedThrow.throwUnchecked(e);
         }
+    }
+
+    private void scheduleTtlCheck(Transaction tx) {
+        long ttl = tx.getTimeToLive();
+
+        Trace.info(String.format(
+                    "Scheduling TTL check for transaction %d in %d seconds.",
+                    tx.getId(),
+                    ttl));
+
+        ttlChecker.schedule(
+                new TtlChecker(tx),
+                ttl,
+                TimeUnit.SECONDS);
     }
 
     private class TtlChecker implements Runnable {
@@ -119,17 +138,19 @@ public class TransactionManager {
                 long ttl = transaction.getTimeToLive();
 
                 // If the transaction has expired
-                if(ttl <= 0)
+                if(ttl <= 0) {
+                    Trace.warn(String.format(
+                                "Transaction %d timed out.",
+                                transaction.getId()));
                     // abort it on all associated RMs
                     transaction.abort();
+                }
                 else
                     // Else, the transaction has not expired. Someone must have
                     // used `touch` behind our backs! Pesky clients.
                     // We just schedule another check after ttl seconds elapse.
                     // That'll show them.
-                    ttlChecker.schedule(
-                            new TtlChecker(transaction), ttl, TimeUnit.SECONDS
-                    );
+                    scheduleTtlCheck(transaction);
             }
         }
     }
