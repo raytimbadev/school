@@ -54,9 +54,6 @@ public class ItemResourceManager extends DatabaseResourceManager {
                 )
         );
 
-        QueryCustomerInfoOperation op =
-            new QueryCustomerInfoOperation(id,customerId);
-
         return new QueryCustomerInfoOperation(
             getTransactionData(id),
             id,
