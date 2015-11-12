@@ -1,6 +1,5 @@
-package server;
+package common;
 
-import common.ItemGroup;
 import lockmanager.LockManager;
 import lockmanager.LockType;
 
@@ -24,6 +23,45 @@ public class TransactionDataStore {
         txData = new Hashtable<String, ItemGroup>();
     }
 
+    /**
+     * Fetches an ItemGroup from the main storage, making no considerations for
+     * transactions.
+     *
+     * @param key The key of the datum to fetch.
+     * @return The requested datum, or null if it doesn't exist.
+     */
+    public synchronized ItemGroup get(String key) {
+        return mainData.get(key);
+    }
+
+    /**
+     * Overwrites an the ItemGroup associated with a given key in a
+     * transaction-oriented way, by acquiring the necessary lock and using the
+     * transaction-local storage.
+     *
+     * @param key The key of the datum to write.
+     * @param value The value to write for the key.
+     * @param lockType The type of lock to request for the key.
+     */
+    public synchronized void put(
+            String key,
+            ItemGroup value) {
+        lockManager.lock(
+                key,
+                transactionId,
+                LockType.LOCK_WRITE);
+
+        txData.put(key, value);
+    }
+
+    /**
+     * Fetches an ItemGroup in a transaction-oriented way, by acquiring the
+     * necessary lock and using the transaction-local storage.
+     *
+     * @param key The key of the datum to fetch.
+     * @param lockType The type of lock to request on the datum.
+     * @return The requested datum, or null if it doesn't exist.
+     */
     public synchronized ItemGroup get(String key, LockType lockType) {
         // take out the necessary lock on the data
         lockManager.lock(key, transactionId, lockType);

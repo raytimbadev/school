@@ -14,35 +14,31 @@ import java.util.*;
 import java.util.List;
 import java.util.ArrayList;
 
-public class AddFlightOperation implements Operation<Boolean> {
-    int id;
+public class AddFlightOperation extends TransactionOperation<Boolean> {
     int flightNumber;
     int numSeats;
     int flightPrice;
 
-    public AddFlightOperation(int id, int flightNumber, int numSeats,
+    public AddFlightOperation(
+            TransactionDataStore tds, 
+            int id, 
+            int flightNumber,
+            int numSeats,
             int flightPrice) {
-        this.id = id;
+
+        super(tds, id);
+
         this.flightNumber = flightNumber;
         this.numSeats = numSeats;
         this.flightPrice = flightPrice;
     }
 
     @Override
-    public List<Object> getParameters() {
-        final List<Object> l = new ArrayList<Object>();
-        l.add(id);
-        l.add(flightNumber);
-        l.add(numSeats);
-        l.add(flightPrice);
-        return l;
-    }
-
-    @Override
-    public Boolean invoke(Hashtable<String, ItemGroup> data) {
+    public Boolean invoke() {
         final String key = String.valueOf(flightNumber);
 
-        ItemGroup g = data.get(key);
+        ItemGroup g = data.get(key, LockType.LOCK_WRITE);
+
         if(g == null) {
             g = new ItemGroup("flight", key, numSeats, flightPrice);
             data.put(key, g);

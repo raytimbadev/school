@@ -15,19 +15,35 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
     protected final Hashtable<String, ItemGroup> mainData;
     protected final LockManager lockManager;
-
-    protected final Hashtable<Integer, Hashtable<String, ItemGroup>>
-        transactions;
+    protected final TransactionDataStore mainDataStore;
+    protected final Hashtable<Integer, TransactionDataStore> transactions;
 
     protected synchronized void mergeData(Hashtable<String, ItemGroup> data) {
         mainData.putAll(data);
     }
 
+    protected TransactionDataStore getTransactionData(int id) {
+        if(id == TransactionOperation.NO_TRANSACTION)
+            return mainDataStore;
+
+        final TransactionDataStore txData = transaction.get(id);
+
+        if(txData == null)
+            throw UncheckedThrow.throwUnchecked(
+                    new NoSuchTransactionException(id)
+            );
+
+        return txData;
+    }
+
     public DatabaseResourceManager() {
         lockManager = new LockManager();
-        transactions =
-            new Hashtable<Integer, Hashtable<String, ItemGroup>>();
+        transactions = new Hashtable<Integer, TransactionDataStore>();
         mainData = new Hashtable<String, ItemGroup>();
+        mainDataStore = new TransactionDataStore(
+                TransactionOperation.NO_TRANSACTION,
+                null,
+                mainData);
     }
 
     // Flight operations //
@@ -40,29 +56,13 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                              int numSeats, int flightPrice) {
         Trace.info("RM::addFlight(" + id + ", " + flightNumber
                 + ", $" + flightPrice + ", " + numSeats + ") called.");
-		AddFlightOperation op = new AddFlightOperation(
+        return new AddFlightOperation(
+                getTransactionData(id),
                 id,
                 flightNumber,
                 numSeats,
-                flightPrice);
-
-		if(id == -1) {
-			return op.invoke(mainData);
-		}
-
-        final Hashtable<String, ItemGroup> txData = transactions.get(id);
-
-        if(txData == null)
-            throw UncheckedThrow.throwUnchecked(
-                    new NoSuchTransactionException(id)
-            );
-
-        lockManager.lock(
-                String.valueOf(flightNumber),
-                id,
-                LockType.LOCK_WRITE);
-
-		return op.invoke(txData);
+                flightPrice)
+            .invoke();
     }
 
     @Override
@@ -84,11 +84,6 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
-        lockManager.lock(
-                String.valueOf(flightNumber),
-                id,
-                LockType.LOCK_WRITE);
 
         return op.invoke(txData);
 
@@ -117,11 +112,6 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     new NoSuchTransactionException(id)
             );
 
-        lockManager.lock(
-                String.valueOf(flightNumber),
-                id,
-                LockType.LOCK_READ);
-
 		return op.invoke(txData);
     }
 
@@ -147,11 +137,6 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     new NoSuchTransactionException(id)
             );
 
-        lockManager.lock(
-                String.valueOf(flightNumber),
-                id,
-                LockType.LOCK_READ);
-
 		return op.invoke(txData);
     }
 
@@ -174,7 +159,6 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-        lockManager.lock(location,id,LockType.LOCK_WRITE);
         return op.invoke(txData);
     }
 
@@ -198,7 +182,6 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-        lockManager.lock(location,id,LockType.LOCK_WRITE);
         return op.invoke(txData);
     }
 
@@ -224,11 +207,6 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
-        lockManager.lock(
-                location,
-                id,
-                LockType.LOCK_READ);
 
 		return op.invoke(txData);
     }
@@ -256,11 +234,6 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
-        lockManager.lock(
-                location,
-                id,
-                LockType.LOCK_READ);
 
 		return op.invoke(txData);
     }
@@ -290,7 +263,6 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-        lockManager.lock(location,id,LockType.LOCK_WRITE);
         return op.invoke(mainData);
     }
 
@@ -313,7 +285,6 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-        lockManager.lock(location+"room",id,LockType.LOCK_WRITE);
         return op.invoke(txData);
     }
 
@@ -340,11 +311,6 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     new NoSuchTransactionException(id)
             );
 
-        lockManager.lock(
-                location,
-                id,
-                LockType.LOCK_READ);
-
         return op.invoke(txData);
     }
 
@@ -370,10 +336,6 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
-        lockManager.lock(location,
-                id,
-                LockType.LOCK_READ);
 
         return op.invoke(txData);
     }
@@ -444,11 +406,6 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 );
         }
 
-        lockManager.lock(
-                String.valueOf(customerId),
-                id,
-                LockType.LOCK_READ);
-
         final ItemGroup g = data.get(String.valueOf(customerId));
         return g != null;
     }
@@ -474,7 +431,6 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     new NoSuchTransactionException(id)
             );
         //check operation is possible
-        lockManager.lock(String.valueOf(flightNumber),id,LockType.LOCK_WRITE);
         return op.invoke(txData); 
     }
 
@@ -502,8 +458,6 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
-        lockManager.lock(location,id,LockType.LOCK_WRITE);
 
         return op.invoke(txData); 
 
@@ -533,8 +487,6 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(
                     new NoSuchTransactionException(id)
             );
-
-        lockManager.lock(location,id,LockType.LOCK_WRITE); 
 
         return op.invoke(txData);
     }

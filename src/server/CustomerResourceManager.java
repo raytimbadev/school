@@ -40,7 +40,6 @@ public class CustomerResourceManager extends DatabaseResourceManager {
         if( id == -1) {
                 return op.invoke(mainData);
             }
-        lockManager.lock(String.valueOf(customerId),id,LockType.LOCK_WRITE); 
         final Hashtable<String, ItemGroup> txData = transactions.get(id);
         if(txData == null)
             throw UncheckedThrow.throwUnchecked(
