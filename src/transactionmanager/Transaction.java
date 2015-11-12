@@ -2,6 +2,7 @@ package transactionmanager;
 
 import common.ResourceManager;
 import common.NoSuchTransactionException;
+import common.InvalidTransactionException;
 import common.UncheckedThrow;
 import common.Trace;
 
@@ -9,7 +10,7 @@ import java.util.Set;
 import java.util.HashSet;
 
 public class Transaction {
-    public static final long DEFAULT_TTL = 10;
+    public static final long DEFAULT_TTL = 60;
 
     private static int nextId = 0;
 
@@ -85,8 +86,9 @@ public class Transaction {
      */
     public void touch() {
         if(state != State.PENDING)
-            throw new RuntimeException(
-                    "Trying to modify a finished transaction.");
+            throw new InvalidTransactionException(
+                    "Trying to modify a finished transaction."
+            );
 
         lastTouch = System.currentTimeMillis();
     }
@@ -101,8 +103,9 @@ public class Transaction {
 
     public void enlist(ResourceManager rm) {
         if(state != State.PENDING)
-            throw new RuntimeException(
-                    "Trying to modify a finished transaction.");
+            throw new InvalidTransactionException(
+                    "Trying to modify a finished transaction."
+            );
 
         Trace.info(String.format(
                     "Enlisting ResourceManager to transaction %d.",
@@ -113,8 +116,9 @@ public class Transaction {
 
     public synchronized void commit() {
         if(state != State.PENDING)
-            throw new RuntimeException(
-                    "Trying to commit a finished transaction.");
+            throw new InvalidTransactionException(
+                    "Trying to commit a finished transaction."
+            );
 
         Trace.info(String.format(
                     "Committing transaction %d.",
@@ -133,8 +137,9 @@ public class Transaction {
 
     public synchronized void abort() {
         if(state != State.PENDING)
-            throw new RuntimeException(
-                    "Trying to commit a finished transaction.");
+            throw new InvalidTransactionException(
+                    "Trying to commit a finished transaction."
+            );
 
         Trace.info(String.format(
                     "Aborting transaction %d.",

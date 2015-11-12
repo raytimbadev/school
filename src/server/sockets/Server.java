@@ -20,7 +20,7 @@ import java.net.Socket;
 
 public class Server implements Runnable {
     public static final int BACKLOG_MULTIPLIER = 5;
-    public static final int DEFAULT_REQUEST_TTL = 15;
+    public static final int DEFAULT_REQUEST_TTL = 10;
 
     public final int THREAD_COUNT;
 
@@ -94,6 +94,7 @@ public class Server implements Runnable {
                     new RequestContext.RequestContextBuilder()
                         .withResourceManager(resourceManager)
                         .withClientSocket(clientSocket)
+                        .withRequestNumber(requestNumber)
                         .build();
                 final RequestHandler handler = new RequestHandler(ctx);
 

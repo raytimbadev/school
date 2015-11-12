@@ -13,7 +13,11 @@ public class RequestHandler implements Runnable {
     }
 
     public void run() {
-        System.out.println("Handling request.");
+        System.out.printf(
+                "Handling request %d.\n",
+                requestContext.getRequestNumber()
+        );
+
         Response response;
 
         try {
@@ -27,11 +31,17 @@ public class RequestHandler implements Runnable {
                 final Object result =
                     request.invoke(requestContext.getResourceManager());
                 response = Response.success(result);
-                System.out.println("Successful.");
+                System.out.printf(
+                        "Request %d successful.\n",
+                        requestContext.getRequestNumber()
+                );
             }
             catch(Exception e) {
                 response = Response.error(e);
-                System.out.println("Failure.");
+                System.out.printf(
+                        "Request %d failed.\n",
+                        requestContext.getRequestNumber()
+                );
             }
 
             final ObjectOutputStream output =

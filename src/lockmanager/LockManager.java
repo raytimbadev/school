@@ -36,8 +36,9 @@ public class LockManager {
         final Lock lock = new Lock(datumName, transaction, lockType);
 
         Trace.info(String.format(
-                    "Locking %s",
-                    datumName));
+                    "Trying to lock item %s for transaction %d",
+                    datumName,
+                    transaction));
 
         if(transactionMap == null) {
             Trace.info(String.format(
@@ -68,7 +69,7 @@ public class LockManager {
             transactionMap.put(transaction, lock);
 
             Trace.info(String.format(
-                        "Grant WRITE lock for %s to %d",
+                        "Grant WRITE lock for item %s to transaction %d",
                         datumName,
                         transaction));
 
@@ -83,7 +84,8 @@ public class LockManager {
                 catch(InterruptedException e) {
                     throw new InvalidLockException(
                             String.format(
-                                "Lock request for %s to %d interrupted.",
+                                "Lock request for item %s to transaction " +
+                                "%d interrupted.",
                                 datumName,
                                 transaction
                             )
@@ -95,13 +97,14 @@ public class LockManager {
                 transactionMap.put(transaction, lock);
 
                 Trace.info(String.format(
-                            "Grant READ lock for %s to %d",
+                            "Grant READ lock for item %s to transaction %d",
                             datumName,
                             transaction));
             }
             else
                 Trace.info(String.format(
-                            "Existing lock for %s to %d",
+                            "Using existing lock for item %s of " +
+                            "transaction %d",
                             datumName,
                             transaction));
 
@@ -110,7 +113,8 @@ public class LockManager {
 
         throw new InvalidLockException(
                 String.format(
-                    "Lock request for %s to %d reached impossible state.",
+                    "Lock request for item %s to transaction %d reached " +
+                    "impossible state.",
                     datumName,
                     transaction
                 )

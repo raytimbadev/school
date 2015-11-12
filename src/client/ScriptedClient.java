@@ -2,6 +2,10 @@ package client;
 
 import common.ResourceManager;
 import common.NoSuchTransactionException;
+import common.InvalidTransactionException;
+import common.Trace;
+
+import lockmanager.InvalidLockException;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -55,11 +59,26 @@ public class ScriptedClient {
         for(int i=0; i < loopCount; i++) {
             int id = proxy.newCustomer(-1);
             int time = (int)System.currentTimeMillis();
-            if(i%2==0) {
-                flightTransaction(id);
+            boolean failed = false;
+            try {
+                if(i%2==0) {
+                    flightTransaction(id);
+                }
+                else {
+                    multiTransaction(id);
+                }
             }
-            else {
-                multiTransaction(id);
+            catch(InvalidLockException e) {
+                Trace.warn(String.format("%d: %s", i, e.getMessage()));
+                failed = true;
+            }
+            catch(InvalidTransactionException e) {
+                Trace.warn(String.format("%d: %s", i, e.getMessage()));
+                failed = true;
+            }
+            catch(Exception e) {
+                Trace.warn(String.format("%d: %s", i, e.getMessage()));
+                failed = true;
             }
             //time now contains the transaction's run time
             time = (int)System.currentTimeMillis() - time;

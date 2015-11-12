@@ -8,10 +8,12 @@ import java.net.InetAddress;
 public class RequestContext {
     final ResourceManager resourceManager;
     final Socket clientSocket;
+    final int requestNumber;
 
-    public RequestContext(ResourceManager rm, Socket client) {
+    public RequestContext(ResourceManager rm, Socket client, int number) {
         resourceManager = rm;
         clientSocket = client;
+        requestNumber = number;
     }
 
     public ResourceManager getResourceManager() {
@@ -22,9 +24,14 @@ public class RequestContext {
         return clientSocket;
     }
 
+    public int getRequestNumber() {
+        return requestNumber;
+    }
+
     public static class RequestContextBuilder {
         ResourceManager resourceManager;
         Socket clientSocket;
+        int requestNumber;
 
         public RequestContextBuilder() {
         }
@@ -39,8 +46,17 @@ public class RequestContext {
             return this;
         }
 
+        public RequestContextBuilder withRequestNumber(int number) {
+            requestNumber = number;
+            return this;
+        }
+
         public RequestContext build() {
-            return new RequestContext(resourceManager, clientSocket);
+            return new RequestContext(
+                    resourceManager,
+                    clientSocket,
+                    requestNumber
+            );
         }
     }
 }
