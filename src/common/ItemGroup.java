@@ -105,4 +105,11 @@ public class ItemGroup {
     public String getItemType() {
         return itemType;
     }
+
+    @Override
+    public Object clone() {
+        final ItemGroup o = new ItemGroup(itemType, key, itemCount, price);
+        o.reservations = new HashMap<Integer, Integer>(reservations);
+        return o;
+    }
 }
