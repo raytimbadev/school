@@ -576,7 +576,7 @@ public class Client {
 				}
 
                 try {
-                    proxy.abort(getInt(arguments.elementAt(1)));
+                    proxy.commit(getInt(arguments.elementAt(1)));
                     System.out.println("COMMIT");
                 }
                 catch(Exception e) {
