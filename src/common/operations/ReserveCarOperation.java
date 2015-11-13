@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class ReserveCarOperation extends TransactionOperation<Boolean> {
-    int customerId;
-    String location;
+    final int customerId;
+    final String location;
 
     public ReserveCarOperation(
             TransactionDataStore data,
@@ -33,6 +33,8 @@ public class ReserveCarOperation extends TransactionOperation<Boolean> {
     @Override
     public Boolean invoke() {
         ItemGroup g = getDatum(location);
+        if(g == null)
+            return false;
         return g.reserve(customerId); 
     }
 

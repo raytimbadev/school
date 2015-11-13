@@ -33,7 +33,9 @@ public class ReserveFlightOperation extends TransactionOperation<Boolean> {
     @Override
     public Boolean invoke() {
         final String key = String.valueOf(flightNumber);
-        ItemGroup g = getDatum(key);
+        final ItemGroup g = getDatum(key);
+        if(g == null)
+            return false;
         return g.reserve(customerId); 
     }
 

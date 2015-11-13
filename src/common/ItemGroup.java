@@ -75,16 +75,28 @@ public class ItemGroup {
      * reservations.
      */
     public synchronized void cancel(int customerId) {
+        Trace.info(String.format(
+                    "Cancelling reservation(s) for customer %d.",
+                    customerId));
+
         final Integer currentCount = reservations.get(customerId);
         if(currentCount != null) {
             reservations.remove(customerId);
             reservedCount -= currentCount;
+            Trace.info(String.format(
+                        "Deleted %d reservations for customer %d.",
+                        currentCount,
+                        customerId));
         }
+        else
+            Trace.warn(String.format(
+                        "Customer %d has no reservation(s).",
+                        customerId));
     }
 
     public synchronized boolean hasReservation(int customerId) {
         final Integer currentCount = reservations.get(customerId);
-        return currentCount == null || currentCount == 0;
+        return currentCount != null && currentCount != 0;
     }
 
     public int getReservedCountFor(int customerId) {

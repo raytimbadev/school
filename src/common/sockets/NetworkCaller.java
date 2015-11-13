@@ -1,5 +1,7 @@
 package common.sockets;
 
+import common.UncheckedThrow;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -18,24 +20,26 @@ public class NetworkCaller {
         this.port = port;
     }
 
-    public Response invoke(final Request request)
-    throws IOException, ClassNotFoundException {
-        System.out.println("Invoking network call.");
+    public Response invoke(final Request request) {
+        try {
+            final Socket socket = new Socket(address, port);
 
-        final Socket socket = new Socket(address, port);
+            final ObjectOutputStream oos =
+                new ObjectOutputStream(socket.getOutputStream());
+            oos.writeObject(request);
 
-        final ObjectOutputStream oos =
-            new ObjectOutputStream(socket.getOutputStream());
-        oos.writeObject(request);
+            System.out.println("Send request.");
 
-        System.out.println("Send request.");
+            final ObjectInputStream ois =
+                new ObjectInputStream(socket.getInputStream());
+            final Response response = (Response)ois.readObject();
 
-        final ObjectInputStream ois =
-            new ObjectInputStream(socket.getInputStream());
-        final Response response = (Response)ois.readObject();
+            System.out.println("Got response.");
 
-        System.out.println("Got response.");
-
-        return response;
+            return response;
+        }
+        catch(Exception e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
     }
 }

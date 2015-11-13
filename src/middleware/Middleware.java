@@ -17,6 +17,7 @@ public class Middleware implements Runnable {
     public static final int BACKLOG_MULTIPLIER = 5;
 
     public final int THREAD_COUNT;
+    private int requestNumber;
 
     final ExecutorService executorService;
     final ServerSocket serverSocket;
@@ -39,6 +40,7 @@ public class Middleware implements Runnable {
     @Override
     public void run() {
         boolean running = true;
+        requestNumber = 0;
 
         while(running) {
             try {
@@ -47,6 +49,7 @@ public class Middleware implements Runnable {
                     new RequestContext.RequestContextBuilder()
                         .withResourceManager(resourceManager)
                         .withClientSocket(clientSocket)
+                        .withRequestNumber(requestNumber)
                         .build();
                 final RequestHandler handler = new RequestHandler(ctx);
 
@@ -55,6 +58,8 @@ public class Middleware implements Runnable {
             catch(IOException e) {
                 e.printStackTrace();
             }
+
+            requestNumber++;
         }
     }
 

@@ -13,10 +13,10 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         return nextCustomerId++;
     }
 
-    protected final Hashtable<String, ItemGroup> mainData;
+    protected final HashMap<String, ItemGroup> mainData;
     protected final LockManager lockManager;
     protected final TransactionDataStore mainDataStore;
-    protected final Hashtable<Integer, TransactionDataStore> transactions;
+    protected final HashMap<Integer, TransactionDataStore> transactions;
 
     protected synchronized void mergeData(Hashtable<String, ItemGroup> data) {
         mainData.putAll(data);
@@ -38,8 +38,8 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
     public DatabaseResourceManager() {
         lockManager = new LockManager();
-        transactions = new Hashtable<Integer, TransactionDataStore>();
-        mainData = new Hashtable<String, ItemGroup>();
+        transactions = new HashMap<Integer, TransactionDataStore>();
+        mainData = new HashMap<String, ItemGroup>();
         mainDataStore = new TransactionDataStore(
                 TransactionOperation.NO_TRANSACTION,
                 null,

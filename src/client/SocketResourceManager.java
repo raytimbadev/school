@@ -28,25 +28,14 @@ public class SocketResourceManager implements ResourceManager {
             int flightNumber,
             int numSeats,
             int flightPrice) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("addFlight")
-                        .primitive(id)
-                        .primitive(flightNumber)
-                        .primitive(numSeats)
-                        .primitive(flightPrice)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Boolean)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Boolean)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("addFlight")
+                    .primitive(id)
+                    .primitive(flightNumber)
+                    .primitive(numSeats)
+                    .primitive(flightPrice)
+                    .build()).yield();
     }
 
     @Override

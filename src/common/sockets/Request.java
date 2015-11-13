@@ -1,6 +1,7 @@
 package common.sockets;
 
 import common.ResourceManager;
+import common.UncheckedThrow;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -111,12 +112,17 @@ public class Request implements Serializable {
             return this;
         }
 
-        public Request build() throws NoSuchFieldException, IllegalAccessException {
-            return new Request(
-                    method,
-                    parameters.toArray(),
-                    primitives.toArray(new Boolean[primitives.size()])
-            );
+        public Request build() {
+            try {
+                return new Request(
+                        method,
+                        parameters.toArray(),
+                        primitives.toArray(new Boolean[primitives.size()])
+                );
+            }
+            catch(Exception e) {
+                throw UncheckedThrow.throwUnchecked(e);
+            }
         }
     }
 }

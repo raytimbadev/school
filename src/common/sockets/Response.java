@@ -1,5 +1,7 @@
 package common.sockets;
 
+import common.UncheckedThrow;
+
 import java.io.Serializable;
 
 public class Response implements Serializable {
@@ -23,6 +25,12 @@ public class Response implements Serializable {
 
     public boolean isSuccessful() {
         return success;
+    }
+
+    public Object yield() {
+        if(!isSuccessful())
+            throw UncheckedThrow.throwUnchecked(getError());
+        return result;
     }
 
     public Object getResult() {

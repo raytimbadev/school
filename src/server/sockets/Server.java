@@ -20,7 +20,7 @@ import java.net.Socket;
 
 public class Server implements Runnable {
     public static final int BACKLOG_MULTIPLIER = 5;
-    public static final int DEFAULT_REQUEST_TTL = 10;
+    public static final int DEFAULT_REQUEST_TTL = 90;
 
     public final int THREAD_COUNT;
 
