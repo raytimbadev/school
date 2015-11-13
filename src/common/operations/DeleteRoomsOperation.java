@@ -33,7 +33,7 @@ public class DeleteRoomsOperation extends TransactionOperation<Boolean> {
         ItemGroup g = getDatum(key);
         
         if(g==null){
-            return true; 
+            return false; 
         }
 
         if(g.getReservedCount() == 0) {

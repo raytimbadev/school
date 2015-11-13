@@ -35,7 +35,7 @@ public class DeleteFlightOperation extends TransactionOperation<Boolean> {
         final ItemGroup g = getDatum(key);
         
         if(g == null) {
-            return true; 
+            return false; 
         }
 
         if(g.getReservedCount() == 0) {
