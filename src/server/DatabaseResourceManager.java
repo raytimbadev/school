@@ -435,4 +435,10 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
         return true;
     }
+
+    @Override
+    public boolean shutdown() {
+        System.exit(0);
+        return true;
+    }
 }

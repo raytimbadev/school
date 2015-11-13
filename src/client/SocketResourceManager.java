@@ -579,4 +579,12 @@ public class SocketResourceManager implements ResourceManager {
             throw UncheckedThrow.throwUnchecked(e);
         }
 	}
+
+    @Override
+    public boolean shutdown() {
+        return (Boolean)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("shutdown")
+                    .build()).yield();
+    }
 }

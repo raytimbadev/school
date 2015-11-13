@@ -546,5 +546,16 @@ public class MiddlewareResourceManager implements ResourceManager {
 
         return result;
 	}
+
+    @Override
+    public boolean shutdown() {
+        customerManager.shutdown();
+        flightManager.shutdown();
+        carManager.shutdown();
+        roomManager.shutdown();
+
+        System.exit(0);
+        return true;
+    }
 }
 

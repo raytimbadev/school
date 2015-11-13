@@ -602,6 +602,23 @@ public class Client {
                 }
 				break;
 
+            case 26:
+                if(arguments.size() != 1) {
+                    wrongNumber();
+                    break;
+                }
+
+                try {
+                    proxy.shutdown();
+                    System.out.println("SHUTDOWN");
+                }
+                catch(Exception e) {
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
+                    e.printStackTrace();
+                }
+                break;
+
             default:
                 System.out.println("The interface does not support this command.");
                 break;
@@ -672,6 +689,8 @@ public class Client {
             return 24; 
         else if (argument.compareToIgnoreCase("abort") == 0)
             return 25;
+        else if (argument.compareToIgnoreCase("shutdown") == 0)
+            return 26;
         else
             return 666;
     }
@@ -881,6 +900,10 @@ public class Client {
             case 25:
             System.out.println("Aborts a transaction");
             break; 
+
+            case 26:
+            System.out.println("Shuts down the system.");
+            break;
 
             default:
             System.out.println(command);
