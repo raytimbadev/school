@@ -126,7 +126,8 @@ public class ItemGroup {
     @Override
     public Object clone() {
         final ItemGroup o = new ItemGroup(itemType, key, itemCount, price);
-        o.reservations = new HashMap<Integer, Integer>(reservations);
+        o.reservedCount = reservedCount;
+        o.reservations = (HashMap<Integer, Integer>)reservations.clone();
         return o;
     }
 }

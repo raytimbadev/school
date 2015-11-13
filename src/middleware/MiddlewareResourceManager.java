@@ -341,8 +341,6 @@ public class MiddlewareResourceManager implements ResourceManager {
     @Override
     public String queryCustomerInfo(int id, int customerId) {
 
-        final StringBuilder sb = new StringBuilder();
-        final boolean exists = customerManager.doesCustomerExist(id, customerId);
 		if(id != -1) {
             try {
                 transactionManager.enlist(id, customerManager);
@@ -354,6 +352,10 @@ public class MiddlewareResourceManager implements ResourceManager {
                 throw UncheckedThrow.throwUnchecked(e);
             }
 		}
+
+        final StringBuilder sb = new StringBuilder();
+        final boolean exists = customerManager.doesCustomerExist(id, customerId);
+
         if(exists) {
             sb.append("\nFlights:\n");
             sb.append(flightManager.queryCustomerInfo(id, customerId));
