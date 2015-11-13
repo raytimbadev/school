@@ -14,6 +14,46 @@ import java.util.*;
 
 public class ScriptedClient {
     final ResourceManager proxy;
+    String[] cities = {
+"Afghanistan",
+"Albania",
+"Algeria",
+"Andorra",
+"Angola",
+"Antigua", "Deps",
+"Argentina",
+"Armenia",
+"Australia",
+"Austria",
+"Azerbaijan",
+"Bahamas",
+"Bahrain",
+"Bangladesh",
+"Barbados",
+"Belarus",
+"Belgium",
+"Belize",
+"Benin",
+"Bhutan",
+"Bolivia",
+"Bosnia Herzegovina",
+"Botswana",
+"Brazil",
+"Brunei",
+"Bulgaria",
+"Burkina",
+"Burundi",
+"Cambodia",
+"Cameroon",
+"Canada",
+"Cape Verde",
+"Central African Rep",
+"Chad",
+"Chile",
+"China",
+"Colombia",
+"Comoros",
+"Congo"};
 
     public ScriptedClient(InetAddress address, int port) {
         proxy = new SocketResourceManager(address, port);
@@ -61,11 +101,13 @@ public class ScriptedClient {
             int time = (int)System.currentTimeMillis();
             boolean failed = false;
             try {
-                if(i%2==0) {
+                if(false) {
                     flightTransaction(id);
                 }
-                else {
+                else if(false) {
                     multiTransaction(id);
+                } else {
+                    duoTransaction(id); 
                 }
             }
             catch(InvalidLockException e) {
@@ -111,13 +153,15 @@ public class ScriptedClient {
     /*Flight transaction used for single RM, single client test case*/
     private void flightTransaction(int id) {
         int tid = proxy.start();
-
-        proxy.addFlight(tid,1,1,100);
-        proxy.addFlight(tid,2,1,100);
-        proxy.reserveFlight(tid,id,1);
-        proxy.reserveFlight(tid,id,2);
-        proxy.addFlight(tid,3,1,100);
-        proxy.reserveFlight(tid,id,3);
+        int r1 = (int)(Math.random()*100000); //constants yay
+        int r2 = (int)(Math.random()*100000); 
+        int r3 = (int)(Math.random()*100000); 
+        proxy.addFlight(tid,r1,1,100);
+        proxy.addFlight(tid,r2,1,100);
+        proxy.reserveFlight(tid,id,r1);
+        proxy.reserveFlight(tid,id,r2);
+        proxy.addFlight(tid,r3,1,100);
+        proxy.reserveFlight(tid,id,r3);
 
         try {
             proxy.commit(tid);
@@ -131,13 +175,15 @@ public class ScriptedClient {
     /*Multi transaction used for multiple RM single client test case*/
     private void multiTransaction(int id) {
         int tid = proxy.start();
-
-        proxy.addFlight(tid,1,1,100);
-        proxy.reserveFlight(tid,id,1);
-        proxy.addCars(tid,"montreal",1,100);
-        proxy.reserveCar(tid,id,"montreal");
-        proxy.addRooms(tid,"montreal",1,100);
-        proxy.reserveRoom(tid,id,"montreal");
+        int r1 = (int)(Math.random()*100000); 
+        String cn1 = cities[(int)(Math.random()*(cities.length-1))];
+        String cn2 = cities[(int)(Math.random()*(cities.length-1))]; 
+        proxy.addFlight(tid,r1,1,100);
+        proxy.reserveFlight(tid,id,r1);
+        proxy.addCars(tid,cn1,1,100);
+        proxy.reserveCar(tid,id,cn1);
+        proxy.addRooms(tid,cn2,1,100);
+        proxy.reserveRoom(tid,id,cn2);
 
         try {
             proxy.commit(tid);
@@ -146,5 +192,27 @@ public class ScriptedClient {
             e.printStackTrace();
             System.exit(1);
         }
+    }
+
+    private void duoTransaction(int id) {
+        int r1 = (int)(Math.random()*100000); 
+        String cn1 = cities[(int)(Math.random()*(cities.length-1))];
+        int r2 =(int)(Math.random()*100000);  
+
+        int tid = proxy.start();
+        proxy.addFlight(tid,r1,1,100);
+        proxy.addFlight(tid,r2,1,100);
+        proxy.addCars(tid,cn1,1,100);
+        proxy.reserveFlight(tid,id,r1);
+        proxy.reserveFlight(tid,id,r2);
+        proxy.reserveCar(tid,id,cn1); 
+        try {
+            proxy.commit(tid);
+        }
+        catch(NoSuchTransactionException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
     }
 }
