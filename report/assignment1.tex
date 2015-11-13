@@ -38,7 +38,7 @@
     },
 }
 
-\title{Distributed Systems -- Deliverable 1}
+\title{Distributed Systems -- Deliverable 2}
 \author{Jacob Errington (260636023) \\ Alexandre Laporte (260635979)}
 \date{6 October 2015}
 
@@ -46,17 +46,15 @@
 
 \maketitle
 
-\section*{Web Services}
-
-The design of the webservices component of the deliverable is centered on
-creating a middleware manager. In order to achieve this we created
+For this deliverable, we choose to extend the TCP sockets implementation from
+the first deliverable. In order to distribute this application we created
 the \texttt{MiddlewareResourceManager} class implementing the same interface as
 the backend servers. Hence, from a client's perspective, it is
 indistinguishable from a backend server.
 
-Internally, the middleware dispatches incoming requests to a backend server
-according to the type of request. Once the backend server's reply is received,
-it is transmitted back to the client.
+In simple cases, the middleware dispatches incoming requests to a backend
+server according to the type of request. Once the backend server's reply is
+received, it is transmitted back to the client.
 
 More complex requests such as reservations require additional work from the
 middleware server. For example, in order to reserve a flight, the middleware
@@ -69,67 +67,45 @@ backend server once.
     \centering
 
     \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1cm,semithick]
-        \node[draw] (rect) (A)                            {Client};
-        \node[draw] (rect) (B) [right of=A,xshift=2cm]    {Middleware Layer};
-        \node[draw] (rect) (C) [right of=B,xshift=3.75cm] {Flight Server};
-        \node[draw] (rect) (D) [above of=C]               {Car Server};
-        \node[draw] (rect) (E) [below of=C]               {Room Server};
-        \node[draw] (rect) (F) [below of=E] 	          {Customer Server};
-        \node[draw] (rect) (G) [right of=C, xshift=3cm]   {Flight Database};
-        \node[draw] (rect) (H) [right of=D, xshift=3cm]   {Car Database};
-        \node[draw] (rect) (I) [right of=E, xshift=3cm]   {Room Database};
-        \node[draw] (rect) (J) [right of=F, xshift=3cm]   {Customer Database};
+        \node[draw] (rect) (client)                             {Client};
+        \node[draw] (rect) (middleware) [right of=client,xshift=2cm] {Middleware Layer};
+
+        \node[draw] (rect) (flight) [right of=middleware,xshift=3.75cm] {Flight Server};
+        \node[draw] (rect) (car) [above of=flight]                  {Car Server};
+        \node[draw] (rect) (room) [below of=flight]                 {Room Server};
+        \node[draw] (rect) (customer) [below of=room] 	           {Customer Server};
+
+        \node[draw] (rect) (flightDB) [right of=flight, xshift=3cm]   {Flight Datastore};
+        \node[draw] (rect) (carDB) [right of=car, xshift=3cm]      {Car Datastore};
+        \node[draw] (rect) (roomDB) [right of=room, xshift=3cm]     {Room Datastore};
+        \node[draw] (rect) (customerDB) [right of=customer, xshift=3cm] {Customer Datastore};
 
         \path
-        (A) edge                node {} (B)
-        (B) edge                node {} (C)
-            edge                node {} (D)
-            edge                node {} (E)
-            edge		        node {} (F)
-        (C) edge                node {} (G)
-        (D) edge                node {} (H)
-        (E) edge                node {} (I)
-        (F) edge 		        node {} (J);
+        (client)     edge                node {} (middleware)
+        (middleware) edge                node {} (flight)
+                     edge                node {} (car)
+                     edge                node {} (room)
+                     edge		        node {}  (customer)
+        (flight)     edge                node {} (flightDB)
+        (car)        edge                node {} (carDB)
+        (room)       edge                node {} (roomDB)
+        (customer)   edge 		        node {}  (customerDB);
     \end{tikzpicture}
 
     \caption{
         The architecture of our system uses a middleware server to contact
-        independent backend servers to perform tasks related to different
-        types of reservable items. Each backend server uses a database to
-        ensure the internal consistency of its data as well as to guarantee
-        that concurrent writes can be performed reliably.
-        However, since each backend server has its own database, data
-        consistency across databases is managed by the middleware.
+        independent backend servers to perform tasks related to different types
+        of reservable items. Each backend server uses in-memory synchronized
+        hashtables to store their respective data. Furthermore, each backend
+        server is equipped with a lock manager enabling it to perform strict
+        two-phase locking. Since each backend server has its own datastore,
+        data consistency across backend servers is maintained by the
+        middleware. The middleware is equipped with a transaction manager to
+        guarantee consistently incrementing identifiers for transactions as
+        they are requested by the clients. Also, the middleware manages
+        timeouts for transactions as a way of resolving deadlocks.
     }
 \end{figure}
-
-\section*{Database architechture}
-
-As persistent backing stores for the data in this system, we choose to use
-relational databases. This allows us to effectively represent certain
-relationships between the different types of data in the system, in particular
-the reservations of items by the customers.
-
-Each backend server is equipped with a database to store a list of items as
-well which items are reserved and by whom. However, because the customer
-information is maintained by a separate resource manager, foreign key
-contraints on the customer identifier cannot be made. Hence, unless certain
-precautions are made by the middleware server, it may arise that items become
-reserved by a customer that does not exist.
-
-Nonetheless, the database schema is programmed to guarantee that certain
-undesirable scenarios are impossible, even under heavy concurrent loads. For
-example, thanks to the judicious use of foreign key and unique constraints,
-items cannot be reserved more than once per customer nor can items be reserved
-by more than one customer at once.
-
-\section*{TCP Sockets}
-
-The overall architecture of the TCP sockets application is identical to the
-structure of the web services application; we merely replace the HTTP transport
-with our own transport. This introduces many new challenges. In particular, we
-concern ourselves with efficiently managing multiple concurrent connections as
-well as transferring objects over the network.
 
 At the core of both the middleware and backend servers, there is a tight loop
 that accepts incoming connections. Upon each new connection being established,
@@ -161,7 +137,7 @@ capabilities. However, we pass only two types of objects over the network.
         transparently be thrown across the network, and prevents exceptions
         raised by event handler code from crashing the socket accept loop.
         However, clients and the middleware must take care to check for these
-        exceptions.
+        exceptions as they are unchecked.
 \end{description}
 
 \begin{figure}[H]
@@ -199,17 +175,48 @@ capabilities. However, we pass only two types of objects over the network.
         capabilities that can be performed on reservable items.
         Backend servers use a \texttt{CustomerResourceManager} or a
         \texttt{ItemResourceManager} to perform actions on their respective
-        backing store, using a pool of database connections, according to the
-        type of data that they manage.
+        backing store,  according to the type of data that they manage.
         Clients use a \texttt{SocketResourceManager} to send \texttt{Request}
         objects representing the remote methods to call.
         The middleware server's \texttt{MiddlewareResourceManager} aggregates a
         number of \texttt{SocketResourceManager}s, one for each connected
-        backend server.  Many requests received by the middleware simply need
+        backend server. Many requests received by the middleware simply need
         to be forwarded to the appropriate backend server, but some requests
         require aggregating data across all nodes in order to present summary
         information to the client.
     }
+\end{figure}
+
+\section*{Performance}
+
+Below we show the performance of distributed transactions in the system.
+Figure \ref{fig:performance-vs-tps} shows the performance of the system under
+concurrent loads, whereas figure \ref{fig:throughput} presents an evaluation of
+the throughput of the system.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figure.pdf}
+    \caption{
+        Requests are submitted by ten clients concurrently at an
+        increasing rate. The performance of the system as the rate of
+        transactions being submitted increases degrades as expected in a
+        slightly sublinear fashion.
+    }
+    \label{fig:performance-vs-tps}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{bars.pdf}
+    \caption{
+        A single client bombards the system with requests in order to evaluate
+        the overall throughput of the system according to the complexity of the
+        submitted requests. Requests involving one, two, and three independent
+        backend servers are submitted. Despite the varying complexity of these
+        requests, the difference in average response times are not significant.
+    }
+    \label{fig:throughput}
 \end{figure}
 
 \end{document}
