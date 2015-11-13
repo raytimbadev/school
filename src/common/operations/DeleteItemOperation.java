@@ -30,9 +30,15 @@ public class DeleteItemOperation extends TransactionOperation<Boolean> {
         final TransactionDataStore data = getDataStore();
 
         for(final String k : data.keys()) {
-            ItemGroup g = data.get(k, LockType.LOCK_READ);
+            ItemGroup g = null;
+            if(this.isTransaction())
+                g = data.get(k, LockType.LOCK_READ);
+            else
+                g = data.get(k);
+
             if(g.hasReservation(customerId)) {
-                g = data.get(k, LockType.LOCK_WRITE);
+                if(this.isTransaction())
+                    g = data.get(k, LockType.LOCK_WRITE);
                 g.cancel(customerId);
             }
         }

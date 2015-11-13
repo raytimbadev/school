@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class DeleteCustomerOperation extends TransactionOperation<Boolean> {
-    int id;
     int customerId;
 
     public DeleteCustomerOperation(
@@ -31,12 +30,11 @@ public class DeleteCustomerOperation extends TransactionOperation<Boolean> {
 
     @Override
     public Boolean invoke() {
-        final String key = String.valueOf(id);
+        final String key = String.valueOf(customerId);
+        final ItemGroup g = getDatum(key);
 
-        ItemGroup g = getDatum(key);
-        
-        if(g==null){
-            return true; 
+        if(g == null){
+            return false;
         }
 
         removeDatum(key);
