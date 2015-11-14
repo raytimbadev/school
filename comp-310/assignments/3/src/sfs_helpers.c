@@ -742,15 +742,24 @@ basic_write(
     // pointers in the inode
     const unsigned int start_block_n = dst_offset / sb->block_size;
 
-    // the number of blocks that the read spans
-    const unsigned int needed_blocks_maybe = size / sb->block_size;
-    const unsigned int needed_blocks = needed_blocks_maybe +
-        (size % sb->block_size == 0 ? 0 : 1);
+    const unsigned int end_block_n_maybe =
+        (dst_offset + size)
+        / sb->block_size;
 
-    const unsigned int end_block_n = start_block_n + needed_blocks;
+    // the number of blocks that the write spans
+    const unsigned int end_block_n = end_block_n_maybe +
+        ((dst_offset + size) % sb->block_size == 0 ? 0 : 1);
 
     // adjust the destination offset to fall within a block.
     dst_offset -= start_block_n * sb->block_size;
+
+    fprintf(stderr,
+            "SFS: basic_write: writing %zu bytes, from data block %u up to "
+            "%u, with first offset %u.\n",
+            size,
+            start_block_n,
+            end_block_n,
+            dst_offset);
 
     const char need_indirect = end_block_n > SFS_DIRECT_PTR_COUNT;
 
@@ -764,65 +773,9 @@ basic_write(
     sfs_block_ptr indirect_ptrs[block_ptrs_per_block];
 
     for(i = start_block_n;
+
             i < end_block_n &&
             i < SFS_DIRECT_PTR_COUNT &&
-            remaining > 0;
-
-            i ++,
-            dst_offset = 0,
-            src_offset += copy_count,
-            remaining -= copy_count)
-    {
-        // allocate a block-sized buffer
-        memset(block_buf, 0, sb->block_size);
-
-        // read any existing disk data into the block buffer
-        if(read_blocks(
-                    db_offset + inode->direct_blocks[i],
-                    1,
-                    block_buf) < 1)
-            goto fail;
-
-        // the number of bytes to copy is the size of a block minus the number
-        // of bytes to skip at the beginning (this only matters for the first
-        // block to write)
-        copy_count = sb->block_size - dst_offset;
-
-        // if that number of bytes is less than the number of remaining bytes
-        // to write, then the number of bytes to copy is simply the number of
-        // remaining bytes.
-        if(remaining < copy_count)
-            copy_count = remaining;
-
-        // copy from the source buffer into the block buffer, overwriting disk
-        // data where expected
-        memcpy(block_buf + dst_offset, src + src_offset, copy_count);
-
-        // write the block back to disk
-        if(write_blocks(
-                    db_offset + inode->direct_blocks[i],
-                    1,
-                    block_buf) < 1)
-            goto fail;
-    }
-
-    // if no indirect blocks are needed, then we can simply return immediately.
-    if(!need_indirect)
-    {
-        free(block_buf);
-        return (signed int)size;
-    }
-
-    if(read_blocks(
-                db_offset + inode->indirect_block,
-                1,
-                (void*)indirect_ptrs) <0)
-        goto fail;
-
-    for(;
-            i < end_block_n &&
-            i < block_ptrs_per_block &&
-            indirect_ptrs[i] != SFS_NULL &&
             remaining > 0;
 
             i++,
@@ -830,15 +783,26 @@ basic_write(
             src_offset += copy_count,
             remaining -= copy_count)
     {
+        fprintf(stderr,
+                "SFS: basic_write: %u remaining bytes to write (i = %u).\n",
+                remaining,
+                i);
+
         // allocate a block-sized buffer
         memset(block_buf, 0, sb->block_size);
 
         // read any existing disk data into the block buffer
         if(read_blocks(
-                    db_offset + indirect_ptrs[i],
+                    db_offset + inode->direct_blocks[i],
                     1,
                     block_buf) < 1)
+        {
+            fprintf(stderr,
+                    "SFS: basic_write: failed to read existing data from "
+                    "direct block %d.\n",
+                    i);
             goto fail;
+        }
 
         // the number of bytes to copy is the size of a block minus the number
         // of bytes to skip at the beginning (this only matters for the first
@@ -855,13 +819,136 @@ basic_write(
         // data where expected
         memcpy(block_buf + dst_offset, src + src_offset, copy_count);
 
+        fprintf(stderr,
+                "SFS: basic_write: copied %u bytes from source buffer "
+                "(offset %u) to block buffer (offset %u).\n",
+                copy_count,
+                src_offset,
+                dst_offset);
+
         // write the block back to disk
         if(write_blocks(
-                    db_offset + indirect_ptrs[i],
+                    db_offset + inode->direct_blocks[i],
                     1,
                     block_buf) < 1)
+        {
+            fprintf(stderr,
+                    "SFS: basic_write: failed to write to direct block %d.\n",
+                    i);
             goto fail;
+        }
+
+        fprintf(stderr,
+                "SFS: basic_write: persisted direct block %d (0x%04x).\n",
+                i,
+                inode->direct_blocks[i]);
     }
+
+    // if no indirect blocks are needed, then we can simply return immediately.
+    if(!need_indirect)
+    {
+        fprintf(stderr,
+                "SFS: basic_write: no indirect pointers, so returning "
+                "early.\n");
+        free(block_buf);
+        return (signed int)size;
+    }
+
+    if(read_blocks(
+                db_offset + inode->indirect_block,
+                1,
+                (void*)indirect_ptrs) < 0)
+    {
+        fprintf(stderr,
+                "SFS: basic_write: failed to read indirect pointer block.\n");
+        goto fail;
+    }
+
+    fprintf(stderr,
+            "SFS: basic_write: "
+            "i = %d, indirect_ptrs[i-12] = 0x%04x, remaining = %u\n",
+            i,
+            indirect_ptrs[i - SFS_DIRECT_PTR_COUNT],
+            remaining);
+
+    for(;
+            i < end_block_n &&
+            i < block_ptrs_per_block &&
+            indirect_ptrs[i - SFS_DIRECT_PTR_COUNT] != SFS_NULL &&
+            remaining > 0;
+
+            i++,
+            dst_offset = 0,
+            src_offset += copy_count,
+            remaining -= copy_count)
+    {
+        const unsigned int indirect_i = i - SFS_DIRECT_PTR_COUNT;
+
+        fprintf(stderr,
+                "SFS: basic_write: %u remaining bytes to write (i = %u).\n",
+                remaining,
+                i);
+
+        // allocate a block-sized buffer
+        memset(block_buf, 0, sb->block_size);
+
+        // read any existing disk data into the block buffer
+        if(read_blocks(
+                    db_offset + indirect_ptrs[indirect_i],
+                    1,
+                    block_buf) < 1)
+        {
+            fprintf(stderr,
+                    "SFS: basic_write: failed to read existing data from "
+                    "indirect block %d (0x%04x).\n",
+                    indirect_i,
+                    indirect_ptrs[indirect_i]);
+            goto fail;
+        }
+
+        // the number of bytes to copy is the size of a block minus the number
+        // of bytes to skip at the beginning (this only matters for the first
+        // block to write)
+        copy_count = sb->block_size - dst_offset;
+
+        // if that number of bytes is less than the number of remaining bytes
+        // to write, then the number of bytes to copy is simply the number of
+        // remaining bytes.
+        if(remaining < copy_count)
+            copy_count = remaining;
+
+        // copy from the source buffer into the block buffer, overwriting disk
+        // data where expected
+        memcpy(block_buf + dst_offset, src + src_offset, copy_count);
+
+        fprintf(stderr,
+                "SFS: basic_write: copied %u bytes from source buffer "
+                "(offset %u) to destination buffer (offset %u).\n",
+                copy_count,
+                src_offset,
+                dst_offset);
+
+        // write the block back to disk
+        if(write_blocks(
+                    db_offset + indirect_ptrs[indirect_i],
+                    1,
+                    block_buf) < 1)
+        {
+            fprintf(stderr,
+                    "SFS: basic_write: failed to persist buffer for indirect "
+                    "block %d (0x%04x).\n",
+                    indirect_i,
+                    indirect_ptrs[indirect_i]);
+            goto fail;
+        }
+
+        fprintf(stderr,
+                "SFS: basic_write: persisted indirect block %d (0x%04x).\n",
+                indirect_i,
+                indirect_ptrs[indirect_i]);
+    }
+
+    fprintf(stderr, "SFS: basic_write: successfully wrote %zu bytes.\n", size);
 
     free(block_buf);
     return (signed int)size;
@@ -894,16 +981,24 @@ basic_read(
     // in the inode.
     const unsigned int start_block_n = src_offset / sb->block_size;
 
-    // the number of blocks that the read spans
-    const unsigned int needed_blocks_maybe = size / sb->block_size;
-    const unsigned int needed_blocks = needed_blocks_maybe +
-        (size % sb->block_size == 0 ? 0 : 1);
+    const unsigned int end_block_n_maybe =
+        (dst_offset + size)
+        / sb->block_size;
 
-    // comes out to one plus the last needed index
-    const unsigned int end_block_n = start_block_n + needed_blocks;
+    // the number of blocks that the read spans
+    const unsigned int end_block_n = end_block_n_maybe +
+        ((dst_offset + size) % sb->block_size == 0 ? 0 : 1);
 
     // adjust the source offset to be within the first block.
     src_offset -= start_block_n * sb->block_size;
+
+    fprintf(stderr,
+            "SFS: basic_read: reading %zu bytes, from data block %u up to "
+            "%u, with first offset %u.\n",
+            size,
+            start_block_n,
+            end_block_n,
+            src_offset);
 
     // represents whether indirect blocks will be needed
     const char need_indirect = end_block_n > SFS_DIRECT_PTR_COUNT;
@@ -913,7 +1008,7 @@ basic_read(
 
     // the block pointer index and the number of bytes to copy from the current
     // block (recalculated for each new block read)
-    int i = start_block_n, copy_count;
+    unsigned int i = start_block_n, copy_count;
 
     // read direct blocks, if any. This loop will be skipped if start_block_n
     // turns out to be greater than the number of direct pointers held in an
@@ -928,9 +1023,17 @@ basic_read(
             src_offset = 0,
             remaining -= copy_count)
     {
+        fprintf(stderr,
+                "SFS: basic_read: %u remaining bytes to read (i = %u).\n",
+                remaining,
+                i);
+
         // read the next block into the block buffer
         if(read_blocks(db_offset + inode->direct_blocks[i], 1, block_buf) < 1)
         {
+            fprintf(stderr,
+                    "SFS: basic_read: failed to read direct block %d.\n",
+                    i);
             free(block_buf);
             return -1;
         }
@@ -946,32 +1049,48 @@ basic_read(
 
         // copy that number of bytes from the block buffer to the destination
         memcpy(dst + dst_offset, block_buf + src_offset, copy_count);
+
+        fprintf(stderr,
+                "SFS: basic_read: copied %u bytes from direct block %d "
+                "(block 0x%04x) (offset %u) to destination (offset %u).\n",
+                copy_count,
+                i,
+                inode->direct_blocks[i],
+                src_offset,
+                dst_offset);
     }
 
     // if no indirect blocks are needed, then we can simply return immediately.
     if(!need_indirect)
     {
         free(block_buf);
+        fprintf(stderr,
+                "SFS: basic_read: indirect block is unused, so exiting "
+                "early.\n");
         return (signed int)size;
     }
 
     // otherwise, we read the indirect pointer block
 
-    const unsigned int block_ptrs_per_block =
+    const unsigned int indirect_ptr_count =
         sb->block_size / sizeof(sfs_block_ptr);
-    sfs_block_ptr indirect_ptrs[block_ptrs_per_block];
+
+    sfs_block_ptr indirect_ptrs[indirect_ptr_count];
+
     if(read_blocks(
                 db_offset + inode->indirect_block,
                 1,
                 (void*)indirect_ptrs) < 0)
     {
         free(block_buf);
+        fprintf(stderr,
+                "SFS: basic_read: failed to read indirect pointer block.\n");
         return -1;
     }
 
     for(;
             i < end_block_n &&
-            i < block_ptrs_per_block &&
+            i < indirect_ptr_count &&
             indirect_ptrs[i] != SFS_NULL &&
             remaining > 0;
 
@@ -980,10 +1099,23 @@ basic_read(
             src_offset = 0,
             remaining -= copy_count)
     {
+        const unsigned int indirect_i = i - SFS_DIRECT_PTR_COUNT;
+
+        fprintf(stderr,
+                "SFS: basic_read: %u bytes remain to be read (i = %u).\n",
+                remaining,
+                i);
+
         // read the next block into the block buffer
-        if(read_blocks(db_offset + indirect_ptrs[i], 1, block_buf) < 1)
+        if(read_blocks(
+                    db_offset + indirect_ptrs[indirect_i],
+                    1,
+                    block_buf) < 1)
         {
             free(block_buf);
+            fprintf(stderr,
+                    "SFS: basic_read: failed to read indirect block %u.\n",
+                    indirect_i);
             return -1;
         }
 
@@ -998,7 +1130,20 @@ basic_read(
 
         // copy that number of bytes from the block buffer to the destination
         memcpy(dst + dst_offset, block_buf + src_offset, copy_count);
+
+        fprintf(stderr,
+                "SFS: basic_read: copied %u bytes from indirect block %d "
+                "(block 0x%04x) (offset %u) to destination (offset %u).\n",
+                copy_count,
+                indirect_ptrs[indirect_i],
+                indirect_i,
+                src_offset,
+                dst_offset);
     }
+
+    fprintf(stderr,
+            "SFS: basic_read: %zu bytes read successfully.\n",
+            size);
 
     free(block_buf);
     return size;
@@ -1830,7 +1975,7 @@ dump_inode(struct sfs_inode *inode)
 
     int i;
     for(i = 0; i < SFS_DIRECT_PTR_COUNT; i++)
-        sprintf(s2 + line_size * i, "0x%08x\n", inode->direct_blocks[i]);
+        sprintf(s2 + line_size * i, "0x%04x\n", inode->direct_blocks[i]);
 
     sfs_block_ptr *indirect_blocks = NULL;
 
@@ -1849,7 +1994,7 @@ dump_inode(struct sfs_inode *inode)
 
         result3 = asprintf(
                 &s3,
-                "indirect pointer: 0x%08x; blocks:\n",
+                "indirect pointer: 0x%04x; blocks:\n",
                 inode->indirect_block);
 
         if(result3 < 0)
@@ -1868,7 +2013,7 @@ dump_inode(struct sfs_inode *inode)
         for(i = 0; i < indirect_block_count; i++)
             sprintf(
                     s4 + i * line_size,
-                    "0x%08x\n",
+                    "0x%04x\n",
                     indirect_blocks[i]);
     }
 
