@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include "sfs_helpers.h"
 
 #include <stdio.h>
@@ -10,27 +12,65 @@ static struct sfs_superblock * SUPERBLOCK = NULL;
 int
 sfs_format(int fresh, char *path, size_t block_size, size_t block_count)
 {
+    fprintf(stderr, "SFS: sfs_format.\n");
+
     if(SUPERBLOCK != NULL)
     {
-        fprintf(stderr, "Calling sfs_format twice.\n");
+        // TODO check out reinitialization logic?
+        fprintf(stderr, "SFS: sfs_format: formatting twice.\n");
         return -1;
     }
 
+    unsigned int bitpacks = block_count / BITPACK_SIZE + 1;
+    block_count = bitpacks * BITPACK_SIZE;
+    fprintf(stderr,
+            "SFS: sfs_format: rounded block_count to %zu.\n",
+            block_count);
+
     unsigned int inodes_per_block = block_size / sizeof(struct sfs_inode);
     unsigned int inode_count =
-        block_size * block_count / SFS_INODE_ALLOC_HEURISTIC;
+        block_size * block_count
+        / SFS_INODE_ALLOC_HEURISTIC
+        / sizeof(struct sfs_inode);
+
+    fprintf(stderr,
+            "SFS: sfs_format: computed inode count %u.\n",
+            inode_count);
+
+    inode_count = inode_count / BITPACK_SIZE + 1;
+    inode_count *= BITPACK_SIZE;
+
+    fprintf(stderr,
+            "SFS: sfs_format: rounded inode count to %u.\n",
+            inode_count);
+
     unsigned int bits_per_block = block_size * CHAR_BIT;
 
     unsigned int inode_blocks = inode_count / inodes_per_block + 1;
 
+    fprintf(stderr,
+            "SFS: sfs_format: %u blocks required to house inodes.\n",
+            inode_blocks);
+
     unsigned int data_bitmap_blocks = block_count / bits_per_block + 1;
     unsigned int inode_bitmap_blocks = inode_count / bits_per_block + 1;
+
+    fprintf(stderr,
+            "SFS: sfs_format: %u blocks for data bitmap.\n",
+            data_bitmap_blocks);
+
+    fprintf(stderr,
+            "SFS: sfs_format: %u blocks for inode bitmap.\n",
+            inode_bitmap_blocks);
 
     unsigned int total_blocks = 1 +
         block_count + inode_blocks +
         data_bitmap_blocks + inode_bitmap_blocks;
 
-    // TODO check for errors
+    fprintf(stderr,
+            "SFS: sfs_format: total disk size: %u blocks.\n",
+            total_blocks);
+
     if(fresh == SFS_FRESH)
     {
         if(init_fresh_disk(path, block_size, total_blocks) != 0)
@@ -50,6 +90,32 @@ sfs_format(int fresh, char *path, size_t block_size, size_t block_count)
     SUPERBLOCK->inode_blocks = inode_blocks;
     SUPERBLOCK->inode_bitmap_count = inode_bitmap_blocks;
     SUPERBLOCK->block_bitmap_count = data_bitmap_blocks;
+    SUPERBLOCK->root = 0;
+
+    // allocate a new inode structure for the root directory
+    struct sfs_inode *root_inode = new_inode(0, SFS_DEFAULT_DIR_MODE);
+
+    // persist the inode to disk.
+    if(inode_persist(SUPERBLOCK, root_inode) < 0)
+        fprintf(stderr,
+                "SFS: sfs_format: failed to persist root directory inode.\n");
+
+    // Now we have to mark root inode as used.
+    // load the inode bitfield from disk.
+    struct free_bitfield *inode_bitfield = load_free_inodes_bitfield();
+
+    // mark the root inode as used.
+    bitfield_mark(inode_bitfield, &SUPERBLOCK->root, 1, BIT_USED);
+
+    // persist the bitfield to disk.
+    bitfield_persist(
+            SUPERBLOCK,
+            inode_bitfield,
+            get_inode_bitmap_offset(SUPERBLOCK));
+
+    // free the in-memory inode structure for the root directory
+    free(root_inode);
+    free_bitfield(inode_bitfield);
 
     return 0;
 }
@@ -111,17 +177,19 @@ block_ceiling(const struct sfs_superblock *superblock, size_t bytes)
     return blocks;
 }
 
-char *
+void *
 block_malloc(const struct sfs_superblock *superblock, size_t block_count)
 {
     return calloc(block_count, superblock->block_size);
 }
 
 /**
- * Determines what block a given inode is stored on.
+ * Determines what block within the inode table a given inode is stored on.
  *
- * Returns 0 and sets the value pointed to by `m` to the block number holding
- * the desired inode.
+ * In case of success, returns 0 and sets the value pointed to by `m` to the
+ * block number holding the desired inode, and sets the value pointed to by `p`
+ * to the inode number of the first inode stored on that block.
+ *
  * Returns -1 in case of failure.
  */
 int
@@ -131,9 +199,9 @@ resolve_inode_to_block(sfs_inode_n n, sfs_block_ptr *m, sfs_inode_n *p)
     const size_t inodes_per_block = get_inodes_per_block(superblock);
     const size_t inode_block_offset = n / inodes_per_block;
 
-    if(inode_block_offset + 1 >= superblock->inode_blocks)
+    if(n >= superblock->inode_count)
     {
-        fprintf(stderr, "inode number too big.\n");
+        fprintf(stderr, "SFS: resolve_inode_to_block: inode number too big.\n");
         return -1;
     }
 
@@ -141,6 +209,12 @@ resolve_inode_to_block(sfs_inode_n n, sfs_block_ptr *m, sfs_inode_n *p)
         *p = inode_block_offset * inodes_per_block;
 
     *m = get_inode_table_offset(superblock) + inode_block_offset;
+
+    fprintf(stderr,
+            "SFS: resolve_inode_to_block: inode %u -> block %u on disk.\n",
+            n,
+            *m);
+
     return 0;
 }
 
@@ -151,7 +225,13 @@ load_inode(sfs_inode_n n, struct sfs_inode **inode)
     sfs_inode_n base_inode_n;
 
     if(resolve_inode_to_block(n, &inode_block, &base_inode_n) != 0)
+    {
+        fprintf(stderr,
+                "SFS: load_inode: fail: could not resolve inode %d to a "
+                "block.\n",
+                n);
         return -1;
+    }
 
     const struct sfs_superblock *superblock = load_superblock();
     const sfs_inode_n inode_offset = n - base_inode_n;
@@ -162,6 +242,10 @@ load_inode(sfs_inode_n n, struct sfs_inode **inode)
     if(block_count < 1)
     {
         // failed to read the block
+        fprintf(stderr,
+                "SFS: load_inode: fail: could not read the block holding "
+                "inode %d.\n",
+                n);
         free(buf);
         return -1;
     }
@@ -169,9 +253,25 @@ load_inode(sfs_inode_n n, struct sfs_inode **inode)
     const struct sfs_inode *inodes = (const struct sfs_inode *)buf;
 
     if(*inode == NULL)
+    {
+        fprintf(stderr,
+                "SFS: load_inode: automatically allocating inode struct.\n");
         *inode = malloc(sizeof(**inode));
+    }
+    else
+        fprintf(stderr,
+                "SFS: load_inode: overwriting existing inode struct.\n");
 
     **inode = inodes[inode_offset];
+
+    // sanity check
+    if(inodes[inode_offset].n == n)
+        fprintf(stderr,
+                "SFS: load_inode: success: loaded inode number %u.\n", n);
+    else
+        fprintf(stderr,
+                "SFS: load_inode: warn: loaded inode's number does not match "
+                "requested inode number.\n");
 
     free(buf);
     return 0;
@@ -208,11 +308,15 @@ follow_path(
         if(load_inode(sb->root, &parent) != 0)
             return -2;
 
+        fprintf(stderr, "SFS: follow_path: recursing from root directory.\n");
         goto recurse;
     }
 
     if(parent == NULL)
+    {
+        fprintf(stderr, "SFS: follow_path: fail: no parent for non-root.\n");
         return -1;
+    }
 
     // seek with another pointer to the next slash or till the end of the
     // string
@@ -223,12 +327,20 @@ follow_path(
     int done = *path_p == '\0';
     *path_p = '\0';
 
+    if(!done)
+        fprintf(stderr,
+                "SFS: follow_path: path split '%s', '%s'\n",
+                path,
+                path_p + 1);
+
     // now path is just the name of leftmost path element
 
     struct sfs_dir_iter *dir = NULL;
     if(listdir(parent, &dir) != 0)
     {
-        free_dir_iter(dir);
+        fprintf(stderr,
+                "SFS: follow_path: failed to listdir inode %d.\n",
+                parent->n);
         return -3;
     }
 
@@ -238,6 +350,8 @@ follow_path(
     // if the child doesn't exist
     if(child_inode == SFS_INODE_NULL)
     {
+        fprintf(stderr,
+                "SFS: follow_path: child does not exist.\n");
         // and if we've reached the end of the path and we have a mode, then we
         // need to create a new file.
         if(done && mode != SFS_NO_MODE)
@@ -245,14 +359,32 @@ follow_path(
         // otherwise, if we're not done or if we don't have a mode, then this
         // is a file not found error.
         else
+        {
+            fprintf(stderr,
+                    "SFS: follow_path: fail: file not found!\n");
             return -4;
+        }
     }
+    else
+        fprintf(stderr,
+                "SFS: follow_path: child exists with inode number %d.\n",
+                child_inode);
 
+    parent = NULL;
     if(load_inode(child_inode, &parent) != 0)
+    {
+        fprintf(stderr,
+                "SFS: follow_path: failed to load child inode %d.\n",
+                child_inode);
         return -5;
+    }
 
     if(!done)
         goto recurse;
+
+    fprintf(stderr,
+            "SFS: follow_path: reached end of path at file with inode %u.\n",
+            parent->n);
 
     // if we're done then the parent pointer in fact points to the file
     // identified by the full path. We can simply set *inode to parent then
@@ -263,24 +395,25 @@ follow_path(
     return 0;
 
 create:
+    fprintf(stderr,
+            "SFS: follow_path: creating new file for missing child.\n");
     // allocate a new inode number
     if((child_inode = ialloc()) == SFS_INODE_NULL)
+    {
+        fprintf(stderr,
+                "SFS: follow_path: fail: cannot allocate an inode for "
+                "child.\n");
         return -6;
+    }
 
-    // overwrite the inode with our new data
-    (*inode)->n = child_inode;
-    (*inode)->mode = mode;
-    (*inode)->link_count = 1;
-    (*inode)->uid = 0;
-    (*inode)->gid = 0;
-    (*inode)->size = 0;
-    int i;
-    for(i = 0; i < SFS_DIRECT_PTR_COUNT; i++)
-        (*inode)->direct_blocks[i] = SFS_NULL;
-    (*inode)->indirect_block = SFS_NULL;
+    free(*inode);
+    *inode = new_inode(child_inode, mode);
 
     // write the inode to disk.
-    inode_persist(load_superblock(), *inode);
+    if(inode_persist(load_superblock(), *inode) < 0)
+        fprintf(stderr,
+                "SFS: follow_path: failed to persist inode %u.\n",
+                child_inode);
 
     struct sfs_dir_entry entry = {
         .inode = child_inode
@@ -306,12 +439,27 @@ recurse:
 sfs_inode_n
 dirlookup(const struct sfs_dir_iter *dir, const char *filename)
 {
+    fprintf(stderr,
+            "SFS: dirlookup: looking up '%s'.\n",
+            filename);
+
     unsigned int i;
     for(i = 0; i < dir->size; i++)
     {
         const char *other_filename = dir->entries[i].filename;
         if(strncmp(filename, other_filename, MAXFILENAME) == 0)
+        {
+            fprintf(stderr,
+                    "SFS: dirlookup: HIT '%s' -> inode %u.\n",
+                    filename,
+                    dir->entries[i].inode);
             return dir->entries[i].inode;
+        }
+        else
+            fprintf(stderr,
+                    "SFS: dirlookup: MISS '%s' /= '%s'.\n",
+                    filename,
+                    dir->entries[i].filename);
     }
 
     return SFS_INODE_NULL;
@@ -325,12 +473,22 @@ listdir(const struct sfs_inode *inode, struct sfs_dir_iter **iter)
 
     // check that the file is a directory
     if((inode->mode & MODE_D) == 0)
+    {
+        fprintf(stderr,
+                "SFS: listdir: fail: not a directory (inode %u).\n",
+                inode->n);
+        free(*iter);
         return -1; // not a directory
+    }
 
     // read in the directory directory
     void *buf = NULL;
-    if(read_whole_file(inode, &buf) != 0)
+    if(read_whole_file(inode, &buf) < 0)
     {
+        fprintf(stderr,
+                "SFS: listdir: fail: cannot load directory contents "
+                "(inode %u).\n",
+                inode->n);
         free(buf);
         return -3;
     }
@@ -342,6 +500,11 @@ listdir(const struct sfs_inode *inode, struct sfs_dir_iter **iter)
     (*iter)->entries = entries;
     (*iter)->size = file_count;
     (*iter)->position = 0;
+
+    fprintf(stderr,
+            "SFS: listdir: loaded directory inode %u (%zu entries).\n",
+            inode->n,
+            file_count);
 
     return 0;
 }
@@ -363,11 +526,16 @@ file_open(
 
     **file = (struct sfs_file) {
         .inode = *inode,
-        .file_offset = 0,
+        .file_offset = inode->size,
         .buf_offset = 0,
         .buf = calloc(SFS_WRITEBUF_SIZE, sizeof(char)),
         .buf_size = SFS_WRITEBUF_SIZE
     };
+
+    fprintf(stderr,
+            "SFS: file_open: opened file; inode %u; size %zu\n",
+            inode->n,
+            inode->size);
 
     return 0;
 }
@@ -381,6 +549,8 @@ int link_remove(
     // open the directory
     if(file_open(dir_inode, &file) != 0)
         return -1;
+
+    file_seek(file, 0, SFS_START);
 
     // marker for the position in the directory where we found a match
     unsigned int found_at = 0;
@@ -399,6 +569,8 @@ int link_remove(
         if(strncmp(filename, entry.filename, MAXFILENAME) != 0)
             continue;
 
+        fprintf(stderr,
+                "SFS: link_remove: found link to remove.\n");
         found = 1;
         found_at = file_seek(file, 0, SFS_HERE) - sizeof(entry);
 
@@ -407,7 +579,12 @@ int link_remove(
 
     // no link to remove
     if(!found)
+    {
+        file_close(file);
+        fprintf(stderr,
+                "SFS: link_remove: no link to remove.\n");
         return 0;
+    }
 
     size_t remaining = file->inode.size - found_at + sizeof(entry);
 
@@ -464,22 +641,51 @@ link_create(
         const struct sfs_inode *dir_inode,
         const struct sfs_dir_entry *entry)
 {
+    fprintf(stderr,
+            "SFS: link_create: '%s' -> %d in directory inode %d.\n",
+            entry->filename,
+            entry->inode,
+            dir_inode->n);
     struct sfs_file *file = NULL;
 
     // remove any existing link to the file we want to create here
-    link_remove(dir_inode, entry->filename);
+    if(link_remove(dir_inode, entry->filename) < 0)
+    {
+        fprintf(stderr,
+                "SFS: link_create: failed to remove existing links to %s in "
+                "directory inode %u.\n",
+                entry->filename,
+                dir_inode->n);
+        return -1;
+    }
 
     // open the directory
     if(file_open(dir_inode, &file) != 0)
+    {
+        fprintf(stderr,
+                "SFS: link_create: failed to open parent (inode %u).\n",
+                dir_inode->n);
         return -1;
+    }
 
     // write our new directory entry to the end of the file.
-    if(file_write(file, entry, sizeof(entry) < 0))
+    if(file_write(file, entry, sizeof(*entry)) < 0)
         goto fail;
 
     // close the file.
     if(file_close(file) < 0)
+    {
+        fprintf(stderr,
+                "SFS: link_create: failed to close directory (inode %u).\n",
+                dir_inode->n);
         goto fail;
+    }
+
+    fprintf(stderr,
+            "SFS: link_create: linked '%s' -> %u in directory inode %u.\n",
+            entry->filename,
+            entry->inode,
+            dir_inode->n);
 
     return 0;
 
@@ -814,34 +1020,74 @@ file_read(struct sfs_file *file, void *dst, size_t size)
     // adjust the size to be at most the maximum number of bytes that can still
     // be read, if the requested size is too large.
     if(file->file_offset + size > file->inode.size)
+    {
         size = file->inode.size - file->file_offset;
+        fprintf(stderr,
+                "SFS: file_read: adjusted read size to %zu.\n",
+                size);
+    }
 
     // perform the read
     const int ret = basic_read(&file->inode, dst, size, file->file_offset);
 
     // advance the file offset if successful
     if(ret > 0)
+    {
+        fprintf(stderr,
+                "SFS: file_read: successfully read %d bytes.\n",
+                ret);
         file->file_offset += ret;
+    }
+    else
+        fprintf(stderr,
+                "SFS: file_read: fail.\n");
 
     // return the number of bytes read.
     return ret;
 }
 
 int
-file_write(struct sfs_file *file, const void *buf, size_t size)
+file_write(struct sfs_file *file, const void *buf, const size_t size)
 {
-    if(size > file->buf_size)
-        return -1;
+    size_t remaining = size;
+    size_t copy_count;
 
-    int ret = 0;
+    while(remaining > 0)
+    {
+        fprintf(stderr,
+                "SFS: file_write: %zu remaining bytes to write.\n",
+                remaining);
 
-    if(size + file->buf_offset > file->buf_size)
-        if((ret = file_flush(file)) < 0)
+        if(file->buf_offset == file->buf_size && file_flush(file) < 0)
+        {
+            fprintf(stderr,
+                    "SFS: file_write: failed to flush write buffer.\n");
             return -2;
+        }
 
-    memcpy(file->buf + file->buf_offset, buf, size);
-    file->buf_offset += size;
-    return ret;
+        copy_count = file->buf_size - file->buf_offset;
+        if(remaining < copy_count)
+        {
+            fprintf(stderr, "SFS: file_write: copying all remaining bytes.\n");
+            copy_count = remaining;
+        }
+        else
+            fprintf(stderr,
+                    "SFS: file_write: copying %zu bytes to buffer.\n",
+                    copy_count);
+
+        memcpy(file->buf + file->buf_offset,
+                buf + size - remaining,
+                copy_count);
+
+        file->buf_offset += copy_count;
+        remaining -= copy_count;
+    }
+
+    fprintf(stderr,
+            "SFS: file_write: wrote %zu bytes successfully.\n",
+            size);
+    return size;
 }
 
 int
@@ -849,7 +1095,12 @@ file_seek(struct sfs_file *file, int offset, sfs_seek_origin origin)
 {
     // flush outstanding write buffers
     if(file_flush(file) < 0)
+    {
+        fprintf(stderr,
+                "SFS: file_seek: flushing file (inode %u) failed.\n",
+                file->inode.n);
         return -2;
+    }
 
     unsigned int new_offset = 0;
 
@@ -860,11 +1111,37 @@ file_seek(struct sfs_file *file, int offset, sfs_seek_origin origin)
     else if(origin == SFS_HERE)
         new_offset = file->file_offset + offset;
     else
+    {
+        fprintf(stderr,
+                "SFS: file_seek: invalid seek origin.\n");
         return -3;
+    }
+
+    if(new_offset == file->file_offset)
+    {
+        fprintf(stderr,
+                "SFS: file_seek: skipping pointless seek for inode %u.\n",
+                file->inode.n);
+        return (signed int)new_offset;
+    }
 
     // check that desired position is not beyond the end of the file.
     if(new_offset > file->inode.size)
+    {
+        fprintf(stderr,
+                "SFS: file_seek: seek inode %u -> %d is beyond end of file "
+                "%zu.\n",
+                file->inode.n,
+                new_offset,
+                file->inode.size);
         return -1;
+    }
+
+    fprintf(stderr,
+            "SFS: file_seek: seek successful of inode %u: %u -> %d.\n",
+            file->inode.n,
+            file->file_offset,
+            new_offset);
 
     // set the offset
     file->file_offset = new_offset;
@@ -883,29 +1160,75 @@ file_flush(struct sfs_file *file)
     // grow the file.
     const size_t new_file_offset = file->file_offset + file->buf_offset;
     if(new_file_offset > file->inode.size)
+    {
+        fprintf(stderr,
+                "SFS: file_flush: growing file (inode %u) %zu -> %zu\n",
+                file->inode.n,
+                file->inode.size,
+                new_file_offset);
+
         if(file_truncate(file, new_file_offset) != 0)
+        {
+            fprintf(stderr,
+                    "SFS: file_flush: failed to truncate file to new size.\n");
             return -1;
+        }
+
+        // sanity check
+        if(file->inode.size != new_file_offset)
+        {
+            fprintf(stderr,
+                    "SFS: file_flush: new file size was not set.\n");
+            return -1;
+        }
+    }
 
     // the call to file_truncate will guarantee the existence of an indirect
     // block if one happens to now be needed.
 
     // write the buffer to the file
-    basic_write(&file->inode, file->buf, file->buf_offset, file->file_offset);
+    int ret = basic_write(
+            &file->inode,
+            file->buf,
+            file->buf_offset,
+            file->file_offset);
+
+    if(ret < 0)
+    {
+        fprintf(stderr,
+                "SFS: file_flush: failed to write buffer for inode %u.\n",
+                file->inode.n);
+        return -1;
+    }
+
+    fprintf(stderr,
+            "SFS: file_flush: flushed %d bytes to disk.\n",
+            ret);
 
     // adjust the offset pointers
     file->file_offset += file->buf_offset;
     file->buf_offset = 0;
 
-    return 0;
+    return ret;
 }
 
 int
 file_close(struct sfs_file *file)
 {
-    if(file_flush(file))
+    if(file_flush(file) < 0)
+    {
+        fprintf(stderr,
+                "SFS: file_close: failed to flush file (inode %u).\n",
+                file->inode.n);
         return -2;
+    }
 
     free(file->buf);
+
+    fprintf(stderr,
+            "SFS: file_close: inode %u, size %zu\n",
+            file->inode.n,
+            file->inode.size);
     free(file);
     return 0;
 }
@@ -918,6 +1241,11 @@ int resize_direct(
     const char is_alloc = needed_count > used_count;
     unsigned int i;
 
+    fprintf(stderr,
+            "SFS: resize_direct: %zu -> %zu blocks.\n",
+            used_count,
+            needed_count);
+
     if(is_alloc)
     {
         sfs_block_ptr *new_blocks = NULL;
@@ -925,7 +1253,8 @@ int resize_direct(
         const unsigned int block_diff = needed_count - used_count;
 
         fprintf(stderr,
-                "allocating %d new indirect pointers\n", block_diff);
+                "SFS: resize_direct: allocating %d new direct pointers\n",
+                block_diff);
 
         // if we're unable to allocate the needed blocks, then fail.
         if((new_blocks = balloc(block_diff)) == NULL) goto fail;
@@ -943,7 +1272,16 @@ int resize_direct(
         const unsigned int block_diff =
             used_count - needed_count;
 
-        fprintf(stderr, "deleting %d indirect pointers\n", block_diff);
+        if(block_diff == 0)
+        {
+            fprintf(stderr,
+                    "SFS: resize_direct: pointless resize skipped.\n");
+            goto done;
+        }
+
+        fprintf(stderr,
+                "SFS: resize_direct: deleting %d direct pointers\n",
+                block_diff);
 
         // mark them as free
         if(bfree(buf + needed_count * sizeof(*buf),
@@ -955,6 +1293,7 @@ int resize_direct(
             buf[i] = SFS_NULL;
     }
 
+done:
     return 0;
 
 fail:
@@ -968,9 +1307,14 @@ resize_indirect(
         size_t used_indirect_count,
         size_t needed_indirect_count)
 {
+    fprintf(stderr,
+            "SFS: resize_indirect: %zu -> %zu blocks.\n",
+            used_indirect_count,
+            needed_indirect_count);
+
     if(used_indirect_count == needed_indirect_count)
     {
-        fprintf(stderr, "indirect block resize with no effect.\n");
+        fprintf(stderr, "SFS: resize_indirect: skipping pointless resize.\n");
         return 0;
     }
 
@@ -986,27 +1330,47 @@ resize_indirect(
                     get_data_blocks_offset(sb) + inode->indirect_block,
                     1,
                     buf) == -1)
+        {
+            fprintf(stderr,
+                    "SFS: resize_indirect: failed to read indirect block.\n");
             goto fail;
+        }
     }
     // if it turns out that we don't already have an indirect block on disk
     else
     {
         // allocate a pointer for it, and fail if we can't.
         indirect_ptr = balloc(1);
-        if(indirect_ptr == NULL) goto fail;
+        if(indirect_ptr == NULL)
+        {
+            fprintf(stderr,
+                    "SFS: resize_indirect: failed to allocate indirect "
+                    "block.\n");
+            goto fail;
+        }
 
         // write the indirect pointer into the inode.
         inode->indirect_block = indirect_ptr[0];
         free(indirect_ptr);
     }
 
-    resize_direct(buf, used_indirect_count, needed_indirect_count);
+    if(resize_direct(buf, used_indirect_count, needed_indirect_count) < 0)
+    {
+        fprintf(stderr,
+                "SFS resize_indirect: failed to resize.\n");
+        goto fail;
+    }
 
     // write the buffer to disk
-    write_blocks(
+    if(write_blocks(
             get_data_blocks_offset(sb) + inode->indirect_block,
             1,
-            buf);
+            buf) < 0)
+    {
+        fprintf(stderr,
+                "SFS: resize_indirect: failed to persist indirect block.\n");
+        goto fail;
+    }
 
     // if we don't need an indirect block anymore
     if(needed_indirect_count == 0)
@@ -1030,13 +1394,22 @@ file_truncate(struct sfs_file *file, size_t new_size)
 {
     const struct sfs_superblock *sb = load_superblock();
 
+    const size_t max_size = get_max_file_size(sb);
+    if(new_size > max_size)
+    {
+        fprintf(stderr,
+                "SFS: file_truncate: "
+                "file (inode %u) would grow to %zu > max file size %zu!\n",
+                file->inode.n,
+                new_size,
+                max_size);
+        return -1;
+    }
+
     struct sfs_inode *inode = &file->inode;
 
     const size_t allocated_blocks = block_ceiling(sb, inode->size);
     const size_t needed_blocks = block_ceiling(sb, new_size);
-
-    if(allocated_blocks == needed_blocks)
-        return 0;
 
     const size_t allocated_direct_blocks =
         allocated_blocks < SFS_DIRECT_PTR_COUNT ?
@@ -1055,17 +1428,33 @@ file_truncate(struct sfs_file *file, size_t new_size)
             inode,
             allocated_indirect_blocks,
             needed_indirect_blocks) != 0)
+    {
+        fprintf(stderr,
+                "SFS: file_truncate: indirect resize failed (inode %u).\n",
+                file->inode.n);
         return -1;
+    }
 
     if(resize_direct(
             inode->direct_blocks,
             allocated_direct_blocks,
             needed_direct_blocks) != 0)
+    {
+        fprintf(stderr,
+                "SFS: file_truncate: direct resize failed (inode %u).\n",
+                file->inode.n);
         return -1;
+    }
 
     inode->size = new_size;
+    fprintf(stderr,
+            "SFS: file_truncate: inode %u size -> %zu\n",
+            inode->n,
+            new_size);
     if(file->file_offset > inode->size)
         file->file_offset = inode->size;
+
+    inode_persist(sb, inode);
 
     return 0;
 }
@@ -1083,12 +1472,23 @@ load_bitfield(
         size_t block_count,
         size_t item_count)
 {
+    fprintf(stderr,
+            "SFS: load_bitfield: loading at block %zu (%zu blocks long).\n",
+            block_offset,
+            block_count);
     void *buf = calloc(block_count, block_size);
     read_blocks(block_offset, block_count, buf);
     struct free_bitfield *field = malloc(sizeof(*field));
     field->bit_count = item_count;
     field->bits = buf;
     return field;
+}
+
+void
+free_bitfield(struct free_bitfield *bitfield)
+{
+    free(bitfield->bits);
+    free(bitfield);
 }
 
 struct free_bitfield *
@@ -1124,7 +1524,17 @@ bitfield_persist(
         field->bit_count / CHAR_BIT / block_size;
     if((field->bit_count / CHAR_BIT) % block_size != 0)
         block_count++;
-    return write_blocks(block_offset, block_count, field->bits);
+    int ret = write_blocks(block_offset, block_count, field->bits);
+    if(ret >= 0)
+        fprintf(stderr,
+                "SFS: bitfield_persist: persisted bitfield at block %zu.\n",
+                block_offset);
+    else
+        fprintf(stderr,
+                "SFS: bitfield_persist: failed to persist bitfield at block "
+                "%zu.\n",
+                block_offset);
+    return ret;
 }
 
 int
@@ -1146,6 +1556,9 @@ inode_persist(
     if(write_blocks(get_inode_table_offset(sb) + inode_block, 1, buf) < 0)
         goto fail;
 
+    fprintf(stderr,
+            "SFS: inode_persist: wrote inode %u to disk.\n",
+            inode->n);
     return 0;
 
 fail:
@@ -1154,36 +1567,24 @@ fail:
 }
 
 int
-bitpack_scan_conv(bitpack_scan scan)
+bitpack_next_free(bitpack pack, bitpack_scan position)
 {
-    // this is insanely inefficient.
-    int i;
-    for(i = -1; scan > 0; scan >>= 1, i++);
-    return i;
+    for(; position < BITPACK_SCAN_END; position++)
+        if((pack & (1U << position)) == 0)
+            return position;
+    return -1;
 }
 
-int
-bitpack_next_free(bitpack pack, bitpack_scan *position)
-{
-    if(position == BITPACK_SCAN_END)
-        return 0;
-
-    bitpack_scan here = *position;
-    *position <<= 1;
-
-    if((pack & here) != 0)
-        return bitpack_scan_conv(here);
-    else {
-        return bitpack_next_free(pack, position);
-    }
-}
-
-unsigned int *
+unsigned short *
 find_free_items(size_t count, struct free_bitfield *field)
 {
+    fprintf(stderr,
+            "SFS: find_free_items: searching %zu bits for %zu free items.\n",
+            field->bit_count,
+            count);
     // Sanity check that the number of bits in the bitfield is divisible by
     // the width of a bitpack.
-    if(field->bit_count % sizeof(*field->bits) != 0)
+    if(field->bit_count % BITPACK_SIZE != 0)
     {
         fprintf(stderr,
                 "EDGE CASE: number of bits must be divisible by number of "
@@ -1191,7 +1592,7 @@ find_free_items(size_t count, struct free_bitfield *field)
     }
 
     // array of items we found so far
-    unsigned int *found_items = calloc(count, sizeof(*found_items));
+    unsigned short *found_items = calloc(count, sizeof(*found_items));
 
     // index in that array to store the next found item
     unsigned int next_index = 0;
@@ -1200,40 +1601,55 @@ find_free_items(size_t count, struct free_bitfield *field)
     // we hit the end of the bitfield
     unsigned int i;
     for(i = 0;
-            i < field->bit_count &&
+            i * BITPACK_SIZE < field->bit_count &&
             next_index < count;
 
-            i += sizeof(*field->bits))
+            i++)
     {
         // load the bitpack from the bitfield.
-        const bitpack pack = field->bits[i / sizeof(*field->bits)];
-        bitpack_scan scan = BITPACK_SCAN_START;
+        const bitpack pack = field->bits[i];
+
+        fprintf(stderr,
+                "SFS: find_free_items: scanning bitpack #%u, 0x%08x.\n",
+                i,
+                pack);
 
         // find the next free index in the bitpack
-        int next_free;
-        while((next_free = bitpack_next_free(pack, &scan)) != -1
+        int next_free = BITPACK_SCAN_START;
+        while((next_free = bitpack_next_free(pack, next_free)) != -1
                 && next_index < count)
         {
             // for each one we find, add it to the array of found items.
-            found_items[next_index++] = i + (unsigned int)next_free;
+            found_items[next_index++] =
+                i * BITPACK_SIZE + (unsigned short)next_free;
+            fprintf(stderr,
+                    "SFS: find_free_items: found free item at position %u.\n",
+                    found_items[next_index - 1]);
+            next_free++;
         }
     }
 
     // if we hit the end of the bitfield without finding enough free items,
-    // then we're sheer outta luck !
+    // then we're shit outta luck !
     if(next_index != count)
     {
+        fprintf(stderr,
+                "SFS: find_free_items: fail: found %u < %zu free items.\n",
+                next_index,
+                count);
         free(found_items);
         return NULL;
     }
     else
+    {
         return found_items;
+    }
 }
 
 void
 bitfield_mark(
         struct free_bitfield *field,
-        unsigned int *ptrs,
+        unsigned short *ptrs,
         size_t count,
         bitfield_value t)
 {
@@ -1241,23 +1657,36 @@ bitfield_mark(
     for(i = 0; i < count; i++)
     {
         // fetch the pointer we're interested in
-        const unsigned int p = ptrs[i];
+        const unsigned short p = ptrs[i];
 
         // calculate which bitpack that pointer refers to
-        const unsigned int bitpack_offset = p / sizeof(*field->bits);
+        const unsigned int bitpack_offset = p / BITPACK_SIZE;
 
         // compute the offset within that bitpack
         const unsigned int bit_offset =
-            p - bitpack_offset * sizeof(*field->bits);
+            p - bitpack_offset * BITPACK_SIZE;
 
         // fetch the bitpack we're interested in
         bitpack pack = field->bits[bitpack_offset];
 
+        fprintf(stderr,
+                "SFS: bitfield_mark: mark bit %u (offset %u in pack %u) as "
+                "%u.\n",
+                p,
+                bit_offset,
+                bitpack_offset,
+                t);
+
         // set the bit_offset-th bit in pack if t is 1; else, clear it.
-        pack ^= (-t ^ pack) & (1 << bit_offset);
+        pack ^= (-t ^ pack) & (1U << bit_offset);
 
         // write the bitpack back to the bitfield.
         field->bits[bitpack_offset] = pack;
+
+        fprintf(stderr,
+                "SFS: bitfield_mark: pack after: 0x%08x.\n",
+                field->bits[bitpack_offset]);
+
     }
 }
 
@@ -1265,6 +1694,10 @@ sfs_block_ptr *
 balloc(size_t count)
 {
     struct sfs_superblock *sb = load_superblock();
+
+    fprintf(stderr,
+            "SFS: balloc: allocating %zu new blocks.\n",
+            count);
 
     struct free_bitfield *block_bitfield = load_free_blocks_bitfield();
     sfs_block_ptr *free_blocks =
@@ -1275,7 +1708,7 @@ balloc(size_t count)
         return NULL;
 
     // mark the blocks as used
-    bitfield_mark(block_bitfield, (unsigned int*)free_blocks, count, BIT_USED);
+    bitfield_mark(block_bitfield, free_blocks, count, BIT_USED);
 
     // persist the bitfield to disk
     if(bitfield_persist(sb, block_bitfield, get_block_bitmap_offset(sb)) == -1)
@@ -1306,6 +1739,9 @@ ialloc()
 {
     struct sfs_superblock *sb = load_superblock();
 
+    fprintf(stderr,
+            "SFS: ialloc: allocating a new inode.\n");
+
     struct free_bitfield *inode_bitfield = load_free_inodes_bitfield();
     sfs_inode_n *free_inodes =
         (sfs_inode_n *)find_free_items(1, inode_bitfield);
@@ -1314,7 +1750,7 @@ ialloc()
     if(free_inodes == NULL)
         return NULL;
 
-    bitfield_mark(inode_bitfield, (unsigned int*)free_inodes, 1, BIT_USED);
+    bitfield_mark(inode_bitfield, (unsigned short*)free_inodes, 1, BIT_USED);
 
     if(bitfield_persist(sb, inode_bitfield, get_inode_bitmap_offset(sb)) == -1)
     {
@@ -1336,4 +1772,119 @@ ifree(sfs_inode_n *inodes, size_t count)
 
     // persist the bitfield to disk.
     return bitfield_persist(sb, inode_bitfield, get_inode_bitmap_offset(sb));
+}
+
+struct sfs_inode *
+new_inode(sfs_inode_n n, sfs_mode mode)
+{
+    struct sfs_inode *inode = malloc(sizeof(*inode));
+    *inode = (struct sfs_inode) {
+        .n = n,
+        .mode = mode,
+        .link_count = 1,
+        .uid = 0,
+        .gid = 0,
+        .size = 0,
+        .indirect_block = SFS_NULL
+    };
+
+    int i;
+    for(i = 0; i < SFS_DIRECT_PTR_COUNT; i++)
+        inode->direct_blocks[i] = SFS_NULL;
+
+    fprintf(stderr, "SFS: new_inode: allocated inode %d in memory.\n", n);
+
+    return inode;
+}
+
+char *
+dump_inode(struct sfs_inode *inode)
+{
+    const struct sfs_superblock *sb = load_superblock();
+
+    int result1, result3;
+
+    char *s1 = NULL, *s2 = NULL, *s3 = NULL, *s4 = NULL;
+    result1 = asprintf(
+            &s1,
+            "inode %u\n"
+            "size: %zu\n"
+            "mode: %u\n"
+            "links: %u\n"
+            "uid: %u\n"
+            "gid: %u\n"
+            "direct pointers:\n",
+            inode->n,
+            inode->size,
+            inode->mode,
+            inode->link_count,
+            inode->uid,
+            inode->gid);
+
+    if(result1 < 0)
+        return NULL;
+
+    const size_t line_size = 11;
+
+    s2 = calloc(SFS_DIRECT_PTR_COUNT, line_size * sizeof(char) + 1);
+
+    int i;
+    for(i = 0; i < SFS_DIRECT_PTR_COUNT; i++)
+        sprintf(s2 + line_size * i, "0x%08x\n", inode->direct_blocks[i]);
+
+    sfs_block_ptr *indirect_blocks = NULL;
+
+    if(inode->indirect_block == SFS_NULL)
+    {
+        s3 = strdup("No indirect blocks.");
+        s4 = strdup("\0");
+    }
+    else
+    {
+        indirect_blocks = calloc(1, sb->block_size * sizeof(char));
+        read_blocks(
+                get_data_blocks_offset(sb) + inode->indirect_block,
+                1,
+                indirect_blocks);
+
+        result3 = asprintf(
+                &s3,
+                "indirect pointer: 0x%08x; blocks:\n",
+                inode->indirect_block);
+
+        if(result3 < 0)
+        {
+            free(s1);
+            free(s2);
+            return NULL;
+        }
+
+        const size_t indirect_block_count =
+            (inode->size - sb->block_size * SFS_DIRECT_PTR_COUNT)
+            / sb->block_size;
+
+        s4 = calloc(indirect_block_count, line_size * sizeof(char) + 1);
+
+        for(i = 0; i < indirect_block_count; i++)
+            sprintf(
+                    s4 + i * line_size,
+                    "0x%08x\n",
+                    indirect_blocks[i]);
+    }
+
+    char * result = calloc(
+            1,
+            1 + sizeof(char) * (
+                strlen(s1) + strlen(s2) + strlen(s3) + strlen(s4)));
+
+    strcat(result, s1);
+    strcat(result, s2);
+    strcat(result, s3);
+    strcat(result, s4);
+    free(s1);
+    free(s2);
+    free(s3);
+    free(s4);
+
+    return result;
 }

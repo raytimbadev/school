@@ -50,36 +50,40 @@
 #define SFS_REUSE 0
 #define SFS_FRESH 1
 
-#define MODE_O_R 0x0000000001
-#define MODE_O_W 0x0000000010
-#define MODE_O_X 0x0000000100
-#define MODE_G_R 0x0000001000
-#define MODE_G_W 0x0000010000
-#define MODE_G_X 0x0000100000
-#define MODE_A_R 0x0001000000
-#define MODE_A_W 0x0010000000
-#define MODE_A_X 0x0100000000
-#define MODE_D   0x1000000000
+#define MODE_O_R 1
+#define MODE_O_W 2
+#define MODE_O_X 4
+#define MODE_G_R 8
+#define MODE_G_W 16
+#define MODE_G_X 32
+#define MODE_A_R 64
+#define MODE_A_W 128
+#define MODE_A_X 256
+#define MODE_D   512
 
 #define SFS_NULL ((sfs_block_ptr)0)
 #define SFS_INODE_NULL ((sfs_inode_n)0)
 
 // TYPES //
 
-typedef unsigned short file_id;
+typedef short file_id;
 
 typedef unsigned short sfs_mode;
 typedef unsigned short sfs_link_count;
 typedef unsigned short sfs_uid;
 typedef unsigned short sfs_gid;
-typedef unsigned int sfs_block_ptr;
-typedef unsigned int sfs_inode_n;
+typedef unsigned short sfs_block_ptr;
+typedef unsigned short sfs_inode_n;
 
 typedef unsigned int sfs_magic;
 
 #define SFS_NO_MODE      ((sfs_mode)0)
 #define SFS_DEFAULT_MODE ((unsigned short)\
-    (MODE_O_R | MODE_O_W | MODE_G_R | MODE_A_R))
+        (MODE_O_R | MODE_O_R | MODE_O_W | MODE_G_R | MODE_A_R))
+
+#define SFS_DEFAULT_DIR_MODE ((unsigned short)\
+        (MODE_D | MODE_O_W | MODE_O_R | MODE_O_X | MODE_G_R | MODE_G_X |\
+         MODE_A_R | MODE_A_X))
 
 struct sfs_inode
 {
@@ -185,7 +189,7 @@ typedef enum
 struct sfs_dir_entry
 {
     sfs_inode_n inode;
-    char filename[MAXFILENAME];
+    char filename[MAXFILENAME+1];
 };
 
 struct sfs_dir_iter
@@ -249,8 +253,9 @@ typedef unsigned int bitpack;
 typedef unsigned int bitpack_scan;
 
 #define BITPACK_MAX        UINT_MAX
-#define BITPACK_SCAN_START ((bitpack_scan)1)
-#define BITPACK_SCAN_END   ((bitpack_scan)0)
+#define BITPACK_SCAN_START ((bitpack_scan)0)
+#define BITPACK_SCAN_END   ((bitpack_scan)(sizeof(bitpack)*CHAR_BIT))
+#define BITPACK_SIZE       (sizeof(bitpack)*CHAR_BIT)
 
 struct free_bitfield
 {

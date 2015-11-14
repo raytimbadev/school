@@ -24,7 +24,15 @@ mksfs(int fresh)
 {
     int i;
     for(i = 0; i < MAX_OPEN_FILES; i++)
-        FILES[i] = NULL;
+    {
+        if(FILES[i] == NULL)
+            continue;
+        else
+        {
+            file_close(FILES[i]);
+            FILES[i] = NULL;
+        }
+    }
 
     // Default is to allocate 1MiB in 512B blocks in a file called "sfs.bin".
     return sfs_format(fresh, "sfs.bin", (size_t)512, (size_t)2048);
@@ -40,9 +48,10 @@ sfs_get_next_filename(
     if(*loc == SFS_DIR_START)
     {
         struct sfs_inode *dir_inode = NULL;
-        if(follow_path(mpath, &dir_inode, NULL, 0) != 0)
+        if(follow_path(mpath, &dir_inode, NULL, 0) < 0)
         {
             free(mpath);
+            fprintf(stderr, "SFS: get_next_filename: follow_path failed.\n");
             return -1;
         }
 
@@ -50,6 +59,7 @@ sfs_get_next_filename(
         {
             free(mpath);
             free(dir_inode);
+            fprintf(stderr, "SFS: get_next_filename: listdir failed.\n");
             return -2;
         }
 
@@ -74,7 +84,7 @@ sfs_get_file_size(const char *path)
 {
     struct sfs_inode *inode = NULL;
     char *mpath = strdup(path);
-    if(follow_path(mpath, &inode, NULL, 0) != 0)
+    if(follow_path(mpath, &inode, NULL, 0) < 0)
     {
         free(mpath);
         return -1;
@@ -108,7 +118,7 @@ sfs_remove(const char *path)
             dirname,
             &dir_inode,
             NULL,
-            SFS_NO_MODE) != 0)
+            SFS_NO_MODE) < 0)
         return -1;
 
     int ret = link_remove(dir_inode, filename) >= 0;
@@ -122,26 +132,62 @@ sfs_remove(const char *path)
 file_id
 sfs_fopen(const char *path)
 {
+    char *mpath = malloc(strlen(path) + 5);
     if(path[0] != '/')
-        return -1;
+    {
+        fprintf(stderr, "SFS: path '%s' not absolute.\n", path);
+        fprintf(stderr, "SFS: *fixing*\n");
+        mpath[0] = '/';
+        strcpy(mpath + 1, path);
+    }
+    else
+        strcpy(mpath, path);
 
-    char *mpath = strdup(path);
     struct sfs_inode *inode = NULL;
 
     if(follow_path(
             mpath,
             &inode,
             NULL,
-            SFS_DEFAULT_MODE) != 0)
+            SFS_DEFAULT_MODE) < 0)
+    {
+        fprintf(stderr, "SFS: failed to follow path %s.\n", mpath);
         return -1;
+    }
 
     file_id fd;
 
+    int i;
+    for(i = 0; i < MAX_OPEN_FILES; i++)
+    {
+        if(FILES[i] == NULL)
+            continue;
+
+        if(FILES[i]->inode.n == inode->n)
+        {
+            fprintf(stderr,
+                    "SFS: trying to open already open file with inode %u.\n",
+                    inode->n);
+            free(inode);
+            return -1;
+        }
+    }
+
     if((fd = next_file_id()) == SFS_NO_MORE_FILES)
+    {
+        fprintf(stderr, "SFS: file limit reached.\n");
+        free(inode);
         return -1;
+    }
+
+    fprintf(stderr, "SFS: allocated file descriptor %d.\n", fd);
 
     if(file_open(inode, &FILES[fd]) < 0)
+    {
+        fprintf(stderr, "SFS: sfs_fopen failed.\n");
+        free(inode);
         return -1;
+    }
 
     return fd;
 }
@@ -150,10 +196,16 @@ int
 sfs_fclose(file_id fd)
 {
     if(FILES[fd] == NULL)
+    {
+        fprintf(stderr, "SFS: fclose invalid file descriptor.\n");
         return -1;
+    }
 
     file_close(FILES[fd]);
     FILES[fd] = NULL;
+
+    fprintf(stderr, "SFS: fclose: closed file %d.\n", fd);
+
     return 0;
 }
 
@@ -161,7 +213,10 @@ int
 sfs_fflush(file_id fd)
 {
     if(FILES[fd] == NULL)
+    {
+        fprintf(stderr, "SFS: fflush invalid file descriptor.\n");
         return -1;
+    }
 
     return file_flush(FILES[fd]);
 }
@@ -170,7 +225,10 @@ int
 sfs_fwrite(file_id fd, const char *buf, size_t length)
 {
     if(FILES[fd] == NULL)
+    {
+        fprintf(stderr, "SFS: fwrite: invalid file descriptor %d.\n", fd);
         return -1;
+    }
 
     return file_write(FILES[fd], buf, length);
 }
@@ -179,7 +237,10 @@ int
 sfs_fread(file_id fd, char *buf, size_t length)
 {
     if(FILES[fd] == NULL)
+    {
+        fprintf(stderr, "SFS: fread invalid file descriptor %d.\n", fd);
         return -1;
+    }
 
     return file_read(FILES[fd], buf, length);
 }
@@ -188,7 +249,10 @@ int
 sfs_fseek(file_id fd, int offset, sfs_seek_origin origin)
 {
     if(FILES[fd] == NULL)
+    {
+        fprintf(stderr, "SFS: fseek invalid file descriptor.\n");
         return -1;
+    }
 
     return file_seek(FILES[fd], offset, origin);
 }

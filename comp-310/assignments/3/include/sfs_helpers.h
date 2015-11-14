@@ -52,7 +52,7 @@ size_t get_max_file_size(const struct sfs_superblock *sb);
 /**
  * Allocates memory with block-size granularity.
  */
-char * block_malloc(const struct sfs_superblock *superblock, size_t block_count);
+void * block_malloc(const struct sfs_superblock *superblock, size_t block_count);
 
 /**
  * Determines what block a given inode is stored on.
@@ -283,6 +283,11 @@ struct free_bitfield *load_free_blocks_bitfield();
 struct free_bitfield *load_free_inodes_bitfield();
 
 /**
+ * Frees the memory associated with a bitfield.
+ */
+void free_bitfield(struct free_bitfield *bitfield);
+
+/**
  * Writes a bitfield to disk at a given block offset.
  */
 int bitfield_persist(
@@ -295,13 +300,6 @@ int inode_persist(
         const struct sfs_inode *inode);
 
 /**
- * Converts a bitpack_scan, an opaque value used to scan a bitpack value, into
- * an signed integer representing the index of the next free item in the
- * bitpack. Returns -1 if the value of the bitpack_scan is BITPACK_SCAN_END.
- */
-int bitpack_scan_conv(bitpack_scan scan);
-
-/**
  * Scans a bitpack to find the next free item within it.
  *
  * Returns the index of the next free item within the bitpack. Returns -1 if
@@ -311,14 +309,14 @@ int bitpack_scan_conv(bitpack_scan scan);
  * pointing to the value BITPACK_SCAN_START. When it ends, the value pointed
  * to by position will be BITPACK_SCAN_END.
  */
-int bitpack_next_free(bitpack pack, bitpack_scan *position);
+int bitpack_next_free(bitpack pack, bitpack_scan position);
 
 /**
  * Finds the offsets of free items by lookup in a bitfield.
  *
  * Used to find free blocks or inodes by passing different bitfields.
  */
-unsigned int *find_free_items(size_t count, struct free_bitfield *field);
+unsigned short *find_free_items(size_t count, struct free_bitfield *field);
 
 /**
  * Marks each bit identified by successive pointers from a given list with
@@ -326,7 +324,7 @@ unsigned int *find_free_items(size_t count, struct free_bitfield *field);
  */
 void bitfield_mark(
         struct free_bitfield *field,
-        unsigned int *ptrs,
+        unsigned short *ptrs,
         size_t count,
         bitfield_value t);
 
@@ -365,5 +363,15 @@ sfs_inode_n ialloc();
  * be unreachable by any file.
  */
 int ifree(sfs_inode_n *inodes, size_t count);
+
+/**
+ * Creates a basic inode data structure in memory.
+ */
+struct sfs_inode *new_inode(sfs_inode_n n, sfs_mode mode);
+
+/**
+ * Dumps the contents of an inode to a human readable string.
+ */
+char * dump_inode(struct sfs_inode *inode);
 
 #endif

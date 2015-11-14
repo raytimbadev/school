@@ -223,6 +223,9 @@ fuse_operations xmp_oper = {
 int
 main(int argc, char *argv[])
 {
+    freopen("fuse_out.log", "wb", stdout);
+    freopen("fuse_err.log", "wb", stderr);
+
     mksfs(SFS_FRESH);
 
     return fuse_main(argc, argv, &xmp_oper, NULL);
