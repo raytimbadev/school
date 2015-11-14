@@ -298,6 +298,23 @@ follow_path(
     int ret;
     char *path_p = path;
 
+    // this happens if the path ends with a slash
+    // empty string is just another name for root, amirite?
+    if(strlen(path) == 0)
+    {
+        if(parent == NULL)
+        {
+            const struct sfs_superblock *sb = load_superblock();
+            if(load_inode(sb->root, inode) != 0)
+                return -2;
+            return 0;
+        }
+
+        *inode = malloc(sizeof(**inode));
+        **inode = *parent;
+        return 0;
+    }
+
     if(path[0] == '/')
     {
         const struct sfs_superblock *sb = load_superblock();
@@ -326,6 +343,16 @@ follow_path(
     // if we've hit the end of the string, set the done flag
     int done = *path_p == '\0';
     *path_p = '\0';
+
+    if(strlen(path) > MAXFILENAME)
+    {
+        fprintf(stderr,
+                "SFS: follow_path: path component '%s' too long. "
+                "Maximum size: %d\n",
+                path,
+                MAXFILENAME);
+        return -1;
+    }
 
     if(!done)
         fprintf(stderr,
@@ -548,7 +575,12 @@ int link_remove(
 
     // open the directory
     if(file_open(dir_inode, &file) != 0)
+    {
+        fprintf(stderr,
+                "SFS: link_remove: failed to open directory (inode %u).\n",
+                dir_inode->n);
         return -1;
+    }
 
     file_seek(file, 0, SFS_START);
 
@@ -557,6 +589,13 @@ int link_remove(
     char found = 0;
     struct sfs_dir_entry entry;
     int read_count;
+    sfs_inode_n found_inode;
+    size_t initial_size = file->inode.size;
+
+    fprintf(stderr,
+            "SFS: link_remove: scanning directory (inode %u) for '%s'.\n",
+            dir_inode->n,
+            filename);
 
     // scan the directory, looking for files with the name we're looking for
     while(!file_eof(file))
@@ -564,17 +603,31 @@ int link_remove(
         read_count = file_read(file, &entry, sizeof(entry));
 
         if(read_count < sizeof(entry))
+        {
+            fprintf(stderr,
+                    "SFS: link_remove: directory (inode %u) abruptly ended.\n",
+                    dir_inode->n);
             break;
+        }
 
         if(strncmp(filename, entry.filename, MAXFILENAME) != 0)
+        {
+            fprintf(stderr,
+                    "SFS: link_remove: '%s' /= '%s'.\n",
+                    filename,
+                    entry.filename);
             continue;
+        }
 
-        fprintf(stderr,
-                "SFS: link_remove: found link to remove.\n");
         found = 1;
         found_at = file_seek(file, 0, SFS_HERE) - sizeof(entry);
+        found_inode = entry.inode;
 
-        break;
+        fprintf(stderr,
+                "SFS: link_remove: found link to remove from directory "
+                "(inode %u) at offset %u.\n",
+                dir_inode->n,
+                found_at);
     }
 
     // no link to remove
@@ -586,14 +639,46 @@ int link_remove(
         return 0;
     }
 
-    size_t remaining = file->inode.size - found_at + sizeof(entry);
+    const size_t remaining = initial_size - found_at + sizeof(entry);
 
-    const size_t buf_size = remaining + sizeof(sfs_inode_n);
-    void *buf = calloc(buf_size, sizeof(char));
+    void *buf = calloc(remaining, sizeof(char));
 
-    read_count = file_read(file, buf, buf_size);
+    fprintf(stderr,
+            "SFS: link_remove: moving subsequent %zu bytes back by %zu "
+            "bytes.\n",
+            remaining,
+            sizeof(entry));
+
+    file_seek(file, found_at + sizeof(entry), SFS_START);
+    read_count = file_read(file, buf, remaining);
     file_seek(file, found_at, SFS_START);
-    file_write(file, buf, buf_size);
+    file_write(file, buf, read_count);
+
+    // shrink the file to release the space taken by the now deleted entry
+    size_t new_size = found_at + read_count;
+    file_truncate(file, new_size);
+
+    // print the new directory listing
+    file_seek(file, 0, SFS_START);
+
+    fprintf(stderr, "SFS: link_remove: new directory listing:\n");
+    while(!file_eof(file))
+    {
+        read_count = file_read(file, &entry, sizeof(entry));
+
+        if(read_count < sizeof(entry))
+        {
+            fprintf(stderr,
+                    "SFS: link_remove: directory (inode %u) abruptly ended.\n",
+                    dir_inode->n);
+            break;
+        }
+
+        fprintf(stderr,
+                "SFS: link_remove: '%s' -> %u\n",
+                entry.filename,
+                entry.inode);
+    }
 
     // we've now eliminated the old file entry by moving the subsequent entries
     // forward.
@@ -605,17 +690,26 @@ int link_remove(
     // load the old inode and decrement its link count. If it still has files
     // pointing to it, then we can persist the modified inode and return 1 (the
     // number of files that we've unlinked)
-    load_inode(entry.inode, &old_inode);
+    load_inode(found_inode, &old_inode);
     old_inode->link_count--;
     if(old_inode->link_count > 0)
     {
         inode_persist(load_superblock(), old_inode);
+        fprintf(stderr,
+                "SFS: link_remove: unlinked file (inode %u) still has %u "
+                "links.\n",
+                old_inode->n,
+                old_inode->link_count);
         free(old_inode);
         return 1;
     }
 
     // otherwise, the link_count is zero! Meaning that we need to properly
     // delete the file.
+    fprintf(stderr,
+            "SFS: link_remove: unlinked file (inode %u) must be garbage "
+            "collected.\n",
+            old_inode->n);
 
     // Reset the file pointer to NULL, and open the file identified by the
     // old inode.
@@ -631,6 +725,7 @@ int link_remove(
 
     // mark the inode as free
     ifree(&old_inode->n, 1);
+    free(old_inode);
 
     // return the number of unlinked files.
     return 1;
@@ -642,10 +737,12 @@ link_create(
         const struct sfs_dir_entry *entry)
 {
     fprintf(stderr,
-            "SFS: link_create: '%s' -> %d in directory inode %d.\n",
+            "SFS: link_create: trying to link '%s' -> %d in directory inode "
+            "%d.\n",
             entry->filename,
             entry->inode,
             dir_inode->n);
+
     struct sfs_file *file = NULL;
 
     // remove any existing link to the file we want to create here
@@ -1200,25 +1297,33 @@ file_write(struct sfs_file *file, const void *buf, const size_t size)
     while(remaining > 0)
     {
         fprintf(stderr,
-                "SFS: file_write: %zu remaining bytes to write.\n",
+                "SFS: file_write: (inode %u) %zu remaining bytes to write.\n",
+                file->inode.n,
                 remaining);
 
         if(file->buf_offset == file->buf_size && file_flush(file) < 0)
         {
             fprintf(stderr,
-                    "SFS: file_write: failed to flush write buffer.\n");
+                    "SFS: file_write: (inode %u) failed to flush write "
+                    "buffer.\n",
+                    file->inode.n);
             return -2;
         }
 
         copy_count = file->buf_size - file->buf_offset;
         if(remaining < copy_count)
         {
-            fprintf(stderr, "SFS: file_write: copying all remaining bytes.\n");
+            fprintf(stderr,
+                    "SFS: file_write: (inode %u) copying all remaining "
+                    "bytes.\n",
+                    file->inode.n);
             copy_count = remaining;
         }
         else
             fprintf(stderr,
-                    "SFS: file_write: copying %zu bytes to buffer.\n",
+                    "SFS: file_write: (inode %u) copying %zu bytes to "
+                    "buffer.\n",
+                    file->inode.n,
                     copy_count);
 
         memcpy(file->buf + file->buf_offset,
@@ -1230,7 +1335,8 @@ file_write(struct sfs_file *file, const void *buf, const size_t size)
     }
 
     fprintf(stderr,
-            "SFS: file_write: wrote %zu bytes successfully.\n",
+            "SFS: file_write: (inode %u) wrote %zu bytes successfully.\n",
+            file->inode.n,
             size);
     return size;
 }
