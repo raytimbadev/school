@@ -7,10 +7,23 @@
 /**
  * Initializes an SFS disk.
  */
-int sfs_format(int fresh, char *path, size_t block_size, size_t block_count);
+int sfs_init(int fresh, char *path, size_t block_size, size_t block_count);
 
 /**
- * Loads the superblock.
+ * Creates a new superblock data structure in memory for a disk with a given
+ * number of data blocks of a given size.
+ */
+struct sfs_superblock * create_superblock(
+        size_t block_size,
+        size_t block_count);
+
+/**
+ * Loads the superblock from disk.
+ */
+struct sfs_superblock * load_superblock_from_disk(size_t block_size);
+
+/**
+ * Loads the superblock from memory.
  */
 struct sfs_superblock * load_superblock();
 
@@ -48,6 +61,11 @@ size_t get_block_bitmap_offset(const struct sfs_superblock *sb);
  * Gets the maximum size of any file representable in SFS.
  */
 size_t get_max_file_size(const struct sfs_superblock *sb);
+
+/**
+ * Gets the total number of blocks needed to store the filesystem on disk.
+ */
+size_t get_total_block_count(const struct sfs_superblock *sb);
 
 /**
  * Allocates memory with block-size granularity.

@@ -9,22 +9,13 @@
 
 static struct sfs_superblock * SUPERBLOCK = NULL;
 
-int
-sfs_format(int fresh, char *path, size_t block_size, size_t block_count)
+struct sfs_superblock *
+create_superblock(size_t block_size, size_t block_count)
 {
-    fprintf(stderr, "SFS: sfs_format.\n");
-
-    if(SUPERBLOCK != NULL)
-    {
-        // TODO check out reinitialization logic?
-        fprintf(stderr, "SFS: sfs_format: formatting twice.\n");
-        return -1;
-    }
-
     unsigned int bitpacks = block_count / BITPACK_SIZE + 1;
     block_count = bitpacks * BITPACK_SIZE;
     fprintf(stderr,
-            "SFS: sfs_format: rounded block_count to %zu.\n",
+            "SFS: create_superblock: rounded block_count to %zu.\n",
             block_count);
 
     unsigned int inodes_per_block = block_size / sizeof(struct sfs_inode);
@@ -34,14 +25,14 @@ sfs_format(int fresh, char *path, size_t block_size, size_t block_count)
         / sizeof(struct sfs_inode);
 
     fprintf(stderr,
-            "SFS: sfs_format: computed inode count %u.\n",
+            "SFS: create_superblock: computed inode count %u.\n",
             inode_count);
 
     inode_count = inode_count / BITPACK_SIZE + 1;
     inode_count *= BITPACK_SIZE;
 
     fprintf(stderr,
-            "SFS: sfs_format: rounded inode count to %u.\n",
+            "SFS: create_superblock: rounded inode count to %u.\n",
             inode_count);
 
     unsigned int bits_per_block = block_size * CHAR_BIT;
@@ -49,75 +40,138 @@ sfs_format(int fresh, char *path, size_t block_size, size_t block_count)
     unsigned int inode_blocks = inode_count / inodes_per_block + 1;
 
     fprintf(stderr,
-            "SFS: sfs_format: %u blocks required to house inodes.\n",
+            "SFS: create_superblock: %u blocks required to house inodes.\n",
             inode_blocks);
 
     unsigned int data_bitmap_blocks = block_count / bits_per_block + 1;
     unsigned int inode_bitmap_blocks = inode_count / bits_per_block + 1;
 
     fprintf(stderr,
-            "SFS: sfs_format: %u blocks for data bitmap.\n",
+            "SFS: create_superblock: %u blocks for data bitmap.\n",
             data_bitmap_blocks);
 
     fprintf(stderr,
-            "SFS: sfs_format: %u blocks for inode bitmap.\n",
+            "SFS: create_superblock: %u blocks for inode bitmap.\n",
             inode_bitmap_blocks);
 
-    unsigned int total_blocks = 1 +
-        block_count + inode_blocks +
-        data_bitmap_blocks + inode_bitmap_blocks;
+    struct sfs_superblock *sb = malloc(sizeof(*sb));
+    sb->magic = MAGIC;
+    sb->block_size = block_size;
+    sb->block_count = block_count;
+    sb->inode_count = inode_count;
+    sb->inode_blocks = inode_blocks;
+    sb->inode_bitmap_count = inode_bitmap_blocks;
+    sb->block_bitmap_count = data_bitmap_blocks;
+    sb->root = 0;
 
     fprintf(stderr,
-            "SFS: sfs_format: total disk size: %u blocks.\n",
-            total_blocks);
+            "SFS: create_superblock: total disk size: %zu blocks.\n",
+            get_total_block_count(sb));
 
-    if(fresh == SFS_FRESH)
-    {
-        if(init_fresh_disk(path, block_size, total_blocks) != 0)
-            return -1;
-    }
-    else
-    {
-        if(init_disk(path, block_size, total_blocks) != 0)
-            return -1;
-    }
+    return sb;
+}
 
-    SUPERBLOCK = malloc(sizeof(*SUPERBLOCK));
-    SUPERBLOCK->magic = MAGIC;
-    SUPERBLOCK->block_size = block_size;
-    SUPERBLOCK->block_count = block_count;
-    SUPERBLOCK->inode_count = inode_count;
-    SUPERBLOCK->inode_blocks = inode_blocks;
-    SUPERBLOCK->inode_bitmap_count = inode_bitmap_blocks;
-    SUPERBLOCK->block_bitmap_count = data_bitmap_blocks;
-    SUPERBLOCK->root = 0;
+/**
+ * Persists the core data structures to disk.
+ *
+ * Must be called after a fresh disk has been created and after the superblock
+ * has been allocated in memory.
+ */
+void
+sfs_init_fresh()
+{
+    struct sfs_superblock *sb = load_superblock();
+
+    // persist the superblock
+    void *sb_buf = calloc(1, sb->block_size * sizeof(char));
+    *(struct sfs_superblock *)sb_buf = *sb;
+    write_blocks(0, 1, sb_buf);
+    free(sb_buf);
 
     // allocate a new inode structure for the root directory
     struct sfs_inode *root_inode = new_inode(0, SFS_DEFAULT_DIR_MODE);
 
-    // persist the inode to disk.
-    if(inode_persist(SUPERBLOCK, root_inode) < 0)
+    // persist the root inode to disk.
+    if(inode_persist(sb, root_inode) < 0)
         fprintf(stderr,
-                "SFS: sfs_format: failed to persist root directory inode.\n");
+                "SFS: sfs_init: failed to persist root directory inode.\n");
 
     // Now we have to mark root inode as used.
     // load the inode bitfield from disk.
     struct free_bitfield *inode_bitfield = load_free_inodes_bitfield();
 
     // mark the root inode as used.
-    bitfield_mark(inode_bitfield, &SUPERBLOCK->root, 1, BIT_USED);
+    bitfield_mark(inode_bitfield, &sb->root, 1, BIT_USED);
 
     // persist the bitfield to disk.
     bitfield_persist(
-            SUPERBLOCK,
+            sb,
             inode_bitfield,
-            get_inode_bitmap_offset(SUPERBLOCK));
+            get_inode_bitmap_offset(sb));
 
     // free the in-memory inode structure for the root directory
     free(root_inode);
     free_bitfield(inode_bitfield);
+}
+
+int
+sfs_init(int fresh, char *path, size_t block_size, size_t block_count)
+{
+    fprintf(stderr, "SFS: sfs_init.\n");
+
+    if(SUPERBLOCK != NULL)
+    {
+        // TODO check out reinitialization logic?
+        fprintf(stderr, "SFS: sfs_init: formatting twice.\n");
+        return -1;
+    }
+
+    if(fresh == SFS_FRESH)
+    {
+        // allocate the superblock in memory.
+
+        SUPERBLOCK = create_superblock(block_size, block_count);
+
+        // initialize a fresh disk big enough to hold the filesystem
+        if(init_fresh_disk(
+                    path,
+                    block_size,
+                    get_total_block_count(SUPERBLOCK)) != 0)
+            return -1;
+
+        // persist the core data structures to disk.
+        sfs_init_fresh();
+    }
+    else
+    {
+        // pretend the disk has just one block, so that we can load the
+        // superblock
+        if(init_disk(path, block_size, 1) != 0)
+            return -1;
+
+        // load the superblock from disk.
+        SUPERBLOCK = load_superblock_from_disk(block_size);
+
+        // reinitialize the disk with the new parameters.
+        if(init_disk(
+                    path,
+                    SUPERBLOCK->block_size,
+                    get_total_block_count(SUPERBLOCK)) != 0)
+            return -1;
+    }
 
     return 0;
+}
+
+struct sfs_superblock *
+load_superblock_from_disk(size_t block_size)
+{
+    void *sb_buf = calloc(1, block_size * sizeof(char));
+    read_blocks(0, 1, sb_buf);
+    struct sfs_superblock *sb = malloc(sizeof(*sb));
+    *sb = *(struct sfs_superblock *)sb_buf;
+    free(sb_buf);
+    return sb;
 }
 
 struct sfs_superblock *
@@ -166,6 +220,16 @@ get_max_file_size(const struct sfs_superblock *sb)
     // maximum number of pointers storable in one block.
     return sb->block_size *
         (SFS_DIRECT_PTR_COUNT + sb->block_size / sizeof(sfs_block_ptr));
+}
+
+size_t
+get_total_block_count(const struct sfs_superblock *sb)
+{
+    return SFS_SUPERBLOCK_COUNT +
+        sb->inode_blocks +
+        sb->block_count +
+        sb->inode_bitmap_count +
+        sb->block_bitmap_count;
 }
 
 size_t

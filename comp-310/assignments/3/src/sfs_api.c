@@ -35,7 +35,7 @@ mksfs(int fresh)
     }
 
     // Default is to allocate 1MiB in 512B blocks in a file called "sfs.bin".
-    return sfs_format(fresh, "sfs.bin", (size_t)512, (size_t)2048);
+    return sfs_init(fresh, "sfs.bin", (size_t)512, (size_t)2048);
 }
 
 int
