@@ -120,11 +120,6 @@ int listdir(const struct sfs_inode *inode, struct sfs_dir_iter **iter);
 sfs_inode_n dirlookup(const struct sfs_dir_iter *dir, const char *filename);
 
 /**
- * Free all memory associated with a directory iterator.
- */
-void free_dir_iter(struct sfs_dir_iter *iter);
-
-/**
  * Opens a file for read/write, seeks to the end of it, and allocates an
  * in-memory buffer for writes.
  *

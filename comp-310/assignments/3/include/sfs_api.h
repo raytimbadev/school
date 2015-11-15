@@ -289,6 +289,11 @@ struct free_bitfield
 int mksfs(int fresh);
 
 /**
+ * Free all memory associated with a directory iterator.
+ */
+void free_dir_iter(struct sfs_dir_iter *iter);
+
+/**
  * Gets the name of the next file in a directory.
  *
  * The file name will copied into the string pointed to by `fname.
