@@ -1143,12 +1143,12 @@ basic_read(
     const unsigned int start_block_n = src_offset / sb->block_size;
 
     const unsigned int end_block_n_maybe =
-        (dst_offset + size)
+        (src_offset + size)
         / sb->block_size;
 
     // the number of blocks that the read spans
     const unsigned int end_block_n = end_block_n_maybe +
-        ((dst_offset + size) % sb->block_size == 0 ? 0 : 1);
+        ((src_offset + size) % sb->block_size == 0 ? 0 : 1);
 
     // adjust the source offset to be within the first block.
     src_offset -= start_block_n * sb->block_size;
