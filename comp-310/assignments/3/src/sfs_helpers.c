@@ -2063,14 +2063,14 @@ ialloc()
 
     // abort if we have no more inodes
     if(free_inodes == NULL)
-        return NULL;
+        return SFS_INODE_NULL;
 
     bitfield_mark(inode_bitfield, (unsigned short*)free_inodes, 1, BIT_USED);
 
     if(bitfield_persist(sb, inode_bitfield, get_inode_bitmap_offset(sb)) == -1)
     {
         free(free_inodes);
-        return NULL;
+        return SFS_INODE_NULL;
     }
 
     return free_inodes[0];
