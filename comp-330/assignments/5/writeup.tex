@@ -1,0 +1,30 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington (260626023)}
+\title{Assignment \#5\\Theory of Computation -- COMP 330}
+\date{19 November 2015}
+
+\usepackage{amsmath,amssymb,amsthm}
+
+\newcommand{\N}{{\ensuremath \mathbb{N}}}
+
+\begin{document}
+
+\maketitle
+
+\begin{enumerate}
+    \item Below is a context-free grammar for the language
+
+        $$
+        \{a^m b^n c^p d^q | m + n = p + q\}
+        $$
+
+        \begin{align*}
+            S &\to A | A^\prime | B | B^\prime \\
+            A &\to a (A | A^\prime | B) d \\
+            A^\prime &\to a (A^\prime | B^\prime) c \\
+            B &\to b (B | B^\prime) d | \epsilon \\
+            B^\prime &\to b B^\prime c | \epsilon \\
+        \end{align*}
+
+\end{document}
