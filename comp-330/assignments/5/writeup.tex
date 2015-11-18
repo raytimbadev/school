@@ -1,5 +1,10 @@
 \documentclass[letterpaper,11pt]{article}
 
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.0cm]{geometry}
+
+\DeclareMathOperator{\perm}{perm}
+
 \author{Jacob Thomas Errington (260626023)}
 \title{Assignment \#5\\Theory of Computation -- COMP 330}
 \date{19 November 2015}
@@ -13,7 +18,8 @@
 \maketitle
 
 \begin{enumerate}
-    \item Below is a context-free grammar for the language
+    \item
+        Below is a context-free grammar for the language
 
         $$
         \{a^m b^n c^p d^q | m + n = p + q\}
@@ -27,4 +33,90 @@
             B^\prime &\to b B^\prime c | \epsilon \\
         \end{align*}
 
+    \item
+        The language $\bar L$ contains all odd-length strings as well as all
+        strings that can be split into $xy$ such that $|x| = |y|$ and there is
+        at least one mismatched corresponding letter in $x$ and $y$.
+
+        That is precisely the structure of our PDA: we nondeterministically
+        choose between a machine that accepts all odd-length strings and a
+        machine that will check for mismatches. Checking for odd length is
+        simple, (we have seen a machine to check for even length in the context
+        of a PDA to recognize $\{ ww^R | w \in \Sigma^*\}$; it's not much
+        harder to build one for odd length) so we will focus on the machine to
+        check for mismatches.
+
+        The machine to find mismatches will guess which character is
+        mismatched, and verify that guess. In particular, it will push $k$
+        characters onto the stack and then transition to a state according to
+        the present letter. That state serves as the memory to perform a
+        comparison later. It will then pop those $k$ characters off the stack,
+        and push $l$ characters onto the stack. It can then compare the present
+        character with the one stored by the earlier choice of state. If there
+        is a match, then we jam; else, we much check that we haven't a false
+        positive by popping all characters from the stack and seeing whether
+        we've reached the end of the input.
+
+    \item
+        Consider the regular language $L = (abc)^*$, which is of course
+        context-free. The language $\perm{L}$ is the language of all strings
+        having matching occurrences of $a$s, $b$s, and $c$s, which is not
+        context-free as it requires a three-way matching.
+
+    \item
+        \begin{enumerate}
+            \item
+                Since $n$ is unbounded, it becomes impossible to decide in
+                finite time whether a given element $m \in \bigcup_n C_n$; we
+                can't just try all of them.
+
+            \item
+                This time, the statement is in fact true. We can use the same
+                technique as dove-tailing for producing an enumerator given
+                a decision procedure.
+        \end{enumerate}
+
+    \item
+        \begin{enumerate}
+            \item
+                Suppose $K$ is computable. Then, there exists a total
+                computable function $f : \Sigma^* \to 2$ that decides the
+                membership of $K$. We can then take an arbitrary word
+                $w \in \Sigma^*$, prepend $a$, and check whether it is in $K$
+                by using $f$. If $aw \in K$, then then $aw$ is either in the
+                first set of the union definition $K$ or it is in the second
+                set. Of course, it can't be in the second set, since all those
+                words start with $b$. Hence, we can use $f$ as a way to decide
+                whether a given word is in $L$, which contradicts the
+                undecidability of $L$.
+
+            \item
+                Suppose $K$ is CE. Then, there exists an algorithm $A$ that
+                halts exactly on those elements $w \in \Sigma^*$ that are in
+                $K$. Using $A$, we can build an algorithm that halts only on
+                inputs that are in $\bar L$ as follows. We take an arbitrary
+                word $w \in \Sigma^*$, and run $A$ with input $bw$. The
+                resulting algorithm indeed halts only for those inputs that are
+                in $\bar L$. Hence, $\bar L$ is CE. This contradicts the
+                premise that $\bar L$ is not CE. Thus, $K$ is not CE.
+
+            \item
+                Suppose $K$ is co-CE. Then, $\bar K$ is CE and we have an
+                algorithm $A$ that halts only on those inputs that are in
+                $\bar K$. The language $\bar K$ consists of those strings
+                $v \in \Sigma^*$ that are neither of the form $aw$ where
+                $w \in L$ nor of the form $bw$ where $w \in \bar L$. We will
+                show that $L$ is co-CE, i.e. that $\bar L$ is CE. To do so,
+                we will build an algorithm that halts only on inputs that are
+                in $\bar L$ as follows. We simply run $A(aw)$ where $w$ is the
+                input to our new algorithm. Clearly, $aw$ is not of the form
+                $bv$ where $v \in \bar L$, so this execution of $A$ will halt
+                if and only if $aw$ is not of the form $av$ where $v \in L$.
+                In other words, it will only halt if $w \notin L$. Hence, the
+                new algorithm halts only for inputs that are in $\bar L$,
+                implying that $L$ is co-CE. This is a contradiction of the
+                premise that $\bar L$ is not CE, however. Thus, $K$ is not
+                co-CE.
+        \end{enumerate}
+\end{enumerate}
 \end{document}
