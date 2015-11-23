@@ -4,27 +4,25 @@
 * security reasons one must thus be provided
 */
 
-package sql; 
+package sql;
 import java.io.IOException;
-import java.sql.SQLException; 
-import java.io.FileNotFoundException; 
+import java.sql.SQLException;
+import java.io.FileNotFoundException;
 import java.sql.Connection;
-import java.beans.PropertyVetoException; 
+import java.beans.PropertyVetoException;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement; 
-import java.sql.Statement; 
-import java.sql.ResultSet; 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.io.BufferedReader; 
-import java.io.FileReader; 
-import java.io.File; 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
 import org.apache.commons.dbcp2.BasicDataSource;
 
 
 class DataSource {
-
-    private static DataSource datasource;
     private BasicDataSource ds;
 
     public DataSource(String username, String password, String url) throws IOException, SQLException, PropertyVetoException {
@@ -36,13 +34,13 @@ class DataSource {
     }
 
     public Connection getConnection() throws SQLException {
-        return this.ds.getConnection(); 
+        return this.ds.getConnection();
     }
 }
 
 public class sqlInterfaceImpl implements sql.sqlInterface {
-	private static String url; 
-	private	static String user; 
+	private static String url;
+	private	static String user;
 	private static String password;
 	private static boolean initialized = false;
 	private static DataSource datasource; 	
@@ -58,16 +56,16 @@ public class sqlInterfaceImpl implements sql.sqlInterface {
 		}
 		try{
 			File f = new File("sql.secrets");
-			if(f.exists() && !f.isDirectory()) { 
+			if(f.exists() && !f.isDirectory()) {
 				BufferedReader br = new BufferedReader(new FileReader("sql.secrets"));
 				url=br.readLine();
 				user=br.readLine();
 				password=br.readLine();
 			} else {
-				System.out.println("secrets file not found in project root directory"); 
+				System.out.println("secrets file not found in project root directory");
 				throw new FileNotFoundException();
 			}
-			datasource = new DataSource(user,password,url); 
+			datasource = new DataSource(user,password,url);
 		} catch	(Exception e) {
 			e.printStackTrace();
 		}
@@ -86,14 +84,14 @@ public class sqlInterfaceImpl implements sql.sqlInterface {
 			for(String s : t) {
 				ps.executeUpdate(s);
 			}
-			con.commit(); 
+			con.commit();
 		}catch (SQLException e) {
 			e.printStackTrace();
 			if(con != null) {
 				try {
 					con.rollback();
 				} catch(Exception ex) {
-					ex.printStackTrace(); 
+					ex.printStackTrace();
 				}
 			}
 		}finally {
@@ -111,7 +109,7 @@ public class sqlInterfaceImpl implements sql.sqlInterface {
 	public int[] returningTransaction(String[] t) {
 	    Connection con = null;
         Statement ps=null;
-		int[] arr = new int[t.length]; 
+		int[] arr = new int[t.length];
         try{
             initialize();
             con=datasource.getConnection();
@@ -120,10 +118,10 @@ public class sqlInterfaceImpl implements sql.sqlInterface {
                 ps.executeUpdate(t[i],Statement.RETURN_GENERATED_KEYS);
 				ResultSet rs = ps.getGeneratedKeys();
 				if( rs.next() ) {
-					arr[i] = rs.getInt(1); 
+					arr[i] = rs.getInt(1);
 				}
             }
-            con.commit(); 
+            con.commit();
         }catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -136,32 +134,32 @@ public class sqlInterfaceImpl implements sql.sqlInterface {
                 e.printStackTrace();
             }
         }
-		return arr; 
+		return arr;
 	}
 	@Override
 	public ResultSet Retrieve(String query) {
-		Connection con=null; 
+		Connection con=null;
 		PreparedStatement ps=null;
-		ResultSet rs=null;  
+		ResultSet rs=null;
 		try{
-			initialize(); 
-			con = datasource.getConnection();  
+			initialize();
+			con = datasource.getConnection();
 			ps = con.prepareStatement(query);
-			rs = ps.executeQuery(); 
+			rs = ps.executeQuery();
 			
 		} catch (Exception e) {
-			e.printStackTrace(); 
+			e.printStackTrace();
 		} finally {
 			try {
 				if(ps != null)
 					ps.close();
 				if(con != null)
-					rs.close(); 
+					rs.close();
 			} catch (Exception e) {
-				e.printStackTrace(); 
+				e.printStackTrace();
 			}
 		}	
 
 		return rs;
 	}
-} 
+}

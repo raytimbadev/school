@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[letterpaper,11pt]{article}
 \usepackage{amsmath}
 \usepackage{moreverb}
 \usepackage{amssymb}
@@ -6,6 +6,7 @@
 \usepackage{mathtools}
 \usepackage{tikz}
 \usepackage{pgfplots}
+\usepackage{float}
 \usetikzlibrary{arrows,shapes, positioning}
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 \let\biconditional\leftrightarrow
@@ -37,111 +38,185 @@
     },
 }
 
-\begin{document}
-\title{\textbf{Comp 512: Deliverable 1}}
-\author{Jacob Erringtom (260636023)  \\ Alexandre Laporte (260635979)}
-\date{October 6th, 2015}
-\maketitle
-\begin{description}
-\item[Part 1: WebServices]\hfill
-	\begin{description}
-		\item[General Architecture:]\hfill\\	
-			The design of the webservies component of the deliverable was centered around creating a the middleware manager. In order
-			to acheive this we created a middleware server which implements the server's Resource Manager interface.\\
-			This middleware program is implemented as follows, it manages three Resource Managers which each point to servers, namely the flight Manager, 
-			car Manager and room Manager. Its task is then to process requests from a client and forward these to the appropriate server for handling, returning
-			value provided by the server back to the client. \\
-			A notable exception to this general process is the handling of adding clients which is handled by the middleware in conjunction with the database server (see below).\\ \\ 
-			The server code also had to be changed in order to account for concurrent access to data and synchronization between servers. To this end we added an additional server, our database,
-			which hosts a POSTGRESQL database. All the server code was then changed to rather than use distributed hash tables, query and write to the database. This gives us a guarantee that
-			upon concurrent access of data no problems arize. Additionally connections to the database are handled using DBCP connection pools ensuring that concurrent connections are handled without issue.  \\
-			Additionally in the case of customer queries from the client the middleware interfaces directly with the database, likewise with the reserveItinerary function. \\
-			This means that our system has the following structure:
-			\item
-			\begin{equation}
-			\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1cm,semithick]
-			\node[draw] (rect)        			(A) 				{$Client Server$};
-			\node[draw] (rect)	       			(B) [right of=A,xshift=2cm] {$Middleware Layer$};
-			\node[draw] (rect)        (C) [right of=B,xshift=3.75cm] {$Server 1(flight Manager)$};
-			\node[draw] (rect) (D)[above of=C] {$Server 2(car Manager)$}; 
-			\node[draw] (rect) 	  (E)[below of=C] {$Server 3(room Manager)$};
-			\node[draw] (rect)	  (F)[right of = C, xshift=3cm]{$Database Server$}; 
-			
+\title{Distributed Systems -- Deliverable 2}
+\author{Jacob Errington (260636023) \\ Alexandre Laporte (260635979)}
+\date{6 October 2015}
 
-			\path 
-			(A) edge              node{}  (B)
-			(B) edge 			  node {} (C)
-				edge			  node {} (D)
-				edge			  node {} (E)
-				edge[out=80,in=100]  node {} (F)
-			(C) edge 			  node {}(F)
-			(D) edge		 	  node {}(F)
-			(E) edge 			  node {} (F); 
-			\end{tikzpicture}
-			\end{equation}
-			\clearpage
-		\item[Database Architecture:]
-			 For clarity the database architecture is included here 
-	\end{description}
-			\begin{equation}
-			 \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2cm,semithick]
-			 \node[draw] (rect)		(A) {$Flight$};
-			 \node[draw] (rect)		(B) [below right of=A,xshift=1cm] {$FlightReservation$};
-			 \node[draw] (rect)		(C) [below right of=B,xshift=1cm] {$Customer$};
-			 \node[draw] (rect)		(D) [above right of=C,xshift=2cm] {$RoomReservations$};
-			 \node[draw] (rect) 	(E) [below of=D] {$CarReservation$};
-			 \node[draw] (rect)		(F) [below of=E] {$Car$};
-			 \node[draw] (rect)		(G) [right of=F] {$Location$}; 
-			 \node[draw] (rect)		(H) [above right of=D, xshift=2cm]{$Room$}; 
-			 \path
-			 (A)
-			 (B) edge node{} (A)
-			 	edge  node{}  (C)
-			 (C)
-			 (D) edge node{} (C)
-			 	 edge node{} (H)
-			 (E) edge node{} (C)
-			  	 edge node{} (F)
-			 (F) edge node{} (G)
-			 (G)
-			 (H) edge node{} (G); 
- 			 \end{tikzpicture}
- 			 \end{equation}
- \item[Part 2: Socket Code] \hfill \\ 
- 	The overaching architecture of the websockets code is identical to the structure shown in (1). As such the description will be focused on the
- 	implementations of webservices on top of websockets. \\
- 	We begin by creating an executor service and oppening a websocket. The server then listens on the socket of all incomming connections, once a connection is opened it is accpted and
- 	packaged into a request context which contains a RequestManager and the socket connection. The request manager implements runnable and is passed to the executor service which assigns the connection a thread and invokes Request Manager's run. The executor service guarantees that connections are run asynchronously and act as a threadpool. \\
- 	The RequestManager's run fetches the socket from the request context, upon receiving an input stream we use Java builtin serialization to pass our own request and response objects,
- 	this allows us to gracefully handle exceptions in a network transparent manner. The Resquest Handler of the recipient then uses Java's build in reflection toolset to identify which method should be invoked providing us with a method of remote method invocation through sockets. As per the webservices code database access is handled through DBCP connection pools. 
- 	
-  	\begin{equation}
-  	\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2cm,semithick]
- 	 	\node[draw] (rect) (A)[xshift=4cm] {$SocketResourceManager$};
- 	 	\node[draw] (rect) (B) [above right of=A,xshift=2cm] {$ResourceManager$};
- 	 	\node[draw] (rect) (C) [below right of=B, xshift=2cm]{$DatabaseResurceManager$};
- 	 	\node[draw] (rect) (D) [below right of=A, xshift=2cm]{$MiddlewareResourceManager$}; 
- 	 	\path
- 	 	(A) edge node{} (B)
- 	 	(B)
- 	 	(C) edge node{} (B)
- 	 	(D) edge node{} (B)
- 	 		edge[dashed] node{} (C)
- 	 		edge[dashed] node{} (A);
- 	 	\begin{customlegend}[
-			legend entries={ % <= in the following there are the entries
-			$Implements$,
-			$aggregates$
-			}] % <= to define position and font legend
-			% the following are the "images" and numbers in the legend
-			\addlegendimage{-stealth,black,opacity=1}
-			\addlegendimage{black,dashed,opacity=0.5}
-			\end{customlegend} 
-  	 \end{tikzpicture}
-  	 \end{equation}
-  	 The above diagram can be read as follows, SocketResourceManagers represent client Resource managers, their purpose being to communicate with the middleware 
-  	 and forward method calls. The databaseResourceManager represents the server Resource managers where every call is either a database read or write operation. 
-  	 The MiddlewareResourceManager aggregates both these managers as the middleware can either act as a client to the databaseResourceManager or perform database operations,
-  	 specifically in the event of customer operations.  
-  	\end{description}
+\begin{document}
+
+\maketitle
+
+For this deliverable, we choose to extend the TCP sockets implementation from
+the first deliverable. In order to distribute this application we created
+the \texttt{MiddlewareResourceManager} class implementing the same interface as
+the backend servers. Hence, from a client's perspective, it is
+indistinguishable from a backend server.
+
+In simple cases, the middleware dispatches incoming requests to a backend
+server according to the type of request. Once the backend server's reply is
+received, it is transmitted back to the client.
+
+More complex requests such as reservations require additional work from the
+middleware server. For example, in order to reserve a flight, the middleware
+must first ensure that the customer exists by querying the customer server,
+and then reserves the flight by sending a request to the flight server. The
+case of printing a bill is even more complicated as it requires querying every
+backend server once.
+
+\begin{figure}[H]
+    \centering
+
+    \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1cm,semithick]
+        \node[draw] (rect) (client)                             {Client};
+        \node[draw] (rect) (middleware) [right of=client,xshift=2cm] {Middleware Layer};
+
+        \node[draw] (rect) (flight) [right of=middleware,xshift=3.75cm] {Flight Server};
+        \node[draw] (rect) (car) [above of=flight]                  {Car Server};
+        \node[draw] (rect) (room) [below of=flight]                 {Room Server};
+        \node[draw] (rect) (customer) [below of=room] 	           {Customer Server};
+
+        \node[draw] (rect) (flightDB) [right of=flight, xshift=3cm]   {Flight Datastore};
+        \node[draw] (rect) (carDB) [right of=car, xshift=3cm]      {Car Datastore};
+        \node[draw] (rect) (roomDB) [right of=room, xshift=3cm]     {Room Datastore};
+        \node[draw] (rect) (customerDB) [right of=customer, xshift=3cm] {Customer Datastore};
+
+        \path
+        (client)     edge                node {} (middleware)
+        (middleware) edge                node {} (flight)
+                     edge                node {} (car)
+                     edge                node {} (room)
+                     edge		        node {}  (customer)
+        (flight)     edge                node {} (flightDB)
+        (car)        edge                node {} (carDB)
+        (room)       edge                node {} (roomDB)
+        (customer)   edge 		        node {}  (customerDB);
+    \end{tikzpicture}
+
+    \caption{
+        The architecture of our system uses a middleware server to contact
+        independent backend servers to perform tasks related to different types
+        of reservable items. Each backend server uses in-memory synchronized
+        hashtables to store their respective data. Furthermore, each backend
+        server is equipped with a lock manager enabling it to perform strict
+        two-phase locking. Since each backend server has its own datastore,
+        data consistency across backend servers is maintained by the
+        middleware. The middleware is equipped with a transaction manager to
+        guarantee consistently incrementing identifiers for transactions as
+        they are requested by the clients. Also, the middleware manages
+        timeouts for transactions as a way of resolving deadlocks.
+    }
+\end{figure}
+
+At the core of both the middleware and backend servers, there is a tight loop
+that accepts incoming connections. Upon each new connection being established,
+a handler is created for that connection and is run in a different thread. We
+use a pool with a fixed number of threads based on the number of logical
+processors on the machine. Consequently, new connections may be accepted while
+requests are being handled in these worker threads, and many requests may be
+processed concurrently.
+
+Objects are sent over the network using Java's built-in serialization
+capabilities. However, we pass only two types of objects over the network.
+
+\begin{description}
+    \item[Request.] A request object represents a remote method invocation on
+        the recipient server's ResourceManager. As such, it simply contains the
+        name of the method to invoke, an array of objects to use as parameters,
+        and some metadata on the parameters. The request object implements a
+        method using reflection to invoke the method on a provided object
+        implementing the resource manager interface. This allows us to remain
+        agnostic about the precise implementation of this interface, and
+        consequently, we can use identical request objects for both
+        client-middleware and middleware-backend communications.
+
+    \item[Response.] A response object represents the return value of the
+        remote method invocation. Since remote method invocations may abruptly
+        fail, we bracket the method calls with exception handlers that
+        package the exception into the response object and return it to the
+        client, where it is thrown again. This allows exceptions to
+        transparently be thrown across the network, and prevents exceptions
+        raised by event handler code from crashing the socket accept loop.
+        However, clients and the middleware must take care to check for these
+        exceptions as they are unchecked.
+\end{description}
+
+\begin{figure}[H]
+    \centering
+
+    \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2cm,semithick]
+        \node[draw] (rect) (B) [xshift=4cm] {ResourceManager};
+        \node[draw] (rect) (A) [right of=B, xshift=2.5cm]                {SocketResourceManager};
+        \node[draw] (rect) (E) [below of=A]      {MiddlewareResourceManager};
+        \node[draw] (rect) (C) [below of=E]      {CustomerResourceManager};
+        \node[draw] (rect) (D) [below of=C]      {ItemResourceManager};
+        \path
+        (A) edge node {} (B)
+        (C) edge[bend left=20] node {} (B)
+        (D) edge[bend left=30] node {} (B)
+        (E) edge node {} (B)
+        (E) edge[dashed]       node {} (A)
+        ;
+
+        \begin{customlegend}[
+            legend entries={ % <= in the following there are the entries
+                implements,
+                aggregates
+            }
+        ] % <= to define position and font legend
+          % the following are the "images" and numbers in the legend
+            \addlegendimage{-stealth,black,opacity=1}
+            \addlegendimage{black,dashed,opacity=0.5}
+        \end{customlegend}
+    \end{tikzpicture}
+
+    \caption{
+        Each component of the system is represented by a class implementing the
+        \texttt{ResourceManager} interface, which defines the basic set of
+        capabilities that can be performed on reservable items.
+        Backend servers use a \texttt{CustomerResourceManager} or a
+        \texttt{ItemResourceManager} to perform actions on their respective
+        backing store,  according to the type of data that they manage.
+        Clients use a \texttt{SocketResourceManager} to send \texttt{Request}
+        objects representing the remote methods to call.
+        The middleware server's \texttt{MiddlewareResourceManager} aggregates a
+        number of \texttt{SocketResourceManager}s, one for each connected
+        backend server. Many requests received by the middleware simply need
+        to be forwarded to the appropriate backend server, but some requests
+        require aggregating data across all nodes in order to present summary
+        information to the client.
+    }
+\end{figure}
+
+\section*{Performance}
+
+Below we show the performance of distributed transactions in the system.
+Figure \ref{fig:performance-vs-tps} shows the performance of the system under
+concurrent loads, whereas figure \ref{fig:throughput} presents an evaluation of
+the throughput of the system.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figure.pdf}
+    \caption{
+        Requests are submitted by ten clients concurrently at an
+        increasing rate. The performance of the system as the rate of
+        transactions being submitted increases degrades as expected in a
+        slightly sublinear fashion.
+    }
+    \label{fig:performance-vs-tps}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{bars.pdf}
+    \caption{
+        A single client bombards the system with requests in order to evaluate
+        the overall throughput of the system according to the complexity of the
+        submitted requests. Requests involving one, two, and three independent
+        backend servers are submitted. Despite the varying complexity of these
+        requests, the difference in average response times are not significant.
+    }
+    \label{fig:throughput}
+\end{figure}
+
 \end{document}

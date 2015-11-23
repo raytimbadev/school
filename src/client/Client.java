@@ -1,33 +1,36 @@
 package client;
 
-import java.util.*;
+import common.ResourceManager;
+import common.NoSuchTransactionException;
+
 import java.io.*;
+import java.net.InetAddress;
+import java.util.*;
 
 
-public class Client extends WSClient {
+public class Client {
+    final ResourceManager proxy;
 
-    public Client(String serviceName, String serviceHost, int servicePort) 
-    throws Exception {
-        super(serviceName, serviceHost, servicePort);
+    public Client(InetAddress address, int port) {
+        proxy = new SocketResourceManager(address, port);
     }
 
     public static void main(String[] args) {
         try {
-        
-            if (args.length != 3) {
-                System.out.println("Usage: MyClient <service-name> " 
+
+            if (args.length != 2) {
+                System.out.println("Usage: MyClient <service-name> "
                         + "<service-host> <service-port>");
                 System.exit(-1);
             }
-            
-            String serviceName = args[0];
-            String serviceHost = args[1];
-            int servicePort = Integer.parseInt(args[2]);
-            
-            Client client = new Client(serviceName, serviceHost, servicePort);
-            
+
+            final InetAddress address = InetAddress.getByName(args[0]);
+            int servicePort = Integer.parseInt(args[1]);
+
+            Client client = new Client(address, servicePort);
+
             client.run();
-            
+
         } catch(Exception e) {
             e.printStackTrace();
         }
@@ -35,7 +38,7 @@ public class Client extends WSClient {
 
 
     public void run() {
-    
+
         int id;
         int flightNumber;
         int flightPrice;
@@ -50,14 +53,14 @@ public class Client extends WSClient {
         String command = "";
         Vector arguments = new Vector();
 
-        BufferedReader stdin = 
+        BufferedReader stdin =
                 new BufferedReader(new InputStreamReader(System.in));
-        
+
         System.out.println("Client Interface");
         System.out.println("Type \"help\" for list of supported commands");
 
         while (true) {
-        
+
             try {
                 //read the next command
                 command = stdin.readLine();
@@ -69,7 +72,7 @@ public class Client extends WSClient {
             //remove heading and trailing white space
             command = command.trim();
             arguments = parse(command);
-            
+
             //decide which of the commands this was
             switch(findChoice((String) arguments.elementAt(0))) {
 
@@ -81,7 +84,7 @@ public class Client extends WSClient {
                 else  //wrong use of help command
                     System.out.println("Improper use of help command. Type help or help, <commandname>");
                 break;
-                
+
             case 2:  //new flight
                 if (arguments.size() != 5) {
                     wrongNumber();
@@ -91,13 +94,13 @@ public class Client extends WSClient {
                 System.out.println("Flight number: " + arguments.elementAt(2));
                 System.out.println("Add Flight Seats: " + arguments.elementAt(3));
                 System.out.println("Set Flight Price: " + arguments.elementAt(4));
-                
+
                 try {
                     id = getInt(arguments.elementAt(1));
                     flightNumber = getInt(arguments.elementAt(2));
                     numSeats = getInt(arguments.elementAt(3));
                     flightPrice = getInt(arguments.elementAt(4));
-                    
+
                     if (proxy.addFlight(id, flightNumber, numSeats, flightPrice))
                         System.out.println("Flight added");
                     else
@@ -109,7 +112,7 @@ public class Client extends WSClient {
                     e.printStackTrace();
                 }
                 break;
-                
+
             case 3:  //new car
                 if (arguments.size() != 5) {
                     wrongNumber();
@@ -136,7 +139,7 @@ public class Client extends WSClient {
                     e.printStackTrace();
                 }
                 break;
-                
+
             case 4:  //new room
                 if (arguments.size() != 5) {
                     wrongNumber();
@@ -163,7 +166,7 @@ public class Client extends WSClient {
                     e.printStackTrace();
                 }
                 break;
-                
+
             case 5:  //new Customer
                 if (arguments.size() != 2) {
                     wrongNumber();
@@ -181,7 +184,7 @@ public class Client extends WSClient {
                     e.printStackTrace();
                 }
                 break;
-                
+
             case 6: //delete Flight
                 if (arguments.size() != 3) {
                     wrongNumber();
@@ -204,7 +207,7 @@ public class Client extends WSClient {
                     e.printStackTrace();
                 }
                 break;
-                
+
             case 7: //delete car
                 if (arguments.size() != 3) {
                     wrongNumber();
@@ -227,7 +230,7 @@ public class Client extends WSClient {
                     e.printStackTrace();
                 }
                 break;
-                
+
             case 8: //delete room
                 if (arguments.size() != 3) {
                     wrongNumber();
@@ -250,7 +253,7 @@ public class Client extends WSClient {
                     e.printStackTrace();
                 }
                 break;
-                
+
             case 9: //delete Customer
                 if (arguments.size() != 3) {
                     wrongNumber();
@@ -273,7 +276,7 @@ public class Client extends WSClient {
                     e.printStackTrace();
                 }
                 break;
-                
+
             case 10: //querying a flight
                 if (arguments.size() != 3) {
                     wrongNumber();
@@ -293,7 +296,7 @@ public class Client extends WSClient {
                     e.printStackTrace();
                 }
                 break;
-                
+
             case 11: //querying a car Location
                 if (arguments.size() != 3) {
                     wrongNumber();
@@ -314,7 +317,7 @@ public class Client extends WSClient {
                     e.printStackTrace();
                 }
                 break;
-                
+
             case 12: //querying a room location
                 if (arguments.size() != 3) {
                     wrongNumber();
@@ -335,7 +338,7 @@ public class Client extends WSClient {
                     e.printStackTrace();
                 }
                 break;
-                
+
             case 13: //querying Customer Information
                 if (arguments.size() != 3) {
                     wrongNumber();
@@ -355,8 +358,8 @@ public class Client extends WSClient {
                     System.out.println(e.getMessage());
                     e.printStackTrace();
                 }
-                break;               
-                
+                break;
+
             case 14: //querying a flight Price
                 if (arguments.size() != 3) {
                     wrongNumber();
@@ -377,7 +380,7 @@ public class Client extends WSClient {
                     e.printStackTrace();
                 }
                 break;
-                
+
             case 15: //querying a car Price
                 if (arguments.size() != 3) {
                     wrongNumber();
@@ -396,7 +399,7 @@ public class Client extends WSClient {
                     System.out.println("EXCEPTION: ");
                     System.out.println(e.getMessage());
                     e.printStackTrace();
-                }                
+                }
                 break;
 
             case 16: //querying a room price
@@ -419,7 +422,7 @@ public class Client extends WSClient {
                     e.printStackTrace();
                 }
                 break;
-                
+
             case 17:  //reserve a flight
                 if (arguments.size() != 4) {
                     wrongNumber();
@@ -444,7 +447,7 @@ public class Client extends WSClient {
                     e.printStackTrace();
                 }
                 break;
-                
+
             case 18:  //reserve a car
                 if (arguments.size() != 4) {
                     wrongNumber();
@@ -457,7 +460,7 @@ public class Client extends WSClient {
                     id = getInt(arguments.elementAt(1));
                     int customer = getInt(arguments.elementAt(2));
                     location = getString(arguments.elementAt(3));
-                    
+
                     if (proxy.reserveCar(id, customer, location))
                         System.out.println("car Reserved");
                     else
@@ -469,7 +472,7 @@ public class Client extends WSClient {
                     e.printStackTrace();
                 }
                 break;
-                
+
             case 19:  //reserve a room
                 if (arguments.size() != 4) {
                     wrongNumber();
@@ -482,7 +485,7 @@ public class Client extends WSClient {
                     id = getInt(arguments.elementAt(1));
                     int customer = getInt(arguments.elementAt(2));
                     location = getString(arguments.elementAt(3));
-                    
+
                     if (proxy.reserveRoom(id, customer, location))
                         System.out.println("room Reserved");
                     else
@@ -494,7 +497,7 @@ public class Client extends WSClient {
                     e.printStackTrace();
                 }
                 break;
-                
+
             case 20:  //reserve an Itinerary
                 if (arguments.size()<7) {
                     wrongNumber();
@@ -516,8 +519,8 @@ public class Client extends WSClient {
                     location = getString(arguments.elementAt(arguments.size()-3));
                     car = getBoolean(arguments.elementAt(arguments.size()-2));
                     room = getBoolean(arguments.elementAt(arguments.size()-1));
-                    
-                    if (proxy.reserveItinerary(id, customer, flightNumbers, 
+
+                    if (proxy.reserveItinerary(id, customer, flightNumbers,
                             location, car, room))
                         System.out.println("Itinerary Reserved");
                     else
@@ -529,7 +532,7 @@ public class Client extends WSClient {
                     e.printStackTrace();
                 }
                 break;
-                            
+
             case 21:  //quit the client
                 if (arguments.size() != 1) {
                     wrongNumber();
@@ -537,7 +540,7 @@ public class Client extends WSClient {
                 }
                 System.out.println("Quitting client.");
                 return;
-                
+
             case 22:  //new Customer given id
                 if (arguments.size() != 3) {
                     wrongNumber();
@@ -558,14 +561,71 @@ public class Client extends WSClient {
                     e.printStackTrace();
                 }
                 break;
-                
+            case 23: //start
+               if(arguments.size() != 1) {
+                   wrongNumber();
+                   break;
+               }
+               int xid = proxy.start();
+               System.out.println("Started transaction: " + xid);
+               break;
+            case 24: //commit
+                if(arguments.size() != 2) {
+                    wrongNumber();   
+					break;
+				}
+
+                try {
+                    proxy.commit(getInt(arguments.elementAt(1)));
+                    System.out.println("COMMIT");
+                }
+                catch(Exception e) {
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
+                    e.printStackTrace();
+                }
+				break;
+			case 25: //abort
+				if(arguments.size() != 2) {
+					wrongNumber();
+					break;
+				}
+
+                try {
+                    proxy.abort(getInt(arguments.elementAt(1)));
+                    System.out.println("ROLLBACK");
+                }
+                catch(Exception e) {
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
+                    e.printStackTrace();
+                }
+				break;
+
+            case 26:
+                if(arguments.size() != 1) {
+                    wrongNumber();
+                    break;
+                }
+
+                try {
+                    proxy.shutdown();
+                    System.out.println("SHUTDOWN");
+                }
+                catch(Exception e) {
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
+                    e.printStackTrace();
+                }
+                break;
+
             default:
                 System.out.println("The interface does not support this command.");
                 break;
             }
         }
     }
-        
+
     public Vector parse(String command) {
         Vector arguments = new Vector();
         StringTokenizer tokenizer = new StringTokenizer(command, ",");
@@ -577,7 +637,7 @@ public class Client extends WSClient {
         }
         return arguments;
     }
-    
+
     public int findChoice(String argument) {
         if (argument.compareToIgnoreCase("help") == 0)
             return 1;
@@ -623,6 +683,14 @@ public class Client extends WSClient {
             return 21;
         else if (argument.compareToIgnoreCase("newcustomerid") == 0)
             return 22;
+        else if (argument.compareToIgnoreCase("start") == 0)
+            return 23;
+        else if (argument.compareToIgnoreCase("commit") == 0)
+            return 24; 
+        else if (argument.compareToIgnoreCase("abort") == 0)
+            return 25;
+        else if (argument.compareToIgnoreCase("shutdown") == 0)
+            return 26;
         else
             return 666;
     }
@@ -634,7 +702,7 @@ public class Client extends WSClient {
         System.out.println("newflight\nnewcar\nnewroom\nnewcustomer\nnewcustomerid\ndeleteflight\ndeletecar\ndeleteroom");
         System.out.println("deletecustomer\nqueryflight\nquerycar\nqueryroom\nquerycustomer");
         System.out.println("queryflightprice\nquerycarprice\nqueryroomprice");
-        System.out.println("reserveflight\nreservecar\nreserveroom\nitinerary");
+        System.out.println("reserveflight\nreservecar\nreserveroom\nitinerary\nstart\ncommit\nabort");
         System.out.println("quit");
         System.out.println("\ntype help, <commandname> for detailed info (note the use of comma).");
     }
@@ -656,7 +724,7 @@ public class Client extends WSClient {
             System.out.println("\nUsage: ");
             System.out.println("\tnewflight, <id>, <flightnumber>, <numSeats>, <flightprice>");
             break;
-            
+
             case 3:  //new car
             System.out.println("Adding a new car.");
             System.out.println("Purpose: ");
@@ -664,7 +732,7 @@ public class Client extends WSClient {
             System.out.println("\nUsage: ");
             System.out.println("\tnewcar, <id>, <location>, <numberofcars>, <pricepercar>");
             break;
-            
+
             case 4:  //new room
             System.out.println("Adding a new room.");
             System.out.println("Purpose: ");
@@ -672,7 +740,7 @@ public class Client extends WSClient {
             System.out.println("\nUsage: ");
             System.out.println("\tnewroom, <id>, <location>, <numberofrooms>, <priceperroom>");
             break;
-            
+
             case 5:  //new Customer
             System.out.println("Adding a new Customer.");
             System.out.println("Purpose: ");
@@ -680,8 +748,8 @@ public class Client extends WSClient {
             System.out.println("\nUsage: ");
             System.out.println("\tnewcustomer, <id>");
             break;
-            
-            
+
+
             case 6: //delete Flight
             System.out.println("Deleting a flight");
             System.out.println("Purpose: ");
@@ -689,7 +757,7 @@ public class Client extends WSClient {
             System.out.println("\nUsage: ");
             System.out.println("\tdeleteflight, <id>, <flightnumber>");
             break;
-            
+
             case 7: //delete car
             System.out.println("Deleting a car");
             System.out.println("Purpose: ");
@@ -697,7 +765,7 @@ public class Client extends WSClient {
             System.out.println("\nUsage: ");
             System.out.println("\tdeletecar, <id>, <location>, <numCars>");
             break;
-            
+
             case 8: //delete room
             System.out.println("Deleting a room");
             System.out.println("\nPurpose: ");
@@ -705,7 +773,7 @@ public class Client extends WSClient {
             System.out.println("Usage: ");
             System.out.println("\tdeleteroom, <id>, <location>, <numRooms>");
             break;
-            
+
             case 9: //delete Customer
             System.out.println("Deleting a Customer");
             System.out.println("Purpose: ");
@@ -713,7 +781,7 @@ public class Client extends WSClient {
             System.out.println("\nUsage: ");
             System.out.println("\tdeletecustomer, <id>, <customerid>");
             break;
-            
+
             case 10: //querying a flight
             System.out.println("Querying flight.");
             System.out.println("Purpose: ");
@@ -721,53 +789,53 @@ public class Client extends WSClient {
             System.out.println("\nUsage: ");
             System.out.println("\tqueryflight, <id>, <flightnumber>");
             break;
-            
+
             case 11: //querying a car Location
             System.out.println("Querying a car location.");
             System.out.println("Purpose: ");
             System.out.println("\tObtain number of cars at a certain car location.");
             System.out.println("\nUsage: ");
-            System.out.println("\tquerycar, <id>, <location>");        
+            System.out.println("\tquerycar, <id>, <location>");
             break;
-            
+
             case 12: //querying a room location
             System.out.println("Querying a room Location.");
             System.out.println("Purpose: ");
             System.out.println("\tObtain number of rooms at a certain room location.");
             System.out.println("\nUsage: ");
-            System.out.println("\tqueryroom, <id>, <location>");        
+            System.out.println("\tqueryroom, <id>, <location>");
             break;
-            
+
             case 13: //querying Customer Information
             System.out.println("Querying Customer Information.");
             System.out.println("Purpose: ");
             System.out.println("\tObtain information about a customer.");
             System.out.println("\nUsage: ");
             System.out.println("\tquerycustomer, <id>, <customerid>");
-            break;               
-            
-            case 14: //querying a flight for price 
+            break;
+
+            case 14: //querying a flight for price
             System.out.println("Querying flight.");
             System.out.println("Purpose: ");
             System.out.println("\tObtain price information about a certain flight.");
             System.out.println("\nUsage: ");
             System.out.println("\tqueryflightprice, <id>, <flightnumber>");
             break;
-            
+
             case 15: //querying a car Location for price
             System.out.println("Querying a car location.");
             System.out.println("Purpose: ");
             System.out.println("\tObtain price information about a certain car location.");
             System.out.println("\nUsage: ");
-            System.out.println("\tquerycarprice, <id>, <location>");        
+            System.out.println("\tquerycarprice, <id>, <location>");
             break;
-            
+
             case 16: //querying a room location for price
             System.out.println("Querying a room Location.");
             System.out.println("Purpose: ");
             System.out.println("\tObtain price information about a certain room location.");
             System.out.println("\nUsage: ");
-            System.out.println("\tqueryroomprice, <id>, <location>");        
+            System.out.println("\tqueryroomprice, <id>, <location>");
             break;
 
             case 17:  //reserve a flight
@@ -777,7 +845,7 @@ public class Client extends WSClient {
             System.out.println("\nUsage: ");
             System.out.println("\treserveflight, <id>, <customerid>, <flightnumber>");
             break;
-            
+
             case 18:  //reserve a car
             System.out.println("Reserving a car.");
             System.out.println("Purpose: ");
@@ -785,7 +853,7 @@ public class Client extends WSClient {
             System.out.println("\nUsage: ");
             System.out.println("\treservecar, <id>, <customerid>, <location>, <nummberofcars>");
             break;
-            
+
             case 19:  //reserve a room
             System.out.println("Reserving a room.");
             System.out.println("Purpose: ");
@@ -793,7 +861,7 @@ public class Client extends WSClient {
             System.out.println("\nUsage: ");
             System.out.println("\treserveroom, <id>, <customerid>, <location>, <nummberofrooms>");
             break;
-            
+
             case 20:  //reserve an Itinerary
             System.out.println("Reserving an Itinerary.");
             System.out.println("Purpose: ");
@@ -803,7 +871,7 @@ public class Client extends WSClient {
                     + "<flightnumber1>....<flightnumberN>, "
                     + "<LocationToBookcarsOrrooms>, <NumberOfcars>, <NumberOfroom>");
             break;
-            
+
 
             case 21:  //quit the client
             System.out.println("Quitting client.");
@@ -812,7 +880,7 @@ public class Client extends WSClient {
             System.out.println("\nUsage: ");
             System.out.println("\tquit");
             break;
-            
+
             case 22:  //new customer with id
             System.out.println("Create new customer providing an id");
             System.out.println("Purpose: ");
@@ -821,13 +889,29 @@ public class Client extends WSClient {
             System.out.println("\tnewcustomerid, <id>, <customerid>");
             break;
 
+            case 23:
+			System.out.println("Starts a transaction");
+            break;
+            
+            case 24:
+            System.out.println("Commits a transaction");
+            break;
+
+            case 25:
+            System.out.println("Aborts a transaction");
+            break; 
+
+            case 26:
+            System.out.println("Shuts down the system.");
+            break;
+
             default:
             System.out.println(command);
             System.out.println("The interface does not support this command.");
             break;
         }
     }
-    
+
     public void wrongNumber() {
         System.out.println("The number of arguments provided in this command are wrong.");
         System.out.println("Type help, <commandname> to check usage of this command.");
@@ -841,7 +925,7 @@ public class Client extends WSClient {
             throw e;
         }
     }
-    
+
     public boolean getBoolean(Object temp) throws Exception {
         try {
             return (new Boolean((String)temp)).booleanValue();
@@ -852,12 +936,12 @@ public class Client extends WSClient {
     }
 
     public String getString(Object temp) throws Exception {
-        try {    
+        try {
             return (String)temp;
         }
         catch (Exception e) {
             throw e;
         }
     }
-    
+
 }

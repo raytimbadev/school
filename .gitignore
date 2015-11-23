@@ -1,6 +1,7 @@
-build/
-servermapping.txt
+/build/
 /webapps/
+*.class
 *.swp
 *wsdl
 *.secrets
+log*/
