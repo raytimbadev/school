@@ -1,0 +1,319 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#3\\Ordinary Differential Equations -- MATH 315}
+\date{24 November 2015}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.0cm]{geometry}
+
+\DeclareMathOperator{\D}{D}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\intd}[1]{{\ensuremath \; \mathrm{d}#1}}
+
+\newcommand{\deriv}[1]{{\ensuremath \frac{\mathrm{d}}{\mathrm{d}#1}}}
+\newcommand{\nderiv}[2]{{\ensuremath \frac{\mathrm{d}^#1}{\mathrm{d}#2^#1}}}
+
+\begin{document}
+
+\maketitle
+
+\begin{enumerate}
+    \item
+        \begin{enumerate}
+            \item
+                To find the annihilator for the nonhomogeneous term, we will
+                find annihilators for each term in the sum and compose them.
+
+                \begin{enumerate}
+                    \item
+                        The term $3xe^x$ has annihilator $(\D{} - 1)^2$.
+
+                    \item
+                        The term $2e^{-2x}$ has annihilator $\D{} + 2$.
+
+                    \item
+                        The term $x \sin{2x}$ has annihilator $(\D^2{} + 4)^2$.
+                \end{enumerate}
+
+                Hence, the full annihilator is the following.
+                $$
+                (\D{} - 1)^2 (\D{} + 2)(\D^2{} + 4)^2
+                $$
+
+            \item
+                We find the roots of the following polynomial to to find the
+                basis for the set of solutions to the annihilated equation.
+                $$
+                (r - 1)^2 (r + 2) (r^2 + 4)^2 (r^3 + 2 r^2 + 4r + 8)
+                $$
+
+                The solutions and their multiplicities are the following.
+                \begin{align*}
+                    r_1 &=  1  &\quad (2)\\
+                    r_2 &= -2  &\quad (2)\\
+                    r_3 &= -4  &\quad (1)\\
+                    r_4 &=  2i &\quad (3)\\
+                    r_5 &= -2i &\quad (3)
+                \end{align*}
+
+                From these solutions, we get the following basis for the
+                solution set of the nonhomogeneous equation.
+                \begin{align*}
+                    y_1 &= e^x \\
+                    y_2 &= x e^x \\
+                    y_3 &= e^{-2x} \\        % HOM
+                    y_4 &= x e^{-2x} \\
+                    y_5 &= e^{-4x} \\
+                    y_6 &= e^{2ix} \\        % HOM
+                    y_7 &= x e^{2ix} \\
+                    y_8 &= x^2 e^{2ix} \\
+                    y_9 &= e^{-2ix} \\       % HOM
+                    y_{10} &= x e^{-2ix} \\
+                    y_{11} &= x^2 e^{-2ix} \\
+                \end{align*}
+
+                The solution to the corresponding homogeneous equation is the
+                following.
+                $$
+                y_H = c_1 e^{-2x} + c_2 e^{-2ix} + c_3 e^{2ix}
+                $$
+
+                We notice that components $\#3$, $\#6$, and $\#9$ from the
+                basis of the solution set of the nonhomogeneous equation
+                correspond to terms from the general solution of the
+                complementary homogeneous equation.
+                The particular solution is thus
+                $$
+                y_p = c_1 e^x
+                    + c_2 x e^x
+                    + c_4 x e^{-2x}
+                    + c_5 e^{-4x}
+                    + c_7 x e^{2ix}
+                    + c_8 x^2 e^{2ix}
+                    + c_{10} x e^{-2ix}
+                    + c_{11} x^2 e^{-2ix}
+                $$
+
+            \item
+                The general solution to the equation is given by the basis we
+                found from the preceding question. Specifically, it is
+                following.
+                \begin{align*}
+                    y &=
+                    c_{1} e^x +
+                    c_{2} x e^x +
+                    c_{3} e^{-2x} +
+                    c_{4} x e^{-2x} +
+                    c_{5} e^{-4x} \\
+                    &+ c_{6} e^{2ix} +
+                    c_{7} x e^{2ix} +
+                    c_{8} x^2 e^{2ix} +
+                    c_{9} e^{-2ix} +
+                    c_{10} x e^{-2ix} +
+                    c_{11} x^2 e^{-2ix}
+                \end{align*}
+        \end{enumerate}
+
+    \item
+        We wish to find a function $z = z(x)$ such that its effect on the
+        derivatives of $y$ is to cancel out the nonconstant coefficients.
+
+        The effect of this substitution on the derivatives of $y$ is the
+        following.
+        \begin{align*}
+            \deriv{x} y &= \deriv{z} y(z) \deriv{x} z \\
+            \nderiv{2}{x} y &= \nderiv{2}{z} y(z) \left(\deriv{x} z\right)^2
+        \end{align*}
+
+        Substituting these back into the original differential equation, we
+        establish a certain number of constraints that $z$ must satisfy in
+        order to cancel out the nonconstant coefficients.
+        \begin{align*}
+            \left(\deriv{x} z\right)^2 &= \frac{1}{x^2} \\
+            \nderiv{2}{x} z &= \frac{1}{x^2} \\
+            \deriv{x} z &= \frac{1}{x}
+        \end{align*}
+
+        We observe that $z(x) = \ln x$ is a suitable choice of substitution.
+        The equation becomes
+        $$ \nderiv{2}{z} y(z) + (\alpha - 1) \deriv{z} y(z) + 3 y(z) = 0 $$
+        which we can write in terms of the differential operator $\D{}$ as
+        $$ \left( \D^2{} + (\alpha - 1) \D{} + 3 \right)y = 0 $$
+
+        This polynomial in $\D{}$ has two roots (counting multiplicity), whose
+        values will affect the behaviour of solutions at infinity. The form of
+        the polynomial indicates that the following cases can arise according
+        to the value of $\alpha$.
+
+        \begin{description}
+            \item[Distinct negative real roots.]
+
+                The form of solutions will be
+                \begin{equation*}
+                    y = c_1 e^{r_1 z} + c_2 e^{r_2 z}
+                    = c_1 e^{r_1 \ln x} + c_2 e^{r_2 \ln x}
+                \end{equation*}
+
+                As $x \to \infty$, $\ln x \to \infty$, so
+                $r_1 \ln x \to - \infty$ and $r_2 \ln x \to -\infty$ since
+                $r_1 < 0$ and $r_2 < 0$. Thus, for any choices of $c_1 \in \R$
+                and $c_2 \in \R$ not both zero, the solution will approach
+                zero.
+
+                This case arises for $\alpha > 1 + 2 \sqrt 3$.
+
+            \item[Distinct positive real roots.]
+
+                The form of solutions is the same as before, but since
+                $r_1 > 0$ and $r_2 > 0$, the solutions will grow without bound.
+
+                This case arises for $\alpha < 1 - 2 \sqrt 3$.
+
+            \item[Repeated negative real roots.]
+
+                The form of solutions will be
+                \begin{equation*}
+                    y = c_1 e^{rz} + c_2 z e^{rz}
+                    = c_1 e^{r \ln x} + c_2 \left(\ln x\right) e^{r \ln x}
+                    = c_1 x^r + c_2 x^r \ln x
+                \end{equation*}
+
+                The first term will approach zero as shown in our analysis of
+                distinct negative real roots. Since $r < 0$, the second term
+                will also approach zero.
+
+                This case occurs for $\alpha = 1 - 2 \sqrt 3$.
+
+            \item[Repeated positive real roots.]
+
+                The form of solutions will be the same as for repeated negative
+                real roots. However, since $r > 0$, both terms will approach
+                infinity.
+
+                This case occurs for $\alpha = 1 + 2 \sqrt 3$.
+
+            \item[Complex roots.]
+
+                When the discriminant of the polynomial in $\D{}$ is negative,
+                complex roots arise, introducing factors of the form
+                $\cos{(\mu_j \ln x)} + i \sin{(\mu_j \ln x)}$ to the terms that
+                make up the solutions. This in turn results in an oscillatory
+                behaviour for all solutions. The range of the osciallation for
+                each term is determined by a factor $x^\lambda$. For
+                $\lambda > 0$, the limit oscillates between $-\infty$ and
+                $\infty$. For $\lambda < 0$, the limit converges to $0$. For
+                $\lambda = 0$, the limit oscillates between $-c_j$ and $c_j$.
+                This analysis of the oscillation bounds is valid for each term
+                in the solution in isolation, but since these limits do not
+                exist for certain values of $\lambda$, it is not valid when we
+                consider the limiting value of their sum.
+
+                First, we must determine which values of $\alpha$ result in
+                complex roots. We know on what values of $\alpha$ we have real
+                roots, so the difference of the reals by the set of those
+                values of $\alpha$ will give the values of $\alpha$ for which
+                we obtain complex valued roots.
+                \begin{equation*}
+                    \R \setminus
+                    (-\infty, 1 - 2 \sqrt 3]
+                    \cup
+                    [1 + 2 \sqrt 3, \infty)
+                    =
+                    (1 - 2 \sqrt 3, 1 + 2 \sqrt 3)
+                \end{equation*}
+
+                Next, we must determine how the choice of $\alpha$ affects
+                $\lambda$, i.e. the real part of the root. From the real part
+                of the quadratic formula applied to the polynomial in $\D{}$,
+                we obtain the following result.
+                \begin{equation*}
+                    \lambda = \frac{1 - \alpha}{2}
+                \end{equation*}
+
+                Hence, $\lambda = 0$ requires that $\alpha = 1$. So for
+                $\alpha > 1$, the limit will converge. for
+                $1 - s \sqrt 3 < \alpha < 1$, the limit will oscillate.
+        \end{description}
+
+    \item
+        To solve the nonhomogeneous second-order differential equation using
+        the method of variation of parameters, we must first solve the
+        complementary homogeneous equation. To do so, we will make the
+        substitution $z(x) = \ln x$ to eliminate the nonconstant coefficients
+        and solve the resulting characteristic equation. We obtain the
+        following general solution.
+        \begin{equation*}
+            y_H = c_1 x^2 + c_2 x^3
+        \end{equation*}
+
+        Next, our goal is to find functions $u_1(x)$ and $u_2(x)$ such that
+        \begin{equation*}
+            y_p = y_1(x) u_1(x) + y_2(x) u_2(x)
+        \end{equation*}
+        where $y_1(x) = x^2$ and $y_2(x) = x^3$.
+
+        We assume that $u_1^\prime y_1 + u_2^\prime y_2 = 0$. Hence,
+        \begin{align*}
+            y_p^\prime &= u_1 y_1^\prime + u_2 y_2^\prime \\
+            y_p^{\prime\prime}
+            &= u_1^\prime y_1^\prime + u_1 y_1^{\prime\prime}
+            + u_2^\prime y_2^\prime + u_2 y_2^{\prime\prime}
+        \end{align*}
+
+        Substituting these back into the original differential equation causes
+        two terms to cancel out as they are solutions to the complementary
+        homogeneous equation, leaving us with
+        \begin{equation*}
+            u_1^\prime y_1^\prime + u_2^\prime + y_2^\prime = \frac{g(t)}{p(t)}
+        \end{equation*}
+        where $g(t) = x^4 \sin x$.
+
+        We need one more assumption to make things workable, which is that the
+        nonhomogeneous term be the constant function $p(t) = 1$. To achieve
+        this we will divide across the entire equation by $x^2$. The
+        nonhomogeneous term thus becomes $h(x) = x^2 \sin x$.
+
+        Now we can use the following system of equations to solve for $u_1(x)$
+        and $u_2(x)$.
+        \begin{align*}
+            u_1^\prime y_1^\prime + u_2^\prime + y_2^\prime &= h(x)
+            u_1^\prime y_1 + u_2^\prime y_2 &= 0
+        \end{align*}
+
+        First, we isolate $u_1$ in the second equation and substitute it into
+        the first equation. This gives a single equation for $u_2$ that we can
+        solve by integrating.
+        \begin{align*}
+            u_2^\prime &= \frac{y_1 h(x)}{y_1 y_2^\prime - y_1^\prime y_2} \\
+            u_2 &=
+                \int{\frac{(x^2)(x^2 \sin x)}{(x^2)(2x^2) - (x^3)(2x)}}\intd{x} \\
+                &= \int{\sin x}\intd{x} \\
+                &= -\cos x + C
+        \end{align*}
+        We choose $C = 0$ since we only need one value for $u_2$.
+
+        Next, we substitute this function for $u_2$ back into the second
+        equation and solve for $u_1$ using integration by parts.
+        \begin{align*}
+            u_1^\prime &= \frac{x^3 \cos x}{x^2} = x \cos x \\
+            u_1 &= \int{x \cos x}\intd{x} \\
+                &= x \sin x + \cos x + C
+        \end{align*}
+        Again we choose $C = 0$.
+
+        Hence, a particular solution to the differential equation is
+        \begin{equation*}
+            y_p = (x^2)(x \sin x + \cos x) - (x^3)(\cos x)
+        \end{equation*}
+
+        Adding this particular solution to the general solution of the
+        homogeneous equation gives the general solution of the nonhomogeneous
+        equation.
+        \begin{equation*}
+            y = (x^2)(x \sin x + \cos x) - (x^3)(\cos x)
+                + c_1 x^2 + c_2 x^3
+        \end{equation*}
+\end{enumerate}
+
+\end{document}
