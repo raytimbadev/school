@@ -40,66 +40,33 @@ public class SocketResourceManager implements ResourceManager {
 
     @Override
     public boolean deleteFlight(int id, int flightNumber) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("deleteFlight")
-                        .primitive(id)
-                        .primitive(flightNumber)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Boolean)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Boolean)network.invoke(
+                new Request.RequestBuilder()
+                .withMethod("deleteFlight")
+                .primitive(id)
+                .primitive(flightNumber)
+                .build()).yield();
     }
 
     // Returns the number of empty seats on this flight.
     @Override
     public int queryFlight(int id, int flightNumber) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("queryFlight")
-                        .primitive(id)
-                        .primitive(flightNumber)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Integer)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Integer)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("queryFlight")
+                    .primitive(id)
+                    .primitive(flightNumber)
+                    .build()).yield();
     }
 
     // Returns price of this flight.
     public int queryFlightPrice(int id, int flightNumber) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("queryFlightPrice")
-                        .primitive(id)
-                        .primitive(flightNumber)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Integer)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Integer)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("queryFlightPrice")
+                    .primitive(id)
+                    .primitive(flightNumber)
+                    .build()).yield();
     }
 
     // Car operations //
@@ -109,91 +76,47 @@ public class SocketResourceManager implements ResourceManager {
     // its current price.
     @Override
     public boolean addCars(int id, String location, int numCars, int carPrice) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("addCars")
-                        .primitive(id)
-                        .parameter(location)
-                        .primitive(numCars)
-                        .primitive(carPrice)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Boolean)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Boolean)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("addCars")
+                    .primitive(id)
+                    .parameter(location)
+                    .primitive(numCars)
+                    .primitive(carPrice)
+                    .build()).yield();
     }
 
     // Delete cars from a location.
     @Override
     public boolean deleteCars(int id, String location) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("deleteCars")
-                        .primitive(id)
-                        .parameter(location)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Boolean)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Boolean)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("deleteCars")
+                    .primitive(id)
+                    .parameter(location)
+                    .build()).yield();
     }
 
     // Returns the number of cars available at a location.
     @Override
     public int queryCars(int id, String location) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("queryCars")
-                        .primitive(id)
-                        .parameter(location)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Integer)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Integer)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("queryCars")
+                    .primitive(id)
+                    .parameter(location)
+                    .build()).yield();
     }
 
     // Returns price of cars at this location.
     @Override
     public int queryCarsPrice(int id, String location) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("queryCarsPrice")
-                        .primitive(id)
-                        .parameter(location)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Integer)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Integer)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("queryCarsPrice")
+                    .primitive(id)
+                    .parameter(location)
+                    .build()).yield();
     }
 
 
@@ -204,269 +127,137 @@ public class SocketResourceManager implements ResourceManager {
     // its current price.
     @Override
     public boolean addRooms(int id, String location, int numRooms, int roomPrice) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("addRooms")
-                        .primitive(id)
-                        .parameter(location)
-                        .primitive(numRooms)
-                        .primitive(roomPrice)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Boolean)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Boolean)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("addRooms")
+                    .primitive(id)
+                    .parameter(location)
+                    .primitive(numRooms)
+                    .primitive(roomPrice)
+                    .build()).yield();
     }
 
     // Delete rooms from a location.
     @Override
     public boolean deleteRooms(int id, String location) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("deleteRooms")
-                        .primitive(id)
-                        .parameter(location)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Boolean)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Boolean)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("deleteRooms")
+                    .primitive(id)
+                    .parameter(location)
+                    .build()).yield();
     }
 
     // Returns the number of rooms available at a location.
     @Override
     public int queryRooms(int id, String location) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("queryRooms")
-                        .primitive(id)
-                        .parameter(location)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Integer)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Integer)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("queryRooms")
+                    .primitive(id)
+                    .parameter(location)
+                    .build()).yield();
     }
 
     // Returns room price at this location.
     @Override
     public int queryRoomsPrice(int id, String location) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("queryRoomsPrice")
-                        .primitive(id)
-                        .parameter(location)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Integer)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Integer)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("queryRoomsPrice")
+                    .primitive(id)
+                    .parameter(location)
+                    .build()).yield();
     }
 
     // Customer operations //
 
     @Override
     public int newCustomer(int id) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("newCustomer")
-                        .primitive(id)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Integer)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Integer)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("newCustomer")
+                    .primitive(id)
+                    .build()).yield();
     }
 
     // This method makes testing easier.
     @Override
     public boolean newCustomerId(int id, int customerId) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("newCustomerId")
-                        .primitive(id)
-                        .primitive(customerId)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Boolean)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Boolean)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("newCustomerId")
+                    .primitive(id)
+                    .primitive(customerId)
+                    .build()).yield();
     }
 
     @Override
     public boolean doesCustomerExist(int id, int customerId) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("doesCustomerExist")
-                        .primitive(id)
-                        .primitive(customerId)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Boolean)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Boolean)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("doesCustomerExist")
+                    .primitive(id)
+                    .primitive(customerId)
+                    .build()).yield();
     }
 
     // Delete customer from the database.
     @Override
     public boolean deleteCustomer(int id, int customerId) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("deleteCustomer")
-                        .primitive(id)
-                        .primitive(customerId)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Boolean)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Boolean)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("deleteCustomer")
+                    .primitive(id)
+                    .primitive(customerId)
+                    .build()).yield();
     }
 
     // Return a bill.
     @Override
     public String queryCustomerInfo(int id, int customerId) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("queryCustomerInfo")
-                        .primitive(id)
-                        .primitive(customerId)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (String)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (String)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("queryCustomerInfo")
+                    .primitive(id)
+                    .primitive(customerId)
+                    .build()).yield();
     }
 
     // Add flight reservation to this customer.
     @Override
     public boolean reserveFlight(int id, int customerId, int flightNumber) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("reserveFlight")
-                        .primitive(id)
-                        .primitive(customerId)
-                        .primitive(flightNumber)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Boolean)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Boolean)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("reserveFlight")
+                    .primitive(id)
+                    .primitive(customerId)
+                    .primitive(flightNumber)
+                    .build()).yield();
     }
 
     // Add car reservation to this customer.
     @Override
     public boolean reserveCar(int id, int customerId, String location) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("reserveCar")
-                        .primitive(id)
-                        .primitive(customerId)
-                        .parameter(location)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Boolean)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Boolean)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("reserveCar")
+                    .primitive(id)
+                    .primitive(customerId)
+                    .parameter(location)
+                    .build()).yield();
     }
 
     // Add room reservation to this customer.
     @Override
     public boolean reserveRoom(int id, int customerId, String location) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("reserveRoom")
-                        .primitive(id)
-                        .primitive(customerId)
-                        .parameter(location)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Boolean)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Boolean)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("reserveRoom")
+                    .primitive(id)
+                    .primitive(customerId)
+                    .parameter(location)
+                    .build()).yield();
     }
 
     // Reserve an itinerary.
@@ -478,107 +269,52 @@ public class SocketResourceManager implements ResourceManager {
             String location,
             boolean car,
             boolean room) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("reserveItinerary")
-                        .primitive(id)
-                        .primitive(customerId)
-                        .parameter(flightNumbers)
-                        .parameter(location)
-                        .primitive(car)
-                        .primitive(room)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Boolean)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
-    }
+        return (Boolean)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("reserveItinerary")
+                    .primitive(id)
+                    .primitive(customerId)
+                    .parameter(flightNumbers)
+                    .parameter(location)
+                    .primitive(car)
+                    .primitive(room)
+                    .build()).yield();
+            }
 		
 	//start
 	@Override
 	public int start() {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("start")
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Integer)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
-	}
+        return (Integer)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("start")
+                    .build()).yield();
+    }
 
     @Override
     public boolean start(int id) {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("start")
-                        .primitive(id)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Boolean)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        return (Boolean)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("start")
+                    .primitive(id)
+                    .build()).yield();
     }
 	
 	//commit
 	public boolean commit(int id)  {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("commit") .primitive(id)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Boolean)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
-	}
+        return (Boolean)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("commit") .primitive(id)
+                    .build()).yield();
+    }
 
 	//abort
 	public boolean abort(int id)  {
-        try {
-            final Response response = network.invoke(
-                    new Request.RequestBuilder()
-                        .withMethod("abort")
-                        .primitive(id)
-                        .build()
-            );
-
-            if(response.isSuccessful())
-                return (Boolean)response.getResult();
-            else
-                throw UncheckedThrow.throwUnchecked(response.getError());
-        }
-        catch(Exception e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
-	}
+        return (Boolean)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("abort")
+                    .primitive(id)
+                    .build()).yield();
+    }
 
     @Override
     public boolean shutdown() {
