@@ -253,13 +253,9 @@
                 \end{proof}
 
             \item
-                Let $m = |\mathcal{C}_4|$ and $0 \leq n \leq m$ be the number
-                of contraints having slack, i.e. in which all variables have
-                been rounded up. Then $m - n$ is the number of nonzero dual
-                variables. Each dual variable is at most $1$, so by strong
-                duality, we have that
-                $x^* = y^* \leq m - n \implies x^* + n \leq m$
-
+                In order for the algorithm to be a $3$-factor approximation,
+                we have, according to our above proposition, to show that
+                there is no slack in any of the constraints.
         \end{enumerate}
 \end{enumerate}
 \end{document}
