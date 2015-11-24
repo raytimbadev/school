@@ -2,8 +2,9 @@ package common;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.io.Serializable;
 
-public class ItemGroup {
+public class ItemGroup implements Serializable {
     private int itemCount;
     private int reservedCount;
     private HashMap<Integer, Integer> reservations;

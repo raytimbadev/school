@@ -4,26 +4,25 @@ import lockmanager.LockManager;
 import lockmanager.LockType;
 
 import java.util.Map;
-import java.util.Hashtable;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.Collection;
 
 public class TransactionDataStore {
-    final Map<String, ItemGroup> mainData;
-    final Map<String, ItemGroup> txData;
+    final Data mainData;
+    final Data txData;
     final LockManager lockManager;
     final int transactionId;
 
     public TransactionDataStore(
             int transactionId,
             LockManager lockManager,
-            Map<String, ItemGroup> mainData) {
+            Data mainData) {
         this.transactionId = transactionId;
         this.mainData = mainData;
         this.lockManager = lockManager;
 
-        txData = new Hashtable<String, ItemGroup>();
+        txData = new Data();
     }
 
     /**
