@@ -220,38 +220,46 @@
                     $y_C^* = 0$.
 
                     Now we will show that the left-hand side implies the
-                    right-hand side by proving the contrapositive, i.e. that
-                    $y_C^* = 0 \implies |\{u \in C | \hat x_u = 1\}| > 3$.
-                    Suppose $y_C^* = 0$. By the complementary slackness
-                    theorem, the corresponding constraint in the primal linear
-                    program has slack, i.e. $\sum_{u \in C} x_u^* > 1$. We
-                    assume without loss of generality that
-                    $\forall u \in V.\; x_u^* \leq 1$ due to our proof in (b).
+                    right-hand side, i.e. that
+                    \begin{equation*}
+                        y_C^* > 0 \implies |\{u \in C | \hat x_u = 1\}| \leq 3
+                    \end{equation*}
 
-                    We want to show that the presence of slack implies that all
-                    the variables were rounded up.
+                    By the completementary slackness theorem, we can instead
+                    prove
+                    \begin{equation*}
+                        \sum_{u \in C} x_u = 1
+                        \implies
+                        |\{u \in C | \hat x_u = 1\}| \leq 3
+                    \end{equation*}
 
-                    Suppose not. Suppose that there exists a variable that was
-                    rounded down. If it is from $L$, then its value must have
-                    been zero. There is slack
+                    We know $|C| = 4$, so let $v_1, v_2, v_3, v_4 \in C$. Hence,
+                    $x_1 + x_2 + x_3 + x_4 = 1$. Suppose futhermore that
+                    $x_1, x_2 \in C_R$ and $x_3, x_4 \in C_L$, where $C_R$ and
+                    $C_L$ are the subgraphs of $C$ whose vertices lie in $R$
+                    and in $L$, respectively.
 
-                    If no more than three variables were rounded,
-
-                    If three of the rounded variables are $0$, then the last
-                    variable must have had been assigned $1$, but then there
-                    would be no slack, which is a contradiction.
-
-                    If two of the rounded variables are $0$ and they both
-                    correspond to vertices from $L$, then the other two
-                    vertices are from $R$, meaning that their values are both
-                    at least $\frac{1}{2}$.
-                    If their sum exceeds $1$, then the corresponding solution
-                    to the primal linear program is suboptimal, which is a
-                    contradiction.
-
-                    If two of the rounded variables are $0$ and they both
-                    correspond to vertices from $R$
+                    Suppose that all four variables were rounded. In order for
+                    that to occur,
+                    \begin{align*}
+                        x_1 &> \frac{1}{2} \\
+                        x_2 &> \frac{1}{2} \\
+                        x_3 &> 0 \\
+                        x_4 &> 0
+                    \end{align*}
+                    but this sum is greater that $1$, which contradicts the
+                    premise of the implication. Hence, no more than $3$ of the
+                    variables can be rounded in order for there to be no slack.
                 \end{proof}
+
+            \item
+                Let $m = |\mathcal{C}_4|$ and $0 \leq n \leq m$ be the number
+                of contraints having slack, i.e. in which all variables have
+                been rounded up. Then $m - n$ is the number of nonzero dual
+                variables. Each dual variable is at most $1$, so by strong
+                duality, we have that
+                $x^* = y^* \leq m - n \implies x^* + n \leq m$
+
         \end{enumerate}
 \end{enumerate}
 \end{document}
