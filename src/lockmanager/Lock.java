@@ -15,6 +15,14 @@ public class Lock {
         return transaction;
     }
 
+    public String getDatumName() {
+        return datumName;
+    }
+
+    public LockType getLockType() {
+        return lockType;
+    }
+
     @Override
     public int hashCode() {
         return datumName.hashCode();
