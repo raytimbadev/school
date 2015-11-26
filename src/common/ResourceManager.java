@@ -187,5 +187,7 @@ public interface ResourceManager {
     public boolean abort(int id)
         throws NoSuchTransactionException;
 
+    public TransactionStatus getTransactionStatus(int id);
+
     public boolean shutdown();
 }

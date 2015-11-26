@@ -5,8 +5,9 @@ import common.NoSuchTransactionException;
 import common.RedundantTransactionException;
 import common.UncheckedThrow;
 import common.Trace;
+import common.TransactionStatus;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -21,9 +22,15 @@ public class TransactionManager {
      */
     private final Map<Integer, Transaction> transactionMap;
 
+    /**
+     * Maps transaction IDs for finished transactions to their status.
+     */
+    private final Map<Integer, TransactionStatus> doneTransactionMap;
+
     public TransactionManager() {
-        transactionMap = new Hashtable<Integer, Transaction>();
+        transactionMap = new HashMap<Integer, Transaction>();
         ttlChecker = Executors.newScheduledThreadPool(1);
+        doneTransactionMap = new HashMap<Integer, TransactionStatus>();
     }
 
     public synchronized Transaction start() {
@@ -51,6 +58,7 @@ public class TransactionManager {
 
         tx.commit();
         transactionMap.remove(transactionId);
+        doneTransactionMap.put(transactionId, TransactionStatus.COMMITTED);
 
         return true;
     }
@@ -73,6 +81,7 @@ public class TransactionManager {
 
         tx.abort();
         transactionMap.remove(transactionId);
+        doneTransactionMap.put(transactionId, TransactionStatus.ABORTED);
 
         return true;
     }
@@ -96,7 +105,11 @@ public class TransactionManager {
         if(tx == null)
             throw new NoSuchTransactionException();
         tx.touch();
-        tx.enlist(rm);
+
+        // if the transaction is not newly enlisting the rm, then return
+        // right away to avoid calling start twice on the rm.
+        if(!tx.enlist(rm))
+            return;
 
         try {
             rm.start(tx.getId());
@@ -104,6 +117,21 @@ public class TransactionManager {
         catch(RedundantTransactionException e) {
             throw UncheckedThrow.throwUnchecked(e);
         }
+    }
+
+    public TransactionStatus getTransactionStatus(int id) {
+        final TransactionStatus doneTransactionStatus =
+            doneTransactionMap.get(id);
+        final Transaction tx =
+            transactionMap.get(id);
+
+        if(tx != null)
+            return TransactionStatus.IN_PROGRESS;
+
+        if(doneTransactionStatus == null)
+            return TransactionStatus.UNKNOWN;
+
+        return doneTransactionStatus;
     }
 
     private void scheduleTtlCheck(Transaction tx) {

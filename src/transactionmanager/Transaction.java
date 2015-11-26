@@ -101,7 +101,11 @@ public class Transaction {
         return state;
     }
 
-    public void enlist(ResourceManager rm) {
+    /**
+     * Marks a resource manager as enlisted in this transaction and decides
+     * whether that resource manager is newly enlisted or redundantly so.
+     */
+    public boolean enlist(ResourceManager rm) {
         if(state != State.PENDING)
             throw new InvalidTransactionException(
                     "Trying to modify a finished transaction."
@@ -110,8 +114,10 @@ public class Transaction {
         Trace.info(String.format(
                     "Enlisting ResourceManager to transaction %d.",
                     this.getId()));
-        if(!resourceManagers.contains(rm))
-            resourceManagers.add(rm);
+
+        final boolean result = resourceManagers.contains(rm);
+        resourceManagers.add(rm);
+        return !result;
     }
 
     public synchronized void commit() {

@@ -5,6 +5,7 @@ import common.UncheckedThrow;
 import common.sockets.Response;
 import common.sockets.Request;
 import common.sockets.NetworkCaller;
+import common.TransactionStatus;
 
 import java.net.InetAddress;
 import java.net.Socket;
@@ -321,6 +322,14 @@ public class SocketResourceManager implements ResourceManager {
         return (Boolean)network.invoke(
                 new Request.RequestBuilder()
                     .withMethod("shutdown")
+                    .build()).yield();
+    }
+
+    @Override
+    public TransactionStatus getTransactionStatus(int id) {
+        return (TransactionStatus)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("getTransactionStatus")
                     .build()).yield();
     }
 }

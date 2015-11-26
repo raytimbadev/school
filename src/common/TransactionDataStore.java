@@ -15,6 +15,13 @@ public class TransactionDataStore {
     final int transactionId;
     final String dbname;
 
+    public static String getTransactionFileName(String dbname, int id) {
+        return String.format(
+                "txn-%s-%d.dat",
+                dbname,
+                id);
+    }
+
     public TransactionDataStore(
             String dbname,
             int transactionId,
@@ -25,13 +32,7 @@ public class TransactionDataStore {
         this.mainData = mainData;
         this.lockManager = lockManager;
 
-        txData = new Data(
-                String.format(
-                    "txn-%s-%d.dat",
-                    dbname,
-                    transactionId
-                )
-        );
+        txData = new Data(getTransactionFileName(dbname, transactionId));
     }
 
     public Data unsafeGetTransactionData() {

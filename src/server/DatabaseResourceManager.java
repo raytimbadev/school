@@ -50,7 +50,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
     private TransactionList getTransactionList() {
         final TransactionList txns = new TransactionList();
-        for(final Integer id : transaction.keys())
+        for(final Integer id : transactions.keySet())
             txns.add(id);
         return txns;
     }
@@ -66,7 +66,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 mainData);
         this.dbname = dbname;
 
-        String dataPaths[] = new String[] {
+        String dataPaths[] = new String[] { 
             String.format("main-%s-0.dat", dbname),
             String.format("main-%s-1.dat", dbname)
         };
@@ -76,7 +76,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             String.format("txns-%s-1.dat", dbname)
         };
 
-        dataPersistenceLayer =
+        dataPersistenceLayer = 
             new SecurePersistenceLayer<Data>(Arrays.asList(dataPaths));
 
         transactionListPersistenceLayer =
@@ -488,5 +488,10 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     public boolean shutdown() {
         System.exit(0);
         return true;
+    }
+
+    @Override
+    public TransactionStatus getTransactionStatus(int id) {
+        throw new UnsupportedOperationException();
     }
 }
