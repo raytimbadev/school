@@ -6,15 +6,16 @@
 package server;
 
 import common.*;
-import lockmanager.*;  
-import common.operations.*; 
+import lockmanager.*;
+import common.operations.*;
 
 import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.util.*;
 
 public class ItemResourceManager extends DatabaseResourceManager {
-    public ItemResourceManager() {
+    public ItemResourceManager(String dbname) {
+        super(dbname);
     }
 
     // Customer operations //

@@ -13,16 +13,25 @@ public class TransactionDataStore {
     final Data txData;
     final LockManager lockManager;
     final int transactionId;
+    final String dbname;
 
     public TransactionDataStore(
+            String dbname,
             int transactionId,
             LockManager lockManager,
             Data mainData) {
+        this.dbname = dbname;
         this.transactionId = transactionId;
         this.mainData = mainData;
         this.lockManager = lockManager;
 
-        txData = new Data();
+        txData = new Data(
+                String.format(
+                    "txn-%s-%d.dat",
+                    dbname,
+                    transactionId
+                )
+        );
     }
 
     /**

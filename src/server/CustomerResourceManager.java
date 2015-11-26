@@ -4,17 +4,18 @@
 // -------------------------------
 
 package server;
-import lockmanager.*; 
+import lockmanager.*;
 import common.*;
-import lockmanager.*; 
+import lockmanager.*;
 import transactionmanager.Transaction;
-import common.operations.*; 
+import common.operations.*;
 import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.util.*;
 
 public class CustomerResourceManager extends DatabaseResourceManager {
-    public CustomerResourceManager() {
+    public CustomerResourceManager(String dbname) {
+        super(dbname);
     }
 
     // Customer operations //

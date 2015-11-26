@@ -128,13 +128,19 @@ public class Server implements Runnable {
         String serverType = args[2];
         int threadCount = Integer.parseInt(args[3]);
 
+        final String serverName = String.format(
+                "%sdb%d",
+                serverType,
+                port
+        );
+
         // TODO read a file with this configuration
         ResourceManager resourceManager = null;
         if(serverType.equals("customer")) {
-            resourceManager = new CustomerResourceManager();
+            resourceManager = new CustomerResourceManager(serverName);
         }
         else if(serverType.equals("item")) {
-            resourceManager = new ItemResourceManager();
+            resourceManager = new ItemResourceManager(serverName);
         }
         else
             throw new RuntimeException(

@@ -17,6 +17,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     protected final LockManager lockManager;
     protected final TransactionDataStore mainDataStore;
     protected final HashMap<Integer, TransactionDataStore> transactions;
+    
+    private final String dbname;
+
+    public String getDatabaseName() {
+        return dbname;
+    }
 
     protected synchronized void mergeData(Map<String, ItemGroup> data) {
         mainData.putAll(data);
@@ -36,14 +42,16 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         return txData;
     }
 
-    public DatabaseResourceManager() {
+    public DatabaseResourceManager(String dbname) {
         lockManager = new LockManager();
         transactions = new HashMap<Integer, TransactionDataStore>();
-        mainData = new Data();
+        mainData = new Data(String.format("main-%s.dat", dbname));
         mainDataStore = new TransactionDataStore(
+                dbname,
                 TransactionOperation.NO_TRANSACTION,
                 null,
                 mainData);
+        this.dbname = dbname;
     }
 
     // Flight operations //
@@ -394,7 +402,15 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     "Starting transaction %d.",
                     transactionId));
 
-        transactions.put(transactionId, new TransactionDataStore(transactionId,lockManager,mainData));
+        transactions.put(
+                transactionId,
+                new TransactionDataStore(
+                    getDatabaseName(),
+                    transactionId,
+                    lockManager,
+                    mainData
+                )
+        );
         return true;
     }
 
