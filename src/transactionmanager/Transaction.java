@@ -110,8 +110,8 @@ public class Transaction {
         Trace.info(String.format(
                     "Enlisting ResourceManager to transaction %d.",
                     this.getId()));
-
-        resourceManagers.add(rm);
+        if(!resourceManagers.contains(rm))
+            resourceManagers.add(rm);
     }
 
     public synchronized void commit() {

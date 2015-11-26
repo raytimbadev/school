@@ -516,6 +516,14 @@ public class MiddlewareResourceManager implements ResourceManager {
     }
 
 	/*Commit a transaction with specified id*/
+    /**
+    *  Commit:
+    *   send commit message to all RM's enlisted in the transaction
+    *   ERROR CASE: if you dont know the transaction forward a cancel reqest to all RM's
+    *   Wait for the votes from the appropriate RM's
+    *   ERROR CASE: If no responce within timeout consider failure and send ABORT to all RM's return fail to client
+    *   If we receive YES send COMMIT and return SUCCESS to client
+    */
     @Override
 	public boolean commit(int id) {
         boolean result = false;
