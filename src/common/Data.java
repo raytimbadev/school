@@ -4,8 +4,11 @@ import java.util.Map;
 import java.util.HashMap;
 import java.io.Serializable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 public class Data
@@ -19,20 +22,12 @@ public class Data
         this.path = path;
     }
 
-    private String getLockPath() {
-        return path + ".lock";
+    public String getPath() {
+        return path;
     }
 
-    public synchronized void persist() throws IOException {
-        final File lockFile = new File(getLockPath());
-
-        if(lockFile.exists())
-            lockFile.delete();
-
-        final ObjectOutputStream output =
-                new ObjectOutputStream(new FileOutputStream(path));
-        output.writeObject(this); 
-
-        lockFile.createNewFile();
+    private Data(String path, Map<String, ItemGroup> existingData) {
+        super(existingData);
+        this.path = path;
     }
 }

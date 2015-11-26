@@ -34,6 +34,10 @@ public class TransactionDataStore {
         );
     }
 
+    public Data unsafeGetTransactionData() {
+        return txData;
+    }
+
     /**
      * Writes all data from the transaction-local storage to the global
      * storage.

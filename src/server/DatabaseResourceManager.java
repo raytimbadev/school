@@ -17,12 +17,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     protected final LockManager lockManager;
     protected final TransactionDataStore mainDataStore;
     protected final HashMap<Integer, TransactionDataStore> transactions;
-    
+
     private final String dbname;
 
-    public String getDatabaseName() {
-        return dbname;
-    }
+    final SecurePersistenceLayer<Data>
+        dataPersistenceLayer;
+
+    final SecurePersistenceLayer<TransactionList>
+        transactionListPersistenceLayer;
 
     protected synchronized void mergeData(Map<String, ItemGroup> data) {
         mainData.putAll(data);
@@ -42,6 +44,17 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         return txData;
     }
 
+    public String getDatabaseName() {
+        return dbname;
+    }
+
+    private TransactionList getTransactionList() {
+        final TransactionList txns = new TransactionList();
+        for(final Integer id : transaction.keys())
+            txns.add(id);
+        return txns;
+    }
+
     public DatabaseResourceManager(String dbname) {
         lockManager = new LockManager();
         transactions = new HashMap<Integer, TransactionDataStore>();
@@ -52,6 +65,25 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 null,
                 mainData);
         this.dbname = dbname;
+
+        String dataPaths[] = new String[] {
+            String.format("main-%s-0.dat", dbname),
+            String.format("main-%s-1.dat", dbname)
+        };
+
+        String transactionListPaths[] = new String[] {
+            String.format("txns-%s-0.dat", dbname),
+            String.format("txns-%s-1.dat", dbname)
+        };
+
+        dataPersistenceLayer =
+            new SecurePersistenceLayer<Data>(Arrays.asList(dataPaths));
+
+        transactionListPersistenceLayer =
+            new SecurePersistenceLayer<TransactionList>(
+                    Arrays.asList(transactionListPaths));
+
+        recoverData();
     }
 
     // Flight operations //
