@@ -27,15 +27,6 @@
     <property name ="customerServer.hostname" value="localhost"/>
     <property name ="customerServer.listenPort" value="8084" />
 
-    <path id="dbcp">
-        <fileset dir="${basedir}/lib">
-            <include name="commons-dbcp2-2.1.1.jar"/>
-            <include name="commons-pool2-2.4.2.jar"/>
-            <include name="commons-logging-1.2.jar"/>
-            <include name="postgresql-9.4-1203.jdbc4.jar"/>
-        </fileset>
-    </path>
-
     <target name="clean">
         <delete dir="${basedir}/build" includeEmptyDirs="true"/>
     </target>
@@ -56,9 +47,6 @@
             srcdir="${basedir}/src"
             includes="common/**, server/**, lockmanager/**, transactionmanager/**"
             sourcepath="${basedir}/src" >
-            <classpath>
-                <path refid="dbcp" />
-            </classpath>
         </javac>
     </target>
 
@@ -71,9 +59,6 @@
             srcdir="${basedir}/src"
             includes="common/**, client/**, transactionmanager/**"
             sourcepath="${basedir}/src">
-            <classpath>
-                <path refid="dbcp" />
-            </classpath>
         </javac>
     </target>
 	
@@ -86,9 +71,6 @@
 			srcdir="${basedir}/src"
 			includes="common/**, client/**, transactionmanager/**"
 			sourcepath="${basedir}/src">
-			<classpath>
-				<path refid="dbcp"/>
-			</classpath>
 		</javac>
 	</target>
 
@@ -101,9 +83,6 @@
             srcdir="${basedir}/src"
             includes="common/**, middleware/**, client/**, transactionmanager/**"
             sourcepath="${basedir}/src">
-            <classpath>
-                <path refid="dbcp" />
-            </classpath>
         </javac>
     </target>
 
@@ -112,7 +91,6 @@
         <java classname="server.sockets.Server">
             <classpath>
                 <pathelement location="${basedir}/build/server" />
-                <path refid="dbcp" />
             </classpath>
             <arg value="${server.bindAddress}" />
             <arg value="${server.listenPort}" />
@@ -125,7 +103,6 @@
         <java classname="client.Client">
             <classpath>
                 <pathelement location="${basedir}/build/client" />
-                <path refid="dbcp" />
             </classpath>
             <arg value="${middleware.hostname}" />
             <arg value="${middleware.listenPort}" />
@@ -137,7 +114,6 @@
         <java classname="client.ScriptedClient">
             <classpath>
                 <pathelement location="${basedir}/build/client" />
-                <path refid="dbcp" />
             </classpath>
             <arg value="${middleware.hostname}" />
             <arg value="${middleware.listenPort}" />
@@ -153,7 +129,6 @@
         <java classname="middleware.Middleware">
             <classpath>
                 <pathelement location="${basedir}/build/middleware" />
-                <path refid="dbcp" />
             </classpath>
             <arg value="${middleware.bindAddress}" />
             <arg value="${middleware.listenPort}" />
