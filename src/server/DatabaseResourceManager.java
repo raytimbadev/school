@@ -86,6 +86,39 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         recoverData();
     }
 
+    private void recoverData() {
+
+        Data recoveredData = dataPersistenceLayer.load();
+        if(recoveredData != null)   
+            maindData = recoveredData; 
+
+        TransactionList t = transactionListPersistenceLayer.load();
+        if(t == null)
+            return;
+
+        TransactionList modifiedTransactionList = t; 
+        SecurePersistenceLayer<Data> transactionDataPersistenceLayer; 
+        for(int i; i < t.size(); i++) {
+            transactionDataPersistenceLayer = 
+                new SecurePersistenceLayer<Data>(TransactionDataStore.getTransactionFileName(dbname,t.get(i))); 
+            Data transactionData = transactionDataPersistenceLayer.load();
+            if(transactionData == null)
+                continue; 
+            else {
+                
+                if(true) //if commited
+                    mainData.putAll(transactionData); 
+                    modifiedTransactionList.remove(i);
+                } else {
+                    //if aborted
+                    modifiedTransactionList.remove(i); 
+                }
+            }
+
+        }
+        transactionListPersistenceLayer.persist(modifiedTransactionList); 
+        dataPersistenceLayer.persist(mainData); 
+    }
     // Flight operations //
 
     // Create a new flight, or add seats to existing flight.
