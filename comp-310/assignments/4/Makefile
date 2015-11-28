@@ -10,7 +10,7 @@ $(shell mkdir -p $(BINDIR) $(OBJDIR))
 CC=gcc
 
 TESTPROG=malloc_test
-CFLAGS=-g -I$(INCLUDEDIR)
+CFLAGS=-g -I$(INCLUDEDIR) -Wall -Werror
 LDFLAGS=
 
 all: lib test
