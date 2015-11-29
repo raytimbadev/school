@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.io.IOException;
 import java.util.List;
+import java.util.Arrays;
 
 /**
  * A durable persistence layer using an n-ary shadowing scheme.
@@ -21,6 +22,10 @@ public class SecurePersistenceLayer<T extends Serializable> {
         if(paths.size() == 0)
             throw new RuntimeException("empty list of paths is invalid.");
         files = paths;
+    }
+
+    public SecurePersistenceLayer(String path) {
+        files = Arrays.asList(new String[] { path });
     }
 
     /**
