@@ -144,14 +144,17 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
         if(recoveredData != null)
             mainData.putAll(recoveredData);
-        if(t == null)
+        if(t == null){
+            Trace.info("Transaction List is null, recovery complete"); 
             return;
+        }
 
         TransactionList modifiedTransactionList = t;
         SecurePersistenceLayer<Data> transactionDataPersistenceLayer;
         Data transactionData = null;
         for(int i=0; i < t.size(); i++) {
             try{
+                Trace.info(String.format("Recovering transaction with id %d", i));
                 ArrayList<String> path = new ArrayList<String>();
                 path.add(TransactionDataStore.getTransactionFileName(dbname,t.get(i)));
                 transactionDataPersistenceLayer = new SecurePersistenceLayer<Data>(path);
