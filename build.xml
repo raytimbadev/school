@@ -96,6 +96,8 @@
             <arg value="${server.listenPort}" />
             <arg value="${server.type}" />
             <arg value="${server.threadCount}" />
+            <arg value="${middleware.hostname}" />
+            <arg value="${middleware.listenPort}" />
         </java>
     </target>
 
