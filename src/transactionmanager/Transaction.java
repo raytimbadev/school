@@ -121,24 +121,51 @@ public class Transaction {
     }
 
     public synchronized void commit() {
-        if(state != State.PENDING)
-            throw new InvalidTransactionException(
-                    "Trying to commit a finished transaction."
-            );
-
         Trace.info(String.format(
-                    "Committing transaction %d.",
+                    "Committing %s transaction %d.",
+                    state.toString(),
                     this.getId()));
+
+        List<ResourceManager> preparedRMs = new ArrayList<ResourceManager>();
+        boolean failed = false;
 
         try {
             for(final ResourceManager rm : resourceManagers)
-                rm.commit(id);
+                if(state == State.PENDING) {
+                    if(rm.commit(id))
+                        preparedRMs.add(rm);
+                    else {
+                        failed = true;
+                        break;
+                    }
+                }
+                else
+                    throw new InvalidTransactionException(
+                            String.format(
+                                "Trying to commit a transaction in an " +
+                                "invalid state (%s).",
+                                state.toString()));
         }
         catch(NoSuchTransactionException e) {
             throw UncheckedThrow.throwUnchecked(e);
         }
 
-        state = State.COMMITTED;
+        Exception failure = null;
+
+        for(final ResourceManager rm : preparedRMs) {
+            try {
+                if(failed)
+                    rm.abort(id);
+                else
+                    rm.mergeCommit(id);
+            }
+            catch(Exception e) {
+                failure = e;
+            }
+        }
+
+        if(failure != null)
+            throw UncheckedThrow.throwUnchecked(failure);
     }
 
     public synchronized void abort() {
