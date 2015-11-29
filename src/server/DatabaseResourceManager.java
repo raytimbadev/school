@@ -120,7 +120,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
     private TransactionList getTransactionList() {
         final TransactionList txns = new TransactionList();
-        for(final Integer id : transactions.keySet())
+        for(final Integer id : preparedTransactions.keySet())
             txns.add(id);
         return txns;
     }
