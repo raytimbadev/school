@@ -582,7 +582,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         preparedTransactions.put(id, transactions.get(id));
         transactions.remove(id);
         try{
-
+            transactionListPersistenceLayer.persist(getTransactionList());
             new SecurePersistenceLayer<Data>(TransactionDataStore.getTransactionFileName(dbname,id))
                 .persist(preparedTransactions.get(id).unsafeGetTransactionData());
 
@@ -614,6 +614,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         preparedTransactions.remove(id);
         lockManager.releaseTransaction(id);
         lockManager.decrementPreparedTransactionCount();
+        transactionListPersistenceLayer.persist(getTransactionList());
         return true;
     }
 
