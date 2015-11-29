@@ -543,6 +543,12 @@ public class MiddlewareResourceManager implements ResourceManager {
         return result;
 	}
 
+    @Override
+    public boolean mergeCommit(int id) {
+        throw new UnsupportedOperationException(); 
+    }
+
+
 	/*aborts a transaction witha  specified id*/
     @Override
 	public boolean abort(int id)  {

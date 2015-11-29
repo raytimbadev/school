@@ -301,6 +301,7 @@ public class SocketResourceManager implements ResourceManager {
     }
 	
 	//commit
+    @Override
 	public boolean commit(int id)  {
         return (Boolean)network.invoke(
                 new Request.RequestBuilder()
@@ -308,7 +309,17 @@ public class SocketResourceManager implements ResourceManager {
                     .build()).yield();
     }
 
+    //merge commit
+    @Override
+    public boolean mergeCommit(int id)  {
+        return (Boolean)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("mergeCommit") .primitive(id)
+                    .build()).yield();
+    }
+
 	//abort
+    @Override
 	public boolean abort(int id)  {
         return (Boolean)network.invoke(
                 new Request.RequestBuilder()

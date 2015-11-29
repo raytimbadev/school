@@ -176,10 +176,16 @@ public interface ResourceManager {
         throws RedundantTransactionException;
 
     /**
-     * Commits the transaction associated with the given id.
+     * Prepares the transaction associated with the given id.
      */
     public boolean commit(int id)
         throws NoSuchTransactionException;
+
+    /**
+    * Commits the transaction in a prepared state
+    */
+    public boolean mergeCommit(int id)
+        throws NoSuchTransactionException; 
 
     /**
      * Abort the transaction associated with id.

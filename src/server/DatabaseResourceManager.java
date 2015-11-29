@@ -534,7 +534,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         lockManager.incrementPreparedTransactionCount(); 
         return true;
     }
-
+    @Override
     public synchronized boolean mergeCommit(int id)
     throws NoSuchTransactionException {
         final TransactionDataStore txData = preparedTransactions.get(id);
