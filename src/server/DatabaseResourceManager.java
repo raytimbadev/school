@@ -531,6 +531,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         } catch(IOException e) {
             UncheckedThrow.throwUnchecked(e); 
         }
+        lockManager.incrementPreparedTransactionCount(); 
         return true;
     }
 
@@ -547,7 +548,8 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         }
         txData.merge(); 
         preparedTransactions.remove(id);
-        lockManager.releaseTransaction(id); 
+        lockManager.releaseTransaction(id);
+        lockManager.decrementPreparedTransactionCount();  
         return true; 
     }
 

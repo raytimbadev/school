@@ -36,6 +36,10 @@ public class LockManager {
      * The service that schedules timeout checks.
      */
     private final ScheduledExecutorService ttlChecker;
+    /**
+    * Number of prepared transactions
+    */
+    private Integer preparedTransactionCount = 0; 
 
     public LockManager() {
         lockMap = new Hashtable<String, Map<Integer, Lock>>();
@@ -47,7 +51,15 @@ public class LockManager {
     public synchronized void markFinished(int transaction) {
         finishedTransactions.add(transaction);
     }
-
+    public synchronized void incrementPreparedTransactionCount() {
+        preparedTransactionCount++;
+    }
+    public synchronized void decrementPreparedTransactionCount() {
+        if(preparedTransactionCount == 0) {
+            throw new RuntimeException("Invariant violated in lock manager, cannot have negative transcation count"); 
+        }
+        preparedTransactionCount--; 
+    }
     public synchronized Lock lock(
             String datumName,
             int transaction,
@@ -173,6 +185,7 @@ public class LockManager {
             final Integer transaction,
             Map<Integer, Lock> transactionMap)
     {
+
         if(finishedTransactions.contains(transaction))
             throw new InvalidLockException(
                     String.format(
@@ -180,6 +193,10 @@ public class LockManager {
                         transaction
                     )
             );
+        
+        if(preparedTransactionCount != 0 ) {
+            return false; 
+        }
 
         for(final Lock lock : transactionMap.values())
             if(lock.lockType == LockType.LOCK_WRITE)
@@ -198,7 +215,9 @@ public class LockManager {
                         transaction
                     )
             );
-
+        if(preparedTransactionCount != 0 ) {
+            return false; 
+        }
         for(final Lock lock : transactionMap.values())
             if(lock.getTransaction() == transaction)
                 continue;
