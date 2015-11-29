@@ -173,6 +173,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     mainData.putAll(transactionData);
                 } else if(status == Transaction.State.ABORTED){
                 } else if(status == Transaction.State.PREPARED){
+                    lockManager.incrementPreparedTransactionCount(); 
                     preparedTransactions.put(t.get(i),new TransactionDataStore(t.get(i),mainData,transactionData,null)); 
                 }
                 else {
