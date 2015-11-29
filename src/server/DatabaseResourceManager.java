@@ -156,6 +156,8 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 path.add(TransactionDataStore.getTransactionFileName(dbname,t.get(i)));
                 transactionDataPersistenceLayer = new SecurePersistenceLayer<Data>(path);
                 transactionData = transactionDataPersistenceLayer.load();
+                preparedTransactions.put(t.get(i),new TransactionDataStore(t.get(i),mainData,transactionData,null)); 
+
             }catch(Exception e) {
                 UncheckedThrow.throwUnchecked(e);
             }
@@ -587,6 +589,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         lockManager.incrementPreparedTransactionCount();
         return true;
     }
+
+    @Override
+    public synchronized boolean partialCommit(int id) {
+        throw new UnsupportedOperationException(); 
+    }
+
     @Override
     public synchronized boolean mergeCommit(int id)
     throws NoSuchTransactionException {

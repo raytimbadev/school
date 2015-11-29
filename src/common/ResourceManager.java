@@ -188,6 +188,11 @@ public interface ResourceManager {
         throws NoSuchTransactionException; 
 
     /**
+    * Tells the middleware to advance the state of a transaction
+    */
+    public boolean partialCommit(int id) 
+        throws NoSuchTransactionException; 
+    /**
      * Abort the transaction associated with id.
      */
     public boolean abort(int id)

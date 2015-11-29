@@ -548,6 +548,24 @@ public class MiddlewareResourceManager implements ResourceManager {
         throw new UnsupportedOperationException(); 
     }
 
+    public boolean partialCommit(int id) {
+        boolean result = false;
+
+        Trace.info(String.format(
+                    "Performing partial commit on transaction %d.",
+                    id));
+
+        try {
+            result = transactionManager.partialCommit(id);
+        }
+        catch(NoSuchTransactionException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
+
+        return result;
+
+
+    }
 
 	/*aborts a transaction witha  specified id*/
     @Override

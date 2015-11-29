@@ -57,12 +57,34 @@ public class TransactionManager {
         if(tx == null)
             throw new NoSuchTransactionException();
 
+        if(tx.getState() == Transaction.State.PREPARED) {
+            throw new RuntimeException();
+        }
+
         tx.commit();
         transactionMap.remove(transactionId);
         doneTransactionMap.put(transactionId, TransactionStatus.COMMITTED);
 
         return true;
     }
+
+    public synchronized boolean partialCommit(int transactionId)
+    throws NoSuchTransactionException {
+        final Transaction tx = transactionMap.get(transactionId);
+        if(tx == null)
+            throw new NoSuchTransactionException();
+
+        
+        if(tx.getState() == Transaction.State.PREPARED) {
+            transactionMap.remove(transactionId);
+            doneTransactionMap.put(transactionId, TransactionStatus.COMMITTED); 
+        } 
+        tx.partialCommit(); 
+       
+        return true;
+    }
+
+
 
     /**
      * Aborts the transaction associated with a given identifier.

@@ -102,6 +102,9 @@ public class Transaction {
     public Transaction.State getState() {
         return state;
     }
+    public void setState(Transaction.State state) {
+        this.state = state; 
+    }
 
     /**
      * Marks a resource manager as enlisted in this transaction and decides
@@ -217,11 +220,61 @@ public class Transaction {
 
         return false;
     }
+    public synchronized void partialCommit() {
+        Trace.info(String.format(
+                    "Performing partial commit for state %s for transaction %d.",
+                    state.toString(),
+                    this.getId()));
+
+        List<ResourceManager> preparedRMs = new ArrayList<ResourceManager>();
+        boolean failed = false;
+
+        try { 
+            for(final ResourceManager rm : resourceManagers)
+                if(state == State.PENDING) {
+                    if(rm.commit(id))
+                        preparedRMs.add(rm);
+                    else {
+                        failed = true;
+                        state = State.ABORTED;
+                        break;
+                    }
+                    state = State.PREPARED; 
+                    return; 
+                }
+        }
+        catch(NoSuchTransactionException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
+
+        Exception failure = null;
+
+        for(final ResourceManager rm : resourceManagers) {
+            try {
+                if(failed)
+                    rm.abort(id);
+                else
+                    rm.mergeCommit(id);
+            }
+            catch(Exception e) {
+                failure = e;
+            }
+        }
+
+        if(failure != null) {
+            state = State.ABORTED;
+            throw UncheckedThrow.throwUnchecked(failure);
+        }
+
+        state = State.COMMITTED;
+    }
+
 
     public enum State {
         COMMITTED,
         ABORTED,
-        PENDING
+        PENDING,
+        PREPARED
     }
 }
 

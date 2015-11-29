@@ -618,6 +618,22 @@ public class Client {
                     e.printStackTrace();
                 }
                 break;
+            case 27: //commit
+                if(arguments.size() != 2) {
+                    wrongNumber();   
+                    break;
+                }
+
+                try {
+                    proxy.partialCommit(getInt(arguments.elementAt(1)));
+                    System.out.println("PARTIAL COMMIT");
+                }
+                catch(Exception e) {
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
+                    e.printStackTrace();
+                }
+                break;
 
             default:
                 System.out.println("The interface does not support this command.");
@@ -691,6 +707,8 @@ public class Client {
             return 25;
         else if (argument.compareToIgnoreCase("shutdown") == 0)
             return 26;
+        else if (argument.compareToIgnoreCase("partialCommit") == 0)
+            return 27; 
         else
             return 666;
     }

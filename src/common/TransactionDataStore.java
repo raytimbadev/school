@@ -13,7 +13,6 @@ public class TransactionDataStore {
     final Data txData;
     final LockManager lockManager;
     final int transactionId;
-    final String dbname;
 
     public static String getTransactionFileName(String dbname, int id) {
         return String.format(
@@ -23,11 +22,20 @@ public class TransactionDataStore {
     }
 
     public TransactionDataStore(
+            int transactionId,
+            Data mainData,
+            Data txData,
+            LockManager lockManager) {
+        this.transactionId = transactionId; 
+        this.mainData = mainData;
+        this.lockManager = lockManager;
+        this.txData = txData; 
+    }
+    public TransactionDataStore(
             String dbname,
             int transactionId,
             LockManager lockManager,
             Data mainData) {
-        this.dbname = dbname;
         this.transactionId = transactionId;
         this.mainData = mainData;
         this.lockManager = lockManager;

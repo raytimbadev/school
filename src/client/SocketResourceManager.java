@@ -317,7 +317,13 @@ public class SocketResourceManager implements ResourceManager {
                     .withMethod("mergeCommit") .primitive(id)
                     .build()).yield();
     }
-
+    @Override
+    public boolean partialCommit(int id) { 
+         return (Boolean)network.invoke(
+                new Request.RequestBuilder()
+                    .withMethod("partialCommit") .primitive(id)
+                    .build()).yield();
+    }
 	//abort
     @Override
 	public boolean abort(int id)  {
