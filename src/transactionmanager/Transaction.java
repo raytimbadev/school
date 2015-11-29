@@ -138,6 +138,7 @@ public class Transaction {
                         preparedRMs.add(rm);
                     else {
                         failed = true;
+                        state = State.ABORTED;
                         break;
                     }
                 }
@@ -154,7 +155,7 @@ public class Transaction {
 
         Exception failure = null;
 
-        for(final ResourceManager rm : preparedRMs) {
+        for(final ResourceManager rm : resourceManagers) {
             try {
                 if(failed)
                     rm.abort(id);
@@ -166,8 +167,12 @@ public class Transaction {
             }
         }
 
-        if(failure != null)
+        if(failure != null) {
+            state = State.ABORTED;
             throw UncheckedThrow.throwUnchecked(failure);
+        }
+
+        state = State.COMMITTED;
     }
 
     public synchronized void abort() {
