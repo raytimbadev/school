@@ -3,7 +3,7 @@ package server;
 import lockmanager.*;
 import common.*;
 import common.operations.*;
-
+import java.io.IOException; 
 import java.util.*;
 
 public abstract class DatabaseResourceManager implements ResourceManager {
@@ -87,26 +87,38 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     }
 
     private void recoverData() {
+        Data recoveredData = null;
+        TransactionList t  = null; 
+        try{
+            recoveredData = dataPersistenceLayer.load();
+            t = transactionListPersistenceLayer.load();
+        } catch(Exception e) {
+            UncheckedThrow.throwUnchecked(e); 
+        }
 
-        Data recoveredData = dataPersistenceLayer.load();
         if(recoveredData != null)   
-            maindData = recoveredData; 
-
-        TransactionList t = transactionListPersistenceLayer.load();
+            mainData.putAll(recoveredData); 
         if(t == null)
             return;
 
         TransactionList modifiedTransactionList = t; 
         SecurePersistenceLayer<Data> transactionDataPersistenceLayer; 
-        for(int i; i < t.size(); i++) {
-            transactionDataPersistenceLayer = 
-                new SecurePersistenceLayer<Data>(TransactionDataStore.getTransactionFileName(dbname,t.get(i))); 
-            Data transactionData = transactionDataPersistenceLayer.load();
-            if(transactionData == null)
+        Data transactionData = null; 
+        for(int i=0; i < t.size(); i++) {
+            try{
+                ArrayList<String> path = new ArrayList<String>(); 
+                path.add(TransactionDataStore.getTransactionFileName(dbname,t.get(i)));
+                transactionDataPersistenceLayer = new SecurePersistenceLayer<Data>(path); 
+                transactionData = transactionDataPersistenceLayer.load();
+            }catch(Exception e) {
+                UncheckedThrow.throwUnchecked(e); 
+            }
+
+            if(transactionData == null){
                 continue; 
-            else {
-                
-                if(true) //if commited
+            } else {
+                     
+                if(true){ //if commited
                     mainData.putAll(transactionData); 
                     modifiedTransactionList.remove(i);
                 } else {
@@ -116,8 +128,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             }
 
         }
-        transactionListPersistenceLayer.persist(modifiedTransactionList); 
-        dataPersistenceLayer.persist(mainData); 
+        try{
+            transactionListPersistenceLayer.persist(modifiedTransactionList); 
+            dataPersistenceLayer.persist(mainData); 
+        }catch(IOException e) {
+            UncheckedThrow.throwUnchecked(e); 
+        }
     }
     // Flight operations //
 
