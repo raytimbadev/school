@@ -7,7 +7,7 @@ import server.ItemResourceManager;
 
 import common.sockets.RequestContext;
 import common.sockets.RequestHandler;
-
+import client.SocketResourceManager; 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -127,6 +127,8 @@ public class Server implements Runnable {
         int port = Integer.parseInt(args[1]);
         String serverType = args[2];
         int threadCount = Integer.parseInt(args[3]);
+        String middlewareAddress = args[4]; 
+        int middlewarePort = Integer.parseInt(args[5]); 
 
         final String serverName = String.format(
                 "%sdb%d",
@@ -136,11 +138,15 @@ public class Server implements Runnable {
 
         // TODO read a file with this configuration
         ResourceManager resourceManager = null;
+
+        ResourceManager middleware = new SocketResourceManager(InetAddress.getByName(middlewareAddress), middlewarePort);
+
         if(serverType.equals("customer")) {
-            resourceManager = new CustomerResourceManager(serverName);
+            resourceManager = new CustomerResourceManager(serverName,middleware);
+
         }
         else if(serverType.equals("item")) {
-            resourceManager = new ItemResourceManager(serverName);
+            resourceManager = new ItemResourceManager(serverName, middleware);
         }
         else
             throw new RuntimeException(

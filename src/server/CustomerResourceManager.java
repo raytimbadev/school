@@ -6,6 +6,7 @@
 package server;
 import lockmanager.*;
 import common.*;
+import client.SocketResourceManager;
 import lockmanager.*;
 import transactionmanager.Transaction;
 import common.operations.*;
@@ -14,8 +15,8 @@ import java.io.IOException;
 import java.util.*;
 
 public class CustomerResourceManager extends DatabaseResourceManager {
-    public CustomerResourceManager(String dbname) {
-        super(dbname);
+    public CustomerResourceManager(String dbname, ResourceManager middleware) {
+        super(dbname,middleware);
     }
 
     // Customer operations //

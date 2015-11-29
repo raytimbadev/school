@@ -12,7 +12,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     private static synchronized int getNextCustomerId() {
         return nextCustomerId++;
     }
-
+    protected final ResourceManager middleware; 
     protected final Data mainData;
     protected final LockManager lockManager;
     protected final TransactionDataStore mainDataStore;
@@ -63,8 +63,9 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         return txns; 
     }
 
-    public DatabaseResourceManager(String dbname) {
+    public DatabaseResourceManager(String dbname, ResourceManager middleware) {
         lockManager = new LockManager();
+        this.middleware = middleware; 
         transactions = new HashMap<Integer, TransactionDataStore>();
         mainData = new Data(String.format("main-%s.dat", dbname));
         preparedTransactions = new HashMap<Integer, TransactionDataStore>(); 
@@ -126,14 +127,15 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             if(transactionData == null){
                 continue; 
             } else {
-                     
-                if(true){ //if commited - check with the middleware and work on result 
+                TransactionStatus status = middleware.getTransactionStatus(i);
+                if(status == TransactionStatus.COMMITTED){ //if commited - check with the middleware and work on result 
                     mainData.putAll(transactionData); 
-                    modifiedTransactionList.remove(i);
-                } else {
-                    //if aborted
-                    modifiedTransactionList.remove(i); 
+                } else if(status == TransactionStatus.ABORTED) {}
+                else {
+                    throw new RuntimeException("Transaction Status invariant violated"); 
                 }
+
+                modifiedTransactionList.remove(i);
             }
 
         }
@@ -522,7 +524,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         preparedTransactions.put(id, transactions.get(id));
         transactions.remove(id);
         try{
-            
+
             new SecurePersistenceLayer<Data>(TransactionDataStore.getTransactionFileName(dbname,id))
                 .persist(preparedTransactions.get(id).unsafeGetTransactionData()); 
 
