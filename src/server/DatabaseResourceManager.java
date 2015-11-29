@@ -17,6 +17,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     protected final LockManager lockManager;
     protected final TransactionDataStore mainDataStore;
     protected final HashMap<Integer, TransactionDataStore> transactions;
+    protected final HashMap<Integer, TransactionDataStore> preparedTransactions;
 
     private final String dbname;
 
@@ -55,10 +56,18 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         return txns;
     }
 
+    private TransactionList getPreparedTransactionList() {
+        final TransactionList txns = new TransactionList();
+        for(final Integer id: preparedTransactions.keySet())
+            txns.add(id);
+        return txns; 
+    }
+
     public DatabaseResourceManager(String dbname) {
         lockManager = new LockManager();
         transactions = new HashMap<Integer, TransactionDataStore>();
         mainData = new Data(String.format("main-%s.dat", dbname));
+        preparedTransactions = new HashMap<Integer, TransactionDataStore>(); 
         mainDataStore = new TransactionDataStore(
                 dbname,
                 TransactionOperation.NO_TRANSACTION,
@@ -118,7 +127,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 continue; 
             } else {
                      
-                if(true){ //if commited
+                if(true){ //if commited - check with the middleware and work on result 
                     mainData.putAll(transactionData); 
                     modifiedTransactionList.remove(i);
                 } else {
@@ -135,6 +144,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             UncheckedThrow.throwUnchecked(e); 
         }
     }
+
     // Flight operations //
 
     // Create a new flight, or add seats to existing flight.
@@ -502,16 +512,41 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         final TransactionDataStore txData = transactions.get(id);
 
         Trace.info(String.format(
-                    "Committing transaction %d.",
+                    "Entering prepared state for transaction %d.",
                     id));
 
         if(txData == null)
             throw new NoSuchTransactionException(id);
 
-        txData.merge(); 
+        
+        preparedTransactions.put(id, transactions.get(id));
         transactions.remove(id);
-        lockManager.releaseTransaction(id);
+        try{
+            
+            new SecurePersistenceLayer<Data>(TransactionDataStore.getTransactionFileName(dbname,id))
+                .persist(preparedTransactions.get(id).unsafeGetTransactionData()); 
+
+        } catch(IOException e) {
+            UncheckedThrow.throwUnchecked(e); 
+        }
         return true;
+    }
+
+    public synchronized boolean mergeCommit(int id)
+    throws NoSuchTransactionException {
+        final TransactionDataStore txData = preparedTransactions.get(id);
+
+        Trace.info(String.format(
+            "Commiting prepared Transaction %d.", 
+            id)); 
+
+        if(txData == null) {
+            throw new NoSuchTransactionException(id); 
+        }
+        txData.merge(); 
+        preparedTransactions.remove(id);
+        lockManager.releaseTransaction(id); 
+        return true; 
     }
 
     //abort
