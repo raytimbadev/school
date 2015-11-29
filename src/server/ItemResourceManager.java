@@ -5,7 +5,7 @@
 
 package server;
 
-import client.SocketResourceManager; 
+import client.SocketResourceManager;
 import common.*;
 import lockmanager.*;
 import common.operations.*;
@@ -31,7 +31,8 @@ public class ItemResourceManager extends DatabaseResourceManager {
                     customerId
                 )
         );
-       return new DeleteItemOperation(
+        touch(id);
+        return new DeleteItemOperation(
             getTransactionData(id),
             id,
             customerId)
@@ -49,6 +50,7 @@ public class ItemResourceManager extends DatabaseResourceManager {
                 )
         );
 
+        touch(id);
         return new QueryCustomerInfoOperation(
             getTransactionData(id),
             id,

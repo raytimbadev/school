@@ -31,6 +31,7 @@ public class CustomerResourceManager extends DatabaseResourceManager {
                     customerId
                 )
         );
+        touch(id);
         return new DeleteCustomerOperation(
                 getTransactionData(id),
                 id,
