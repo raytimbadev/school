@@ -1,7 +1,7 @@
 package transactionmanager;
 
-import java.util.List; 
-import java.util.ArrayList; 
+import java.util.List;
+import java.util.ArrayList;
 import common.ResourceManager;
 import common.NoSuchTransactionException;
 import common.InvalidTransactionException;
@@ -103,7 +103,7 @@ public class Transaction {
         return state;
     }
     public void setState(Transaction.State state) {
-        this.state = state; 
+        this.state = state;
     }
 
     /**
@@ -188,15 +188,22 @@ public class Transaction {
                     "Aborting transaction %d.",
                     this.getId()));
 
-        try {
-            for(final ResourceManager rm : resourceManagers)
-                rm.abort(id);
-        }
-        catch(NoSuchTransactionException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
+        Exception failure = null;
 
         state = State.ABORTED;
+
+        for(final ResourceManager rm : resourceManagers) {
+            try {
+                rm.abort(id);
+            }
+            catch(Exception e) {
+                // TODO use an ExceptionList ?
+                failure = e;
+            }
+        }
+
+        if(failure != null)
+            throw UncheckedThrow.throwUnchecked(failure);
     }
 
     public Set<ResourceManager> getResourceManagers() {
@@ -229,7 +236,7 @@ public class Transaction {
         List<ResourceManager> preparedRMs = new ArrayList<ResourceManager>();
         boolean failed = false;
 
-        try { 
+        try {
             for(final ResourceManager rm : resourceManagers)
                 if(state == State.PENDING) {
                     if(rm.commit(id))
@@ -239,8 +246,8 @@ public class Transaction {
                         state = State.ABORTED;
                         break;
                     }
-                    state = State.PREPARED; 
-                    return; 
+                    state = State.PREPARED;
+                    return;
                 }
         }
         catch(NoSuchTransactionException e) {

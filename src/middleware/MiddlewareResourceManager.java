@@ -3,7 +3,7 @@ package middleware;
 import transactionmanager.*;
 
 import common.ResourceManager;
-import common.NoSuchTransactionException; 
+import common.NoSuchTransactionException;
 import common.UncheckedThrow;
 import common.NoSuchTransactionException;
 import common.Trace;
@@ -384,7 +384,7 @@ public class MiddlewareResourceManager implements ResourceManager {
         if(id != -1) {
             try {
                 transactionManager.enlist(id, flightManager);
-                transactionManager.enlist(id, customerManager); 
+                transactionManager.enlist(id, customerManager);
             }
             catch(NoSuchTransactionException e) {
                 throw UncheckedThrow.throwUnchecked(e);
@@ -428,7 +428,7 @@ public class MiddlewareResourceManager implements ResourceManager {
         if(id != -1) {
             try {
                 transactionManager.enlist(id, carManager);
-                transactionManager.enlist(id, customerManager); 
+                transactionManager.enlist(id, customerManager);
             }
             catch(NoSuchTransactionException e) {
                 throw UncheckedThrow.throwUnchecked(e);
@@ -456,7 +456,7 @@ public class MiddlewareResourceManager implements ResourceManager {
             boolean room) {
 		if (id != -1) {
             try {
-                transactionManager.enlist(id,customerManager); 
+                transactionManager.enlist(id,customerManager);
                 transactionManager.enlist(id, flightManager);
                 if(car)
                     transactionManager.enlist(id, carManager);
@@ -544,7 +544,7 @@ public class MiddlewareResourceManager implements ResourceManager {
 
     @Override
     public boolean mergeCommit(int id) {
-        throw new UnsupportedOperationException(); 
+        throw new UnsupportedOperationException();
     }
 
     public boolean partialCommit(int id) {

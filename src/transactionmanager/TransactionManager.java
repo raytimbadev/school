@@ -101,9 +101,9 @@ public class TransactionManager {
         if(tx == null)
             throw new NoSuchTransactionException();
 
-        tx.abort();
-        transactionMap.remove(transactionId);
         doneTransactionMap.put(transactionId, Transaction.State.ABORTED);
+        transactionMap.remove(transactionId);
+        tx.abort();
 
         return true;
     }
