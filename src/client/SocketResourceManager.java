@@ -347,6 +347,7 @@ public class SocketResourceManager implements ResourceManager {
         return (TransactionStatus)network.invoke(
                 new Request.RequestBuilder()
                     .withMethod("getTransactionStatus")
+                    .primitive(id)
                     .build()).yield();
     }
 }
