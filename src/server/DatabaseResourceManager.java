@@ -3,6 +3,7 @@ package server;
 import lockmanager.*;
 import common.*;
 import common.operations.*;
+import transactionmanager.Transaction;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -168,10 +169,10 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             if(transactionData == null){
                 continue;
             } else {
-                TransactionStatus status = middleware.getTransactionStatus(i);
-                if(status == TransactionStatus.COMMITTED){ //if commited - check with the middleware and work on result
+                final Transaction.State status = middleware.getTransactionStatus(i);
+                if(status == Transaction.State.COMMITTED){ //if commited - check with the middleware and work on result
                     mainData.putAll(transactionData);
-                } else if(status == TransactionStatus.ABORTED) {}
+                } else if(status == Transaction.State.ABORTED) {}
                 else {
                     throw new RuntimeException("Transaction Status invariant violated");
                 }
@@ -649,7 +650,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     }
 
     @Override
-    public TransactionStatus getTransactionStatus(int id) {
+    public Transaction.State getTransactionStatus(int id) {
         throw new UnsupportedOperationException();
     }
 

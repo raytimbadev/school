@@ -17,6 +17,7 @@
 package common;
 
 import java.util.*;
+import transactionmanager.Transaction;
 
 public interface ResourceManager {
     // Flight operations //
@@ -198,7 +199,7 @@ public interface ResourceManager {
     public boolean abort(int id)
         throws NoSuchTransactionException;
 
-    public TransactionStatus getTransactionStatus(int id);
+    public Transaction.State getTransactionStatus(int id);
 
     public boolean shutdown();
 }

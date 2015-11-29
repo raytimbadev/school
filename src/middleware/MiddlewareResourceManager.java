@@ -7,7 +7,6 @@ import common.NoSuchTransactionException;
 import common.UncheckedThrow;
 import common.NoSuchTransactionException;
 import common.Trace;
-import common.TransactionStatus;
 
 import java.util.*;
 import javax.jws.WebService;
@@ -594,7 +593,7 @@ public class MiddlewareResourceManager implements ResourceManager {
     }
 
     @Override
-    public TransactionStatus getTransactionStatus(int id) {
+    public Transaction.State getTransactionStatus(int id) {
         return transactionManager.getTransactionStatus(id);
     }
 }

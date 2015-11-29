@@ -5,7 +5,7 @@ import common.UncheckedThrow;
 import common.sockets.Response;
 import common.sockets.Request;
 import common.sockets.NetworkCaller;
-import common.TransactionStatus;
+import transactionmanager.Transaction;
 
 import java.net.InetAddress;
 import java.net.Socket;
@@ -343,8 +343,8 @@ public class SocketResourceManager implements ResourceManager {
     }
 
     @Override
-    public TransactionStatus getTransactionStatus(int id) {
-        return (TransactionStatus)network.invoke(
+    public Transaction.State getTransactionStatus(int id) {
+        return (Transaction.State)network.invoke(
                 new Request.RequestBuilder()
                     .withMethod("getTransactionStatus")
                     .primitive(id)

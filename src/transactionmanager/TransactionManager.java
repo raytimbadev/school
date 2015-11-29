@@ -5,9 +5,8 @@ import common.NoSuchTransactionException;
 import common.RedundantTransactionException;
 import common.UncheckedThrow;
 import common.Trace;
-import common.TransactionStatus;
-import java.util.List; 
-import java.util.ArrayList; 
+import java.util.List;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.Map;
@@ -26,12 +25,12 @@ public class TransactionManager {
     /**
      * Maps transaction IDs for finished transactions to their status.
      */
-    private final Map<Integer, TransactionStatus> doneTransactionMap;
+    private final Map<Integer, Transaction.State> doneTransactionMap;
 
     public TransactionManager() {
         transactionMap = new HashMap<Integer, Transaction>();
         ttlChecker = Executors.newScheduledThreadPool(1);
-        doneTransactionMap = new HashMap<Integer, TransactionStatus>();
+        doneTransactionMap = new HashMap<Integer, Transaction.State>();
     }
 
     public synchronized Transaction start() {
@@ -63,7 +62,7 @@ public class TransactionManager {
 
         tx.commit();
         transactionMap.remove(transactionId);
-        doneTransactionMap.put(transactionId, TransactionStatus.COMMITTED);
+        doneTransactionMap.put(transactionId, Transaction.State.COMMITTED);
 
         return true;
     }
@@ -74,13 +73,13 @@ public class TransactionManager {
         if(tx == null)
             throw new NoSuchTransactionException();
 
-        
+
         if(tx.getState() == Transaction.State.PREPARED) {
             transactionMap.remove(transactionId);
-            doneTransactionMap.put(transactionId, TransactionStatus.COMMITTED); 
-        } 
-        tx.partialCommit(); 
-       
+            doneTransactionMap.put(transactionId, Transaction.State.COMMITTED);
+        }
+        tx.partialCommit();
+
         return true;
     }
 
@@ -104,7 +103,7 @@ public class TransactionManager {
 
         tx.abort();
         transactionMap.remove(transactionId);
-        doneTransactionMap.put(transactionId, TransactionStatus.ABORTED);
+        doneTransactionMap.put(transactionId, Transaction.State.ABORTED);
 
         return true;
     }
@@ -142,17 +141,14 @@ public class TransactionManager {
         }
     }
 
-    public TransactionStatus getTransactionStatus(int id) {
-        final TransactionStatus doneTransactionStatus =
+    public Transaction.State getTransactionStatus(int id) {
+        final Transaction.State doneTransactionStatus =
             doneTransactionMap.get(id);
         final Transaction tx =
             transactionMap.get(id);
 
         if(tx != null)
-            return TransactionStatus.IN_PROGRESS;
-
-        if(doneTransactionStatus == null)
-            return TransactionStatus.UNKNOWN;
+            return tx.getState();
 
         return doneTransactionStatus;
     }
