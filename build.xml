@@ -45,7 +45,7 @@
             verbose="${verbose}"
             destdir="${basedir}/build/server"
             srcdir="${basedir}/src"
-            includes="common/**, server/**, lockmanager/**, transactionmanager/**"
+            includes="client/**, common/**, server/**, lockmanager/**, transactionmanager/**"
             sourcepath="${basedir}/src" >
         </javac>
     </target>
