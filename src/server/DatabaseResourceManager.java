@@ -160,7 +160,6 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 path.add(TransactionDataStore.getTransactionFileName(dbname,t.get(i)));
                 transactionDataPersistenceLayer = new SecurePersistenceLayer<Data>(path);
                 transactionData = transactionDataPersistenceLayer.load();
-                preparedTransactions.put(t.get(i),new TransactionDataStore(t.get(i),mainData,transactionData,null)); 
 
             }catch(Exception e) {
                 UncheckedThrow.throwUnchecked(e);
@@ -172,9 +171,13 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 final Transaction.State status = middleware.getTransactionStatus(i);
                 if(status == Transaction.State.COMMITTED){ //if commited - check with the middleware and work on result
                     mainData.putAll(transactionData);
-                } else if(status == Transaction.State.ABORTED) {}
+                } else if(status == Transaction.State.ABORTED){
+                } else if(status == Transaction.State.PREPARED){
+                    preparedTransactions.put(t.get(i),new TransactionDataStore(t.get(i),mainData,transactionData,null)); 
+                }
                 else {
-                    throw new RuntimeException("Transaction Status invariant violated");
+
+                    throw new RuntimeException(String.format("Transaction Status invariant violated %s", status.toString()));
                 }
 
                 modifiedTransactionList.remove(i);
