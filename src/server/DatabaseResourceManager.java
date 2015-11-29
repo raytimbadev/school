@@ -614,7 +614,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         preparedTransactions.remove(id);
         lockManager.releaseTransaction(id);
         lockManager.decrementPreparedTransactionCount();
-        transactionListPersistenceLayer.persist(getTransactionList());
+        try {
+            transactionListPersistenceLayer.persist(getTransactionList());
+        }
+        catch(IOException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
         return true;
     }
 
