@@ -5,18 +5,71 @@
 \date{3 December 2015}
 
 \usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.0cm]{geometry}
 
 \newtheorem{proposition}{Proposition}
 \newtheorem{claim}{Claim}
+
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\N}{\mathbb{N}}
 
 \begin{document}
 
 \maketitle
 
 \begin{enumerate}
-    \item --
+    \item
+        Suppose $M$ is a Turing machine and $w$ is a word.
 
-    \item --
+        \begin{proposition}
+            Whether $M$ uses more than a given number $n$ of cells on its tape
+            to process $w$ is decidable.
+        \end{proposition}
+
+        \begin{proof}
+            If $M$ implements a computable function defined on $w$, then it
+            suffices to see how many cells have been used when $M$ halts to
+            decide. However, if the function implemented by $M$ is undefined on
+            $w$, then the machine will diverge.
+
+            Divergence can arise in two ways. Either the machine will diverge
+            by returning to a prior configuration (the tape contents, the
+            state, and the head position are exactly as they were some time
+            before) or it will diverge by ``running off'' (there is a loop in
+            the states, but the head and tape contents keep changing).
+
+            In the presence of a space bound, the first type of divergence can
+            be checked in finite time since there are finitely many possible
+            configurations. It suffices to keep track of each
+            configuration as the computation progresses. If the machine returns
+            to a prior computation, then we know that it will loop forever
+            within the space bound, and our decision process can output ``NO''.
+
+            If the machine leaves the space bound, it will do so in finite time
+            by the same argument.
+        \end{proof}
+
+    \item
+        If the submarine is not moving, it clearly suffices to shoot in a
+        spiral fashion starting at some arbitrary starting point to eventually
+        hit the submarine. This can be generalized. Indeed, if
+        $g : \N \to \Z \times \Z$ is a bijection, then shooting at tile $g(t)$
+        at time $t$ will eventually hit an immobile submarine.
+
+        Now, the submarine is not immobile. It has an unknown starting
+        position, a speed, and a direction. We call this tuple a
+        \emph{configuration}. The set of all such tuples
+        $S = \Z \times \Z \times \N \times 4$ characterizes these
+        configurations.
+
+        There exists a bijection $f : \N \to S$, which identifies each time
+        step with some configuration. Using it, we can check \emph{all} the
+        configurations. To compute a position to shoot at, we will construct a
+        function $h : S \to \Z \times \Z$. This function takes the starting
+        position and adds to it the direction multiplied by the velocity.
+
+        Composing $f$ and $h$ gives us a function $g^\prime$ that tells us
+        where to shoot at time $n$.
 
     \item
         \begin{enumerate}
@@ -100,6 +153,35 @@
                     Hence, $L$ is regular.
                 \end{proof}
         \end{enumerate}
+
+    \item
+        Suppose $L$ is a context-free language and $R$ is a regular language.
+
+        \begin{proposition}
+            It is undecidable whether $R \subseteq L$.
+        \end{proposition}
+
+        \begin{proof}
+            If we take $R = \Sigma^*$, then deciding $R \subseteq L$ amounts to
+            deciding whether $L = \Sigma^*$ since $\Sigma^*$ is the greatest
+            language. It is known that checking whether a context-free language
+            accepts all words is undecidable.
+        \end{proof}
+
+        \begin{proposition}
+            It is decidable whether $L \subseteq R$.
+        \end{proposition}
+        
+        \begin{proof}
+            Consider $L \cap \bar R$. It is a context-free language since $\bar
+            R$ is regular and the intersection of a regular language with a
+            context-free language is context-free. We know then from set theory
+            that
+            $$L \cap \bar R = \emptyset \iff L \subseteq R$$
+            Checking whether a context-free language is empty is decidable, and
+            thus so is checking whether a context-free language is a subset of
+            a regular language.
+        \end{proof}
 \end{enumerate}
 
 \end{document}
