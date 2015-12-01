@@ -1,0 +1,192 @@
+If I do honours math & cs:
+
+    In order to complete required courses:
+
+        math 242 - analysis 1 (F16)
+        math 255 - honours analysis 2 (W16 !)
+        math 248 - honours advanced calculus (F16)
+        math 350 - graph theory and combinatorics (F16)
+        math 356 - honours probability (F16)
+        math 370 - honours algebra 3 (F16)
+        math 371 - honours algebra 4 (W17)
+        math 387 - honours numerical analysis (W16)
+
+        Need to learn analysis 1 over the winter break so I can reasonably take
+        analysis 2 before formally taking analysis 1. Need to do this so I can
+        be in analysis 2 as a corequisite for honours numerical analysis.
+
+    In order to complete complementary courses:
+
+        + 6 credits from *honours* math courses
+
+        My plan for those:
+
+            ???
+            ???
+
+        + 12 credits in COMP
+
+        My plan for those:
+
+            comp 520 - compiler design (4 credits) (W16)
+            comp 527 - logic and computation (3 credits) (W16)
+            comp 512 - distributed systems (done) (4 credits) (F15)
+
+            + 1 more, maybe language-based security in winter 17
+
+    In order to complete the degree:
+
+        15 arbitrary credits:
+
+            hgen 396 - human genetics research project (3 credits)
+            math 318 - mathematical logic (required in majors!)
+            math 315 - ordinary differential equations (required in majors!)
+
+
+    Overall:
+        Fall 14:
+            comp 206 - introduction to software systems (required)
+            comp 250 - introduction to computer science (required)
+            math 235 - algebra 1 (required)
+            math 318 - mathematical logic (elective)
+
+        Winter 15:
+            comp 252 - honours algorithms and data structures (required)
+            comp 273 - introduction to computer systems (required)
+            comp 302 - programming languages and paradigms (required)
+            hgen 396 - human genetics research project (elective)
+            math 251 - honours algebra 2 (required)
+
+        Fall 15:
+            comp 310 - operating systems (required)
+            comp 330 - theory of computing (required)
+            comp 360 - algorithm design (~ required)
+            comp 512 - distributed systems (complementary)
+            math 315 - ordinary differential equations (elective?!)
+
+        Winter 16:
+            math 255 - honours analysis 2 (required)
+            math 287 - honours numerical analysis (complementary)
+            comp 520 - compiler design (complementary)
+            comp 527 - logic and computation (complementary)
+            + 1 more
+
+        Fall 16:
+            math 242 - analysis 1 (required)
+            math 250 - graph theory and combinatorics (required)
+            math 248 - honours advanced calculus (required)
+            math 256 - honours probability (complementary)
+            math 371 - honours algebra 3 (complementary)
+
+        winter 17:
+            math 371 - honours algebra 4 (complementary)
+            comp 523 - language based security (complementary) ?
+            + 2 honours math courses
+            + 2 electives
+
+If I do majors math cs:
+
+    required courses (54 credits ~ 18 courses):
+
+        comp 206 - introduction to software systems (F14) !
+        comp 250 - introduction to computer science (F14) !
+        comp 251 - algorithms and data structures (W15) !
+        comp 273 - introduction to computer systems (W15) !
+        comp 302 - programming languages and paradigms (W15) !
+        comp 310 - operating systems (F15) !
+        comp 330 - theory of computation (F15) !
+        comp 360 - algorithm design (F15) !
+        math 222 - calculus 3 (CEGEP) !
+        math 235 - algebra 1 (F14) !
+        math 236 - algebra 2 (W15) !
+        math 315 - ordinary differential equations (F15) !
+        math 318 - mathematical logic (F14) !
+        math 242 - analysis 1 (F16)
+        math 317 - numerical analysis (W16)
+        math 323 - probability (F16)
+        math 340 - discrete structures 2 (F16)
+
+    complementary courses (18 credits ~ 6 courses):
+
+        3 math courses:
+
+            math 370 - honours algebra 3 (F16)
+            math 371 - honours algebra 4 (W17)
+            + 1 more (perhaps mathematical finance)
+
+        3 computer science courses:
+
+            comp 512 - distributed systems (F15) !
+            comp 520 - compiler design (W16)
+            comp 527 - logic and commputation (W16)
+
+    electives (18 credits ~ 6 courses):
+
+        6 courses:
+
+            hgen 396 - human genetics research project (W15)
+            comp 523 - language based security (W17) ?
+
+            + 4 more (perhaps a language course ?)
+
+    Conclusion:
+
+        I won't have to take honours analysis 2 or honours advanced calculus.
+
+        I can take regular numerical analysis in F16 instead of honours
+        numerical analysis in W16.
+
+    Overall:
+
+        Fall 14:
+
+            comp 206 (required)
+            comp 250 (required)
+            math 235 (required)
+            math 318 (required)
+
+        Winter 15:
+
+            comp 252 (required comp 251)
+            comp 273 (required)
+            comp 302 (required)
+            hgen 396 (elective)
+            math 251 (required math 236)
+
+        Fall 15:
+
+            comp 310 (required)
+            comp 330 (required)
+            comp 360 (required)
+            comp 512 (comp complementary)
+            math 315 (required)
+
+        Winter 16:
+
+            comp 520 (comp complementary)
+            comp 527 (comp complementary)
+            comp 531 (elective)
+            math 340 (required)
+            + 1 math complementary or 1 elective
+
+            Note: math 430 conflicts with comp 527
+
+        Fall 16:
+
+            math 242 - analysis 1 (required)
+            math 317 - numerical analysis (required)
+            math 370 - honours algebra 3 (math complementary)
+            + 1 math complementary and 1 elective
+            OR
+            + 2 electives
+
+        Winter 17:
+
+            math 323 - probability (required)
+            math 371 - honours algebra 4 (math complementary)
+            +1 math complementary and 2 electives
+            OR
+            +3 electives
+
+            Perhaps math 430
+
