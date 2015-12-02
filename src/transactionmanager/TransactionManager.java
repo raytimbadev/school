@@ -82,8 +82,6 @@ public class TransactionManager {
         return true;
     }
 
-
-
     /**
      * Aborts the transaction associated with a given identifier.
      *

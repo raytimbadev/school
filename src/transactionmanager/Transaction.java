@@ -134,23 +134,24 @@ public class Transaction {
         List<ResourceManager> preparedRMs = new ArrayList<ResourceManager>();
         boolean failed = false;
 
+        if(state != State.PENDING)
+            throw new InvalidTransactionException(
+                    String.format(
+                        "Trying to commit a transaction in an " +
+                        "invalid state (%s).",
+                        state.toString()));
+
+        state = State.PREPARED;
+
         try {
             for(final ResourceManager rm : resourceManagers)
-                if(state == State.PENDING) {
-                    if(rm.commit(id))
-                        preparedRMs.add(rm);
-                    else {
-                        failed = true;
-                        state = State.ABORTED;
-                        break;
-                    }
+                if(rm.commit(id))
+                    preparedRMs.add(rm);
+                else {
+                    failed = true;
+                    state = State.ABORTED;
+                    break;
                 }
-                else
-                    throw new InvalidTransactionException(
-                            String.format(
-                                "Trying to commit a transaction in an " +
-                                "invalid state (%s).",
-                                state.toString()));
         }
         catch(NoSuchTransactionException e) {
             throw UncheckedThrow.throwUnchecked(e);
@@ -162,8 +163,19 @@ public class Transaction {
             try {
                 if(failed)
                     rm.abort(id);
-                else
-                    rm.mergeCommit(id);
+                else {
+                    try {
+                        rm.mergeCommit(id);
+                    }
+                    catch(Exception e) {
+                        Trace.error(
+                                String.format(
+                                    "mergeCommit failed for an RM !"
+                                )
+                        );
+                        failure = e;
+                    }
+                }
             }
             catch(Exception e) {
                 failure = e;

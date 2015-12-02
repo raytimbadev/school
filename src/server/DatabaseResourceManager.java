@@ -146,7 +146,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         if(recoveredData != null)
             mainData.putAll(recoveredData);
         if(t == null){
-            Trace.info("Transaction List is null, recovery complete"); 
+            Trace.info("Transaction List is null, recovery complete");
             return;
         }
 
@@ -169,12 +169,16 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 continue;
             } else {
                 final Transaction.State status = middleware.getTransactionStatus(i);
-                if(status == Transaction.State.COMMITTED){ //if commited - check with the middleware and work on result
+                if(status == Transaction.State.COMMITTED){
+                    // if commited - check with the middleware and work on result
                     mainData.putAll(transactionData);
-                } else if(status == Transaction.State.ABORTED){
-                } else if(status == Transaction.State.PREPARED){
-                    lockManager.incrementPreparedTransactionCount(); 
-                    preparedTransactions.put(t.get(i),new TransactionDataStore(t.get(i),mainData,transactionData,null)); 
+                }
+                else if(status == Transaction.State.ABORTED){
+                    // do nothing
+                }
+                else if(status == Transaction.State.PREPARED) {
+                    lockManager.incrementPreparedTransactionCount();
+                    preparedTransactions.put(t.get(i),new TransactionDataStore(t.get(i),mainData,transactionData,null));
                 }
                 else {
 
@@ -583,24 +587,32 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         if(txData == null)
             throw new NoSuchTransactionException(id);
 
+        synchronized(txData) {
+            preparedTransactions.put(id, txData);
+            transactions.remove(id);
+            try{
+                transactionListPersistenceLayer.persist(getTransactionList());
+                new SecurePersistenceLayer<Data>(
+                        TransactionDataStore.getTransactionFileName(
+                            dbname,
+                            id
+                        )
+                    )
+                    .persist(txData.unsafeGetTransactionData());
 
-        preparedTransactions.put(id, transactions.get(id));
-        transactions.remove(id);
-        try{
-            transactionListPersistenceLayer.persist(getTransactionList());
-            new SecurePersistenceLayer<Data>(TransactionDataStore.getTransactionFileName(dbname,id))
-                .persist(preparedTransactions.get(id).unsafeGetTransactionData());
-
-        } catch(IOException e) {
-            UncheckedThrow.throwUnchecked(e);
+            } catch(IOException e) {
+                // We assume that the filesystem is secure, so this exception
+                // should never be thrown.
+                UncheckedThrow.throwUnchecked(e);
+            }
+            lockManager.incrementPreparedTransactionCount();
+            return true;
         }
-        lockManager.incrementPreparedTransactionCount();
-        return true;
     }
 
     @Override
     public synchronized boolean partialCommit(int id) {
-        throw new UnsupportedOperationException(); 
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -612,25 +624,38 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             "Commiting prepared Transaction %d.",
             id));
 
+        // if the transaction is not prepared
         if(txData == null) {
             throw new NoSuchTransactionException(id);
         }
+
+        // merge the data with the main data
         txData.merge();
+
+        // persist the main data
         try {
             dataPersistenceLayer.persist(mainData);
         }
         catch(IOException e) {
             throw UncheckedThrow.throwUnchecked(e);
         }
+
+        // remove the transaction from the list of prepared transactions
         preparedTransactions.remove(id);
+
+        // release locks owned by the transaction
         lockManager.releaseTransaction(id);
+
+        // decrease the count of prepared transactions
         lockManager.decrementPreparedTransactionCount();
+
         try {
             transactionListPersistenceLayer.persist(getTransactionList());
         }
         catch(IOException e) {
             throw UncheckedThrow.throwUnchecked(e);
         }
+
         return true;
     }
 
@@ -645,19 +670,24 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     id));
 
         if(txData != null) {
+            // transaction is in PENDING state (not yet persisted)
             transactions.remove(id);
             lockManager.releaseTransaction(id);
-            return true; 
-        } 
-        if(preparedTransactions.get(id) == null) {
-            throw new NoSuchTransactionException(); 
+            return true;
         }
+
+        if(preparedTransactions.get(id) == null) {
+            throw new NoSuchTransactionException();
+        }
+
         preparedTransactions.remove(id);
+        lockManager.decrementPreparedTransactionCount();
+
         try {
-        transactionListPersistenceLayer.persist(getTransactionList()); 
-        } 
+            transactionListPersistenceLayer.persist(getTransactionList());
+        }
         catch(IOException e) {
-            throw UncheckedThrow.throwUnchecked(e); 
+            throw UncheckedThrow.throwUnchecked(e);
         }
 
         return true;
@@ -692,7 +722,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 int ttl = ttls.get(transactionId);
                 if(ttl < delta / 1000)
                     try {
-                        middleware.abort(transactionId);
+                        abort(transactionId);
                     }
                     catch(NoSuchTransactionException e) {
                     }

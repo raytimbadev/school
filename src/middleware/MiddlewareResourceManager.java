@@ -562,8 +562,6 @@ public class MiddlewareResourceManager implements ResourceManager {
         }
 
         return result;
-
-
     }
 
 	/*aborts a transaction witha  specified id*/

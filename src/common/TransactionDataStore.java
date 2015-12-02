@@ -26,11 +26,12 @@ public class TransactionDataStore {
             Data mainData,
             Data txData,
             LockManager lockManager) {
-        this.transactionId = transactionId; 
+        this.transactionId = transactionId;
         this.mainData = mainData;
         this.lockManager = lockManager;
-        this.txData = txData; 
+        this.txData = txData;
     }
+
     public TransactionDataStore(
             String dbname,
             int transactionId,
@@ -137,7 +138,7 @@ public class TransactionDataStore {
 
         if(mainGroup == null)
             return null;
-        
+
         // make a copy of the main data
         final ItemGroup newTxGroup = (ItemGroup)mainGroup.clone();
 
@@ -147,5 +148,5 @@ public class TransactionDataStore {
         // return the transaction-local copy
         return newTxGroup;
     }
-    
+
 }
