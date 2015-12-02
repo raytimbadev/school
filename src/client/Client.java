@@ -1,5 +1,6 @@
 package client;
 
+import common.SimulatedFailure; 
 import common.ResourceManager;
 import common.NoSuchTransactionException;
 
@@ -635,6 +636,38 @@ public class Client {
                 }
                 break;
 
+            case 28: //set failure
+                if(arguments.size() != 2) {
+                    wrongNumber();
+                    break; 
+                }
+
+                try {
+                    proxy.setFailure(SimulatedFailure.valueOf(getString(arguments.elementAt(1)))); 
+                    System.out.println("Set TM failure");
+                }
+                catch(Exception e) {
+                    System.out.println("EXCEPTION: "); 
+                    e.printStackTrace(); 
+                }
+                break; 
+
+            case 29: //set failure
+                if(arguments.size() != 3) {
+                    wrongNumber();
+                    break; 
+                }
+
+                try {
+                    proxy.setRMFailure(SimulatedFailure.valueOf(getString(arguments.elementAt(1))), getInt(arguments.elementAt(2))); 
+                    System.out.println(String.format("Set RM failure on machine %d",getInt(arguments.elementAt(2))));
+                }
+                catch(Exception e) {
+                    System.out.println("EXCEPTION: "); 
+                    e.printStackTrace(); 
+                }
+                break; 
+
             default:
                 System.out.println("The interface does not support this command.");
                 break;
@@ -709,6 +742,10 @@ public class Client {
             return 26;
         else if (argument.compareToIgnoreCase("partialCommit") == 0)
             return 27; 
+        else if (argument.compareToIgnoreCase("setFailure") == 0)
+            return 28;
+        else if (argument.compareToIgnoreCase("setRMFailure") == 0)
+            return 29;
         else
             return 666;
     }

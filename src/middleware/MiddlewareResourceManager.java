@@ -2,6 +2,7 @@ package middleware;
 
 import transactionmanager.*;
 
+import common.SimulatedFailure; 
 import common.ResourceManager;
 import common.NoSuchTransactionException;
 import common.UncheckedThrow;
@@ -29,6 +30,7 @@ public class MiddlewareResourceManager implements ResourceManager {
     final ResourceManager customerManager;
 
     final TransactionManager transactionManager;
+    SimulatedFailure failure;
 
     public MiddlewareResourceManager(
             ResourceManager flightManager,
@@ -39,7 +41,7 @@ public class MiddlewareResourceManager implements ResourceManager {
         this.carManager = carManager;
         this.roomManager = roomManager;
         this.customerManager = customerManager;
-
+        failure = null; 
         transactionManager = new TransactionManager();
     }
 
@@ -578,6 +580,28 @@ public class MiddlewareResourceManager implements ResourceManager {
 
         return result;
 	}
+
+    @Override
+    public boolean setFailure(SimulatedFailure failure) {
+        this.failure = failure;
+        return true; 
+    }
+
+    @Override
+    public boolean setRMFailure(SimulatedFailure failure, int rm) {
+        if(rm == 0) {
+
+            return flightManager.setFailure(failure); 
+        } else if(rm == 1) {
+
+            return carManager.setFailure(failure);
+        } else if(rm == 2) {
+
+            return  roomManager.setFailure(failure); 
+        } else {
+            throw new RuntimeException("Invalid rm on which to set failure"); 
+        }
+    }   
 
     @Override
     public boolean shutdown() {

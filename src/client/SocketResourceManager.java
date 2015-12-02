@@ -3,6 +3,7 @@ package client;
 import common.ResourceManager;
 import common.UncheckedThrow;
 import common.sockets.Response;
+import common.SimulatedFailure; 
 import common.sockets.Request;
 import common.sockets.NetworkCaller;
 import transactionmanager.Transaction;
@@ -332,6 +333,25 @@ public class SocketResourceManager implements ResourceManager {
                     .withMethod("abort")
                     .primitive(id)
                     .build()).yield();
+    }
+
+    @Override
+    public boolean setFailure(SimulatedFailure failure) {
+        return (boolean)network.invoke(
+            new Request.RequestBuilder()
+                .withMethod("setFailure")
+                .parameter(failure)
+                .build()).yield(); 
+    }
+
+    @Override
+    public boolean setRMFailure(SimulatedFailure failure, int rm) {
+        return (boolean)network.invoke(
+            new Request.RequestBuilder()
+                .withMethod("setRMFailure")
+                .parameter(failure)
+                .primitive(rm)
+                .build()).yield(); 
     }
 
     @Override

@@ -25,7 +25,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     protected final HashMap<Integer, TransactionDataStore> transactions;
     protected final HashMap<Integer, TransactionDataStore> preparedTransactions;
     protected final HashMap<Integer, Integer> ttls;
-
+    protected SimulatedFailure failure; 
     protected final ScheduledExecutorService ttlScheduler;
 
     private final String dbname;
@@ -48,6 +48,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 null,
                 mainData);
         this.dbname = dbname;
+        failure = null; 
 
         String dataPaths[] = new String[] {
             String.format("main-%s-0.dat", dbname),
@@ -697,6 +698,17 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     public boolean shutdown() {
         System.exit(0);
         return true;
+    }
+
+    @Override
+    public boolean setFailure(SimulatedFailure failure) {
+        this.failure = failure; 
+        return true; 
+    }
+
+    @Override
+    public boolean setRMFailure(SimulatedFailure failure, int rm) {
+        throw new UnsupportedOperationException(); 
     }
 
     @Override

@@ -199,6 +199,10 @@ public interface ResourceManager {
     public boolean abort(int id)
         throws NoSuchTransactionException;
 
+    public boolean setFailure(SimulatedFailure failure);
+
+    public boolean setRMFailure(SimulatedFailure failure, int rm); 
+
     public Transaction.State getTransactionStatus(int id);
 
     public boolean shutdown();
