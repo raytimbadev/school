@@ -179,7 +179,7 @@ public class Transaction {
     }
 
     public synchronized void abort() {
-        if(state != State.PENDING)
+        if(state != State.PENDING && state != State.PREPARED)
             throw new InvalidTransactionException(
                     "Trying to commit a finished transaction."
             );

@@ -644,11 +644,21 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     "Aborting transaction %d.",
                     id));
 
-        if(txData == null)
-            throw new NoSuchTransactionException(id);
-
-        transactions.remove(id);
-        lockManager.releaseTransaction(id);
+        if(txData != null) {
+            transactions.remove(id);
+            lockManager.releaseTransaction(id);
+            return true; 
+        } 
+        if(preparedTransactions.get(id) == null) {
+            throw new NoSuchTransactionException(); 
+        }
+        preparedTransactions.remove(id);
+        try {
+        transactionListPersistenceLayer.persist(getTransactionList()); 
+        } 
+        catch(IOException e) {
+            throw UncheckedThrow.throwUnchecked(e); 
+        }
 
         return true;
     }
