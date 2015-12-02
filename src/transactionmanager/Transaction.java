@@ -271,6 +271,8 @@ public class Transaction {
 
         if(failed)
             abort(); // will set state = ABORTED
+        else
+            state = State.PREPARED;
     }
 
     public synchronized void partialCommit() {
