@@ -1,4 +1,5 @@
 /build/
+/persistence/
 /webapps/
 *.class
 *.swp

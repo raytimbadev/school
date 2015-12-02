@@ -31,6 +31,10 @@
         <delete dir="${basedir}/build" includeEmptyDirs="true"/>
     </target>
 
+    <target name="reset">
+        <delete dir="${basedir}/persistence"/>
+    </target>
+
     <target name="setup">
         <mkdir dir="${basedir}/build" />
         <mkdir dir="${basedir}/build/server" />
