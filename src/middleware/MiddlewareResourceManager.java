@@ -2,7 +2,8 @@ package middleware;
 
 import transactionmanager.*;
 
-import common.SimulatedFailure; 
+import common.SimulatedFailure;
+import common.SimulatedFailureManager;  
 import common.ResourceManager;
 import common.NoSuchTransactionException;
 import common.UncheckedThrow;
@@ -30,7 +31,6 @@ public class MiddlewareResourceManager implements ResourceManager {
     final ResourceManager customerManager;
 
     final TransactionManager transactionManager;
-    SimulatedFailure failure;
 
     public MiddlewareResourceManager(
             ResourceManager flightManager,
@@ -41,7 +41,6 @@ public class MiddlewareResourceManager implements ResourceManager {
         this.carManager = carManager;
         this.roomManager = roomManager;
         this.customerManager = customerManager;
-        failure = null; 
         transactionManager = new TransactionManager();
     }
 
@@ -528,6 +527,10 @@ public class MiddlewareResourceManager implements ResourceManager {
     */
     @Override
 	public boolean commit(int id) {
+        if(SimulatedFailureManager.getInstance().getFailure() == SimulatedFailure.CRASH_BEFORE_SEND_TM) {
+            SimulatedFailureManager.getInstance().crash(); 
+        }
+
         boolean result = false;
 
         Trace.info(String.format(
@@ -582,8 +585,8 @@ public class MiddlewareResourceManager implements ResourceManager {
 	}
 
     @Override
-    public boolean setFailure(SimulatedFailure failure) {
-        this.failure = failure;
+    public boolean setFailure(SimulatedFailure f) {
+        SimulatedFailureManager.getInstance().setFailure(f);
         return true; 
     }
 

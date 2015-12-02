@@ -25,7 +25,6 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     protected final HashMap<Integer, TransactionDataStore> transactions;
     protected final HashMap<Integer, TransactionDataStore> preparedTransactions;
     protected final HashMap<Integer, Integer> ttls;
-    protected SimulatedFailure failure; 
     protected final ScheduledExecutorService ttlScheduler;
 
     private final String dbname;
@@ -47,8 +46,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 TransactionOperation.NO_TRANSACTION,
                 null,
                 mainData);
-        this.dbname = dbname;
-        failure = null; 
+        this.dbname = dbname; 
 
         String dataPaths[] = new String[] {
             String.format("main-%s-0.dat", dbname),
@@ -83,10 +81,13 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         );
 
         ttlScheduler.schedule(
-                new TtlChecker(transactionId),
-                delta / 1000,
+                new TtlChecker(transactionId,DEFAULT_TRANSACTION_TTL),
+                delta/1000,
                 TimeUnit.SECONDS
         );
+        synchronized(ttls) {
+            ttls.put(transactionId, (int)System.currentTimeMillis()); 
+        }
     }
 
     protected void touch(int transactionId) {
@@ -94,7 +95,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             return;
 
         synchronized(ttls) {
-            ttls.put(transactionId, DEFAULT_TRANSACTION_TTL);
+            ttls.put(transactionId, (int)System.currentTimeMillis());
         }
     }
 
@@ -572,6 +573,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     mainData
                 )
         );
+        scheduleTtlCheck(transactionId, DEFAULT_TRANSACTION_TTL*1000); 
         return true;
     }
 
@@ -587,6 +589,10 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
         if(txData == null)
             throw new NoSuchTransactionException(id);
+
+        if(SimulatedFailureManager.getInstance().getFailure() == SimulatedFailure.CRASH_BEFORE_ANSWER_RM) {
+            SimulatedFailureManager.getInstance().crash();
+        }
 
         synchronized(txData) {
             preparedTransactions.put(id, txData);
@@ -607,6 +613,10 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 UncheckedThrow.throwUnchecked(e);
             }
             lockManager.incrementPreparedTransactionCount();
+
+            if(SimulatedFailureManager.getInstance().getFailure() == SimulatedFailure.CRASH_AFTER_SEND_RM) {
+                SimulatedFailureManager.getInstance().scheduleCrash(1); 
+            }
             return true;
         }
     }
@@ -619,6 +629,9 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     @Override
     public synchronized boolean mergeCommit(int id)
     throws NoSuchTransactionException {
+        if(SimulatedFailureManager.getInstance().getFailure() == SimulatedFailure.CRASH_AFTER_FINAL_RECEIVE_RM) {
+            SimulatedFailureManager.getInstance().crash(); 
+        }
         final TransactionDataStore txData = preparedTransactions.get(id);
 
         Trace.info(String.format(
@@ -701,8 +714,8 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     }
 
     @Override
-    public boolean setFailure(SimulatedFailure failure) {
-        this.failure = failure; 
+    public boolean setFailure(SimulatedFailure f) {
+        SimulatedFailureManager.getInstance().setFailure(f); 
         return true; 
     }
 
@@ -718,29 +731,29 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
     private class TtlChecker implements Runnable {
         private final int transactionId;
-        private long then;
+        private final int ttl;
 
-        public TtlChecker(int transactionId) {
+        public TtlChecker(int transactionId, int ttl) {
             this.transactionId = transactionId;
-            this.then = System.currentTimeMillis();
+            this.ttl = ttl; 
         }
 
         @Override
         public void run() {
             long now = System.currentTimeMillis();
-            long delta = (int)(then - now);
+            
 
             synchronized(ttls) {
-                int ttl = ttls.get(transactionId);
-                if(ttl < delta / 1000)
+                int lastTime = ttls.get(transactionId);
+                long delta = (int)(now-lastTime)/1000;
+                if(ttl <= delta)
                     try {
                         abort(transactionId);
                     }
                     catch(NoSuchTransactionException e) {
                     }
                 else {
-                    ttls.put(transactionId, (int)(ttl - delta / 1000));
-                    scheduleTtlCheck(transactionId, ttl * 1000 - delta);
+                    scheduleTtlCheck(transactionId, (ttl - delta)*1000);
                 }
             }
         }

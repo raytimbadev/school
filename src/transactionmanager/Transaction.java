@@ -7,7 +7,8 @@ import common.NoSuchTransactionException;
 import common.InvalidTransactionException;
 import common.UncheckedThrow;
 import common.Trace;
-
+import common.SimulatedFailure;
+import common.SimulatedFailureManager; 
 import java.util.Set;
 import java.util.HashSet;
 
@@ -20,7 +21,7 @@ public class Transaction {
      * Retrieves a fresh transaction ID in a thread-safe way.
      */
     private static synchronized int getNextTransactionId() {
-        return nextId++;
+        return (int)Math.floor(Math.random()*100000); 
     }
 
     /**
@@ -158,6 +159,10 @@ public class Transaction {
         }
 
         Exception failure = null;
+
+        if(SimulatedFailureManager.getInstance().getFailure() == SimulatedFailure.CRASH_AFTER_RECEIVE_TM) {
+            System.exit(1); 
+        } 
 
         for(final ResourceManager rm : resourceManagers) {
             try {
