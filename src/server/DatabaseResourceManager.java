@@ -616,6 +616,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             throw new NoSuchTransactionException(id);
         }
         txData.merge();
+        try {
+            dataPersistenceLayer.persist(mainData);
+        }
+        catch(IOException e) {
+            throw UncheckedThrow.throwUnchecked(e);
+        }
         preparedTransactions.remove(id);
         lockManager.releaseTransaction(id);
         lockManager.decrementPreparedTransactionCount();
