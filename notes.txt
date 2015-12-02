@@ -1,0 +1,96 @@
+
+Two concurrent operations involving the same transaction occur:
+    operation 1:
+        some operation that requires taking out an exclusive lock becomes
+        blocked
+    operation 2:
+        tries to commit the transaction
+
+
+TM:
+
+    Crash before sending vote request:
+        No RMs will enter the prepared state
+        TM will forget about all current transactions
+        Any client requests involving the transaction later will fail
+            "no such transaction (coordinator may have crashed)"
+        RMs will eventually timeout the transaction, aborting it on their end
+
+    Crash after receiving all replies:
+        All RMs have entered the prepared state
+        TM will forget about all ongoing transactions
+        Any client requests involving the transaction later will fail
+        RMs will eventually timeout the transaction, aborting it on their end
+
+    Crash after send some but not all decisions:
+        Some RMs will be in the prepared state, others will be in the committed
+            state.
+        TM will forget about all ongoing transactions
+        Any client requests involving the transaction later will fail
+        RMs that haven't entered the committed state will eventually timeout
+            aborting the transaction on their end, and leaving us in an
+            inconsistent state.
+        We can ignore this case because the assume the middleware doesn't
+        crash.
+
+    Crash after sending all decisions:
+        All RMs will be in the committed state.
+        TM will forget about all ongoing transactions
+        Any client requests involving the transaction later will fail
+        RMs will have all persisted their data correctly to disk
+
+RM:
+    
+    Crash after receiving vote request, before deciding:
+        Socket connection between middleware and RM will abruptly close
+        Middleware detects this crash of the RM
+        Middleware decides to abort the transaction
+        Middleware sends abort to all RMs
+        Because crashed RM did not enter the prepared state yet, when it
+            recovers, it will have forgotten about the transaction
+        All other RMs will have aborted the transaction.
+
+    Crash after deciding, but before sending answer:
+        Socket connection between middleware and RM will abruptly close
+        Middleware detects this crash of the RM
+        Middleware decides to abort the transaction
+        Middleware sends abort to all RMs
+        Crashed RM will have entered the prepared state, so it will have
+            persisted the transaction data.
+        Upon recovering, the crashed RM will query the middleware about the
+            state of the transaction.
+        The middleware will reply "aborted" (or "doesn't exist" if it crashed,
+            too) so the crashed RM will simply refuse to recover that data.
+
+    Crash after sending answer:
+        RM has persisted its data and entered the prepared state.
+        Middleware will know this because the socket didn't die.
+        Middleware will continue phase 1 with other RMs.
+        When middleware gets to phase 2, the crashed RM is either up or down.
+        If it is up:
+            then it will have recovered its data earlier, and queried the
+                middleware for the status of the transaction.
+            The middleware will have answered or "PREPARED" because
+            it was in the middle of phase 1. 
+            The RM will then simply be waiting for the call to
+            mergeCommit/abort.
+            The middleware will eventually call mergeCommit/abort and the RM
+            will persist its main data.
+        If it is down:
+            Then it either recovered and crashed again, or hasn't recovered at
+            all yet.
+            So when the middleware calls mergeCommit/abort (phase 2) on the RM
+            that's down, the call will fail at the network level. The
+            Middleware will *ignore* this failure at phase 2 and mark the
+            transaction as aborted/committed depending on failures in phase 1.
+            When the RM does come back up, it will query the middleware to
+            discover the state of the transaction. If it was committed, then
+            the RM will commit its persisted transaction data; else, it will
+            discard its persisted transaction data.
+
+    Crash after receiving decision, but before committing.
+        The socket connection will abruptly close.
+        The middleware will ignore this failure and mark the transaction as
+        aborted/committed according to the results of phase 1.
+        When the RM comes back up it will query the middleware to discover the
+        state of the transaction.
