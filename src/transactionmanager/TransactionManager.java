@@ -73,7 +73,6 @@ public class TransactionManager {
         if(tx == null)
             throw new NoSuchTransactionException();
 
-
         if(tx.getState() == Transaction.State.PREPARED) {
             transactionMap.remove(transactionId);
             doneTransactionMap.put(transactionId, Transaction.State.COMMITTED);
