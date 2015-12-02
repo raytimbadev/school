@@ -227,55 +227,98 @@ public class Transaction {
 
         return false;
     }
+
+    private synchronized void prepare() {
+        if(state != State.PENDING)
+            throw new InvalidTransactionException(
+                    String.format(
+                        "Transaction state invariant violated in " +
+                        "transaction %d",
+                        id
+                    )
+            );
+
+        boolean failed = false;
+
+        try {
+            for(final ResourceManager rm : resourceManagers)
+                if(!rm.commit(id)) {
+                    failed = true;
+                    Trace.warn(
+                            String.format(
+                                "ResourceManager %s failed to enter " +
+                                "prepared state for transaction %d",
+                                rm.getClass().toString(),
+                                id
+                            )
+                    );
+                    break;
+                }
+        }
+        catch(NoSuchTransactionException e) {
+            // commit should never throw, so if an exception is raised, it's
+            // probably because an RM is down, so we need to abort the
+            // transaction.
+            failed = true;
+            Trace.warn(
+                    String.format(
+                        "Failed to prepare: An enlisted RM is unaware of " +
+                        "transaction %d.",
+                        id
+                    )
+            );
+        }
+
+        if(failed)
+            abort(); // will set state = ABORTED
+    }
+
     public synchronized void partialCommit() {
         Trace.info(String.format(
                     "Performing partial commit for state %s for transaction %d.",
                     state.toString(),
                     this.getId()));
 
-        List<ResourceManager> preparedRMs = new ArrayList<ResourceManager>();
-        boolean failed = false;
-
-        try {
-            for(final ResourceManager rm : resourceManagers)
-                if(state == State.PENDING) {
-                    if(rm.commit(id))
-                        preparedRMs.add(rm);
-                    else {
-                        failed = true;
-                        state = State.ABORTED;
-                        break;
-                    }
-                    state = State.PREPARED;
-                    return;
-                }
+        if(state == State.PENDING) {
+            prepare();
         }
-        catch(NoSuchTransactionException e) {
-            throw UncheckedThrow.throwUnchecked(e);
-        }
-
-        Exception failure = null;
-
-        for(final ResourceManager rm : resourceManagers) {
-            try {
-                if(failed)
-                    rm.abort(id);
-                else
+        else if(state == State.PREPARED) {
+            for(final ResourceManager rm : resourceManagers) {
+                try {
                     rm.mergeCommit(id);
+                    Trace.info(
+                            String.format(
+                                "Fully committed transaction %d on " +
+                                "ResourceManager %s",
+                                id,
+                                rm.getClass().toString()
+                            )
+                    );
+                }
+                catch(Exception e) {
+                    Trace.warn(
+                            String.format(
+                                "ResourceManager %s failed to enter " +
+                                "committed state for transaction %d",
+                                rm.getClass().toString(),
+                                id
+                            )
+                    );
+                }
             }
-            catch(Exception e) {
-                failure = e;
-            }
-        }
 
-        if(failure != null) {
-            state = State.ABORTED;
-            throw UncheckedThrow.throwUnchecked(failure);
+            state = State.COMMITTED;
         }
-
-        state = State.COMMITTED;
+        else {
+            throw new InvalidTransactionException(
+                    String.format(
+                        "Transaction %d is in state %s, which cannot be " +
+                        "committed.",
+                        state.toString()
+                    )
+            );
+        }
     }
-
 
     public enum State {
         COMMITTED,
@@ -284,4 +327,3 @@ public class Transaction {
         PREPARED
     }
 }
-
