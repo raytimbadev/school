@@ -46,7 +46,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 TransactionOperation.NO_TRANSACTION,
                 null,
                 mainData);
-        this.dbname = dbname; 
+        this.dbname = dbname;
 
         String dataPaths[] = new String[] {
             String.format("main-%s-0.dat", dbname),
@@ -86,7 +86,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                 TimeUnit.SECONDS
         );
         synchronized(ttls) {
-            ttls.put(transactionId, (int)System.currentTimeMillis()); 
+            ttls.put(transactionId, (int)System.currentTimeMillis());
         }
     }
 
@@ -170,7 +170,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             if(transactionData == null){
                 continue;
             } else {
-                
+
                 final Transaction.State status = middleware.getTransactionStatus(t.get(i));
 
                 if(status == Transaction.State.COMMITTED){
@@ -576,7 +576,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     mainData
                 )
         );
-        scheduleTtlCheck(transactionId, DEFAULT_TRANSACTION_TTL*1000); 
+        scheduleTtlCheck(transactionId, DEFAULT_TRANSACTION_TTL*1000);
         return true;
     }
 
@@ -618,8 +618,9 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             }
             lockManager.incrementPreparedTransactionCount();
 
-            if(SimulatedFailureManager.getInstance().getFailure() == SimulatedFailure.CRASH_AFTER_SEND_RM) {
-                SimulatedFailureManager.getInstance().scheduleCrash(1); 
+            if(SimulatedFailureManager.getInstance().getFailure()
+                    == SimulatedFailure.CRASH_AFTER_SEND_RM) {
+                SimulatedFailureManager.getInstance().scheduleCrash(1);
             }
             return true;
         }
@@ -634,7 +635,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     public synchronized boolean mergeCommit(int id)
     throws NoSuchTransactionException {
         if(SimulatedFailureManager.getInstance().getFailure() == SimulatedFailure.CRASH_AFTER_FINAL_RECEIVE_RM) {
-            SimulatedFailureManager.getInstance().crash(); 
+            SimulatedFailureManager.getInstance().crash();
         }
         final TransactionDataStore txData = preparedTransactions.get(id);
 
@@ -719,14 +720,14 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
     @Override
     public boolean setFailure(SimulatedFailure f) {
-        SimulatedFailureManager.getInstance().setFailure(f); 
-        System.out.println("Set failure condition in RM"); 
-        return true; 
+        SimulatedFailureManager.getInstance().setFailure(f);
+        System.out.println("Set failure condition in RM");
+        return true;
     }
 
     @Override
     public boolean setRMFailure(SimulatedFailure failure, int rm) {
-        throw new UnsupportedOperationException(); 
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -740,13 +741,13 @@ public abstract class DatabaseResourceManager implements ResourceManager {
 
         public TtlChecker(int transactionId, int ttl) {
             this.transactionId = transactionId;
-            this.ttl = ttl; 
+            this.ttl = ttl;
         }
 
         @Override
         public void run() {
             long now = System.currentTimeMillis();
-            
+
 
             synchronized(ttls) {
                 int lastTime = ttls.get(transactionId);

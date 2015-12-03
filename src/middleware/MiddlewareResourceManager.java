@@ -3,7 +3,7 @@ package middleware;
 import transactionmanager.*;
 
 import common.SimulatedFailure;
-import common.SimulatedFailureManager;  
+import common.SimulatedFailureManager;
 import common.ResourceManager;
 import common.NoSuchTransactionException;
 import common.UncheckedThrow;
@@ -528,7 +528,7 @@ public class MiddlewareResourceManager implements ResourceManager {
     @Override
 	public boolean commit(int id) {
         if(SimulatedFailureManager.getInstance().getFailure() == SimulatedFailure.CRASH_BEFORE_SEND_TM) {
-            SimulatedFailureManager.getInstance().crash(); 
+            SimulatedFailureManager.getInstance().crash();
         }
 
         boolean result = false;
@@ -587,24 +587,24 @@ public class MiddlewareResourceManager implements ResourceManager {
     @Override
     public boolean setFailure(SimulatedFailure f) {
         SimulatedFailureManager.getInstance().setFailure(f);
-        return true; 
+        return true;
     }
 
     @Override
     public boolean setRMFailure(SimulatedFailure failure, int rm) {
         if(rm == 0) {
 
-            return flightManager.setFailure(failure); 
+            return flightManager.setFailure(failure);
         } else if(rm == 1) {
 
             return carManager.setFailure(failure);
         } else if(rm == 2) {
 
-            return  roomManager.setFailure(failure); 
+            return  roomManager.setFailure(failure);
         } else {
-            throw new RuntimeException("Invalid rm on which to set failure"); 
+            throw new RuntimeException("Invalid rm on which to set failure");
         }
-    }   
+    }
 
     @Override
     public boolean shutdown() {
