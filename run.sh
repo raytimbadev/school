@@ -1,6 +1,6 @@
 #!/bin/bash
 
-trap "echo quitting; exit1;" SIGINT
+trap "echo quitting; exit 1;" SIGINT
 
 test -z "$1" && {
     echo "No run type specified." >&2
