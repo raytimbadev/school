@@ -64,12 +64,14 @@
 
         There exists a bijection $f : \N \to S$, which identifies each time
         step with some configuration. Using it, we can check \emph{all} the
-        configurations. To compute a position to shoot at, we will construct a
+        configurations. To compute a position to shoot at, we construct a
         function $h : S \to \Z \times \Z$. This function takes the starting
         position and adds to it the direction multiplied by the velocity.
 
         Composing $f$ and $h$ gives us a function $g^\prime$ that tells us
-        where to shoot at time $n$.
+        where to shoot at time $n$. Because $f$ is a bijection, we will
+        eventually get to the configuration of the the submarine that we're
+        playing against and win.
 
     \item
         \begin{enumerate}
@@ -128,22 +130,15 @@
                 \end{claim}
 
                 \begin{proof}
-                    Since $G$ is a context-free grammar, $G$ is context-free.
+                    Since $G$ is a context-free grammar, $L(G)$ is
+                    context-free.
                     Context-free grammars are closed under union, so $L$ is
                     context-free.
 
-                    Suppose $L$ is regular. Then, there is a DFA for $L$.
-                    Furthermore, it must be possible to build this DFA from
-                    the PDA for $N\#\Sigma^* \cup \Sigma^*\# L(G)$. We can
-                    imagine that PDA as consisting of two branches due to
-                    the union. Since $N$ is not regular, in order for $L$
-                    to be regular, it is necessary that for every input, it
-                    be possible to avoid the branch involving $N$. Since
-                    $N \subseteq \Sigma^*$, it is already possible to do so
-                    up to the $\#$ letter, but after that, it will be
-                    possible only if $\Sigma^* \subseteq L(G)$. Since
-                    $\Sigma^*$ is the greatest language, this conclusion is
-                    equivalent to the requirement $\Sigma^* = L(G)$.
+                    Suppose $L$ is regular. Suppose $L(G) \neq \Sigma^*$. Then,
+                    there exists $w \in \#L(G)$. The language $L/w$ is equal to
+                    $N$, which is not regular. This is a contradiction, so
+                    $L(G) = \Sigma^*$.
 
                     Now suppose $L(G) = \Sigma^*$. Then $N\#\Sigma^*
                     \subseteq \Sigma^*\#\Sigma^*$, so
