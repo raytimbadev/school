@@ -745,7 +745,7 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                   // e.printStackTrace();
+                    e.printStackTrace();
                     Throwable result = e; 
                     Throwable cause = null; 
                     while(null != (cause = result.getCause())&& (result != cause) ) {

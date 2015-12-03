@@ -54,7 +54,7 @@ public class TransactionManager {
     throws NoSuchTransactionException {
         final Transaction tx = transactionMap.get(transactionId);
         if(tx == null)
-            throw new NoSuchTransactionException();
+            throw new NoSuchTransactionException("No such transation");
 
         if(tx.getState() == Transaction.State.PREPARED) {
             throw new RuntimeException();
@@ -96,7 +96,7 @@ public class TransactionManager {
     throws NoSuchTransactionException {
         final Transaction tx = transactionMap.get(transactionId);
         if(tx == null)
-            throw new NoSuchTransactionException();
+            throw new NoSuchTransactionException("No such transaction");
 
         doneTransactionMap.put(transactionId, Transaction.State.ABORTED);
         transactionMap.remove(transactionId);

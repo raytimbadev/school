@@ -586,8 +586,9 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     throws NoSuchTransactionException {
         final TransactionDataStore txData = transactions.get(id);
 
+
         Trace.info(String.format(
-                    "Entering prepared state for transaction %d.",
+                    "Entering prepared state for transaction %d with failure state.",
                     id));
 
         if(txData == null)
@@ -719,6 +720,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
     @Override
     public boolean setFailure(SimulatedFailure f) {
         SimulatedFailureManager.getInstance().setFailure(f); 
+        System.out.println("Set failure condition in RM"); 
         return true; 
     }
 
