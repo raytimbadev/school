@@ -149,8 +149,14 @@ public class Transaction {
                 if(rm.commit(id))
                     preparedRMs.add(rm);
                 else {
+                    Trace.warn(
+                            String.format(
+                                "An RM failed to enter the prepared state. " +
+                                "Aborting transaction %d.",
+                                getId()
+                            )
+                    );
                     failed = true;
-                    state = State.ABORTED;
                     break;
                 }
         }
@@ -160,39 +166,35 @@ public class Transaction {
 
         Exception failure = null;
 
-        if(SimulatedFailureManager.getInstance().getFailure() == SimulatedFailure.CRASH_AFTER_RECEIVE_TM) {
-            System.exit(1); 
-        } 
+        if(SimulatedFailureManager.getInstance().getFailure()
+                == SimulatedFailure.CRASH_AFTER_RECEIVE_TM) {
+            System.exit(1);
+        }
+
+        if(failed)
+            state = State.ABORTED;
+        else
+            state = State.COMMITTED;
 
         for(final ResourceManager rm : resourceManagers) {
             try {
-                if(failed)
+                if(state == State.ABORTED)
                     rm.abort(id);
-                else {
-                    try {
-                        rm.mergeCommit(id);
-                    }
-                    catch(Exception e) {
-                        Trace.error(
-                                String.format(
-                                    "mergeCommit failed for an RM !"
-                                )
-                        );
-                        failure = e;
-                    }
-                }
+                else
+                    rm.mergeCommit(id);
             }
             catch(Exception e) {
-                failure = e;
+                Trace.warn(
+                        String.format(
+                            "An RM failed to commit/abort transaction %d. " +
+                            "This doesn't matter because when it comes back " +
+                            "it will query the middleware to determine what " +
+                            "to do",
+                            getId()
+                        )
+                );
             }
         }
-
-        if(failure != null) {
-            state = State.ABORTED;
-            throw UncheckedThrow.throwUnchecked(failure);
-        }
-
-        state = State.COMMITTED;
     }
 
     public synchronized void abort() {
