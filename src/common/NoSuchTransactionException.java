@@ -11,6 +11,10 @@ public class NoSuchTransactionException extends Exception {
         this.transactionId = transactionId;
     }
 
+    public NoSuchTransactionException(String message) {
+        super(message); 
+    }
+
     @Override
     public String toString() {
         if(transactionId == null)

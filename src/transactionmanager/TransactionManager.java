@@ -71,7 +71,7 @@ public class TransactionManager {
     throws NoSuchTransactionException {
         final Transaction tx = transactionMap.get(transactionId);
         if(tx == null)
-            throw new NoSuchTransactionException();
+            throw new NoSuchTransactionException("Invalid transaction was used");
 
         if(tx.getState() == Transaction.State.PREPARED) {
             transactionMap.remove(transactionId);
@@ -122,7 +122,7 @@ public class TransactionManager {
     throws NoSuchTransactionException {
         final Transaction tx = transactionMap.get(transactionId);
         if(tx == null)
-            throw new NoSuchTransactionException();
+            throw new NoSuchTransactionException("Unknown transaction used");
         tx.touch();
 
         // if the transaction is not newly enlisting the rm, then return
@@ -144,8 +144,11 @@ public class TransactionManager {
         final Transaction tx =
             transactionMap.get(id);
 
-        if(tx != null)
+        if(tx != null) {
+            Trace.info(String.format("Returning status for transaction:%d",id));
             return tx.getState();
+        }
+        Trace.info(String.format("Returning status for transaction:%d from done transaction list",id));
 
         return doneTransactionStatus;
     }

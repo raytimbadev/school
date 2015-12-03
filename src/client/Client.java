@@ -109,8 +109,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
 
@@ -136,8 +141,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
 
@@ -163,10 +173,14 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
-                break;
 
             case 5:  //new Customer
                 if (arguments.size() != 2) {
@@ -181,8 +195,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
 
@@ -204,8 +223,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
 
@@ -227,8 +251,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
 
@@ -250,8 +279,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
 
@@ -273,8 +307,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
 
@@ -293,8 +332,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
 
@@ -314,8 +358,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
 
@@ -335,8 +384,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
 
@@ -356,8 +410,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
 
@@ -377,8 +436,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
 
@@ -398,8 +462,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
 
@@ -419,8 +488,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
 
@@ -444,8 +518,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
 
@@ -469,8 +548,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
 
@@ -494,8 +578,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
 
@@ -529,8 +618,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
 
@@ -558,8 +652,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
             case 23: //start
@@ -580,10 +679,15 @@ public class Client {
                     proxy.commit(getInt(arguments.elementAt(1)));
                     System.out.println("COMMIT");
                 }
-                catch(Exception e) {
+               catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
 				break;
 			case 25: //abort
@@ -598,8 +702,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
 				break;
 
@@ -615,8 +724,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
             case 27: //commit
@@ -631,8 +745,13 @@ public class Client {
                 }
                 catch(Exception e) {
                     System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
+                   // e.printStackTrace();
+                    Throwable result = e; 
+                    Throwable cause = null; 
+                    while(null != (cause = result.getCause())&& (result != cause) ) {
+                        result = cause; 
+                    }
+                    System.out.println(result.getMessage()); 
                 }
                 break;
 

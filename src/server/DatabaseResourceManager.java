@@ -157,7 +157,7 @@ public abstract class DatabaseResourceManager implements ResourceManager {
         Data transactionData = null;
         for(int i=0; i < t.size(); i++) {
             try{
-                Trace.info(String.format("Recovering transaction with id %d", i));
+                Trace.info(String.format("Recovering transaction with id %d", t.get(i)));
                 ArrayList<String> path = new ArrayList<String>();
                 path.add(TransactionDataStore.getTransactionFileName(dbname,t.get(i)));
                 transactionDataPersistenceLayer = new SecurePersistenceLayer<Data>(path);
@@ -170,10 +170,12 @@ public abstract class DatabaseResourceManager implements ResourceManager {
             if(transactionData == null){
                 continue;
             } else {
-                final Transaction.State status = middleware.getTransactionStatus(i);
+                
+                final Transaction.State status = middleware.getTransactionStatus(t.get(i));
+
                 if(status == Transaction.State.COMMITTED){
                     // if commited - check with the middleware and work on result
-                    mainData.putAll(transactionData);
+                   mainData.putAll(transactionData);
                 }
                 else if(status == Transaction.State.ABORTED){
                     // do nothing
@@ -182,9 +184,10 @@ public abstract class DatabaseResourceManager implements ResourceManager {
                     lockManager.incrementPreparedTransactionCount();
                     preparedTransactions.put(t.get(i),new TransactionDataStore(t.get(i),mainData,transactionData,null));
                 }
-                else {
-
-                    throw new RuntimeException(String.format("Transaction Status invariant violated %s", status.toString()));
+                else if ( status == Transaction.State.PENDING){
+                   // throw new RuntimeException(String.format("Transaction Status invariant violated %s ", status.toString()));
+                } else if(status == null){
+                     System.out.println(String.format("status: is fucked"));
                 }
 
                 modifiedTransactionList.remove(i);
