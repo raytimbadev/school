@@ -1,0 +1,172 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#5\\Algorithm Design -- COMP 360}
+\date{8 December 2015}
+
+\usepackage{amsmath,amssymb,amsthm}
+
+\begin{document}
+
+\begin{enumerate}
+    \item
+        This problem can be solved for its optimal value in polynomial time, so
+        no approximation is required.
+
+        The algorithm that we propose simply checks all pairs of points as
+        defining diameters of circles and all triples of points as defining
+        circles by the circumscribed circle of the triangle identified by the
+        triple. The number of pairs is $O(n^2)$ and the number of triples is
+        $O(n^3)$, and checking whether all points are in a circle is $O(n)$ and
+        must be performed for each triple and each pair. Thus we get a running
+        time that is $O(n^4)$. to find the optimal circle.
+
+    \item
+        Let $\vec r$ be the random $n$-dimensional vector taking random
+        component values in $\{-1, 0, 1\}$. Let $A$, $B$, and $C$ be the
+        algorithm inputs. Let $D = AB - C = (d_{ij})A$. Let
+        $\vec p = D \vec r = (p_1, \cdots, p_n)$.
+
+        By the definition of matrix multiplication, we have that
+        $$p_i = \sum_{k=1}^n {d_{ik}r_k}$$
+
+        Since $AB \neq C$ in the case of error which we are analyzing, assume
+        $d_{ij} \neq 0$. There may be some other nonzero elements in $D$.
+        Hence, we find that
+        $$p_i = d_{ij} + y$$
+        where $y$ is the sum of the products due to the other nonzero elements
+        of $D$.
+
+        We know that
+        $$\Pr{[p_i = 0\mid y = 0] = \Pr{[r_j = 0]} = \frac{1}{3}}$$
+        and
+        \begin{align*}
+            \Pr{[p_i = 0\mid y \neq 0]}
+                &= \Pr{[r_j = 1]}\Pr{[d_{ij} = -y]}
+                + \Pr{[r_j = -1]}\Pr{[d_{ij} = y]} \\
+                &= \frac{1}{3}
+                \left(\Pr{[d_{ij} = -y]} + \Pr{[d_{ij} = y]}\right) \\
+                &\leq \frac{1}{3}
+        \end{align*}
+
+        So
+        \begin{align*}
+            \Pr{[p_i = 0]}
+                &= \frac{1}{3}\left(\Pr{[y = 0]} + \Pr{[y \neq 0]}\right) \\
+                &\leq \frac{1}{3}
+        \end{align*}
+
+        Hence,
+        \begin{align*}
+            \Pr{[\vec p = \vec 0]}
+            &= \Pr{[\bigwedge_{i = 1}^n p_i = 0]} \\
+                &\leq \Pr{[p_i = 0]} \\
+                &= \frac{1}{3}
+        \end{align*}
+
+        So the probability of error is $\frac{1}{3}$ per round.
+
+    \item
+        --
+
+    \item
+        --
+
+    \item
+        We simply find the probability of any given vertex being included in
+        $S$ and multiply by n. A vertex will wind up in $S$ in the first
+        phase of the algorithm with probability $p$. It will be added in the
+        second phase if it was not added to $S$ in the first phase and if all
+        its neighbours were not added to $S$ in the first phase. The
+        probability of not being added in the first phase is $(1 - p)$. Hence,
+        the overall probability of being added to $S$ is
+        $$q = p + (1 - p)^5$$
+
+        The expected size of $S$ is thus $qn$.
+
+        The value of $p$ that maximizes $q$ is $p = 1$, since with this value,
+        all the vertices of the graph are added to $S$ in the first phase.
+        
+    \item
+        In order to show the existence of the necessary
+        $\epsilon_1, \cdots, \epsilon_n$, we will construct them inductively.
+
+        As a base case, we have $n = 1$. For both $\epsilon_1 = -1$ or
+        $\epsilon_1 = 1$, $|\epsilon_1 v_1| \leq 1$.
+
+        Now we assume that
+        $$|\epsilon_1 v_1 + \cdots + \epsilon_k v_k| \leq \sqrt{k}$$
+
+        \begin{align*}
+            &
+            |
+            \epsilon_1 v_1 + \cdots + \epsilon_k v_k + \epsilon_{k+1} v_{k+1}
+            |^2 \\
+            &=
+            \langle
+            \epsilon_1 v_1 + \cdots + \epsilon_k v_k + \epsilon_{k+1} v_{k+1},
+            \epsilon_1 v_1 + \cdots + \epsilon_k v_k + \epsilon_{k+1} v_{k+1}
+            \rangle \\
+            &=
+            \langle
+            \epsilon_1 v_1 + \cdots + \epsilon_k v_k,
+            \epsilon_1 v_1 + \cdots + \epsilon_k v_k + \epsilon_{k+1} v_{k+1}
+            \rangle \\
+            &+
+            \langle
+            \epsilon_{k+1} v_{k+1},
+            \epsilon_1 v_1 + \cdots + \epsilon_k v_k + \epsilon_{k+1} v_{k+1}
+            \rangle \\
+            &=
+            \langle
+            \epsilon_1 v_1 + \cdots + \epsilon_k v_k,
+            \epsilon_1 v_1 + \cdots + \epsilon_k v_k
+            \rangle \\
+            &+
+            \langle
+            \epsilon_1 v_1 + \cdots + \epsilon_k v_k,
+            \epsilon_{k+1} v_{k+1}
+            \rangle \\
+            &+
+            \langle
+            \epsilon_{k+1}, v_{k+1},
+            \epsilon_1 v_1 + \cdots + \epsilon_k v_k
+            \rangle \\
+            &+
+            \langle
+            \epsilon_{k+1}, v_{k+1},
+            \epsilon_{k+1}, v_{k+1}
+            \rangle \\
+            &=
+            |\epsilon_1 v_1 + \cdots + \epsilon_k v_k|^2
+            +
+            2 \epsilon_{k+1}
+            \langle
+            v_{k+1}, \epsilon_1 v_1 + \cdots + \epsilon_k v_k
+            \rangle \\
+            &+
+            1 \\
+            &\leq
+            k
+            +
+            2 \epsilon_{k+1}
+            |v_{k+1}| |\epsilon_1 v_1 + \cdots + \epsilon_k v_k| \cos \theta
+            +
+            1
+        \end{align*}
+
+        In order to choose an appropriate value for $\epsilon_{k+1}$, it
+        suffices to analyze the value of $\cos \theta$. If it is negative, then
+        we choose $\epsilon_{k+1} = 1$. If it is positive, then we choose
+        $\epsilon_{k+1} = -1$. If it is zero, then the choice doesn't matter.
+        The outcome of this choice is that the middle term will be negative,
+        allowing us to state
+        $$
+        |\epsilon_1 v_1 + \cdots + \epsilon_{k+1} v_{k+1}|^2 \leq k + 1
+        $$
+        Hence,
+        $$
+        |\epsilon_1 v_1 + \cdots + \epsilon_n v_n| \leq \sqrt{n}
+        $$
+\end{enumerate}
+\end{document}
