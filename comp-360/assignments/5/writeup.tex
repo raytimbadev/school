@@ -19,7 +19,7 @@
         triple. The number of pairs is $O(n^2)$ and the number of triples is
         $O(n^3)$, and checking whether all points are in a circle is $O(n)$ and
         must be performed for each triple and each pair. Thus we get a running
-        time that is $O(n^4)$. to find the optimal circle.
+        time that is $O(n^4)$ to find the optimal circle.
 
     \item
         Let $\vec r$ be the random $n$-dimensional vector taking random
@@ -92,7 +92,8 @@
         $\epsilon_1, \cdots, \epsilon_n$, we will construct them inductively.
 
         As a base case, we have $n = 1$. For both $\epsilon_1 = -1$ or
-        $\epsilon_1 = 1$, $|\epsilon_1 v_1| \leq 1$.
+        $\epsilon_1 = 1$, $|\epsilon_1 v_1| \leq 1$. In other words, in the
+        base case, the choice doesn't matter.
 
         Now we assume that
         $$|\epsilon_1 v_1 + \cdots + \epsilon_k v_k| \leq \sqrt{k}$$
@@ -138,8 +139,8 @@
             \epsilon_{k+1}, v_{k+1}
             \rangle \\
             &=
-            |\epsilon_1 v_1 + \cdots + \epsilon_k v_k|^2
-            +
+            |\epsilon_1 v_1 + \cdots + \epsilon_k v_k|^2 \\
+            &+
             2 \epsilon_{k+1}
             \langle
             v_{k+1}, \epsilon_1 v_1 + \cdots + \epsilon_k v_k
@@ -159,8 +160,8 @@
         suffices to analyze the value of $\cos \theta$. If it is negative, then
         we choose $\epsilon_{k+1} = 1$. If it is positive, then we choose
         $\epsilon_{k+1} = -1$. If it is zero, then the choice doesn't matter.
-        The outcome of this choice is that the middle term will be negative,
-        allowing us to state
+        The outcome of this choice is that the middle term will be at most
+        zero, allowing us to state
         $$
         |\epsilon_1 v_1 + \cdots + \epsilon_{k+1} v_{k+1}|^2 \leq k + 1
         $$
