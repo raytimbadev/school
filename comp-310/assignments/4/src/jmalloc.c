@@ -133,6 +133,13 @@ break_up() // :'(
 {
     struct free_block *break_point
         = (struct free_block *)sbrk(JMALLOC_PAGE_SIZE);
+
+    if(break_point == (void*)(-1))
+    {
+        jmalloc_error = NO_MORE_MEMORY;
+        return NULL;
+    }
+
     *break_point = (struct free_block) {
         .next = NULL,
         .prev = NULL,
@@ -320,6 +327,9 @@ jmalloc(user_size_t size)
     while(result == NULL || result->size < size)
     {
         struct free_block *block = break_up();
+        if(block == NULL)
+            return NULL;
+
         block_append(block);
         if(block_list.last != block && can_merge(block_list.last, block))
         {
