@@ -1,0 +1,94 @@
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage[margin=2.0cm]{geometry}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#3\\Distributed systems -- COMP 512}
+\date{8 December 2015}
+
+\begin{document}
+
+\maketitle
+
+\section{Recovery in fault-tolerant systems}
+
+In \emph{offline} recovery, request processing is suspended until the new
+replica has caught up with the existing ones. In our \emph{online} scheme, we
+allow request processing to continue during the initialization of the new
+replica.
+
+To that end, one of the replicas is elected as the recovery coordinator. The
+recovery coordinator knows its own load average, so it can determine a number
+of updates that it can send out per second to the new replica without causing
+any major delays in its regular request processing.
+
+The new replica will not be made available for read requests until it receives
+the entire state of the data.
+The new replica will however receive write requests and can safely install
+them. This will in fact act to lessen the burden on the recovery coordinator.
+
+At the beginning of the recovery phase, the recovery coordinator marks each of
+its data items $d_i$ as \textsc{NotTransferred}. Any new data items that are
+created after the initialization of the recovery protocol can immediately be
+marked \textsc{Transferred} since the replica will have received the request to
+create the new data item as well.
+
+When the recovery coordinator receives a write request $w(d_i)$, it marks the
+corresponding data item $d_i$ as \textsc{Transferred}. We call this map from
+data item identifiers to transfer states the \emph{recovery map}. Indeed, it
+does not need to transfer this data item to the new replica as the new replica
+will also have received the request $w(d_i)$ and will have installed it.
+
+Every time the recovery coordinator decides to send an update, it chooses a
+data item marked \textsc{NotTransferred}, sends it to the new replica, and
+marks the data item \textsc{Transferred}.
+
+When the new replica receives a write request $w(d_i)$ \emph{from the recovery
+coordinator}, it checks whether $d_i$ already exists in its data store. If
+$d_i$ already exists, then it is because a natural write request was submitted
+to the system during while the recovery coordinator was processing the data
+item to send to the new replica; the data from this natural request is more
+recent than the transferred data, so the write request from the recovery
+coordinator is ignored.
+
+When all data items have been marked \textsc{Transferred} by the recovery
+coordinator, the recovery protocol is complete. The recovery coordinator can
+then broadcast a message to the group notifying the other nodes that the new
+replica can now service read requests. When the online recovery protocol
+completes, the new replica will have a copy of every data item and that data
+item will either have originated from a natural write submitted to the system
+or from a replication transfer initiated by the recovery coordinator. Hence, it
+will have a consistent view of the data.
+
+This scheme works unchanged in both active and passive replication
+environments, since the new replica does not need to know precisely where the
+write requests are coming from beyond whether they were submitted to it by the
+recovery coordinator or by the natural execution of the system. In a passive
+replication environment however, it may be worthwhile to have the primary node
+be the recovery coordinator.
+
+As presented, this scheme puts the burden of recovery on a single recovery
+coordinator. The recovery coordinator performs an analysis of its present load
+to effectively perform the recovery \emph{at lost time}, i.e. when it would
+otherwise not be doing anything useful. The downside to this approach is that
+the recovery process may take a very long time if the system is under heavy
+load. In order to guarantee than the system does eventually complete the
+recovery, we can impose a minimum number of data items per time unit that must
+be transferred to the new replica. This tunable parameter represents the
+tradeoff between regular operation of the system and ensuring that replicas
+are brought up in a timely fashion. As this minimum is increased, client
+response times will suffer.
+
+We can generalize this scheme to account for systems using sharding by having
+multiple recovery coordinators. The recovery protocol will thus have one
+recovery coordination leader and multiple recovery coordination followers, with
+one follower per shard that we wish to replicate. Each recovery coordination
+follower uses the protocol as described above, but when it completes for its
+shard, it merely notifies the recovery coordination leader that its shard is
+fully transferred to the new replica. Once the recovery coordination leader
+receives such a notification from all of the followers, it can declare that the
+recovery is completed.
+Furthermore, multiple recoveries can be performed simultaneously using this
+scheme by having one recovery map per recovering replica.
+
+\end{document}
