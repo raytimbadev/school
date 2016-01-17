@@ -7,3 +7,6 @@
 [submodule "comp-520/project"]
 	path = comp-520/project
 	url = git@github.com:djeik/comp-520-project.git
+[submodule "comp-527"]
+	path = comp-527
+	url = tsani@j:git/comp-527.git
