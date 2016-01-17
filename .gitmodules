@@ -4,3 +4,6 @@
 [submodule "comp-512/project"]
 	path = comp-512/project
 	url = https://github.com/djeik/comp-512-project.git
+[submodule "comp-520/project"]
+	path = comp-520/project
+	url = git@github.com:djeik/comp-520-project.git
