@@ -1,0 +1,141 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\author{Jacob Errington (260636023)}
+\date{19 September 2014}
+\title{Mathematical Logic -- Assignment \#1}
+
+\newcommand*{\problem}{}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Q}{\mathbb{Q}}
+
+\begin{document}
+
+\maketitle
+
+\begin{enumerate}
+    \item \problem{Decide whether the following are true or false.}
+        \begin{enumerate}
+            \item $1 \in 1$
+
+                False. A set cannot be an element of itself.
+
+            \item $1 \subseteq 1$
+
+                True. A set is a subset of another if all its elements are also elements of the
+                other. Since the two sets in question are identical, they have the same elements,
+                and are therefore subsets of each other.
+
+            \item $1 \in \left\{ 1, 2 \right\}$
+
+                True.
+
+            \item $1 \subseteq \left\{ 1, 2 \right\}$
+
+                False. We can construct the natural numbers from the primitive operations on sets
+                inductively with $0 = \emptyset$ and $\mathrm{succ}(n) = n \cup \left\{ n \right\}$.  Therefore, $1 =
+                \{0, \{ 0 \}\}$ and $2 = \left\{1, \left\{ 1 \right\}\right\}$. Neither of the elements of $1$ are equal
+                to $1$ or to $2$. Thus, the statement is false.
+
+        \end{enumerate}
+
+    \item \problem{Draw the following sets in $\R^2$.}
+        \begin{enumerate}
+            \item $\left\{(x, y) \in \R^2 : x < y + 1 \, \mathrm{and} \, x^2 > y\right\}$
+
+                See appendix 1.
+
+            \item $\left\{(x, y) \in \R^2 : \left( x^2 + y^2 \leq 1 \, \mathrm{and} \, x \geq y\right)
+                \, \mathrm{or} \, x^2 + y^2 \geq 2\right\}$
+
+                See appendix 2.
+
+        \end{enumerate}
+
+    \item 
+        \begin{enumerate}
+            \item \problem{Compute the transitive closure $T$ of the following relation $R$ on 
+                $A = \left\{1, 2, 3, 4\right\}$.}
+                \begin{align*}
+                    R                 &= \{(1, 2), (2, 3), (3, 1), (4, 4)\} \\
+                    R \circ R         &= \{(1, 3), (3, 2), (2, 1), (4, 4)\} \\
+                    R \circ R \circ R &= \{(1, 1), (2, 2), (3, 3), (4, 4)\} 
+                \end{align*}
+                Let $R^\prime$ be the union of the above three compositions. Further compositions yield only
+                elements already contained in $R^\prime$, so $\bigcup_{n=1}^\infty R^n = R^\prime = T$.
+                
+            \item \problem{Is $T$ an equivalence relation?}
+
+                We verify the properties of an equivalence relation.
+                \begin{description}
+                    \item[reflexivity] The pairs $\{(1,1),(2,2),(3,3),(4,4)\} \subseteq
+                    T$ indicate that each element in $A$ is related to itself by $T$.
+
+                    \item[symmetricity] We can see that for all $k_1, k_2 \in \{1, 2, 3\}.\, (k_1, k_2)
+                        \in T \, \mathrm{and} \, (k_2, k_1) \in T$.
+
+                    \item[transitivity] The transitive closure of a relation is guaranteed to be
+                        transitive.
+                \end{description}
+                From the above verification, $T$ is an equivalence relation.
+
+            \item \problem{Compute the equivalence class of 1.}
+
+                $\left[1\right]_T = \{1, 2, 3\}$
+        \end{enumerate}
+
+    \item \problem{For each of the following relations, decide whether it is an equivalence
+        relation.}
+        \begin{enumerate}
+            \item $E$ on $\N$ such that $x E y$ if $x < y$
+
+                This relation is not an equivalence relation since it is not symmetric. If $y$ is
+                greater than $x$, then $x$ cannot be greater than $y$.
+
+            \item $E$ on $\N$ such that $x E y$ if $x^2 = y^2$
+
+                Since squaring is an injective function on $\N$, i.e. no two different natural
+                numbers have the same square, $x^2 = y^2 \iff x = y$, which we already
+                know to be an equivalence relation.
+
+            \item $E$ on $\R$ such that $x E y$ if $x - y \notin \Q$
+
+                This relation is not reflexive, since $x - x = 0 \in \Q$.
+        \end{enumerate}
+
+    \item
+        \begin{enumerate}
+            \item \problem{Compute the composition of the following functions.}
+
+                $
+                    \left( \begin{array}{cccccc}
+                            1 & 2 & 3 & 4 & 5 & 6 \\
+                            6 & 5 & 1 & 4 & 2 & 3
+                    \end{array} \right)
+                    \left( \begin{array}{cccccc}
+                            1 & 2 & 3 & 4 & 5 & 6 \\
+                            1 & 3 & 6 & 2 & 4 & 5
+                    \end{array} \right) =
+                    \left( \begin{array}{cccccc}
+                            1 & 2 & 3 & 4 & 5 & 6 \\
+                            6 & 1 & 3 & 5 & 4 & 2
+                    \end{array} \right)
+                $
+
+            \item \problem{Compute the inverse of the following permutation.}
+                
+                $\left( \begin{array}{cccccc}
+                        1 & 2 & 3 & 4 & 5 & 6 \\
+                        2 & 5 & 4 & 1 & 6 & 3
+                \end{array} \right)^{-1} = 
+                \left( \begin{array}{cccccc}
+                        1 & 2 & 3 & 4 & 5 & 6 \\
+                        4 & 1 & 6 & 3 & 2 & 5
+                \end{array} \right)$
+        \end{enumerate}
+\end{enumerate}
+\end{document}
