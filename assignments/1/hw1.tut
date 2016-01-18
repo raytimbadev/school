@@ -207,3 +207,27 @@ begin
 ] ;
 ~(A | B) => ~A & ~B
 end ;
+
+classical proof q1d : ~(A & B) => ~A | ~B =
+begin
+[   A & B => F ;
+    [   ~(~A | ~B) ;
+        [   ~A ;
+            ~A | ~B ;
+            F
+        ] ;
+        ~~A ;
+        A ;
+        [   ~B ;
+            ~A | ~B ;
+            F
+        ] ;
+        ~~B ;
+        B ;
+        A & B ;
+        F
+    ] ;
+    ~A | ~B
+] ;
+~(A & B) => ~A | ~B
+end;
