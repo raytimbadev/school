@@ -3,59 +3,43 @@
 module Language.Minilang.Syntax where
 
 import Prelude hiding ( print, read )
-import Control.Monad.Free
 import Data.Text ( Text )
 
-data ProgramF f
-    = Var Ident Type f
-    | Assign Ident Expr f
-    | While Expr (Program ()) f
-    | If Expr (Program ()) (Program ()) f
-    | Print Expr f
-    | Read (ValueE -> f)
-    deriving (Functor)
+data Statement
+    = Var Ident Type
+    | Assign Ident Expr
+    | While Expr Program
+    | If Expr Program Program
+    | Print Expr
+    | Read Ident
+    deriving (Eq, Read, Show)
 
-type Expr = TermE
+data Expr
+    = BinaryOp BinaryOp Expr Expr
+    | UnaryOp UnaryOp Expr
+    | Literal Literal
+    deriving (Eq, Read, Show)
 
-data TermE
-    = Plus TermE FactorE
-    | Minus TermE FactorE
-    | Factor FactorE
+data BinaryOp
+    = Plus | Minus | Times | Divide
+    deriving (Eq, Read, Show)
 
-data FactorE
-    = Times FactorE ValueE
-    | Divide FactorE ValueE
-    | Value ValueE
+data UnaryOp
+    = Negative
+    deriving (Eq, Read, Show)
 
-data ValueE
-    = Negate LiteralE
-    | Literal LiteralE
-
-data LiteralE
+data Literal
     = Variable Text
     | Int Int
     | Real Double
     | String Text
+    deriving (Eq, Read, Show)
 
-type Program = Free ProgramF
+data Type 
+    = TyReal
+    | TyInt
+    | TyString
+    deriving (Eq, Read, Show)
 
+type Program = [Statement]
 type Ident = Text
-type Type = Text
-
-var :: Ident -> Type -> Program ()
-var i t = liftF . Var i t $ ()
-
-(.=) :: Ident -> Expr -> Program ()
-i .= e = liftF . Assign i e $ ()
-
-while :: Expr -> Program () -> Program ()
-while e p = liftF . While e p $ ()
-
-ifThenElse :: Expr -> Program () -> Program () -> Program ()
-ifThenElse e tb eb = liftF . If e tb eb $ ()
-
-print :: Expr -> Program ()
-print e = liftF . Print e $ ()
-
-read :: Program ValueE
-read = liftF . Read $ id
