@@ -1,0 +1,59 @@
+Minilangcheck
+=============
+
+Written by Jacob Thomas Errington (260636023).
+
+Structure
+---------
+
+The code consists of three parts:
+ * A library called `minilang` that includes the lexer/parser as well as a
+   high-level parsing function `parseOnlyMinilang`.
+ * An executable called `minilangcheck` that depends on this library, and
+   simply wraps a call to `parseOnlyMinilang` in a command-line interface.
+ * An Hspec specification with unit tests for different lexer/parser internals.
+   This test suite also loads several valid (resp. invalid) programs and checks
+   that they successfully (resp. unsuccessfully) parse.
+
+Building
+--------
+
+The project is guaranteed to build on GHC 7.10.2. Earlier versions of GHC 7.10
+should also work. Any earlier version of GHC is essentially unsupported!
+
+This project uses the cabal build tool. Recent versions of cabal support
+sandboxing, which avoids a kind of dependency hell. Sadly, the version of cabal
+available on the school computers is old enough not to support sandboxing, so
+building the project may inexplicably fail with dependency errors.
+
+Should building be too difficult/time-consuming, I have also included a binary
+copy of minilangcheck. GHC statically links all Haskell dependencies, so this
+binary should work on pretty much any modern Linux system. I have personally
+tested it on `teaching.cs.mcgill.ca` and it worked.
+
+### With sandboxing (recent versions of cabal)
+
+    cd src
+    cabal sandbox init
+    cabal install --only-dependencies
+    # If you want to run the test suite, you need to enable tests as follows
+    # when using `cabal install`:
+    #     cabal --enable-tests install --only-dependencies
+    cabal build
+
+### Without sandboxing
+
+To build within sandboxing, simply omit the `cabal sandbox init` step in the
+above instructions. Build failure is significantly more likely this way!
+
+Running
+-------
+
+After building, if you are in the `src` directory, `cabal run` will invoke
+minilangcheck. Command-line arguments can be passed to minilangcheck, just
+append them to `cabal run`.
+
+Alternatively, the `run` script in project root directory will invoke a locally
+built `minilangcheck` if it exists. If no locally built `minilangcheck` can be
+found, then `run` will try to run the predistributed binary.
+

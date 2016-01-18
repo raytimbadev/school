@@ -1,0 +1,11 @@
+#!/bin/bash
+
+LOCAL_MINILANGCHECK='src/dist/build/minilangcheck/minilangcheck'
+PREBUILT_MINILANGCHECK='src/minilangcheck'
+
+test -x "$LOCAL_MINILANGCHECK" && exec ./$LOCAL_MINILANGCHECK $@
+
+test -x "$PREBUILT_MINILANGCHECK" && exec ./$PREBUILT_MINILANGCHECK $@
+
+echo 'No minilangcheck binary could be found.' >&2
+exit 1
