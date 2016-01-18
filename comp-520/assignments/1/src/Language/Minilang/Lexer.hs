@@ -90,7 +90,7 @@ stringLiteral :: Parser Text
 stringLiteral = lexeme rawStringLiteral
 
 identifier :: Parser Text
-identifier = lexeme rawIdentifier
+identifier = notFollowedBy (choice reserved) *> lexeme rawIdentifier
 
 integerLiteral :: Parser Int
 integerLiteral = lexeme rawIntegerLiteral
@@ -106,44 +106,64 @@ rawType = pure TyReal <* tokTyFloat
     <|> pure TyInt <* tokTyInt
     <|> pure TyString <* tokTyString
 
+reservedWord :: String -> Parser ()
+reservedWord s = void $ lexeme $ try (string s) <* notFollowedBy alphaNumChar
+
 tokTyFloat :: Parser ()
-tokTyFloat = void $ lexeme $ try (string "float") <* notFollowedBy alphaNumChar
+tokTyFloat = reservedWord "float"
 
 tokTyInt :: Parser ()
-tokTyInt = void $ lexeme $ try (string "int") <* notFollowedBy alphaNumChar
+tokTyInt = reservedWord "int"
 
 tokTyString :: Parser ()
-tokTyString = void $ lexeme $ try (string "string") <* notFollowedBy alphaNumChar
+tokTyString = reservedWord "string"
 
 tokVar :: Parser ()
-tokVar = void $ lexeme $ try (string "var") <* notFollowedBy alphaNumChar
+tokVar = reservedWord "var"
 
 tokWhile :: Parser ()
-tokWhile = void $ lexeme $ try (string "while") <* notFollowedBy alphaNumChar
+tokWhile = reservedWord "while"
 
 tokRead :: Parser ()
-tokRead = void $ lexeme $ try (string "read") <* notFollowedBy alphaNumChar
+tokRead = reservedWord "read"
 
 tokPrint :: Parser ()
-tokPrint = void $ lexeme $ try (string "print") <* notFollowedBy alphaNumChar
+tokPrint = reservedWord "print"
 
 tokIf :: Parser ()
-tokIf = void $ lexeme $ try (string "if") <* notFollowedBy alphaNumChar
+tokIf = reservedWord "if"
 
 tokThen :: Parser ()
-tokThen = void $ lexeme $ try (string "then") <* notFollowedBy alphaNumChar
+tokThen = reservedWord "then"
 
 tokElse :: Parser ()
-tokElse = void $ lexeme $ try (string "else") <* notFollowedBy alphaNumChar
+tokElse = reservedWord "else"
 
 tokEnd :: Parser ()
-tokEnd = void $ lexeme $ try (string "end") <* notFollowedBy alphaNumChar
+tokEnd = reservedWord "end"
 
 tokDo :: Parser ()
-tokDo = void $ lexeme $ try (string "do") <* notFollowedBy alphaNumChar
+tokDo = reservedWord "do"
 
 tokDone :: Parser ()
-tokDone = void $ lexeme $ try (string "done") <* notFollowedBy alphaNumChar
+tokDone = reservedWord "done"
+
+reserved :: [Parser ()]
+reserved =
+    [ tokTyFloat
+    , tokTyInt
+    , tokTyString
+    , tokVar
+    , tokWhile
+    , tokRead
+    , tokPrint
+    , tokIf
+    , tokThen
+    , tokElse
+    , tokEnd
+    , tokDo
+    , tokDone
+    ]
 
 tokMinus :: Parser ()
 tokMinus = void $ symbol "-"
