@@ -80,8 +80,23 @@ main = do
 
         describe "Parser" $ do
             describe "varStmt" $ do
-                it "parses variable declarations" $
+                it "parses simple variable declarations" $ do
                     parseOnly varStmt "var x: int;" `shouldBe` Right (Var "x" TyInt)
+                    parseOnly varStmt "var y: float;" `shouldBe` Right (Var "y" TyReal)
+                    parseOnly varStmt "var z: string;" `shouldBe` Right (Var "z" TyString)
+
+                it "parses a whole statement, ending with a semicolon" $
+                    parseOnly varStmt "var hi: string" `shouldSatisfy` isLeft
+
+                it "parses declarations that must include a type" $
+                    parseOnly varStmt "var hi: ;" `shouldSatisfy` isLeft
+
+                it "fails if there's no space after the 'var' keyword" $
+                    parseOnly varStmt "varh i: string;" `shouldSatisfy` isLeft
+
+                prop "the name of the variable can be any identifier" $
+                    forAll identifiers $ \i ->
+                        parseOnly varStmt ("var " ++ i ++ " : int;") `shouldSatisfy` isRight
 
         describe "parseMinilang" $ do
             forM_ validSources $ \(name, contents) ->
