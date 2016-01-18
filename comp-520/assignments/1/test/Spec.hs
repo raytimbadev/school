@@ -19,10 +19,14 @@ import Test.Hspec.QuickCheck
 import Test.QuickCheck
 import Text.Megaparsec
 
-sourcesDir = "test-sources"
+validSourcesDir :: FilePath
+validSourcesDir = "valid-test-sources"
 
-getTestSources :: IO [(String, Text)]
-getTestSources = getMinilangFiles >>= mapM readWithPath where
+invalidSourcesDir :: FilePath
+invalidSourcesDir = "invalid-test-sources"
+
+getTestSources :: FilePath -> IO [(String, Text)]
+getTestSources sourcesDir = getMinilangFiles >>= mapM readWithPath where
     getMinilangFiles = filter isMinilangFile <$> getSourcePaths
     isMinilangFile = (==) ".min" . takeExtension
     getSourcePaths = getDirectoryContents sourcesDir
@@ -31,10 +35,17 @@ getTestSources = getMinilangFiles >>= mapM readWithPath where
 parseOnly m = parse (m <* eof) "" . fromString
 
 main = do
-    testSources <- getTestSources
+    validSources <- getTestSources validSourcesDir
 
-    putStrLn "Loading the following Minilang test programs:"
-    forM_ testSources $ \(n, _) -> putStrLn $ "\t" ++ n
+    putStrLn "Loading the following valid Minilang test programs:"
+    forM_ validSources $ \(n, _) -> putStrLn $ "\t" ++ n
+    putStrLn ""
+
+    invalidSources <- getTestSources invalidSourcesDir
+
+    putStrLn "Loading the following invalid Minilang test programs:"
+    forM_ invalidSources $ \(n, _) -> putStrLn $ "\t" ++ n
+    putStrLn ""
     
     hspec $ describe "Language.Minilang" $ do
         describe "Lexer" $ do
@@ -73,9 +84,13 @@ main = do
                     parseOnly varStmt "var x: int;" `shouldBe` Right (Var "x" TyInt)
 
         describe "parseMinilang" $ do
-            forM_ testSources $ \(name, contents) ->
-                it ("successfully parses " ++ name) $
+            forM_ validSources $ \(name, contents) ->
+                it ("successfully parses the valid program " ++ name) $
                     parseOnlyMinilang name contents `shouldSatisfy` isRight
+
+            forM_ invalidSources $ \(name, contents) ->
+                it ("fails to parse the invalid program " ++ name) $
+                    parseOnlyMinilang name contents `shouldSatisfy` isLeft
 
 isRight :: Either a b -> Bool
 isRight (Right _) = True
