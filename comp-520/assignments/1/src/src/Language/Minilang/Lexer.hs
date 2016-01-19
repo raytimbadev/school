@@ -83,7 +83,7 @@ rawFloatLiteral = simple <|> noIntegralPart where
         return $ ip + d
 
     noIntegralPart = do
-        try $ char '.'
+        try $ void $ char '.'
         fractionalPart
 
 stringLiteral :: Parser Text

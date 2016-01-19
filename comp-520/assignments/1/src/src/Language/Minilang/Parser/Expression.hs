@@ -22,6 +22,7 @@ literal
     <|> fmap String stringLiteral
     <|> fmap Variable identifier
 
+table :: [[Operator Parser Expr]]
 table =
     [ [ Prefix $ tokMinus *> unaryMinus
       ]

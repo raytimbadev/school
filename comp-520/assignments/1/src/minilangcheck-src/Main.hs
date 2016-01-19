@@ -6,6 +6,7 @@ import Data.Text.IO ( readFile )
 import Prelude hiding ( readFile )
 import Options.Applicative
 
+argParser :: ParserInfo String
 argParser = info sourcePath details where
     sourcePath = argument str (metavar "FILE")
     details = header h <> progDesc p

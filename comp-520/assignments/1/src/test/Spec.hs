@@ -4,12 +4,10 @@ module Main where
 
 import Language.Minilang
 import Language.Minilang.Lexer
-import Language.Minilang.Parser
 
 import Control.Monad ( forM_ )
 import Data.String ( IsString, fromString )
 import Data.Text ( Text )
-import qualified Data.Text as T
 import Data.Text.IO ( readFile )
 import Prelude hiding ( readFile )
 import System.FilePath
@@ -32,8 +30,10 @@ getTestSources sourcesDir = getMinilangFiles >>= mapM readWithPath where
     getSourcePaths = getDirectoryContents sourcesDir
     readWithPath p = (,) <$> pure p <*> readFile (sourcesDir </> p)
 
+parseOnly :: Parser a -> String -> Either ParseError a
 parseOnly m = parse (m <* eof) "" . fromString
 
+main :: IO ()
 main = do
     validSources <- getTestSources validSourcesDir
 
