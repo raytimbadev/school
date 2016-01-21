@@ -2,7 +2,8 @@ module Language.Minilang.Parser
 ( minilang
 , Input
 , stmt
-, varStmt
+, decl
+, varDecl
 , assignStmt
 , whileStmt
 , ifStmt
@@ -17,19 +18,22 @@ import Language.Minilang.Syntax
 import Text.Megaparsec
 
 minilang :: Parser Program
-minilang = many stmt
+minilang = (,) <$> many decl <*> many stmt
 
 stmt :: Parser Statement
 stmt
-    = varStmt
-    <|> whileStmt
+    = whileStmt
     <|> ifStmt
     <|> assignStmt
     <|> printStmt
     <|> readStmt
 
-varStmt :: Parser Statement
-varStmt = do
+decl :: Parser Declaration
+decl
+    = varDecl
+
+varDecl :: Parser Declaration
+varDecl = do
     try $ tokVar
     ident <- identifier
     colon
@@ -49,7 +53,7 @@ whileStmt = do
     try tokWhile
     e <- expr
     tokDo
-    body <- minilang
+    body <- many stmt
     tokDone
     return $ While e body
 
@@ -58,8 +62,8 @@ ifStmt = do
     try tokIf
     e <- expr
     tokThen
-    thenBody <- minilang
-    elseBody <- option [] $ try tokElse *> minilang
+    thenBody <- many stmt
+    elseBody <- option [] $ try tokElse *> many stmt
     tokEnd
     return $ If e thenBody elseBody
         

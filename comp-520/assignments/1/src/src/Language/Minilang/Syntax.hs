@@ -6,12 +6,15 @@ import Prelude hiding ( print, read )
 import Data.Text ( Text )
 
 data Statement
-    = Var Ident Type
-    | Assign Ident Expr
-    | While Expr Program
-    | If Expr Program Program
+    = Assign Ident Expr
+    | While Expr [Statement]
+    | If Expr [Statement] [Statement]
     | Print Expr
     | Read Ident
+    deriving (Eq, Read, Show)
+
+data Declaration
+    = Var Ident Type
     deriving (Eq, Read, Show)
 
 data Expr
@@ -41,5 +44,5 @@ data Type
     | TyString
     deriving (Eq, Read, Show)
 
-type Program = [Statement]
+type Program = ([Declaration], [Statement])
 type Ident = Text
