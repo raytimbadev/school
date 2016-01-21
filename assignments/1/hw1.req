@@ -7,8 +7,8 @@
 
 proof easy0 : (A & (B & C)) => (A & B); 
 proof easy1 :  (A => B) => ((B => C) => (A => C));
-proof d1a : (A | B) => C => (A => C) & (B => C);
-proof d1b :  (A => C) & (B => C) => (A | B) => C;
+annotated proof d1a : ((A | B) => C) => (A => C) & (B => C);
+annotated proof d1b :  (A => C) & (B => C) => (A | B) => C;
 proof d1c : ((A => B) & (A | C)) => (B | C);
 
 % OPTIONAL
