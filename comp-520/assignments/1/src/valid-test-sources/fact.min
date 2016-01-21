@@ -1,0 +1,13 @@
+var acc:float;
+var limit:int;
+
+acc = 1;
+limit = 20;
+
+while limit do
+    acc = acc * limit;
+    x = x - 1;
+done
+
+print "20! = ";
+print x;
