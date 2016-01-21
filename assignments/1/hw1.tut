@@ -231,3 +231,18 @@ begin
 ] ;
 ~(A & B) => ~A | ~B
 end;
+
+proof q1e : (~ ~ ~ A => ~ A) =
+begin
+[   ~~~A ;
+    [   A ;
+        [   ~A ;
+            F
+        ] ;
+        ~~A ;
+        F
+    ];
+    ~A
+] ;
+~~~A => ~A
+end ;
