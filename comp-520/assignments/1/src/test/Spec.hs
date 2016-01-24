@@ -78,6 +78,9 @@ main = do
                     parseOnly floatLiteral "3." `shouldBe` Right 3
                     parseOnly floatLiteral "0." `shouldBe` Right 0.0
 
+                it "fails to parse float literals consisting of just a dor" $ do
+                    parseOnly floatLiteral "." `shouldSatisfy` isLeft
+
         describe "Parser" $ do
             describe "varDecl" $ do
                 it "parses simple variable declarations" $ do

@@ -75,6 +75,7 @@ rawFloatLiteral :: Parser Double
 rawFloatLiteral = simple <|> noIntegralPart where
     integralPart = fromIntegral <$> rawIntegerLiteral 
     fractionalPart = (read . ("0." ++) . (++ "0")) <$> many digitChar
+    fractionalPart' = (read . ("0." ++) . (++ "0")) <$> some digitChar
 
     simple = do
         ip <- try $ integralPart <* char '.'
@@ -84,7 +85,7 @@ rawFloatLiteral = simple <|> noIntegralPart where
 
     noIntegralPart = do
         try $ void $ char '.'
-        fractionalPart
+        fractionalPart'
 
 stringLiteral :: Parser Text
 stringLiteral = lexeme rawStringLiteral
