@@ -1,0 +1,82 @@
+\documentclass[11pt,letterpaper]{article}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#1\\Advanced theory of computation -- COMP 531}
+\date{27 January 2016}
+
+\usepackage[margin=2.0cm]{geometry}
+
+\usepackage{amsmath,amssymb,amsthm}
+
+\newtheorem{proposition}{Proposition}
+
+\begin{document}
+
+\maketitle
+
+\begin{proposition}
+    If $L$ is recognized by a Turing machine $M$ that does not necessarily halt
+    but such that $s_M(n) \in O(S(n))$ for $S(n) \geq \log n$, then $L$ can be
+    recognized by a Turing machine $M^\prime$ such that
+    $s_{M^\prime}(n) = S(n)$ and that always halts.
+\end{proposition}
+
+\begin{proof}
+    Our strategy is to construct $M^\prime$ so as to simulate $M$ \emph{twice},
+    which will allow us to detect space-bounded loops.
+
+    The intuition for this solution comes from a technique to find loops in
+    linked lists. We hold onto two cursors in the list. One cursor advances by
+    one item, and the other advances by two items. Every iteration, the items
+    referred to by these cursors are compared: if they are equal then there is
+    a loop. If there is no loop, then one of the cursors will reach the end of
+    the list.
+
+    When it comes to Turing machines, we have a graph rather than a list.
+    However, we still have this notion of advancing one step at a time
+    according to the transition function of the machine, so this algorithm
+    still applies. In one of our simulations, we apply the transition function
+    twice, and in the other we apply it once. The outcome is that on one tape
+    of our machine $M^\prime$ we can trace the evolution of $M$ one step at a
+    time, and on another tape of $M^\prime$ we can trace the evolution of $M$
+    two steps at a time. It suffices to compare the configuration in one tape
+    with the configuration in the other in order to detect loops, in which case
+    $M^\prime$ will reject. If one simulation or the other reaches an accepting
+    state then $M^\prime$ accepts; else if one or the other simulations reaches
+    a rejecting state then $M^\prime$ rejects.
+
+    As for space complexity, $M^\prime$ will use twice as much space as $M$, as
+    there are two simulations, as well as some overhead in order to perform the
+    comparison of the two work tapes. That overhead will of course be no more
+    than $s_M(n)$.
+\end{proof}
+
+\begin{proposition}
+    The language $L = \{ a^n b^n | n \geq 0\}$ can be recognized by a
+    single-tape Turing machine in time $O(n \log n)$.
+\end{proposition}
+
+\begin{proof}
+    First without loss of generality we will assume that all inputs are of the
+    form $a^* b^*$, which can be verified by a deterministic finite automaton
+    in time $O(n)$.
+
+    Our idea is to use a counter. Leaving the counter at a fixed location on
+    the tape, however, would result in $O(n^2)$ time complexity due to needing
+    to seek from the input to the counter and back for each input character.
+
+    Our insight is to drag the counter along with the input head in order to
+    minimize seeking distances.
+
+    Our strategy is to use an extended alphabet
+    $\Gamma = \{a, b, a_0, a_1, b_0, b_1\}$.
+    The subscripts of sequential characters on the tape will be used to
+    represent the value of the counter.
+
+    Incrementing or decrementing the value of the counter that is immediately
+    under the cursor takes time $O(\log n)$. Moving the counter over by one
+    takes time $O(\log n)$. We must perform these operations $2n$ times. Hence
+    overall, this algorithm is $O(n \log n)$.
+\end{proof}
+
+\end{document}
