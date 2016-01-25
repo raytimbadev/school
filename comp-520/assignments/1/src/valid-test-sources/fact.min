@@ -4,6 +4,10 @@ var limit:int;
 acc = 1;
 limit = 20;
 
+if 0 then
+    print "impossible !";
+endif
+
 while limit do
     acc = acc * limit;
     x = x - 1;

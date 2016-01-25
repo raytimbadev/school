@@ -141,7 +141,7 @@ tokElse :: Parser ()
 tokElse = reservedWord "else"
 
 tokEnd :: Parser ()
-tokEnd = reservedWord "end"
+tokEnd = reservedWord "endif"
 
 tokDo :: Parser ()
 tokDo = reservedWord "do"
