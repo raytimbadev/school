@@ -1,0 +1,18 @@
+var f1 : int;
+var f2 : int;
+var t : int;
+var n : int;
+
+n = 100;
+
+f1 = 0;
+f2 = 1;
+
+while n do
+    t = f1 + f2;
+    f1 = f2;
+    f2 = t;
+    n = n - 1;
+done
+
+print f2;
