@@ -58,7 +58,15 @@ symbol :: String -> Parser String
 symbol = L.symbol spaceConsumer
 
 rawStringLiteral :: Parser Text
-rawStringLiteral = char '"' *> (T.pack <$> manyTill anyChar (char '"'))
+rawStringLiteral = char '"' *> (T.pack <$> manyTill strchar (char '"'))
+
+strchar
+    = oneOf
+    $ concat
+        [ "qwertyuiopasdfghjklzxcvbnm"
+        , "QWERTYUIOPASDFGHJKLZXCVBNM"
+        , "1234567890!.,? "
+        ]
 
 rawIdentifier :: Parser Text
 rawIdentifier = do
