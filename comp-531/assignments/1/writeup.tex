@@ -14,6 +14,8 @@
 
 \maketitle
 
+\section*{Question 1}
+
 \begin{proposition}
     If $L$ is recognized by a Turing machine $M$ that does not necessarily halt
     but such that $s_M(n) \in O(S(n))$ for $S(n) \geq \log n$, then $L$ can be
@@ -51,6 +53,8 @@
     than $s_M(n)$.
 \end{proof}
 
+\section*{Question 2}
+
 \begin{proposition}
     The language $L = \{ a^n b^n | n \geq 0\}$ can be recognized by a
     single-tape Turing machine in time $O(n \log n)$.
@@ -78,5 +82,89 @@
     takes time $O(\log n)$. We must perform these operations $2n$ times. Hence
     overall, this algorithm is $O(n \log n)$.
 \end{proof}
+
+Now we will show that for a single-tape Turing machine, this time bound is
+optimal for recognizing $L$. To do so, we notice that $L$ is not regular (by a
+simple application of the pumping lemma), and we will prove that all
+single-tape Turing machines with time complexity $o(n \log n)$ are equivalent
+to deterministic finite automata.
+
+I have found some proofs of this, but I am unable to understand them, so I will
+leave this part unsolved.
+
+\section*{Question 3}
+
+\begin{proposition}
+    If $L$ is a language that can be recognized by a Turing machine in space
+    $s_M(n) \in o(\log \log n)$, then L is regular.
+\end{proposition}
+
+\begin{proof}
+    Suppose not. Then $L$ is a nonregular language that can be recognized by a
+    Turing machine $M$ in space asymptotically strictly less than
+    $\log \log n$. Of course $M \notin DSPACE(1)$, so for any
+    $k \in \mathbb{N}$, there exists some word $x \in L$ requiring more than
+    $k$ space to recognize.
+
+    Now suppose $x$ is an input of minimal size, let $n = |x|$. Let $C$ be the
+    set of all configurations of $M$ processing $x$. Since
+    $M \in DSPACE(s(n))$,
+    $$
+    |C| \leq 2^{c s(n)} \in o(\log n)
+    $$
+    where $c$ is a constant that depends on $M$ to account for differences in
+    alphabet size.
+
+    Let $S$ be the set of all possible crossing sequences of $M$ processing
+    $x$. Note that the length of any crossing sequence cannot exceed $|C|$. (If
+    there were a longer crossing sequence, then there would be a repeated
+    configuration, which would cause the machine to run forever.) There are at
+    most $|C|$ possibilities for each element of any crossing sequence (we
+    consider crossing sequences to consist of \emph{configurations}), so the
+    number of crossing sequences of $M$ processing $x$ is
+    $$
+    |S| \leq |C|^{|C|} = {2^{c s(n)}}^{2^{c s(n)}} = 2^{c s(n) 2^{c s(n)}}
+    < 2^{2^{2 c s(n)}} = 2^{2^{o(\log \log n)}} = o(n)
+    $$
+
+    Then, due to the pigeonhole principle, there will exist indices $i$ and $j$
+    where $i < j$ such that $C_i = C_j$ where $C_k$ denotes the crossing
+    sequence at position $k$.
+
+    Finally, since those crossing sequences are the same, we can create a new
+    string $x^\prime$ by snipping out the cells from $i$ to $j$ while
+    preserving the behaviour of $M$. This new string is smaller than $x$, which
+    contradicts the minimality of $x$. Thus, this language $L$ cannot exist.
+\end{proof}
+
+\section*{Question 4}
+
+\begin{proposition}
+    The language $BIN$ consisting of strings of the form
+    $$
+    b_1 \# b_2 \# \cdots \# b_n
+    $$
+    where $b_i$ is the binary encoding of the number $i$ can be recognized in
+    $DSPACE(\log \log n)$.
+\end{proposition}
+
+\begin{proof}
+    The Turing machine needs merely to check that for each $b_i$, the next
+    binary string is equal to $i + 1$. This can be done by successively
+    comparing digits of the binary encoded string. The Turing machine must keep
+    track only of which digit is has reached. The number of digits in the
+    binary encoding is on the order of $\log n$, so the counter to keep track
+    of which digit is currently being processed will be on the order of
+    $\log \log n$.
+\end{proof}
+
+\begin{proposition}
+    The language $BIN$ is not regular.
+\end{proposition}
+
+We will not provide a rigorous argument. We know that a deterministic finite
+automaton cannot perform an equality check of two arbitrary strings; what is
+being done by the Turing machine in our construction is slightly more complex
+than that, so it stands to reason that a DFA should be incapable of it as well.
 
 \end{document}
