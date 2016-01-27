@@ -4,7 +4,7 @@ var reader : string;
 var printer : string;
 var integer : int;
 
-print "What's your name?";
+print "What is your name?";
 read reader;
 printer = reader;
 print "The countdown is starting !";

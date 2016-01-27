@@ -13,5 +13,5 @@ while limit do
     x = x - 1;
 done
 
-print "20! = ";
+print "20! is ";
 print x;
