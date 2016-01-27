@@ -102,9 +102,9 @@ If I do majors math cs:
         math 315 - ordinary differential equations (F15) !
         math 318 - mathematical logic (F14) !
         math 242 - analysis 1 (F16)
-        math 317 - numerical analysis (W16)
+        math 317 - numerical analysis (F16)
         math 323 - probability (F16)
-        math 340 - discrete structures 2 (F16)
+        math 340 - discrete structures 2 (W16) !
 
     complementary courses (18 credits ~ 6 courses):
 
@@ -117,17 +117,19 @@ If I do majors math cs:
         3 computer science courses:
 
             comp 512 - distributed systems (F15) !
-            comp 520 - compiler design (W16)
-            comp 527 - logic and commputation (W16)
+            comp 520 - compiler design (W16) !
+            comp 527 - logic and commputation (W16) !
 
     electives (18 credits ~ 6 courses):
 
         6 courses:
 
             hgen 396 - human genetics research project (W15)
+            comp 531 - advanced theory of computation (W16) !
             comp 523 - language based security (W17) ?
+            - introductory latin (F16 - W17) ?
 
-            + 4 more (perhaps a language course ?)
+            + 2 more
 
     Conclusion:
 
@@ -167,7 +169,8 @@ If I do majors math cs:
             comp 527 (comp complementary)
             comp 531 (elective)
             math 340 (required)
-            + 1 math complementary or 1 elective
+            
+            Missing one course here now !
 
             Note: math 430 conflicts with comp 527
 
