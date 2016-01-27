@@ -18,7 +18,7 @@ import Language.Minilang.Syntax
 import Text.Megaparsec
 
 minilang :: Parser Program
-minilang = (,) <$> many decl <*> many stmt
+minilang = Program <$> many decl <*> many stmt
 
 stmt :: Parser Statement
 stmt

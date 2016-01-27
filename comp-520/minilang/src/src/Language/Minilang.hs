@@ -3,11 +3,13 @@ module Language.Minilang
 , module Language.Minilang.Parser
 , parseMinilang
 , parseOnlyMinilang
+, pretty
 ) where
 
 import Language.Minilang.Syntax
 import Language.Minilang.Lexer
 import Language.Minilang.Parser
+import Language.Minilang.Pretty
 
 import Text.Megaparsec
 

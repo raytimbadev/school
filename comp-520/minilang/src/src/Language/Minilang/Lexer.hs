@@ -60,6 +60,7 @@ symbol = L.symbol spaceConsumer
 rawStringLiteral :: Parser Text
 rawStringLiteral = char '"' *> (T.pack <$> manyTill strchar (char '"'))
 
+strchar :: Parser Char
 strchar
     = oneOf
     $ concat
