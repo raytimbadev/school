@@ -1,12 +1,18 @@
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module Language.Minilang.Syntax where
 
 import Language.Minilang.Precedence
 import Language.Minilang.Pretty
 
+import Data.Functor.Foldable
 import Prelude hiding ( print, read )
 import Data.Text ( Text )
+
+-- | A functor value with an annotation.
+data Ann x f a = Ann x (f a)
 
 data Statement
     = Assign Ident Expr
@@ -20,11 +26,13 @@ data Declaration
     = Var Ident Type
     deriving (Eq, Read, Show)
 
-data Expr
-    = BinaryOp BinaryOp Expr Expr
-    | UnaryOp UnaryOp Expr
+data ExprF f
+    = BinaryOp BinaryOp f f
+    | UnaryOp UnaryOp f
     | Literal Literal
-    deriving (Eq, Read, Show)
+    deriving (Eq, Read, Show, Functor)
+
+type Expr = Fix ExprF
 
 data BinaryOp
     = Plus | Minus | Times | Divide
@@ -76,11 +84,11 @@ instance Pretty UnaryOp where
         Negative -> "-"
 
 instance Pretty Literal where
-    pretty e = case e of
-        Variable t -> pretty t
-        Int n -> pretty n
-        Real x -> pretty x
-        String t -> pretty t
+    prettysPrec _ e = case e of
+        Variable t -> prettys t
+        Int n -> prettys n
+        Real x -> prettys x
+        String t -> prettyString "\"" . prettys t . prettyString "\""
 
 instance Pretty Type where
     pretty e = case e of
@@ -89,13 +97,27 @@ instance Pretty Type where
         TyString -> "string"
 
 instance Pretty Expr where
-    prettysPrec d e = case e of
-        BinaryOp op l r ->
-            showParen (precedence op < d) (prettyInfix op l r)
-        UnaryOp op p ->
-            showParen (precedence op < d) (prettyPrefix op p)
-        Literal l ->
-            prettys l
+    prettysPrec _ fe = snd $ cata f fe where
+        f e = case e of
+            BinaryOp op (dl, l) (dr, r) ->
+                let
+                    p = precedence op
+                    lb = showParen (dl < p) l
+                    lr = showParen (dr < p) r
+                    body = lb . prettySpace . prettys op . prettySpace . lr
+                in
+                    (p, body)
+
+            UnaryOp op (dm, m) ->
+                let
+                    p = precedence op
+                    lm = showParen (dm < p) m
+                    body = prettys op . lm
+                in
+                    (p, body)
+
+            Literal l ->
+                (10, prettys l)
 
 instance Pretty Statement where
     prettysPrec d e = case e of

@@ -5,6 +5,7 @@ module Language.Minilang.Parser.Expression
 import Language.Minilang.Lexer
 import Language.Minilang.Syntax
 
+import Data.Functor.Foldable
 import Text.Megaparsec
 import Text.Megaparsec.Expr
 
@@ -12,7 +13,7 @@ expr :: Parser Expr
 expr = makeExprParser term table
 
 term :: Parser Expr
-term = fmap Literal literal
+term = fmap (Fix . Literal) literal
     <|> parens expr
 
 literal :: Parser Literal
@@ -33,8 +34,9 @@ table =
       , InfixL $ tokMinus *> minus
       ]
     ] where
-        unaryMinus = pure (UnaryOp Negative)
-        times = pure (BinaryOp Times)
-        divide = pure (BinaryOp Divide)
-        plus = pure (BinaryOp Plus)
-        minus = pure (BinaryOp Minus)
+        unaryMinus = pure (Fix . UnaryOp Negative)
+        bin op = pure (\e1 e2 -> Fix $ BinaryOp op e1 e2)
+        times = bin Times
+        divide = bin Divide
+        plus = bin Plus
+        minus = bin Minus
