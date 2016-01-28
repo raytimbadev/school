@@ -25,6 +25,9 @@ library
     Language.Minilang.Parser.Expression
     Language.Minilang.Precedence
     Language.Minilang.Pretty
+    Language.Minilang.SrcAnn
+    Language.Minilang.Annotation
+    Language.Minilang.Lexer.Core
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options:
@@ -34,7 +37,8 @@ library
     base >=4.8 && <4.9,
     megaparsec >=4.2 && <4.3,
     text >=1.2 && <1.3,
-    recursion-schemes >=4.1 && <4.2
+    recursion-schemes >=4.1 && <4.2,
+    pretty >=1.1 && <1.2
 
 executable minilangc
   main-is:             Main.hs
@@ -47,7 +51,8 @@ executable minilangc
     base >=4.8 && <4.9,
     minilang,
     text >=1.2 && <1.3,
-    optparse-applicative >=0.12 && <0.13
+    optparse-applicative >=0.12 && <0.13,
+    pretty-show >=1.6 && <1.7
 
 test-suite spec
   type:                exitcode-stdio-1.0

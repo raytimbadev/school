@@ -1,3 +1,6 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE StandaloneDeriving #-}
+
 module Language.Minilang.Pretty
 ( Pretty(..)
 , prettys
@@ -12,6 +15,7 @@ module Language.Minilang.Pretty
 
 import Language.Minilang.Precedence
 
+import Data.Functor.Identity
 import Data.Text ( Text, unpack )
 
 -- | Minilang pretty-printable types.
@@ -44,6 +48,8 @@ instance Pretty Double where
 
 instance Pretty Text where
     pretty e = unpack e
+
+deriving instance Pretty a => Pretty (Identity a)
 
 -- | Pretty-prints something (as a difference list) with the lowest precedence.
 prettys :: Pretty a => a -> ShowS

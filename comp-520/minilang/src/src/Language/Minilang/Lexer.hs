@@ -36,26 +36,13 @@ module Language.Minilang.Lexer
 , equals
 ) where
 
+import Language.Minilang.Lexer.Core
 import Language.Minilang.Syntax
 
-import Control.Monad ( void, mzero )
+import Control.Monad ( void )
 import Data.Maybe ( fromMaybe )
 import Data.Text ( Text )
 import qualified Data.Text as T
-import Text.Megaparsec
-import Text.Megaparsec.Text
-import qualified Text.Megaparsec.Lexer as L
-
-type Input = Text
-
-spaceConsumer :: Parser ()
-spaceConsumer = L.space (void spaceChar) (L.skipLineComment "#") mzero
-
-lexeme :: Parser a -> Parser a
-lexeme = L.lexeme spaceConsumer
-
-symbol :: String -> Parser String
-symbol = L.symbol spaceConsumer
 
 rawStringLiteral :: Parser Text
 rawStringLiteral = char '"' *> (T.pack <$> manyTill strchar (char '"'))

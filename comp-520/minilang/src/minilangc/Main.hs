@@ -5,6 +5,7 @@ import Language.Minilang
 import Data.Text.IO ( readFile, getContents )
 import Prelude hiding ( readFile, getContents )
 import Options.Applicative
+import Text.Show.Pretty
 
 argParser :: ParserInfo String
 argParser = info sourcePath details where
@@ -19,11 +20,12 @@ main :: IO ()
 main = do
     sourcePath <- execParser argParser
     contents <- if sourcePath == "-" then getContents else readFile sourcePath
-    case parseOnlyMinilang sourcePath contents of
+    case parseOnlyExpr sourcePath contents of
         Left e -> do
             putStrLn "Invalid"
             print e
         Right e -> do
             putStrLn "Valid"
             putStrLn "Pretty print:"
-            putStr $ pretty e
+            putStrLn $ pretty e
+            putStrLn (ppShow e)

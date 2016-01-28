@@ -1,65 +1,113 @@
+{-# LANGUAGE DeriveFoldable #-}
 {-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 
 module Language.Minilang.Syntax where
 
 import Language.Minilang.Precedence
 import Language.Minilang.Pretty
+import Language.Minilang.SrcAnn
 
+import Data.Functor.Identity
 import Data.Functor.Foldable
 import Prelude hiding ( print, read )
+import qualified Prelude as P
 import Data.Text ( Text )
+import Text.PrettyPrint
 
--- | A functor value with an annotation.
-data Ann x f a = Ann x (f a)
+data StatementF ident expr f
+    = Assign ident expr
+    | While expr [f]
+    | If expr [f] [f]
+    | Print expr
+    | Read ident
+    deriving (Eq, Read, Show, Functor, P.Foldable, Traversable)
 
-data Statement
-    = Assign Ident Expr
-    | While Expr [Statement]
-    | If Expr [Statement] [Statement]
-    | Print Expr
-    | Read Ident
+type SrcAnnStatement
+    = SrcAnnFix (StatementF SrcAnnIdent SrcAnnExpr)
+
+newtype BasicStatementF expr f
+    = BasicStatementF
+        { basicStatement :: StatementF Ident expr f
+        }
+    deriving (Eq, Read, Show, Functor, P.Foldable, Traversable)
+
+data Declaration ident ty
+    = Var ident ty
     deriving (Eq, Read, Show)
 
-data Declaration
-    = Var Ident Type
-    deriving (Eq, Read, Show)
+type BasicDeclaration = Declaration Ident Type
 
-data ExprF f
-    = BinaryOp BinaryOp f f
-    | UnaryOp UnaryOp f
-    | Literal Literal
-    deriving (Eq, Read, Show, Functor)
+type SrcAnnDeclaration
+    = SrcAnn Identity (Declaration SrcAnnIdent SrcAnnType)
 
-type Expr = Fix ExprF
+data ExprF binaryOp unaryOp literal f
+    = BinaryOp binaryOp f f
+    | UnaryOp unaryOp f
+    | Literal literal
+    deriving (Eq, Read, Show, Functor, P.Foldable, Traversable)
+
+type SrcAnnExpr
+    = SrcAnnFix (ExprF SrcAnnBinaryOp SrcAnnUnaryOp SrcAnnLiteral)
+
+newtype BasicExprF f
+    = BasicExprF
+        { basicExpr :: ExprF BinaryOp UnaryOp Literal f
+        }
+    deriving (Eq, Read, Show, Functor, P.Foldable, Traversable)
 
 data BinaryOp
     = Plus | Minus | Times | Divide
     deriving (Eq, Read, Show)
 
+type SrcAnnBinaryOp
+    = SrcAnn Identity BinaryOp
+
 data UnaryOp
     = Negative
     deriving (Eq, Read, Show)
 
+type SrcAnnUnaryOp
+    = SrcAnn Identity UnaryOp
+
 data Literal
-    = Variable Text
+    = Variable Ident
     | Int Int
     | Real Double
     | String Text
     deriving (Eq, Read, Show)
 
-data Type 
+type SrcAnnLiteral
+    = SrcAnn Identity Literal
+
+data Type
     = TyReal
     | TyInt
     | TyString
     deriving (Eq, Read, Show)
 
-data Program
-    = Program [Declaration] [Statement]
+type SrcAnnType = SrcAnn Identity Type
+
+data Program decl stmt
+    = Program [decl] [stmt]
     deriving (Eq, Read, Show)
 
+type BasicProgram
+    = Program BasicDeclaration (Fix (BasicStatementF (Fix BasicExprF)))
+
+-- | A program with source code annotations all over the place.
+type SrcAnnProgram
+    = Program
+        SrcAnnDeclaration
+        SrcAnnStatement
+
 type Ident = Text
+
+type SrcAnnIdent = SrcAnn Identity Ident
 
 instance HasPrecedence BinaryOp where
     precedence e = case e of
@@ -96,7 +144,14 @@ instance Pretty Type where
         TyInt -> "int"
         TyString -> "string"
 
-instance Pretty Expr where
+instance
+    ( Pretty bin
+    , Pretty un
+    , Pretty lit
+    , HasPrecedence un
+    , HasPrecedence bin
+    ) => Pretty (Fix (ExprF bin un lit)) where
+
     prettysPrec _ fe = snd $ cata f fe where
         f e = case e of
             BinaryOp op (dl, l) (dr, r) ->
@@ -119,41 +174,42 @@ instance Pretty Expr where
             Literal l ->
                 (10, prettys l)
 
-instance Pretty Statement where
-    prettysPrec d e = case e of
-        Assign i ex ->
-            indent d.
-            prettys i .
-            prettySpace .
-            prettyString "=" .
-            prettySpace .
-            prettys ex .
-            prettyString ";\n"
-        While ex body ->
-            indent d . prettyString "while " . prettys ex . prettyString " do\n" .
-            foldr (.) id (map (prettysPrec $ d + 1) body) .
-            prettyString "end\n"
-        If ex body1 body2 ->
-            indent d . prettyString "if " . prettys ex . prettyString " then\n" .
-            foldr (.) id (map (prettysPrec $ d + 1) body1) .
-            (if (not . null) body2
-                then
-                    prettyString " else " .
-                    foldr (.) id (map (prettysPrec $ d + 1) body2)
-                else
-                    id) .
-            indent d . prettyString " endif\n"
-        Print ex ->
-            indent d .
-            prettyString "print " .
-            prettys ex .
-            prettyString ";\n"
-        Read ex ->
-            indent d . prettyString "read " .
-            prettys ex .
-            prettyString ";\n"
+indentWidth :: Int
+indentWidth = 4
 
-instance Pretty Declaration where
+instance
+    ( Pretty i
+    , Pretty e
+    ) => Pretty (Fix (StatementF i e)) where
+
+    pretty fe = render $ cata f fe where
+        tp :: Pretty a => a -> Doc
+        tp = text . pretty
+        f e = case e of
+            Assign i ex -> tp i <+> char '=' <+> tp ex <> semi
+            While ex body ->
+                text "while" <+> tp ex <+> text "do" $+$
+                nest indentWidth (vcat body) $+$
+                text "end"
+            If ex body1 body2 ->
+                text "if" <+> tp ex <+> text "then" $+$
+                nest indentWidth (vcat body1) $+$
+                (if (not . null) body2
+                    then
+                        text "else" $+$
+                        nest indentWidth (vcat body2)
+                    else
+                        empty) $+$
+                text "endif"
+            Print ex ->
+                text "print" <+> tp ex <> semi
+            Read ex ->
+                text "read" <+> tp ex <> semi
+
+    prettyList ls
+        = foldr (\a b -> a . showString "\n" . b) id (map prettys ls)
+
+instance (Pretty ident, Pretty ty) => Pretty (Declaration ident ty) where
     prettysPrec d e = case e of
         Var i t ->
             indent d .
@@ -163,7 +219,7 @@ instance Pretty Declaration where
             prettys t .
             prettyString ";\n"
 
-instance Pretty Program where
+instance (Pretty decl, Pretty stmt) => Pretty (Program decl stmt) where
     prettysPrec _ e = case e of
         Program decls stmts ->
             prettyList decls .

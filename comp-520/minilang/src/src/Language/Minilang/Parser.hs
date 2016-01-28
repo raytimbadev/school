@@ -13,14 +13,16 @@ module Language.Minilang.Parser
 
 import Language.Minilang.Lexer
 import Language.Minilang.Parser.Expression ( expr )
+import Language.Minilang.SrcAnn
 import Language.Minilang.Syntax
 
+import Data.Functor.Identity
 import Text.Megaparsec
 
-minilang :: Parser Program
+minilang :: Parser SrcAnnProgram
 minilang = Program <$> many decl <*> many stmt
 
-stmt :: Parser Statement
+stmt :: Parser SrcAnnStatement
 stmt
     = whileStmt
     <|> ifStmt
@@ -28,28 +30,28 @@ stmt
     <|> printStmt
     <|> readStmt
 
-decl :: Parser Declaration
+decl :: Parser SrcAnnDeclaration
 decl
     = varDecl
 
-varDecl :: Parser Declaration
-varDecl = do
+varDecl :: Parser SrcAnnDeclaration
+varDecl = withSrcAnn' Identity $ do
     try $ tokVar
-    ident <- identifier
+    ident <- withSrcAnn' Identity identifier
     colon
-    ty <- type_
+    ty <- withSrcAnn' Identity type_
     semicolon
     return $ Var ident ty
     
-assignStmt :: Parser Statement
-assignStmt = do
-    ident <- try $ identifier <* equals
+assignStmt :: Parser SrcAnnStatement
+assignStmt = withSrcAnnFix $ do
+    ident <- try $ withSrcAnn' Identity identifier <* equals
     e <- expr
     semicolon
     return $ Assign ident e
 
-whileStmt :: Parser Statement
-whileStmt = do
+whileStmt :: Parser SrcAnnStatement
+whileStmt = withSrcAnnFix $ do
     try tokWhile
     e <- expr
     tokDo
@@ -57,8 +59,8 @@ whileStmt = do
     tokDone
     return $ While e body
 
-ifStmt :: Parser Statement
-ifStmt = do
+ifStmt :: Parser SrcAnnStatement
+ifStmt = withSrcAnnFix $ do
     try tokIf
     e <- expr
     tokThen
@@ -67,16 +69,16 @@ ifStmt = do
     tokEnd
     return $ If e thenBody elseBody
         
-printStmt :: Parser Statement
-printStmt = do
+printStmt :: Parser SrcAnnStatement
+printStmt = withSrcAnnFix $ do
     try tokPrint
     e <- expr
     semicolon
     return $ Print e
 
-readStmt :: Parser Statement
-readStmt = do
+readStmt :: Parser SrcAnnStatement
+readStmt = withSrcAnnFix $ do
     try tokRead
-    ident <- identifier
+    ident <- withSrcAnn' Identity identifier
     semicolon
     return $ Read ident
