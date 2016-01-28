@@ -2,8 +2,8 @@ module Main where
 
 import Language.Minilang
 
-import Data.Text.IO ( readFile )
-import Prelude hiding ( readFile )
+import Data.Text.IO ( readFile, getContents )
+import Prelude hiding ( readFile, getContents )
 import Options.Applicative
 
 argParser :: ParserInfo String
@@ -17,8 +17,8 @@ argParser = info sourcePath details where
 
 main :: IO ()
 main = do
-    sourcePath <- execParser argParser 
-    contents <- readFile sourcePath
+    sourcePath <- execParser argParser
+    contents <- if sourcePath == "-" then getContents else readFile sourcePath
     case parseOnlyMinilang sourcePath contents of
         Left e -> do
             putStrLn "Invalid"
