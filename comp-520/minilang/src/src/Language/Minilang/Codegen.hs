@@ -28,6 +28,30 @@ translateBinaryOp b = case b of
 translateIdent :: MS.Ident -> CD.Ident
 translateIdent (unpack -> s) = internalIdent (s ++ "_")
 
+translateDecl :: SrcAnnDeclaration -> CDecl
+translateDecl (runIdentity . bare -> d) = case d of
+    Var (runIdentity . bare -> i) (runIdentity . bare -> t) ->
+        let
+            (ct, declr) = case t of
+                TyInt -> (CIntType undefNode, [])
+                TyString -> (CCharType undefNode, [CPtrDeclr [] undefNode])
+                TyReal -> (CDoubleType undefNode, [])
+        in
+            CDecl
+                [ CTypeSpec ct ]
+                [ ( Just
+                    (CDeclr
+                        (Just (translateIdent i))
+                        declr
+                        Nothing
+                        []
+                        undefNode)
+                  , Nothing
+                  , Nothing
+                  )
+                ]
+                undefNode
+
 translateStmt :: TySrcAnnStatement -> CStat
 translateStmt = cata f where
     f (Ann _ s) = case s of
