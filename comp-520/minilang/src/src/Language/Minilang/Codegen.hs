@@ -5,6 +5,7 @@ module Language.Minilang.Codegen where
 import Language.Minilang.Syntax as MS
 import Language.Minilang.SrcAnn
 import Language.Minilang.Typecheck
+import Language.Minilang.Codegen.Runtime
 
 import Data.Functor.Foldable
 import Data.Functor.Identity
@@ -26,13 +27,6 @@ translateBinaryOp b = case b of
 -- identitifers from colliding with minilang runtime identifiers.
 translateIdent :: MS.Ident -> CD.Ident
 translateIdent (unpack -> s) = internalIdent (s ++ "_")
-
--- | Simply uses a string value as a C identifier.
---
--- Using this on user-supplied identifiers is unsafe because those identifiers
--- might collide with minilang runtime identifiers.
-unsafeIdent :: String -> CD.Ident
-unsafeIdent = internalIdent
 
 translateStmt :: TySrcAnnStatement -> CStat
 translateStmt = cata f where
@@ -75,7 +69,7 @@ translateStmt = cata f where
                 CExpr
                     (Just
                         (CCall
-                            (CVar (unsafeIdent "printf") undefNode)
+                            (CVar cPrintf undefNode)
                             [ CConst (CStrConst (cString fmt) undefNode)
                             , e'
                             ]
@@ -86,7 +80,7 @@ translateStmt = cata f where
             CExpr
                 (Just
                     (CCall
-                        (CVar (unsafeIdent "getline") undefNode)
+                        (CVar cGetline undefNode)
                         [ CUnary
                             CAdrOp
                             (CVar
@@ -94,10 +88,10 @@ translateStmt = cata f where
                                 undefNode)
                             undefNode
                         , CVar
-                            (unsafeIdent "lastSize")
+                            minilangLastSize
                             undefNode
                         , CVar
-                            (unsafeIdent "stdin")
+                            cStdin
                             undefNode
                         ]
                         undefNode))
@@ -123,7 +117,7 @@ translateExpr = snd . cata f where
                 TyReal -> CUnary CMinOp se undefNode
                 TyString ->
                     CCall
-                        (CVar (unsafeIdent "minilang_strrev") undefNode)
+                        (CVar minilangStrrev undefNode)
                         [se]
                         undefNode
 
@@ -149,7 +143,7 @@ translateExpr = snd . cata f where
                 -- concatenated, so we will call minilang_strcat
                 Plus ->
                     CCall
-                        (CVar (unsafeIdent "minilang_strcat") undefNode)
+                        (CVar minilangStrcat undefNode)
                         [se1, se2]
                         undefNode
 
@@ -157,10 +151,10 @@ translateExpr = snd . cata f where
                 -- arithmetic semantics: a - b = a + (-b)
                 Minus ->
                     CCall
-                        (CVar (unsafeIdent "minilang_strcat") undefNode)
+                        (CVar minilangStrcat undefNode)
                         [ se1
                         , CCall
-                            (CVar (unsafeIdent "minilang_strrev") undefNode)
+                            (CVar minilangStrrev undefNode)
                             [se2]
                             undefNode
                         ]

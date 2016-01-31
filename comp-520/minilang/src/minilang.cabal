@@ -25,6 +25,7 @@ library
     Language.Minilang.Annotation
     Language.Minilang.SrcAnn
     Language.Minilang.Codegen
+    Language.Minilang.Codegen.Runtime
   other-modules:
     Language.Minilang.Parser.Expression
     Language.Minilang.Precedence
