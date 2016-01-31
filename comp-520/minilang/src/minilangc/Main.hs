@@ -1,11 +1,21 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Main where
 
 import Language.Minilang
+import Language.Minilang.Typecheck
+import Language.Minilang.Annotation
 
+import Control.Monad.Except
+import Data.Functor.Foldable
+import qualified Data.Map.Strict as M
 import Data.Text.IO ( readFile, getContents )
 import Prelude hiding ( readFile, getContents )
 import Options.Applicative
 import Text.Show.Pretty
+
+unFix :: Fix f -> f (Fix f)
+unFix (Fix f) = f
 
 argParser :: ParserInfo String
 argParser = info sourcePath details where
@@ -14,7 +24,14 @@ argParser = info sourcePath details where
     h = "minilangcheck - checks the syntax of a minilang program"
     p = "The specified FILE is loaded and parsed. "
         ++ "If the parse succeeds, then `Valid` is printed to standard out; " 
-        ++ "else, `Invalid` is printed."
+        ++ "else, `Invalid` is printed. "
+        ++ "The special file - can be used to read from standard in."
+
+testEnv = M.fromList
+    [ ( "i", TyInt )
+    , ( "s", TyString )
+    , ( "r", TyReal )
+    ]
 
 main :: IO ()
 main = do
@@ -29,3 +46,10 @@ main = do
             putStrLn "Pretty print:"
             putStrLn $ pretty e
             putStrLn (ppShow e)
+            case runExcept (typecheckExpr testEnv e) of
+                Left e' -> do
+                    putStrLn "type error:"
+                    print e'
+                Right e' -> do
+                    putStrLn "type:"
+                    print (snd . ann . unFix $ e')

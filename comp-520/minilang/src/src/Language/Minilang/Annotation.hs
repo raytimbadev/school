@@ -22,6 +22,8 @@ data Ann x f a
 
 type instance Base (Ann x f a) = f
 
+type AnnFix x f = Fix (Ann x f)
+
 -- | Strip all annotations from a syntax tree.
 bareF :: Functor f => Fix (Ann x f) -> Fix f
 bareF = cata (Fix . bare)

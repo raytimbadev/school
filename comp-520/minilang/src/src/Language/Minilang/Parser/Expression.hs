@@ -9,7 +9,6 @@ import Language.Minilang.SrcAnn
 
 import Data.Functor
 import Data.Functor.Foldable
-import Data.Functor.Identity
 import Text.Megaparsec
 import Text.Megaparsec.Expr
 
@@ -21,11 +20,11 @@ term = l
     <|> parens expr where
         l :: Parser SrcAnnExpr
         l = do
-            lit <- withSrcAnn' Literal literal
+            lit <- withSrcAnn Literal literal
             pure (Fix lit)
 
 literal :: Parser SrcAnnLiteral
-literal = withSrcAnn' Identity unannotated where
+literal = withSrcAnnId unannotated where
     unannotated
         = fmap Real floatLiteral
         <|> fmap Int integerLiteral
@@ -45,14 +44,14 @@ table =
     ] where
         unaryMinus :: Parser (SrcAnnExpr -> SrcAnnExpr)
         unaryMinus = do
-            m <- withSrcAnn' Identity (tokMinus $> Negative)
+            m <- withSrcAnnId (tokMinus $> Negative)
             let (Ann p _) = m
             pure (\e@(Fix (Ann a _)) ->
                 Fix $ Ann (SrcSpan (srcStart p) (srcEnd a))
                           (UnaryOp m e))
 
         bin op tok = do
-            m <- withSrcAnn' Identity (tok $> op)
+            m <- withSrcAnnId (tok $> op)
             pure (\e1@(Fix (Ann a1 _)) e2@(Fix (Ann a2 _)) ->
                 Fix $ Ann (SrcSpan (srcStart a1) (srcEnd a2))
                           (BinaryOp m e1 e2))

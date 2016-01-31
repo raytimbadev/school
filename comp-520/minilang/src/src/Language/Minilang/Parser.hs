@@ -16,7 +16,6 @@ import Language.Minilang.Parser.Expression ( expr )
 import Language.Minilang.SrcAnn
 import Language.Minilang.Syntax
 
-import Data.Functor.Identity
 import Text.Megaparsec
 
 minilang :: Parser SrcAnnProgram
@@ -35,17 +34,17 @@ decl
     = varDecl
 
 varDecl :: Parser SrcAnnDeclaration
-varDecl = withSrcAnn' Identity $ do
+varDecl = withSrcAnnId $ do
     try $ tokVar
-    ident <- withSrcAnn' Identity identifier
+    ident <- withSrcAnnId identifier
     colon
-    ty <- withSrcAnn' Identity type_
+    ty <- withSrcAnnId type_
     semicolon
     return $ Var ident ty
     
 assignStmt :: Parser SrcAnnStatement
 assignStmt = withSrcAnnFix $ do
-    ident <- try $ withSrcAnn' Identity identifier <* equals
+    ident <- try $ withSrcAnnId identifier <* equals
     e <- expr
     semicolon
     return $ Assign ident e
@@ -79,6 +78,6 @@ printStmt = withSrcAnnFix $ do
 readStmt :: Parser SrcAnnStatement
 readStmt = withSrcAnnFix $ do
     try tokRead
-    ident <- withSrcAnn' Identity identifier
+    ident <- withSrcAnnId identifier
     semicolon
     return $ Read ident

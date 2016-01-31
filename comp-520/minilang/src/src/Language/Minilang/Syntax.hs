@@ -27,14 +27,29 @@ data StatementF ident expr f
     | Read ident
     deriving (Eq, Read, Show, Functor, P.Foldable, Traversable)
 
-type SrcAnnStatement
-    = SrcAnnFix (StatementF SrcAnnIdent SrcAnnExpr)
+type SrcAnnStatementF
+    = StatementF SrcAnnIdent SrcAnnExpr
 
-newtype BasicStatementF expr f
-    = BasicStatementF
-        { basicStatement :: StatementF Ident expr f
-        }
-    deriving (Eq, Read, Show, Functor, P.Foldable, Traversable)
+type SrcAnnStatement
+    = SrcAnnFix SrcAnnStatementF
+
+type BasicStatementF
+    = StatementF Ident BasicExpr
+
+type BasicStatement
+    = Fix BasicStatementF
+
+unannotateStmt
+    :: SrcAnnStatement
+    -> BasicStatement
+unannotateStmt fe = cata f fe where
+    f :: Ann SrcSpan SrcAnnStatementF BasicStatement -> BasicStatement
+    f (Ann _ ex) = Fix $ case ex of
+        Assign i e -> Assign (runIdentity $ bare i) (unannotateExpr e)
+        While e stmts -> While (unannotateExpr e) stmts
+        If e thens elses -> If (unannotateExpr e) thens elses
+        Print e -> Print (unannotateExpr e)
+        Read i -> Read (runIdentity $ bare i)
 
 data Declaration ident ty
     = Var ident ty
@@ -45,20 +60,38 @@ type BasicDeclaration = Declaration Ident Type
 type SrcAnnDeclaration
     = SrcAnn Identity (Declaration SrcAnnIdent SrcAnnType)
 
+unannotateDecl
+    :: SrcAnnDeclaration
+    -> BasicDeclaration
+unannotateDecl de = case de of
+    Ann _ e -> case runIdentity e of
+        Var i t -> Var (runIdentity $ bare i) (runIdentity $ bare t)
+
 data ExprF binaryOp unaryOp literal f
     = BinaryOp binaryOp f f
     | UnaryOp unaryOp f
     | Literal literal
     deriving (Eq, Read, Show, Functor, P.Foldable, Traversable)
 
-type SrcAnnExpr
-    = SrcAnnFix (ExprF SrcAnnBinaryOp SrcAnnUnaryOp SrcAnnLiteral)
+type BasicExprF
+    = ExprF BinaryOp UnaryOp Literal
 
-newtype BasicExprF f
-    = BasicExprF
-        { basicExpr :: ExprF BinaryOp UnaryOp Literal f
-        }
-    deriving (Eq, Read, Show, Functor, P.Foldable, Traversable)
+type SrcAnnExprF
+    = ExprF SrcAnnBinaryOp SrcAnnUnaryOp SrcAnnLiteral
+
+type SrcAnnExpr
+    = SrcAnnFix SrcAnnExprF
+
+type BasicExpr
+    = Fix BasicExprF
+
+unannotateExpr :: SrcAnnExpr -> BasicExpr
+unannotateExpr fe = cata f fe where
+    f :: Ann SrcSpan SrcAnnExprF BasicExpr -> BasicExpr
+    f (Ann _ e) = Fix $ case e of
+        BinaryOp o e1 e2 -> BinaryOp (runIdentity $ bare o) e1 e2
+        UnaryOp o e' -> UnaryOp (runIdentity $ bare o) e'
+        Literal l -> Literal (runIdentity $ bare l)
 
 data BinaryOp
     = Plus | Minus | Times | Divide
@@ -97,7 +130,7 @@ data Program decl stmt
     deriving (Eq, Read, Show)
 
 type BasicProgram
-    = Program BasicDeclaration (Fix (BasicStatementF (Fix BasicExprF)))
+    = Program BasicDeclaration BasicStatement
 
 -- | A program with source code annotations all over the place.
 type SrcAnnProgram

@@ -84,9 +84,9 @@ main = do
         describe "Parser" $ do
             describe "varDecl" $ do
                 it "parses simple variable declarations" $ do
-                    parseOnly varDecl "var x: int;" `shouldBe` Right (Var "x" TyInt)
-                    parseOnly varDecl "var y: float;" `shouldBe` Right (Var "y" TyReal)
-                    parseOnly varDecl "var z: string;" `shouldBe` Right (Var "z" TyString)
+                    unannotateDecl <$> parseOnly varDecl "var x: int;" `shouldBe` Right (Var "x" TyInt)
+                    unannotateDecl <$> parseOnly varDecl "var y: float;" `shouldBe` Right (Var "y" TyReal)
+                    unannotateDecl <$> parseOnly varDecl "var z: string;" `shouldBe` Right (Var "z" TyString)
 
                 it "parses a whole statement, ending with a semicolon" $
                     parseOnly varDecl "var hi: string" `shouldSatisfy` isLeft
