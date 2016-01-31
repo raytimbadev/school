@@ -24,6 +24,7 @@ library
     Language.Minilang.Typecheck
     Language.Minilang.Annotation
     Language.Minilang.SrcAnn
+    Language.Minilang.Codegen
   other-modules:
     Language.Minilang.Parser.Expression
     Language.Minilang.Precedence
@@ -41,7 +42,8 @@ library
     recursion-schemes >=4.1 && <4.2,
     pretty >=1.1 && <1.2,
     containers >=0.5 && <0.6,
-    mtl >=2.2 && <2.3
+    mtl >=2.2 && <2.3,
+    language-c >=0.4 && <0.5
 
 executable minilangc
   main-is:             Main.hs
