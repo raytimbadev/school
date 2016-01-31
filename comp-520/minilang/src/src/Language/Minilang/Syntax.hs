@@ -155,27 +155,27 @@ instance HasPrecedence UnaryOp where
 
 instance Pretty BinaryOp where
     pretty e = case e of
-        Plus -> "+"
-        Minus -> "-"
-        Times -> "*"
-        Divide -> "/"
+        Plus -> text "+"
+        Minus -> text "-"
+        Times -> text "*"
+        Divide -> text "/"
 
 instance Pretty UnaryOp where
     pretty e = case e of
-        Negative -> "-"
+        Negative -> text "-"
 
 instance Pretty Literal where
-    prettysPrec _ e = case e of
-        Variable t -> prettys t
-        Int n -> prettys n
-        Real x -> prettys x
-        String t -> prettyString "\"" . prettys t . prettyString "\""
+    prettyPrec _ e = case e of
+        Variable t -> pretty t
+        Int n -> pretty n
+        Real x -> pretty x
+        String t -> text "\"" <> pretty t <> text "\""
 
 instance Pretty Type where
     pretty e = case e of
-        TyReal -> "float"
-        TyInt -> "int"
-        TyString -> "string"
+        TyReal -> text "float"
+        TyInt -> text "int"
+        TyString -> text "string"
 
 instance
     ( Pretty bin
@@ -185,27 +185,29 @@ instance
     , HasPrecedence bin
     ) => Pretty (Fix (ExprF bin un lit)) where
 
-    prettysPrec _ fe = snd $ cata f fe where
+    prettyPrec _ fe = snd $ cata f fe where
+        f :: (Pretty bin, Pretty un, Pretty lit, HasPrecedence un, HasPrecedence bin)
+          => ExprF bin un lit (Int, Doc) -> (Int, Doc)
         f e = case e of
             BinaryOp op (dl, l) (dr, r) ->
                 let
                     p = precedence op
-                    lb = showParen (dl < p) l
-                    lr = showParen (dr < p) r
-                    body = lb . prettySpace . prettys op . prettySpace . lr
+                    lb = prettyParens (dl < p) l
+                    lr = prettyParens (dr < p) r
+                    body = lb <+> pretty op <+> lr
                 in
                     (p, body)
 
             UnaryOp op (dm, m) ->
                 let
                     p = precedence op
-                    lm = showParen (dm < p) m
-                    body = prettys op . lm
+                    lm = prettyParens (dm < p) m
+                    body = pretty op <> lm
                 in
                     (p, body)
 
             Literal l ->
-                (10, prettys l)
+                (10, pretty l)
 
 indentWidth :: Int
 indentWidth = 4
@@ -215,17 +217,15 @@ instance
     , Pretty e
     ) => Pretty (Fix (StatementF i e)) where
 
-    pretty fe = render $ cata f fe where
-        tp :: Pretty a => a -> Doc
-        tp = text . pretty
+    pretty fe = cata f fe where
         f e = case e of
-            Assign i ex -> tp i <+> char '=' <+> tp ex <> semi
+            Assign i ex -> pretty i <+> char '=' <+> pretty ex <> semi
             While ex body ->
-                text "while" <+> tp ex <+> text "do" $+$
+                text "while" <+> pretty ex <+> text "do" $+$
                 nest indentWidth (vcat body) $+$
                 text "end"
             If ex body1 body2 ->
-                text "if" <+> tp ex <+> text "then" $+$
+                text "if" <+> pretty ex <+> text "then" $+$
                 nest indentWidth (vcat body1) $+$
                 (if (not . null) body2
                     then
@@ -235,26 +235,15 @@ instance
                         empty) $+$
                 text "endif"
             Print ex ->
-                text "print" <+> tp ex <> semi
+                text "print" <+> pretty ex <> semi
             Read ex ->
-                text "read" <+> tp ex <> semi
-
-    prettyList ls
-        = foldr (\a b -> a . showString "\n" . b) id (map prettys ls)
+                text "read" <+> pretty ex <> semi
 
 instance (Pretty ident, Pretty ty) => Pretty (Declaration ident ty) where
-    prettysPrec d e = case e of
-        Var i t ->
-            indent d .
-            prettyString "var " .
-            prettys i .
-            prettyString " : " .
-            prettys t .
-            prettyString ";\n"
+    pretty e = case e of
+        Var i t -> text "var" <+> pretty i <+> text ":" <+> pretty t <> text ";"
 
 instance (Pretty decl, Pretty stmt) => Pretty (Program decl stmt) where
-    prettysPrec _ e = case e of
+    prettyPrec _ e = case e of
         Program decls stmts ->
-            prettyList decls .
-            prettyString "\n" .
-            prettyList stmts
+            vcat (map pretty decls) $+$ vcat (map pretty stmts)
