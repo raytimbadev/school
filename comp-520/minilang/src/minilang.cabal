@@ -23,11 +23,11 @@ library
     Language.Minilang.Syntax
     Language.Minilang.Typecheck
     Language.Minilang.Annotation
+    Language.Minilang.SrcAnn
   other-modules:
     Language.Minilang.Parser.Expression
     Language.Minilang.Precedence
     Language.Minilang.Pretty
-    Language.Minilang.SrcAnn
     Language.Minilang.Lexer.Core
   hs-source-dirs:      src
   default-language:    Haskell2010

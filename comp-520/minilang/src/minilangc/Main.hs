@@ -4,7 +4,7 @@ module Main where
 
 import Language.Minilang
 import Language.Minilang.Typecheck
-import Language.Minilang.Annotation
+import Language.Minilang.SrcAnn
 
 import Control.Monad.Except
 import Data.Functor.Foldable
@@ -27,6 +27,7 @@ argParser = info sourcePath details where
         ++ "else, `Invalid` is printed. "
         ++ "The special file - can be used to read from standard in."
 
+testEnv :: Env
 testEnv = M.fromList
     [ ( "i", TyInt )
     , ( "s", TyString )
@@ -37,7 +38,7 @@ main :: IO ()
 main = do
     sourcePath <- execParser argParser
     contents <- if sourcePath == "-" then getContents else readFile sourcePath
-    case parseOnlyExpr sourcePath contents of
+    case parseOnlyExpr (case sourcePath of "-" -> "stdin" ; x -> x) contents of
         Left e -> do
             putStrLn "Invalid"
             print e
@@ -47,9 +48,11 @@ main = do
             putStrLn $ pretty e
             putStrLn (ppShow e)
             case runExcept (typecheckExpr testEnv e) of
-                Left e' -> do
+                Left (Ann pos e') -> do
                     putStrLn "type error:"
                     print e'
+                    putStrLn "at:"
+                    print (srcStart pos)
                 Right e' -> do
                     putStrLn "type:"
                     print (snd . ann . unFix $ e')
