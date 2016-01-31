@@ -55,4 +55,4 @@ main = do
                     print (srcStart pos)
                 Right e' -> do
                     putStrLn "type:"
-                    print (snd . ann . unFix $ e')
+                    print (exprType e')

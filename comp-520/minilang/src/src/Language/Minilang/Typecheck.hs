@@ -15,6 +15,7 @@ module Language.Minilang.Typecheck
 , typecheckStmt
 , typecheckStmts
 , typecheckExpr
+, exprType
 , SemanticError(..)
 ) where
 
@@ -76,6 +77,10 @@ symbolTableTsv = invoke . foldr line id . M.toList where
 symbolTableFrom :: [BasicDeclaration] -> Env
 symbolTableFrom = M.fromList . map f where
     f (Var i t) = (i, t)
+
+-- | Gets the top-level type of a typechecked expression.
+exprType :: TySrcAnnExpr -> Type
+exprType (Fix (Ann (_, ty) _)) = ty
 
 -- | Typecheck a statement, i.e. typecheck any expressions occurring in the
 -- statement.
