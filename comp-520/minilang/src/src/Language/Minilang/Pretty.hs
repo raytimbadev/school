@@ -43,6 +43,9 @@ instance Pretty a => Pretty (Maybe a) where
 instance Pretty Int where
     pretty i = show i
 
+instance Pretty Integer where
+    pretty i = show i
+
 instance Pretty Double where
     pretty x = show x
 

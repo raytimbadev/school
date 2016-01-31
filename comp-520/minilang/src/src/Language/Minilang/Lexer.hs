@@ -62,7 +62,7 @@ rawIdentifier = do
     s <- many alphaNumChar
     return $ T.pack (c:s)
 
-rawIntegerLiteral :: Parser Int
+rawIntegerLiteral :: Parser Integer
 rawIntegerLiteral = zero <|> num where
     zero = char '0' *> notFollowedBy digitChar *> pure 0
     num = fmap read $ (:) <$> oneOf ['1'..'9'] <*> many digitChar
@@ -89,7 +89,7 @@ stringLiteral = lexeme rawStringLiteral
 identifier :: Parser Text
 identifier = notFollowedBy (choice reserved) *> lexeme rawIdentifier
 
-integerLiteral :: Parser Int
+integerLiteral :: Parser Integer
 integerLiteral = lexeme rawIntegerLiteral
 
 floatLiteral :: Parser Double

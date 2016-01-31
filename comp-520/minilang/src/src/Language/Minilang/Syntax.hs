@@ -109,7 +109,7 @@ type SrcAnnUnaryOp
 
 data Literal
     = Variable Ident
-    | Int Int
+    | Int Integer
     | Real Double
     | String Text
     deriving (Eq, Read, Show)
