@@ -34,6 +34,75 @@ translateIdent (unpack -> s) = internalIdent (s ++ "_")
 unsafeIdent :: String -> CD.Ident
 unsafeIdent = internalIdent
 
+translateStmt :: TySrcAnnStatement -> CStat
+translateStmt = cata f where
+    f (Ann _ s) = case s of
+        Assign (runIdentity . bare -> i) e ->
+            CExpr
+                (Just
+                    (CAssign
+                        CAssignOp
+                        (CVar (translateIdent i) undefNode)
+                        (translateExpr e)
+                        undefNode))
+                undefNode
+
+        While e body ->
+            CWhile
+                (translateExpr e)
+                (CCompound [] (map CBlockStmt body) undefNode)
+                False
+                undefNode
+
+        If e tb eb ->
+            CIf
+                (translateExpr e)
+                (CCompound [] (map CBlockStmt tb) undefNode)
+                (if null eb
+                    then Nothing
+                    else Just (CCompound [] (map CBlockStmt eb) undefNode))
+                undefNode
+
+        Print e ->
+            let
+                e' = translateExpr e
+                t = exprType e
+                fmt = case t of
+                    TyInt -> "%d\\n"
+                    TyReal -> "%f\\n"
+                    TyString -> "%s\\n"
+            in
+                CExpr
+                    (Just
+                        (CCall
+                            (CVar (unsafeIdent "printf") undefNode)
+                            [ CConst (CStrConst (cString fmt) undefNode)
+                            , e'
+                            ]
+                            undefNode))
+                    undefNode
+
+        Read (runIdentity . bare -> i) ->
+            CExpr
+                (Just
+                    (CCall
+                        (CVar (unsafeIdent "getline") undefNode)
+                        [ CUnary
+                            CAdrOp
+                            (CVar
+                                (translateIdent i)
+                                undefNode)
+                            undefNode
+                        , CVar
+                            (unsafeIdent "lastSize")
+                            undefNode
+                        , CVar
+                            (unsafeIdent "stdin")
+                            undefNode
+                        ]
+                        undefNode))
+                undefNode
+
 -- | Translates a typechecked Minilang expression into a C expression.
 translateExpr :: TySrcAnnExpr -> CExpr
 translateExpr = snd . cata f where
