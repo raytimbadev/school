@@ -19,3 +19,6 @@ cGetline = internalIdent "getline"
 
 cStdin :: CD.Ident
 cStdin = internalIdent "stdin"
+
+cMain :: CD.Ident
+cMain = internalIdent "main"

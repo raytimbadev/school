@@ -13,6 +13,76 @@ import Data.Text ( unpack )
 import Language.C.Data as CD
 import Language.C.Syntax as CS
 
+-- | Translates a typechecked Minilang program into a C function with given
+-- declaration specifiers and declarator.
+translateProgram
+    :: [CDeclSpec]
+    -> CDeclr
+    -> [CDecl]
+    -> TySrcAnnProgram
+    -> CFunDef
+translateProgram declspecs declr args (Program decls stmts)
+    = CFunDef
+        declspecs
+        declr
+        args
+        (CCompound
+            []
+            (map (CBlockDecl . translateDecl) decls
+            ++ map (CBlockStmt . translateStmt) stmts)
+            undefNode)
+        undefNode
+
+-- | Translates a typechecked Minilang program into a C \"main\" function.
+translateProgramMain :: TySrcAnnProgram -> CFunDef
+translateProgramMain
+    = translateProgram
+        [CTypeSpec (CIntType undefNode)]
+        (CDeclr
+            (Just cMain)
+            [ CFunDeclr
+                (Right
+                    ( [ CDecl
+                        [ CTypeSpec (CIntType undefNode) ]
+                        [ ( Just
+                            (CDeclr
+                                (Just (internalIdent "argc"))
+                                []
+                                Nothing
+                                []
+                                undefNode)
+                          , Nothing
+                          , Nothing
+                          )
+                        ]
+                        undefNode
+                    , CDecl
+                        [ CTypeSpec (CCharType undefNode) ]
+                        [ ( Just
+                            (CDeclr
+                                (Just (internalIdent "argv"))
+                                [ CPtrDeclr [] undefNode
+                                , CPtrDeclr [] undefNode
+                                ]
+                                Nothing
+                                []
+                                undefNode)
+                          , Nothing
+                          , Nothing
+                          )
+                        ]
+                        undefNode
+                    ]
+                  , False
+                  ))
+                []
+                undefNode
+            ]
+            Nothing
+            []
+            undefNode)
+        []
+
 -- | Translates a Minilang binary operator into its corresponding C binary
 -- operator.
 translateBinaryOp :: BinaryOp -> CBinaryOp
