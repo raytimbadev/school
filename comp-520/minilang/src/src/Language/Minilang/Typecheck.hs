@@ -108,9 +108,72 @@ typecheckStmt
 typecheckStmt env = cata f where
     f (Ann pos me) = case me of
         Assign i e -> do
-            e' <- typecheckExpr env e
+            let (Ann ipos (runIdentity -> i')) = i
 
-            pure (Fix (Ann pos (Assign i e')))
+            -- check that the identifier that we want to assign to is declared.
+            case M.lookup i' env of
+                Nothing -> throwError
+                    (Ann
+                        ipos
+                        (FreeVariableError
+                            { freeVariable = i' }))
+
+                Just ty -> do
+                    e' <- typecheckExpr env e
+                    let (Fix (Ann (epos, ety) _)) = e'
+
+                    let ok = pure (Fix (Ann pos (Assign i e')))
+
+                    -- check that the type of the identifier to assign to
+                    -- matches the computed type of the expression
+                    case (ty, ety) of
+                        (TyInt, TyInt) -> ok
+
+                        (TyInt, TyReal) -> throwError
+                            (Ann
+                                epos
+                                (TypeMismatch
+                                    { gotType = TyReal
+                                    , expectedTypes = [TyInt]
+                                    }))
+
+                        (TyInt, TyString) -> throwError
+                            (Ann
+                                epos
+                                (TypeMismatch
+                                    { gotType = TyString
+                                    , expectedTypes = [TyInt]
+                                    }))
+
+                        (TyReal, TyInt) -> ok
+
+                        (TyReal, TyReal) -> ok
+
+                        (TyReal, TyString) -> throwError
+                            (Ann
+                                epos
+                                (TypeMismatch
+                                    { gotType = TyString
+                                    , expectedTypes = [TyInt, TyReal]
+                                    }))
+
+                        (TyString, TyInt) -> throwError
+                            (Ann
+                                epos
+                                (TypeMismatch
+                                    { gotType = TyInt
+                                    , expectedTypes = [TyString]
+                                    }))
+
+                        (TyString, TyReal) -> throwError
+                            (Ann
+                                epos
+                                (TypeMismatch
+                                    { gotType = TyReal
+                                    , expectedTypes = [TyString]
+                                    }))
+
+                        (TyString, TyString) -> ok
 
         While e ss -> do
             e' <- typecheckExpr env e
@@ -253,7 +316,6 @@ typecheckExpr env fe = cata f fe where
                 Int _ -> conclude TyInt
                 Real _ -> conclude TyReal
                 String _ -> conclude TyString
-                
 
         UnaryOp un mt -> do
             ft <- mt
