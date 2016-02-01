@@ -10,8 +10,8 @@ endif
 
 while limit do
     acc = acc * limit;
-    x = x - 1;
+    limit = limit - 1;
 done
 
 print "20! is ";
-print x;
+print acc;
