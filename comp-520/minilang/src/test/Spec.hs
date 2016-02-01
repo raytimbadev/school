@@ -4,8 +4,10 @@ module Main where
 
 import Language.Minilang
 import Language.Minilang.Lexer
+import Language.Minilang.Typecheck
 
-import Control.Monad ( forM_ )
+import Control.Monad ( forM_, (>=>) )
+import Control.Monad.Except ( runExcept )
 import Data.String ( IsString, fromString )
 import Data.Text ( Text )
 import Data.Text.IO ( readFile )
@@ -32,6 +34,9 @@ getTestSources sourcesDir = getMinilangFiles >>= mapM readWithPath where
 
 parseOnly :: Parser a -> String -> Either ParseError a
 parseOnly m = parse (m <* eof) "" . fromString
+
+roundTrip3 :: Input -> Either ParseError Input
+roundTrip3 = roundTrip >=> roundTrip >=> roundTrip
 
 main :: IO ()
 main = do
@@ -105,6 +110,19 @@ main = do
             forM_ validSources $ \(name, contents) ->
                 it ("successfully parses the valid program " ++ name) $
                     parseOnlyMinilang name contents `shouldSatisfy` isRight
+
+            forM_ validSources $ \(name, contents) ->
+                it ("round-trips the valid program " ++ name) $
+                    roundTrip contents `shouldBe` roundTrip3 contents
+
+            forM_ validSources $ \(name, contents) ->
+                it ("typechecks the valid program " ++ name) $
+                    case parseOnlyMinilang name contents of
+                        Left e -> expectationFailure (show e)
+                        Right p ->
+                            case runExcept (typecheckProgram p) of
+                                Left e -> expectationFailure (show e)
+                                Right _ -> pure ()
 
             forM_ invalidSources $ \(name, contents) ->
                 it ("fails to parse the invalid program " ++ name) $
