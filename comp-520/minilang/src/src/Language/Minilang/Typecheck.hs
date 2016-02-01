@@ -12,6 +12,8 @@ module Language.Minilang.Typecheck
   -- * Typechecking
 , TySrcAnnExpr
 , TySrcAnnStatement
+, TySrcAnnProgram
+, typecheckProgram
 , typecheckStmt
 , typecheckStmts
 , typecheckExpr
@@ -36,6 +38,10 @@ type TySrcAnnExpr = AnnFix (SrcSpan, Type) SrcAnnExprF
 -- | Typechecked statements, i.e. statements in which all expressions have been
 -- typechecked.
 type TySrcAnnStatement = SrcAnnFix (StatementF SrcAnnIdent TySrcAnnExpr)
+
+-- | Typechecked program, i.e. a program in which statements have been
+-- typechecked using the program's declarations as a symbol table.
+type TySrcAnnProgram = Program SrcAnnDeclaration TySrcAnnStatement
 
 -- | Semantic errors that occur during typechecking.
 data SemanticError a
@@ -66,6 +72,18 @@ data SemanticError a
     deriving (Functor)
 
 deriving instance Show (SemanticError a)
+
+typecheckProgram :: MonadError (SrcAnn SemanticError a) m
+                 => SrcAnnProgram -> m TySrcAnnProgram
+typecheckProgram (Program decls stmts) = do
+    -- build the symbol table
+    let env = symbolTableFrom (map unannotateDecl decls)
+
+    -- typecheck the statements
+    stmts' <- typecheckStmts env stmts
+
+    -- produce the typechecked program
+    pure (Program decls stmts')
 
 -- | Converts a symbol table to a tab-separated value string.
 symbolTableTsv :: Env -> String
