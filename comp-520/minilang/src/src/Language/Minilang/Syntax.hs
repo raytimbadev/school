@@ -223,7 +223,7 @@ instance
             While ex body ->
                 text "while" <+> pretty ex <+> text "do" $+$
                 nest indentWidth (vcat body) $+$
-                text "end"
+                text "done"
             If ex body1 body2 ->
                 text "if" <+> pretty ex <+> text "then" $+$
                 nest indentWidth (vcat body1) $+$
