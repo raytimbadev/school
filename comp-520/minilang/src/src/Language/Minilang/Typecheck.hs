@@ -3,6 +3,7 @@
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module Language.Minilang.Typecheck
 ( -- * Symbol tables
@@ -21,6 +22,7 @@ module Language.Minilang.Typecheck
 , SemanticError(..)
 ) where
 
+import Language.Minilang.Pretty
 import Language.Minilang.SrcAnn
 import Language.Minilang.Syntax
 
@@ -28,6 +30,7 @@ import Control.Monad.Identity
 import Control.Monad.Except
 import Data.Functor.Foldable
 import qualified Data.Map.Strict as M
+import Text.PrettyPrint
 
 -- | Symbol table.
 type Env = M.Map Ident Type
@@ -72,6 +75,33 @@ data SemanticError a
     deriving (Functor)
 
 deriving instance Show (SemanticError a)
+
+instance Pretty (SemanticError a) where
+    pretty e = case e of
+        TypeMismatch { gotType = t, expectedTypes = ts } ->
+            text "Type mismatch." $+$
+            nest 4 (
+                text "Got" <+> pretty t $+$
+                if null ts
+                    then text "But no type is valid here."
+                    else text "Expected:" <+> sep (punctuate comma (map pretty ts))
+            )
+        UnsupportedType { gotType = t, supportedTypes = ts } ->
+            text "Unsupported type in operator." $+$
+            nest 4 (
+                text "Got" <+> pretty t $+$
+                if null ts
+                    then text "But no types are supported by the operator."
+                    else text "Supported types:" <+> sep (punctuate comma (map pretty ts))
+            )
+        FreeVariableError { freeVariable = v } ->
+            text "Unbound variable." $+$
+            nest 4 (
+                text "The variable" <+> pretty v <+> text "has no declaration."
+            )
+
+instance Pretty (Ann SrcSpan SemanticError a) where
+    pretty (Ann pos e) = hang (pretty $ srcStart pos) 4 (pretty e)
 
 typecheckProgram :: MonadError (SrcAnn SemanticError a) m
                  => SrcAnnProgram -> m TySrcAnnProgram

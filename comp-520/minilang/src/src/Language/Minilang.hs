@@ -28,4 +28,4 @@ parseOnlyExpr :: String -> Input -> Either ParseError SrcAnnExpr
 parseOnlyExpr = parse (spaceConsumer *> expr <* eof)
 
 roundTrip :: Input -> Either ParseError Input
-roundTrip s = pack . render . pretty <$> parseOnlyMinilang "roundtrip" s
+roundTrip s = pack . render . pretty . unannotateProgram <$> parseOnlyMinilang "roundtrip" s

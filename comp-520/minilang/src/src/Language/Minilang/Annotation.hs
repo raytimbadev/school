@@ -31,8 +31,5 @@ bareF = cata (Fix . bare)
 instance (Functor f, Pretty (Fix f)) => Pretty (Fix (Ann x f)) where
     pretty = pretty . bareF
 
-instance Pretty (f a) => Pretty (Ann x f a) where
-    pretty = pretty . bare
-
 instance (Functor f, HasPrecedence (f a)) => HasPrecedence (Ann x f a) where
     precedence = precedence . bare

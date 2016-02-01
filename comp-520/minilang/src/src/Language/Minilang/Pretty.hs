@@ -10,6 +10,7 @@ module Language.Minilang.Pretty
 
 import Data.Functor.Identity
 import Data.Text ( Text, unpack )
+import Text.Megaparsec.Pos
 import Text.PrettyPrint
 
 -- | Minilang pretty-printable types.
@@ -44,6 +45,9 @@ instance Pretty Text where
     pretty = text . unpack
 
 deriving instance Pretty a => Pretty (Identity a)
+
+instance Pretty SourcePos where
+    pretty = text . show
 
 prettyBrackets :: Bool -> Doc -> Doc
 prettyBrackets True s = text "[" <> s <> text "]"

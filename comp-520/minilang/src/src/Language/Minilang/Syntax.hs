@@ -138,6 +138,10 @@ type SrcAnnProgram
         SrcAnnDeclaration
         SrcAnnStatement
 
+unannotateProgram :: SrcAnnProgram -> BasicProgram
+unannotateProgram (Program decls stmts)
+    = Program (map unannotateDecl decls) (map unannotateStmt stmts)
+
 type Ident = Text
 
 type SrcAnnIdent = SrcAnn Identity Ident
