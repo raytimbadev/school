@@ -9,11 +9,13 @@ import Language.Minilang.SrcAnn
 
 import Control.Monad.Except
 import Data.Functor.Foldable
-import qualified Data.Map.Strict as M
+import Data.Text ( pack )
 import Data.Text.IO ( readFile, getContents )
+-- import qualified Data.Text.IO as TIO
 import qualified Language.C.Pretty as CP
 import Options.Applicative
 import Prelude hiding ( readFile, getContents )
+-- import System.Exit ( exitFailure )
 import Text.PrettyPrint hiding ( (<>) )
 
 unFix :: Fix f -> f (Fix f)
@@ -29,17 +31,11 @@ argParser = info sourcePath details where
         ++ "else, `Invalid` is printed. "
         ++ "The special file - can be used to read from standard in."
 
-testEnv :: Env
-testEnv = M.fromList
-    [ ( "i", TyInt )
-    , ( "s", TyString )
-    , ( "r", TyReal )
-    ]
-
 main :: IO ()
 main = do
     sourcePath <- execParser argParser
     contents <- if sourcePath == "-" then getContents else readFile sourcePath
+
     case parseOnlyMinilang (case sourcePath of "-" -> "stdin" ; x -> x) contents of
         Left e -> do
             putStrLn "Invalid"
@@ -47,8 +43,16 @@ main = do
         Right p -> do
             putStrLn "Valid\n"
             putStrLn "Pretty print:"
-            putStrLn (render (pretty p))
-            putStrLn ""
+            let roundT = render (pretty p)
+            putStrLn roundT
+
+            case parseOnlyMinilang "roundtrip" (pack roundT) of
+                Left e -> do
+                    putStrLn "roundtrip failed"
+                    print e
+                Right e -> do
+                    putStrLn "roundtrip succeeded"
+                    putStrLn (render (pretty e))
 
             case runExcept (typecheckProgram p) of
                 Left (Ann pos e') -> do
