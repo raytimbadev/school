@@ -1,0 +1,6 @@
+# Inverted endif and done
+while 2 do
+  if 1 then
+    print 0;
+done
+  endif

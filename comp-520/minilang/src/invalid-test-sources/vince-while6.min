@@ -1,0 +1,5 @@
+# assignment instead of expression
+var x: int;
+while x = 1 do
+  print 1;
+done

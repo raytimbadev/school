@@ -1,0 +1,2 @@
+# invalid unary operator
+print +4;

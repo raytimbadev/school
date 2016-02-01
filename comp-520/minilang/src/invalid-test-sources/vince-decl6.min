@@ -1,0 +1,2 @@
+# Declare + initialize
+var x: int = 42;

@@ -1,0 +1,4 @@
+# Semi-colon after done
+while 1 do
+ print 0;
+done;

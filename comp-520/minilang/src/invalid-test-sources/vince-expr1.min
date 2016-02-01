@@ -1,0 +1,2 @@
+# Invalid unary operator
+print ~3;

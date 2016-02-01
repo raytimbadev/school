@@ -1,0 +1,2 @@
+# Leading zero in float
+print 01.3;

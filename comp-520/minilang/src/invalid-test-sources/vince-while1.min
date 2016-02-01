@@ -1,0 +1,4 @@
+# Missing do
+while 1
+  print 1;
+done

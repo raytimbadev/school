@@ -1,0 +1,3 @@
+# Missing endif
+if 1 then
+ print 0;

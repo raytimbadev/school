@@ -1,0 +1,2 @@
+# Invalid binary operator
+print 3 % 4;

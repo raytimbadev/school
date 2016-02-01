@@ -1,0 +1,2 @@
+# No leading zeros allowed
+print 01;
