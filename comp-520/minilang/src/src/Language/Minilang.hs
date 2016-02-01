@@ -4,6 +4,7 @@ module Language.Minilang
 , parseMinilang
 , parseOnlyMinilang
 , parseOnlyExpr
+, roundTrip
 , pretty
 ) where
 
@@ -13,7 +14,9 @@ import Language.Minilang.Parser
 import Language.Minilang.Parser.Expression
 import Language.Minilang.Pretty
 
+import Data.Text ( pack )
 import Text.Megaparsec
+import Text.PrettyPrint ( render )
 
 parseMinilang :: String -> Input -> Either ParseError SrcAnnProgram
 parseMinilang = parse minilang
@@ -23,3 +26,6 @@ parseOnlyMinilang = parse (spaceConsumer *> minilang <* eof)
 
 parseOnlyExpr :: String -> Input -> Either ParseError SrcAnnExpr
 parseOnlyExpr = parse (spaceConsumer *> expr <* eof)
+
+roundTrip :: Input -> Either ParseError Input
+roundTrip s = pack . render . pretty <$> parseOnlyMinilang "roundtrip" s
