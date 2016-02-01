@@ -156,9 +156,10 @@ translateStmt = cata f where
                 e' = translateExpr e
                 t = exprType e
                 fmt = case t of
-                    TyInt -> "%d\\n"
-                    TyReal -> "%f\\n"
-                    TyString -> "%s\\n"
+                    -- the C pretty-printer takes care of escaping these for us
+                    TyInt -> "%d\n"
+                    TyReal -> "%f\n"
+                    TyString -> "%s\n"
             in
                 CExpr
                     (Just
