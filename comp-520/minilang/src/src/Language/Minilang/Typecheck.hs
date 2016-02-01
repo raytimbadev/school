@@ -207,12 +207,38 @@ typecheckStmt env = cata f where
 
         While e ss -> do
             e' <- typecheckExpr env e
+
+            let (Fix (Ann (epos, ety) _)) = e'
+
+            case ety of
+                TyInt -> pure ()
+                _ -> throwError
+                    (Ann
+                        epos
+                        (UnsupportedType
+                            { gotType = ety
+                            , supportedTypes = [TyInt]
+                            }))
+
             ss' <- sequence ss
 
             pure (Fix (Ann pos (While e' ss')))
 
         If e tb eb -> do
             e' <- typecheckExpr env e
+
+            let (Fix (Ann (epos, ety) _)) = e'
+
+            case ety of
+                TyInt -> pure()
+                _ -> throwError
+                    (Ann
+                        epos
+                        (UnsupportedType
+                            { gotType = ety
+                            , supportedTypes = [TyInt]
+                            }))
+
             tb' <- sequence tb
             eb' <- sequence eb
 
