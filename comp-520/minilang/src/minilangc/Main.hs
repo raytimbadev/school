@@ -3,6 +3,7 @@
 module Main where
 
 import Language.Minilang
+import Language.Minilang.Codegen
 import Language.Minilang.Typecheck
 import Language.Minilang.SrcAnn
 
@@ -10,9 +11,10 @@ import Control.Monad.Except
 import Data.Functor.Foldable
 import qualified Data.Map.Strict as M
 import Data.Text.IO ( readFile, getContents )
-import Prelude hiding ( readFile, getContents )
+import qualified Language.C.Pretty as CP
 import Options.Applicative
-import Text.Show.Pretty
+import Prelude hiding ( readFile, getContents )
+import Text.PrettyPrint hiding ( (<>) )
 
 unFix :: Fix f -> f (Fix f)
 unFix (Fix f) = f
@@ -38,21 +40,22 @@ main :: IO ()
 main = do
     sourcePath <- execParser argParser
     contents <- if sourcePath == "-" then getContents else readFile sourcePath
-    case parseOnlyExpr (case sourcePath of "-" -> "stdin" ; x -> x) contents of
+    case parseOnlyMinilang (case sourcePath of "-" -> "stdin" ; x -> x) contents of
         Left e -> do
             putStrLn "Invalid"
             print e
-        Right e -> do
-            putStrLn "Valid"
+        Right p -> do
+            putStrLn "Valid\n"
             putStrLn "Pretty print:"
-            putStrLn $ pretty e
-            putStrLn (ppShow e)
-            case runExcept (typecheckExpr testEnv e) of
+            putStrLn (render (pretty p))
+            putStrLn ""
+
+            case runExcept (typecheckProgram p) of
                 Left (Ann pos e') -> do
                     putStrLn "type error:"
                     print e'
                     putStrLn "at:"
                     print (srcStart pos)
-                Right e' -> do
-                    putStrLn "type:"
-                    print (exprType e')
+                Right p' -> do
+                    let c = translateProgramMain p'
+                    putStrLn (render (CP.pretty c))

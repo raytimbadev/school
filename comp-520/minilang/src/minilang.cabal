@@ -61,7 +61,9 @@ executable minilangc
     pretty-show >=1.6 && <1.7,
     mtl >=2.2 && <2.3,
     recursion-schemes >=4.1 && <4.2,
-    containers >=0.5 && <0.6
+    containers >=0.5 && <0.6,
+    pretty >=1.1 && <1.2,
+    language-c >=0.4 && <0.5
 
 test-suite spec
   type:                exitcode-stdio-1.0
