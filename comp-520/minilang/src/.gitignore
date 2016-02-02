@@ -1,6 +1,8 @@
 /.cabal-sandbox/
 /cabal.sandbox.config
 /dist/
+/bin-mini/
 *.pretty.min
 *.symbol.txt
 *.c
+*.o

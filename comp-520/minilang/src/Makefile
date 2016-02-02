@@ -1,15 +1,20 @@
-MIN=$(shell find valid-test-sources -name '*.min' \! -name '*.pretty.min')
+SRCDIR=valid-test-sources
+BINDIR=bin-mini
+MIN=$(shell find $(SRCDIR) -name '*.min' \! -name '*.pretty.min')
+BIN=$(patsubst $(BINDIR)/%,$(SRCDIR)/%.min,$(MIN))
+
+$(shell mkdir -p $(BINDIR))
 
 .PRECIOUS: %.c
 .PHONY: all
-all: $(patsubst %.min,%,$(MIN))
+all: $(patsubst $(SRCDIR)/%.min,$(BINDIR)/%,$(MIN))
 
 %.c: %.min
 	cabal run $<
 
-%: %.c
+$(BINDIR)/%: $(SRCDIR)/%.c
 	gcc -o $@ $<
 
 .PHONY: clean
 clean:
-	-rm -v $(patsubst %.min,%.c,$(MIN)) $(patsubst %.min,%.pretty.min,$(MIN)) $(patsubst %.min,%.symbol.txt,$(MIN)) $(patsubst %.min,%,$(MIN))
+	-rm -v $(patsubst %.min,%.c,$(MIN)) $(patsubst %.min,%.pretty.min,$(MIN)) $(patsubst %.min,%.symbol.txt,$(MIN)) $(BIN)
