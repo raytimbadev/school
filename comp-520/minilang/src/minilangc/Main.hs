@@ -12,6 +12,8 @@ import Control.Monad.Except
 import Data.Functor.Foldable
 import Data.Text ( pack )
 import Data.Text.IO ( readFile, writeFile, getContents )
+import Data.Text.Lazy ( toStrict )
+import Data.Text.Lazy.Builder ( fromString, toLazyText )
 import qualified Language.C.Pretty as CP
 import Options.Applicative
 import Prelude hiding ( readFile, writeFile, getContents )
@@ -79,4 +81,6 @@ handleTypechecked sourcePath p = do
     let c = translateProgramMain p
 
     -- write out the generated code
-    writeFile (sourcePath -<.> "c") (pack (render (CP.pretty c)))
+    writeFile
+        (sourcePath -<.> "c")
+        (toStrict . toLazyText . prependRuntime . fromString . render . CP.pretty $ c)

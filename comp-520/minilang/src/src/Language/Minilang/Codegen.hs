@@ -8,7 +8,9 @@ import Language.Minilang.Typecheck
 import Language.Minilang.Codegen.Runtime
 
 import Data.Functor.Foldable
+import Data.Monoid ( (<>) )
 import Data.Text ( unpack )
+import Data.Text.Lazy.Builder
 import Language.C.Data as CD
 import Language.C.Syntax as CS
 
@@ -31,6 +33,10 @@ translateProgram declspecs declr args (Program decls stmts)
             ++ map (CBlockStmt . translateStmt) stmts)
             undefNode)
         undefNode
+
+-- | Prepends the minilang runtime to some text.
+prependRuntime :: Builder -> Builder
+prependRuntime = (minilangRuntime <>)
 
 -- | Translates a typechecked Minilang program into a C \"main\" function.
 translateProgramMain :: TySrcAnnProgram -> CFunDef
