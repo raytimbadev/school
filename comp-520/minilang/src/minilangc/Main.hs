@@ -13,6 +13,7 @@ import Data.Text.IO ( readFile, writeFile, getContents )
 import qualified Language.C.Pretty as CP
 import Options.Applicative
 import Prelude hiding ( readFile, writeFile, getContents )
+import System.Exit ( exitFailure )
 import System.FilePath
 import Text.PrettyPrint hiding ( (<>) )
 
@@ -50,7 +51,11 @@ handleParsed sourcePath p = do
 
     -- compute the symbol table from the declarations list
     let (Program decls _) = p
-    let symtab = symbolTableFrom (map unannotateDecl decls)
+    symtab <- case runExcept (symbolTableFrom decls) of
+        Left e -> do
+            putStrLn (render (pretty e))
+            exitFailure
+        Right env -> pure env
 
     -- write out the symbol table in a tab-separated format
     writeFile (sourcePath -<.> "symbol.txt") (pack (symbolTableTsv symtab))

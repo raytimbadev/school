@@ -29,7 +29,10 @@ import Language.Minilang.Syntax
 import Control.Monad.Identity
 import Control.Monad.Except
 import Data.Functor.Foldable
+import Data.Function ( on )
+import Data.List ( sortBy, groupBy )
 import qualified Data.Map.Strict as M
+import Data.Ord ( comparing )
 import Text.PrettyPrint
 
 -- | Symbol table.
@@ -72,6 +75,12 @@ data SemanticError a
         }
     -- ^ A free variable is found in the expression, so its type cannot be
     -- determined.
+    | RedeclaredVariable
+        { firstOccurrence :: Ident
+        , redundantOccurrences :: [SrcAnnIdent]
+        , envAnyway :: Env
+        }
+    -- ^ A variable is declared twice.
     deriving (Functor)
 
 deriving instance Show (SemanticError a)
@@ -99,6 +108,12 @@ instance Pretty (SemanticError a) where
             nest 4 (
                 text "The variable" <+> pretty v <+> text "has no declaration."
             )
+        RedeclaredVariable { firstOccurrence = x, redundantOccurrences = xs } ->
+            text "Redeclaration of variables." $+$
+            nest 4 (
+                text "The variable" <+> pretty x <+> text "is redeclared." $+$
+                vcat (map (pretty . srcStart . ann) xs)
+            )
 
 instance Pretty (Ann SrcSpan SemanticError a) where
     pretty (Ann pos e) = hang (pretty $ srcStart pos) 4 (pretty e)
@@ -107,7 +122,7 @@ typecheckProgram :: MonadError (SrcAnn SemanticError a) m
                  => SrcAnnProgram -> m TySrcAnnProgram
 typecheckProgram (Program decls stmts) = do
     -- build the symbol table
-    let env = symbolTableFrom (map unannotateDecl decls)
+    env <- symbolTableFrom decls
 
     -- typecheck the statements
     stmts' <- typecheckStmts env stmts
@@ -122,16 +137,39 @@ symbolTableTsv = invoke . foldr line id . M.toList where
     invoke ss = ss ""
 
 -- | Builds a symbol table from a list of declarations.
-symbolTableFrom :: [BasicDeclaration] -> Env
-symbolTableFrom = M.fromList . map f where
-    f (Var i t) = (i, t)
+symbolTableFrom :: MonadError (SrcAnn SemanticError a) m
+                => [SrcAnnDeclaration] -> m Env
+symbolTableFrom decls = do
+    let ident (bareId -> (Var (bareId -> i) _)) = i
+    let annIdent (bareId -> (Var i _)) = i
+
+    let decls' = sortBy (comparing ident) decls
+    let decls'' = groupBy ((==) `on` ident) decls'
+
+    let f (bareId -> (Var (bareId -> i) (bareId -> t))) = (i, t)
+    let env = M.fromList (map f decls)
+
+    -- check that there are no redeclarations
+    forM_ decls'' $ \declGrp -> case declGrp of
+        [] -> error "groupBy internal invariant broken"
+        [_] -> pure () -- ok
+        (x:xs) -> throwError
+            (Ann
+                (ann (annIdent x))
+                (RedeclaredVariable
+                    { firstOccurrence = ident x
+                    , redundantOccurrences = annIdent <$> xs
+                    , envAnyway = env
+                    }))
+
+    pure env
 
 -- | Gets the top-level type of a typechecked expression.
 exprType :: TySrcAnnExpr -> Type
 exprType (Fix (Ann (_, ty) _)) = ty
 
 -- | Typecheck a statement, i.e. typecheck any expressions occurring in the
--- statement.
+-- statement and typecheck any bare identifiers.
 typecheckStmt
     :: MonadError (SrcAnn SemanticError a) m
     => Env -> SrcAnnStatement -> m TySrcAnnStatement
