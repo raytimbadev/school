@@ -11,14 +11,26 @@ module Language.Minilang.Typecheck
 , symbolTableTsv
 , symbolTableFrom
   -- * Typechecking
-, TySrcAnnExpr
-, TySrcAnnStatement
+, TySrcAnn
+, TySrcAnnFix
+  -- ** Programs
 , TySrcAnnProgram
 , typecheckProgram
+  -- ** Statements
+, TySrcAnnStatement
 , typecheckStmt
 , typecheckStmts
+  -- ** Expressions
+, TySrcAnnExpr
 , typecheckExpr
-, exprType
+, tyExprType
+, tyExprSrcSpan
+  -- ** Identifiers
+, TySrcAnnIdent
+, tyIdentType
+, tyIdentName
+, tyIdentSrcSpan
+  -- * Error handling
 , SemanticError(..)
 ) where
 
@@ -38,12 +50,26 @@ import Text.PrettyPrint
 -- | Symbol table.
 type Env = M.Map Ident Type
 
--- | Typechecked expression.
+-- | A "Type" and "SrcSpan"-annotated functor value.
+type TySrcAnn = Ann (SrcSpan, Type)
+
+-- | A "Type" and "SrcSpan"-annotated functor fixed point.
+type TySrcAnnFix f = AnnFix (SrcSpan, Type) f
+
+-- | A "Type" and "SrcSpan"-annotated identifier, wrapped in an "Identity"
+-- functor.
+type TySrcAnnIdent = TySrcAnn Identity Ident
+
+-- | A "Type" and "SrcSpan"-annotated expression tree.
 type TySrcAnnExpr = AnnFix (SrcSpan, Type) SrcAnnExprF
 
--- | Typechecked statements, i.e. statements in which all expressions have been
--- typechecked.
-type TySrcAnnStatement = SrcAnnFix (StatementF SrcAnnIdent TySrcAnnExpr)
+-- | A "Type" and "SrcSpan"-annotated statement tree.
+--
+-- Statements themselves do not have types, so the branches of this fixed point
+-- are only annotated with source spans. The identifiers and expressions that
+-- appear in the statement are however typechecked, so they are annotated with
+-- both types and source spans.
+type TySrcAnnStatement = SrcAnnFix (StatementF TySrcAnnIdent TySrcAnnExpr)
 
 -- | Typechecked program, i.e. a program in which statements have been
 -- typechecked using the program's declarations as a symbol table.
@@ -165,8 +191,36 @@ symbolTableFrom decls = do
     pure env
 
 -- | Gets the top-level type of a typechecked expression.
-exprType :: TySrcAnnExpr -> Type
-exprType (Fix (Ann (_, ty) _)) = ty
+tyExprType :: TySrcAnnExpr -> Type
+tyExprType (Fix (Ann (_, ty) _)) = ty
+
+-- | Gets the source span of a typechecked expression.
+tyExprSrcSpan :: TySrcAnnExpr -> SrcSpan
+tyExprSrcSpan (Fix (Ann (pos, _) _)) = pos
+
+-- | Typechecks an identifier in a given environment, raising a
+-- "FreeVariableError" if the variable cannot be found.
+typecheckIdent :: MonadError (SrcAnn SemanticError a) m
+               => Env -> SrcAnnIdent -> m TySrcAnnIdent
+typecheckIdent env (Ann pos i) = case M.lookup (runIdentity i) env of
+    Just t -> pure (Ann (pos, t) i)
+    Nothing -> throwError
+        (Ann
+            pos
+            (FreeVariableError
+                { freeVariable = runIdentity i }))
+
+-- | Extract the source span of a typechecked identifier.
+tyIdentSrcSpan :: TySrcAnnIdent -> SrcSpan
+tyIdentSrcSpan = fst . ann
+
+-- | Extract the type of a typechecked identifier.
+tyIdentType :: TySrcAnnIdent -> Type
+tyIdentType = snd . ann
+
+-- | Extract the name of a typechecked identifier.
+tyIdentName :: TySrcAnnIdent -> Ident
+tyIdentName = bareId
 
 -- | Typecheck a statement, i.e. typecheck any expressions occurring in the
 -- statement and typecheck any bare identifiers.
@@ -174,93 +228,78 @@ typecheckStmt
     :: MonadError (SrcAnn SemanticError a) m
     => Env -> SrcAnnStatement -> m TySrcAnnStatement
 typecheckStmt env = cata f where
-    f (Ann pos me) = case me of
+    f :: MonadError (SrcAnn SemanticError a) m
+      => SrcAnn SrcAnnStatementF (m TySrcAnnStatement) -> m TySrcAnnStatement
+    f (Ann pos me) = case me of -- me :: f (m TySrcAnnStatement)
         Assign i e -> do
-            let (Ann ipos (runIdentity -> i')) = i
+            ity <- typecheckIdent env i -- typecheck the identifier
+            ety <- typecheckExpr env e -- typecheck the expression
 
-            -- check that the identifier that we want to assign to is declared.
-            case M.lookup i' env of
-                Nothing -> throwError
-                    (Ann
-                        ipos
-                        (FreeVariableError
-                            { freeVariable = i' }))
+            -- a helper for valid statements
+            let ok = pure (Fix (Ann pos (Assign ity ety)))
 
-                Just ty -> do
-                    e' <- typecheckExpr env e
-                    let (Fix (Ann (epos, ety) _)) = e'
+            -- a helper for invalid statements
+            let die x = throwError (Ann (tyExprSrcSpan ety) x)
 
-                    let ok = pure (Fix (Ann pos (Assign i e')))
+            -- check that the type of the identifier to assign to
+            -- matches the computed type of the expression
+            case (tyIdentType ity, tyExprType ety) of
+                (TyInt, TyInt) -> ok
 
-                    -- check that the type of the identifier to assign to
-                    -- matches the computed type of the expression
-                    case (ty, ety) of
-                        (TyInt, TyInt) -> ok
+                (TyInt, TyReal) -> die $
+                    TypeMismatch
+                        { gotType = TyReal
+                        , expectedTypes = [TyInt]
+                        }
 
-                        (TyInt, TyReal) -> throwError
-                            (Ann
-                                epos
-                                (TypeMismatch
-                                    { gotType = TyReal
-                                    , expectedTypes = [TyInt]
-                                    }))
+                (TyInt, TyString) -> die $
+                    TypeMismatch
+                        { gotType = TyString
+                        , expectedTypes = [TyInt]
+                        }
 
-                        (TyInt, TyString) -> throwError
-                            (Ann
-                                epos
-                                (TypeMismatch
-                                    { gotType = TyString
-                                    , expectedTypes = [TyInt]
-                                    }))
+                (TyReal, TyInt) -> ok
 
-                        (TyReal, TyInt) -> ok
+                (TyReal, TyReal) -> ok
 
-                        (TyReal, TyReal) -> ok
+                (TyReal, TyString) -> die $
+                    TypeMismatch
+                        { gotType = TyString
+                        , expectedTypes = [TyInt, TyReal]
+                        }
 
-                        (TyReal, TyString) -> throwError
-                            (Ann
-                                epos
-                                (TypeMismatch
-                                    { gotType = TyString
-                                    , expectedTypes = [TyInt, TyReal]
-                                    }))
+                (TyString, TyInt) -> die $
+                    TypeMismatch
+                        { gotType = TyInt
+                        , expectedTypes = [TyString]
+                        }
 
-                        (TyString, TyInt) -> throwError
-                            (Ann
-                                epos
-                                (TypeMismatch
-                                    { gotType = TyInt
-                                    , expectedTypes = [TyString]
-                                    }))
+                (TyString, TyReal) -> die $
+                    TypeMismatch
+                        { gotType = TyReal
+                        , expectedTypes = [TyString]
+                        }
 
-                        (TyString, TyReal) -> throwError
-                            (Ann
-                                epos
-                                (TypeMismatch
-                                    { gotType = TyReal
-                                    , expectedTypes = [TyString]
-                                    }))
-
-                        (TyString, TyString) -> ok
+                (TyString, TyString) -> ok
 
         While e ss -> do
-            e' <- typecheckExpr env e
+            ety <- typecheckExpr env e
+            let ty = tyExprType ety
+            let epos = tyExprSrcSpan ety
 
-            let (Fix (Ann (epos, ety) _)) = e'
-
-            case ety of
+            case ty of
                 TyInt -> pure ()
                 _ -> throwError
                     (Ann
                         epos
                         (UnsupportedType
-                            { gotType = ety
+                            { gotType = ty
                             , supportedTypes = [TyInt]
                             }))
 
             ss' <- sequence ss
 
-            pure (Fix (Ann pos (While e' ss')))
+            pure (Fix (Ann pos (While ety ss')))
 
         If e tb eb -> do
             e' <- typecheckExpr env e
@@ -288,7 +327,9 @@ typecheckStmt env = cata f where
             pure (Fix (Ann pos (Print e')))
 
         Read i -> do
-            pure (Fix (Ann pos (Read i)))
+            i' <- typecheckIdent env i
+
+            pure (Fix (Ann pos (Read i')))
 
 -- | Typechecks a block of statements with a given symbol table.
 typecheckStmts :: MonadError (SrcAnn SemanticError a) m

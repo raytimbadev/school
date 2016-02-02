@@ -153,7 +153,7 @@ translateStmt = cata f where
         Print e ->
             let
                 e' = translateExpr e
-                t = exprType e
+                t = tyExprType e
                 fmt = case t of
                     -- the C pretty-printer takes care of escaping these for us
                     TyInt -> "%d\n"
