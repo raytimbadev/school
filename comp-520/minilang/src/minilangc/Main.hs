@@ -1,10 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ViewPatterns #-}
 
 module Main where
 
 import Language.Minilang
 import Language.Minilang.Codegen
 import Language.Minilang.Typecheck
+import Language.Minilang.Annotation ( bare )
 
 import Control.Monad.Except
 import Data.Functor.Foldable
@@ -51,14 +53,20 @@ handleParsed sourcePath p = do
 
     -- compute the symbol table from the declarations list
     let (Program decls _) = p
-    symtab <- case runExcept (symbolTableFrom decls) of
+    (symtab, continue) <- case runExcept (symbolTableFrom decls) of
         Left e -> do
             putStrLn (render (pretty e))
-            exitFailure
-        Right env -> pure env
+            case e of
+                (bare -> RedeclaredVariable { envAnyway = env }) -> pure (env, False)
+                _ -> exitFailure
+        Right env -> pure (env, True)
 
     -- write out the symbol table in a tab-separated format
     writeFile (sourcePath -<.> "symbol.txt") (pack (symbolTableTsv symtab))
+
+    -- so that we can write out the symbol table even if a declaration error
+    -- occurs.
+    when (not continue) exitFailure
 
     -- typecheck the program
     case runExcept (typecheckProgram p) of
