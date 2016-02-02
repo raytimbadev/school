@@ -355,7 +355,7 @@ typecheckExpr env fe = cata f fe where
                                 { gotType = t2, supportedTypes = [TyInt, TyReal] }))
 
         Literal ml -> do
-            let (runIdentity . bare -> l) = ml
+            let (bareId -> l) = ml
 
             let conclude rt = pure (Fix (Ann (pos, rt) (Literal ml)))
 

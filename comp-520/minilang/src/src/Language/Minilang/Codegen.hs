@@ -8,7 +8,6 @@ import Language.Minilang.Typecheck
 import Language.Minilang.Codegen.Runtime
 
 import Data.Functor.Foldable
-import Data.Functor.Identity
 import Data.Text ( unpack )
 import Language.C.Data as CD
 import Language.C.Syntax as CS
@@ -99,8 +98,8 @@ translateIdent :: MS.Ident -> CD.Ident
 translateIdent (unpack -> s) = internalIdent (s ++ "_")
 
 translateDecl :: SrcAnnDeclaration -> CDecl
-translateDecl (runIdentity . bare -> d) = case d of
-    Var (runIdentity . bare -> i) (runIdentity . bare -> t) ->
+translateDecl (bareId -> d) = case d of
+    Var (bareId -> i) (bareId -> t) ->
         let
             (ct, declr) = case t of
                 TyInt -> (CIntType undefNode, [])
@@ -125,7 +124,7 @@ translateDecl (runIdentity . bare -> d) = case d of
 translateStmt :: TySrcAnnStatement -> CStat
 translateStmt = cata f where
     f (Ann _ s) = case s of
-        Assign (runIdentity . bare -> i) e ->
+        Assign (bareId -> i) e ->
             CExpr
                 (Just
                     (CAssign
@@ -171,7 +170,7 @@ translateStmt = cata f where
                             undefNode))
                     undefNode
 
-        Read (runIdentity . bare -> i) ->
+        Read (bareId -> i) ->
             CExpr
                 (Just
                     (CCall
@@ -199,13 +198,13 @@ translateExpr = snd . cata f where
     -- so that we can always have access to the determined types of
     -- subexpressions.
     f (Ann (_, ty) e) = (,) ty $ case e of
-        Literal (runIdentity . bare -> l) -> case l of
+        Literal (bareId -> l) -> case l of
             Variable x -> CVar (translateIdent x) undefNode
             Int x -> CConst (CIntConst (CInteger x DecRepr noFlags) undefNode)
             Real x -> CConst (CFloatConst (CFloat (show x)) undefNode)
             String x -> CConst (CStrConst (cString (unpack x)) undefNode)
 
-        UnaryOp (runIdentity . bare -> o) (sty, se) -> case o of
+        UnaryOp (bareId -> o) (sty, se) -> case o of
             -- remark: ty = sty in all cases here; see Typecheck.hs
             Negative -> case sty of
                 TyInt -> CUnary CMinOp se undefNode
@@ -216,7 +215,7 @@ translateExpr = snd . cata f where
                         [se]
                         undefNode
 
-        BinaryOp (runIdentity . bare -> o) (_, se1) (_, se2) -> case ty of
+        BinaryOp (bareId -> o) (_, se1) (_, se2) -> case ty of
             -- if the minilang expression computes an integer, then we can
             -- infer that both subexpressions are also integers, regardless of
             -- the binary operator that is used
