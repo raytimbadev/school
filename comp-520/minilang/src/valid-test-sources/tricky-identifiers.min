@@ -16,5 +16,4 @@ while integer do
     integer = integer - 1;
 done
 
-print "Happy new year,";
-print printer;
+print "Happy new year, " + printer;

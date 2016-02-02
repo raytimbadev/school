@@ -1,9 +1,11 @@
-var f1 : int;
-var f2 : int;
-var t : int;
+# computes the 30th fibonacci number
+
+var f1 : float;
+var f2 : float;
+var t : float;
 var n : int;
 
-n = 100;
+n = 31;
 
 f1 = 0;
 f2 = 1;
