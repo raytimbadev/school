@@ -163,7 +163,7 @@ translateStmt = cata f where
                 fmt = case t of
                     -- the C pretty-printer takes care of escaping these for us
                     TyInt -> "%d\n"
-                    TyReal -> "%f\n"
+                    TyReal -> "%lf\n"
                     TyString -> "%s\n"
             in
                 CExpr
@@ -182,7 +182,7 @@ translateStmt = cata f where
                 deref = CUnary CAdrOp raw undefNode
                 (var, fmt) = case tyIdentType i of
                     TyInt -> (deref, "%d")
-                    TyReal -> (deref, "%f")
+                    TyReal -> (deref, "%lf")
                     TyString -> (raw, "%s")
             in
                 CExpr
