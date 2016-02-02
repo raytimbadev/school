@@ -17,8 +17,8 @@ minilangStrcat = internalIdent "minilang_strcat"
 cPrintf :: CD.Ident
 cPrintf = internalIdent "printf"
 
-cGetline :: CD.Ident
-cGetline = internalIdent "getline"
+cScanf :: CD.Ident
+cScanf = internalIdent "scanf"
 
 cStdin :: CD.Ident
 cStdin = internalIdent "stdin"

@@ -176,26 +176,24 @@ translateStmt = cata f where
                             undefNode))
                     undefNode
 
-        Read (bareId -> i) ->
-            CExpr
-                (Just
-                    (CCall
-                        (CVar cGetline undefNode)
-                        [ CUnary
-                            CAdrOp
-                            (CVar
-                                (translateIdent i)
-                                undefNode)
-                            undefNode
-                        , CVar
-                            minilangLastSize
-                            undefNode
-                        , CVar
-                            cStdin
-                            undefNode
-                        ]
-                        undefNode))
-                undefNode
+        Read i ->
+            let
+                raw = CVar (translateIdent $ tyIdentName i) undefNode
+                deref = CUnary CAdrOp raw undefNode
+                (var, fmt) = case tyIdentType i of
+                    TyInt -> (deref, "%d")
+                    TyReal -> (deref, "%f")
+                    TyString -> (raw, "%s")
+            in
+                CExpr
+                    (Just
+                        (CCall
+                            (CVar cScanf undefNode)
+                            [ CConst (CStrConst (cString fmt) undefNode)
+                            , var
+                            ]
+                            undefNode))
+                    undefNode
 
 -- | Translates a typechecked Minilang expression into a C expression.
 translateExpr :: TySrcAnnExpr -> CExpr
