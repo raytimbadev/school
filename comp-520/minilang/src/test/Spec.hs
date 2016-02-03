@@ -5,6 +5,7 @@ module Main where
 import Language.Minilang
 import Language.Minilang.Lexer
 import Language.Minilang.Typecheck
+import Language.Minilang.SrcAnn
 
 import Control.Monad ( forM_, (>=>) )
 import Control.Monad.Except ( runExcept )
@@ -24,6 +25,9 @@ validSourcesDir = "valid-test-sources"
 
 invalidSourcesDir :: FilePath
 invalidSourcesDir = "invalid-test-sources"
+
+invalidTypeSourcesDir :: FilePath
+invalidTypeSourcesDir = "invalid-type"
 
 getTestSources :: FilePath -> IO [(String, Text)]
 getTestSources sourcesDir = getMinilangFiles >>= mapM readWithPath where
@@ -50,6 +54,12 @@ main = do
 
     putStrLn "Loading the following invalid Minilang test programs:"
     forM_ invalidSources $ \(n, _) -> putStrLn $ "\t" ++ n
+    putStrLn ""
+
+    invalidTypeSources <- getTestSources invalidTypeSourcesDir
+
+    putStrLn "Loading the semantically invalid Minilang test programs:"
+    forM_ invalidTypeSources $ \(n, _) -> putStrLn $ "\t" ++ n
     putStrLn ""
     
     hspec $ describe "Language.Minilang" $ do
@@ -115,18 +125,40 @@ main = do
                 it ("round-trips the valid program " ++ name) $
                     roundTrip contents `shouldBe` roundTrip3 contents
 
-            forM_ validSources $ \(name, contents) ->
-                it ("typechecks the valid program " ++ name) $
-                    case parseOnlyMinilang name contents of
-                        Left e -> expectationFailure (show e)
-                        Right p ->
-                            case runExcept (typecheckProgram p) of
-                                Left e -> expectationFailure (show e)
-                                Right _ -> pure ()
-
             forM_ invalidSources $ \(name, contents) ->
                 it ("fails to parse the invalid program " ++ name) $
                     parseOnlyMinilang name contents `shouldSatisfy` isLeft
+
+        describe "typecheckProgram" $ do
+            forM_ validSources $ \(name, contents) ->
+                it ("typechecks the valid program " ++ name) $
+                    checkTypecheck
+                        -- in case it fails to typecheck
+                        (expectationFailure . show)
+                        -- in case it successfully typechecks
+                        (const (pure ()))
+                        name
+                        contents
+
+            forM_ invalidTypeSources $ \(name, contents) ->
+                it ("fails to typecheck the invalid program " ++ name) $
+                    checkTypecheck
+                        -- in case it fails to typecheck
+                        (const (pure ()))
+                        -- in case it successfully typechecks
+                        (const (expectationFailure "should not typecheck"))
+                        name
+                        contents
+
+checkTypecheck
+    :: (SrcAnn SemanticError a -> Expectation)
+    -> (TySrcAnnProgram -> Expectation)
+    -> String -> Input -> Expectation
+checkTypecheck bad good name contents = case parseOnlyMinilang name contents of
+    Left e -> expectationFailure (show e)
+    Right p -> case runExcept (typecheckProgram p) of
+        Left e' -> bad e'
+        Right p' -> good p'
 
 isRight :: Either a b -> Bool
 isRight (Right _) = True

@@ -1,0 +1,6 @@
+# uses an undeclarated identifier
+var cent : int;
+
+cent = 100;
+
+print cnet;

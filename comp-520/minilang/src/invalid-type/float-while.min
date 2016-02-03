@@ -1,0 +1,5 @@
+var x : float;
+
+while x do
+    print "wtf";
+done

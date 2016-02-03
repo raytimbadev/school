@@ -1,0 +1,7 @@
+# using a string for an if-statement
+
+var x : string;
+
+if x then
+    print "wtf";
+endif
