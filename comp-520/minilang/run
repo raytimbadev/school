@@ -1,7 +1,7 @@
 #!/bin/bash
 
-LOCAL_MINILANGCHECK='src/dist/build/minilangcheck/minilangcheck'
-PREBUILT_MINILANGCHECK='src/minilangcheck'
+LOCAL_MINILANGCHECK='src/dist/build/minilangc/minilangc'
+PREBUILT_MINILANGCHECK='./minilangc'
 
 test -x "$LOCAL_MINILANGCHECK" && exec ./$LOCAL_MINILANGCHECK $@
 
