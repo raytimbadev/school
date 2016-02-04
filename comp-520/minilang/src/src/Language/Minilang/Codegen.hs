@@ -107,21 +107,37 @@ translateDecl :: SrcAnnDeclaration -> CDecl
 translateDecl (bareId -> d) = case d of
     Var (bareId -> i) (bareId -> t) ->
         let
-            (ct, declr) = case t of
-                TyInt -> (CIntType undefNode, [])
-                TyString -> (CCharType undefNode, [CPtrDeclr [] undefNode])
-                TyReal -> (CDoubleType undefNode, [])
+            (ct, declr, initExpr) = case t of
+                TyInt ->
+                    ( CIntType undefNode
+                    , []
+                    , CConst (CIntConst (cInteger 0) undefNode)
+                    )
+                TyString ->
+                    ( CCharType undefNode
+                    , [CPtrDeclr [] undefNode]
+                    , CCall
+                        (CVar cMalloc undefNode)
+                        [ CConst (CIntConst (cInteger 1024) undefNode) ]
+                        undefNode
+                    )
+                TyReal ->
+                    ( CDoubleType undefNode
+                    , []
+                    , CConst (CFloatConst (cFloat 0.0) undefNode)
+                    )
         in
             CDecl
                 [ CTypeSpec ct ]
-                [ ( Just
-                    (CDeclr
+                [ ( Just $
+                    CDeclr
                         (Just (translateIdent i))
                         declr
                         Nothing
                         []
-                        undefNode)
-                  , Nothing
+                        undefNode
+                  , Just $
+                    CInitExpr initExpr undefNode
                   , Nothing
                   )
                 ]

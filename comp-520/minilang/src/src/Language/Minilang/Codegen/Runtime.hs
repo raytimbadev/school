@@ -26,6 +26,9 @@ cStdin = internalIdent "stdin"
 cMain :: CD.Ident
 cMain = internalIdent "main"
 
+cMalloc :: CD.Ident
+cMalloc = internalIdent "malloc"
+
 minilangRuntime :: Builder
 minilangRuntime = mconcat
     [ "#include <stdlib.h>\n"
