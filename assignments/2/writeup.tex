@@ -1,0 +1,313 @@
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage{proof}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.0cm]{geometry}
+
+\newtheorem{lemma}{Lemma}
+\DeclareMathOperator{\trueP}{\text{ true}}
+\DeclareMathOperator{\fst}{\mathtt{fst}}
+\DeclareMathOperator{\snd}{\mathtt{snd}}
+
+\renewcommand{\t}{\trueP{}}
+\newcommand{\proves}{\vdash}
+\newcommand{\neut}{\uparrow}
+\newcommand{\norm}{\downarrow}
+
+\begin{document}
+
+\section{Logical equivalence}
+
+We can interpret logical equivalence,
+$A \equiv B$
+as $A \supset B$ and $B \supset A$, with the following introduction and
+elimination rules.
+
+\begin{center}
+    \begin{tabular}{c c c}
+        $$
+        \infer[\equiv I^{u,v}]{A \equiv B \t}{
+            \infer*{B\t}{
+                \infer[u]{A\t}{}
+            }
+            &
+            \infer*{A\t}{
+                \infer[v]{B\t}{}
+            }
+        }
+        $$
+        &
+        $$
+        \infer[\equiv E_L]{A\t}{
+            A \equiv B \t
+            &
+            B \t
+        }
+        $$
+        &
+        $$
+        \infer[\equiv E_R]{B\t}{
+            A \equiv B \t
+            &
+            A \t
+        }
+        $$
+    \end{tabular}
+\end{center}
+
+\newcommand{\equivproofterm}[6]{
+    \left \langle
+        \lambda #1 : #2 . #3,
+        \lambda #4 : #5 . #6
+    \right\rangle : #2 \equiv #5
+}
+
+\begin{enumerate}
+    \item These rules have the following proof terms, which look overall like a
+        combination of the terms for conjunctions and implications.
+
+        $$
+        \infer[\equiv I^{u,v}]{\equivproofterm{x}{A}{M}{y}{B}{N}}{
+            \infer*{M : B}{
+                \infer[u]{x : A}{}
+            }
+            &
+            \infer*{N : A}{
+                \infer[v]{y : B}{}
+            }
+        }
+        $$
+
+        $$
+        \infer[\equiv E_L]{\fst M x : B}{
+            M : A \equiv B
+            &
+            x : A
+        }
+        $$
+
+        $$
+        \infer[\equiv E_R]{\snd M y : A}{
+            M : A \equiv B
+            &
+            y : B
+        }
+        $$
+
+    \item Using these proof terms, here are the local reduction and expansion
+        rules for logical equivalence.
+
+        $$
+        \begin{array}{c c c}
+            \infer[\equiv E_L]{M : B}{
+                \infer[\equiv I^{u, v}]{\equivproofterm{x}{A}{M}{y}{B}{N}}{
+                    \deduce[\mathcal{D}]{M:B}{
+                        \infer[u]{x:A}{}
+                    }
+                    &
+                    \deduce[\mathcal{E}]{N:A}{
+                        \infer[v]{y:B}{}
+                    }
+                }
+                &
+                \deduce[\mathcal{F}]{x : A}{}
+            }
+            &
+            \Rightarrow_R
+            &
+            \deduce[\text{[}\mathcal{F} / u \text{]} \mathcal{D}]{M:B}{}
+        \end{array}
+        $$
+
+        $$
+        \begin{array}{c c c}
+            \deduce[\mathcal{D}]{M : A \equiv B}{}
+            &
+            \Rightarrow_E
+            &
+            \infer[\equiv I^{u, v}]{
+                \equivproofterm{x}{A}{\fst M x}{y}{B}{\snd M y}
+            }{
+                \infer[\equiv E_L]{\fst M x : B}{
+                    \deduce[\mathcal{D}]{M : A \equiv B}{}
+                    &
+                    \infer[u]{x : A}{}
+                }
+                &
+                \infer[\equiv E_R]{\snd M y : A}{
+                    \deduce[\mathcal{D}]{M : A \equiv B}{}
+                    &
+                    \infer[v]{y : B}{}
+                }
+            }
+        \end{array}
+        $$
+
+        These rules show that the proposed extension is locally sound and
+        complete.
+
+    \item
+        The addition of these three rules necessitates adding three cases to
+        the proof by structural induction of the substitution lemma.
+
+        \begin{lemma}[Substitution]
+            If $\Gamma, x:A, \Gamma^\prime \proves M : B$
+            and $\Gamma \proves N : A$, then
+            $$
+            \Gamma, \Gamma^\prime \proves [N/x]M : B
+            $$
+        \end{lemma}
+
+
+        \begin{proof} By structural induction on a given derivation.
+
+            \begin{description}
+                \item[Case] $\equiv I^{u, v}$.
+                    $$
+                    \mathcal{D} = \infer[\equiv I^{u, v}]{
+                        \Gamma, x:A, \Gamma^\prime
+                        \proves
+                        \equivproofterm{u}{B}{M_1}{z}{C}{M_2}
+                    }{
+                        \deduce[\mathcal{D}_1]{
+                            \Gamma, x:A, \Gamma^\prime, u:B \proves M_1 : C
+                        }{}
+                        &
+                        \deduce[\mathcal{D}_2]{
+                            \Gamma, x:A, \Gamma^\prime, v:C \proves M_2 : B
+                        }{}
+                    }
+                    $$
+
+                    \begin{center}
+                        \begin{tabular}{l r}
+                            $\Gamma \proves N : A$
+                            &
+                            by assumption. \\
+                            $\Gamma, \Gamma^\prime, u:B \proves [N/x]M_1 : C$
+                            &
+                            by I.H. on $\mathcal{D}_1$. \\
+                            $\Gamma, \Gamma^\prime, v:C \proves [N/x]M_2 : B$
+                            &
+                            by I.H. on $\mathcal{D}_2$. \\
+                            $
+                            \Gamma, \Gamma^\prime
+                            \proves
+                            \equivproofterm{u}{B}{[N/x]M_1}{v}{C}{[N/x]M_2}
+                            $
+                            &
+                            by $\equiv I^{u, v}$. \\
+                            $
+                            \Gamma, \Gamma^\prime
+                            \proves
+                            [N/x]\equivproofterm{u}{B}{M_1}{v}{C}{M_2}
+                            $
+                            &
+                            by substitution definition. \\
+                        \end{tabular}
+                    \end{center}
+
+                \item[Case] $\equiv E_L$.
+                    $$
+                    \mathcal{D} = \infer[\equiv E_L]{
+                        \Gamma, x:A, \Gamma^\prime
+                        \proves
+                        \fst M u : C
+                    }{
+                        \deduce[\mathcal{D}_1]{
+                            \Gamma, x:A, \Gamma^\prime
+                            \proves
+                            M : B \equiv C
+                        }{}
+                        &
+                        \deduce[\mathcal{D}_2]{
+                            \Gamma, x:A, \Gamma^\prime
+                            \proves
+                            u : B
+                        }{}
+                    }
+                    $$
+
+                    \begin{center}
+                        \begin{tabular}{l r}
+                            $\Gamma \proves N : A$
+                            &
+                            by assumption. \\
+                            $
+                            \Gamma, \Gamma^\prime
+                            \proves
+                            [N/x]M : B \equiv C
+                            $
+                            &
+                            by I.H. on $\mathcal{D}_1$. \\
+                            $
+                            \Gamma, \Gamma^\prime
+                            \proves
+                            [N/x]u : B
+                            $
+                            &
+                            by I.H. on $\mathcal{D}_2$. \\
+                            $
+                            \Gamma, \Gamma^\prime
+                            \proves
+                            \fst [N/x]M [N/x]u : C
+                            $
+                            &
+                            by $\equiv E_L$. \\
+                            $
+                            \Gamma, \Gamma^\prime
+                            \proves
+                            [N/x] \fst M u : C
+                            $
+                            &
+                            by substitution definition.
+                        \end{tabular}
+                    \end{center}
+
+                \item[Case] $\equiv E_R$.
+
+                    This proof is essentially the same as for $\equiv E_L$ so
+                    we will omit it.
+            \end{description}
+        \end{proof}
+
+    \item
+        We restate introduction and elimination rules for logical equivalence
+        with the judgements $A\norm$ and $A\neut$ to show how to construct only
+        normal proofs with these rules.
+
+        \begin{center}
+            \begin{tabular}{c c c}
+                $$
+                \infer[\equiv I^{u,v}]{A \equiv B \norm}{
+                    \infer*{B \norm}{
+                        \infer[u]{A \neut}{}
+                    }
+                    &
+                    \infer*{A \norm}{
+                        \infer[v]{B \neut}{}
+                    }
+                }
+                $$
+                &
+                $$
+                \infer[\equiv E_R]{A \neut}{
+                    A \equiv B \neut
+                    &
+                    B \norm
+                }
+                $$
+                &
+                $$
+                \infer[\equiv E_L]{B \neut}{
+                    A \equiv B \neut
+                    &
+                    A \norm
+                }
+                $$
+            \end{tabular}
+        \end{center}
+
+\end{enumerate}
+
+\end{document}
