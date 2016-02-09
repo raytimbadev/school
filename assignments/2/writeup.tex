@@ -13,6 +13,7 @@
 \newcommand{\proves}{\vdash}
 \newcommand{\neut}{\uparrow}
 \newcommand{\norm}{\downarrow}
+\renewcommand{\implies}{\supset}
 
 \begin{document}
 
@@ -309,5 +310,37 @@ elimination rules.
         \end{center}
 
 \end{enumerate}
+
+\section{First-order logic proofs}
+
+See the attached verified proofs written for Tutch.
+
+We found the following statements to be unprovable.
+
+\begin{itemize}
+    \item
+        $(\exists x : \tau . (A \implies P x)
+        \implies A \implies \forall x : \tau . P x$
+
+        From the assumptions that we have, it can only be proved that $P a$
+        holds for the specific witness $a : \tau$ that was used to construct
+        the existential. We cannot prove that $P x$ holds for a general $x$.
+
+    \item
+        $((\forall x : \tau . P x) \implies A)
+        \implies \exists x : \tau . (P x \implies A)$
+
+        It is impossible to produce a specific witness $a : \tau$ for which
+        $P a \implies A$ using nothing more that the fact that
+        $(\forall x : \tau . P x) \implies A$. The proof breaks down when we
+        try to construct the existential.
+
+    \item
+        $\neg (\forall x : \tau . B x) \implies \exists x : \tau . \neg B x$
+
+        Again from nothing more than an assumption involving a universally
+        quantified proposition, we can't construct the witness necessary to
+        build the existential.
+\end{itemize}
 
 \end{document}
