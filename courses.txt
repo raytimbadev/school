@@ -17,7 +17,7 @@ If I do majors math cs:
         math 318 - mathematical logic (F14) !
         math 242 - analysis 1 (F16)
         math 317 - numerical analysis (F16)
-        math 323 - probability (F16)
+        math 323 - probability (W17)
         math 340 - discrete structures 2 (W16) !
 
     complementary courses (18 credits ~ 6 courses):
@@ -26,7 +26,7 @@ If I do majors math cs:
 
             math 370 - honours algebra 3 (F16)
             math 371 - honours algebra 4 (W17)
-            + 1 more (perhaps mathematical finance)
+            + 1 more (ideally: math 430 - mathematical finance)
 
         3 computer science courses:
 
@@ -38,10 +38,10 @@ If I do majors math cs:
 
         6 courses:
 
-            hgen 396 - human genetics research project (W15)
+            hgen 396 - human genetics research project (W15) !
             comp 531 - advanced theory of computation (W16) !
             comp 523 - language based security (W17) ?
-            - introductory latin (F16 - W17) ?
+            - introductory latin (F17 - W18) ?
 
             + 2 more
 
@@ -81,29 +81,26 @@ If I do majors math cs:
 
             comp 520 (comp complementary)
             comp 527 (comp complementary)
-            comp 531 (elective)
-            math 340 (required)
-            
-            Missing one course here now !
-
-            Note: math 430 conflicts with comp 527
+            comp 531 (elective, S/U)
 
         Fall 16:
 
             math 242 - analysis 1 (required)
             math 317 - numerical analysis (required)
             math 370 - honours algebra 3 (math complementary)
-            + 1 math complementary and 1 elective
-            OR
-            + 2 electives
 
         Winter 17:
 
             math 323 - probability (required)
             math 371 - honours algebra 4 (math complementary)
-            +1 math complementary and 2 electives
-            OR
-            +3 electives
+            + 1 elective (ideally: comp 523 - language-based security)
 
-            Perhaps math 430
+        Fall 17:
 
+            math 340/350 - discrete structures / combinatorics & graph theory
+            + 1 math complementary
+            + 1 elective
+
+        Winter 18:
+
+            +2 electives
