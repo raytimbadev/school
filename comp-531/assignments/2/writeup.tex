@@ -1,0 +1,53 @@
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+
+\newtheorem{proposition}{Proposition}
+
+\DeclareMathOperator{\vdeg}{deg}
+\newcommand{\degb}[1]{\vdeg_b{#1}}
+\newcommand{\Z}{\mathbb{Z}}
+
+\begin{document}
+
+\section{Log-space reductions}
+
+\begin{proposition}
+    If both $f$ and $g$ are log-space computable functions, then $f \circ g$ is
+    also a log-space computable function.
+\end{proposition}
+
+\begin{proof}
+    Since $f$ and $g$ are computable, we have Turing machines $M_f$ and $M_g$
+    that implement them with the appropriate space complexities. We will
+    construct a Turing machine $M$ of logarithmic space complexity implementing
+    $f \circ g$.
+
+    The na\"ive strategy for constructing $M$ is to compute $f(w)$ by
+    simulating $M_f$, and then feed $f(w)$ as input to a simulation of $M_g$.
+    This however does not work since the output of $M_f$ might have length
+    polynomial in $w$! It suffices to recognize that we can compute select
+    elements of the output of $M_f$ in an on-demand fashion.
+
+    In $M$, we represent the position of the $M_g$ simulation's read head with
+    a counter: when the simulation would move the read head to the right, the
+    counter is decremented; when the simulation would move the read head to the
+    left, the counter is decremented. When the simulation of $M_g$ performs a
+    read, $M$ performs a simulation of $M_f$ but ``jams'' the simulated write
+    head, so to speak. Consequently, letters that are written by the $M_f$
+    simulation overwrite each other. Each time an $M_f$ write is simulated, a
+    copy of the counter is decremented; this allows $M$ to keep track of how
+    many letters have been written. When this counter reaches zero, then the
+    letter under the write head of the $M_f$ simulation can be used as the
+    letter under the read head of the $M_g$ simulation.
+
+    The nonconstant extra space required by this procedure is due to the
+    counters. There is one primary counter used to represent the read head of
+    the $M_g$ simulation, and one copy used when a new letter needs to be
+    computed. The size of this counter is logarithmically bounded by the size
+    of $f(w)$, which is at most polynomial in $w$. Hence overall, the
+    nonconstant size is logarithmically bounded in the size of $w$ as required.
+\end{proof}
+
+\end{document}
