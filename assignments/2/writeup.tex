@@ -3,17 +3,36 @@
 \usepackage{proof}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage[margin=2.0cm]{geometry}
+\usepackage{enumitem}
 
 \newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
 \DeclareMathOperator{\trueP}{\text{ true}}
 \DeclareMathOperator{\fst}{\mathtt{fst}}
 \DeclareMathOperator{\snd}{\mathtt{snd}}
+\DeclareMathOperator{\fste}{\mathtt{fst}_\equiv}
+\DeclareMathOperator{\snde}{\mathtt{snd}_\equiv}
 
+\newcommand{\D}{\mathcal{D}}
 \renewcommand{\t}{\trueP{}}
 \newcommand{\proves}{\vdash}
 \newcommand{\neut}{\uparrow}
 \newcommand{\norm}{\downarrow}
 \renewcommand{\implies}{\supset}
+
+\newcommand{\la}{\left\langle}
+\newcommand{\ra}{\right\rangle}
+
+\newcommand{\equivproofterm}[6]{
+    \left \langle \left \langle
+        \lambda #1 : #2 . #3,
+        \lambda #4 : #5 . #6
+    \right \rangle \right \rangle : #2 \equiv #5
+}
+
+\newcommand{\andproofterm}[4]{
+    \left \langle #1, #3 \right \rangle : #2 \land #4
+}
 
 \author{Jacob Thomas Errington (260636023)}
 \title{Assignment \#2\\Logic and computations -- COMP 527}
@@ -62,13 +81,6 @@ elimination rules.
     \end{tabular}
 \end{center}
 
-\newcommand{\equivproofterm}[6]{
-    \left \langle
-        \lambda #1 : #2 . #3,
-        \lambda #4 : #5 . #6
-    \right\rangle : #2 \equiv #5
-}
-
 \begin{enumerate}
     \item These rules have the following proof terms, which look overall like a
         combination of the terms for conjunctions and implications.
@@ -86,7 +98,7 @@ elimination rules.
         $$
 
         $$
-        \infer[\equiv E_L]{\fst M x : B}{
+        \infer[\equiv E_L]{\fste M x : B}{
             M : A \equiv B
             &
             x : A
@@ -94,7 +106,7 @@ elimination rules.
         $$
 
         $$
-        \infer[\equiv E_R]{\snd M y : A}{
+        \infer[\equiv E_R]{\snde M y : A}{
             M : A \equiv B
             &
             y : B
@@ -122,7 +134,7 @@ elimination rules.
             &
             \Rightarrow_R
             &
-            \deduce[\text{[}\mathcal{F} / u \text{]} \mathcal{D}]{M:B}{}
+            \deduce[{[}\mathcal{F} / u{]} \mathcal{D}]{M:B}{}
         \end{array}
         $$
 
@@ -133,15 +145,15 @@ elimination rules.
             \Rightarrow_E
             &
             \infer[\equiv I^{u, v}]{
-                \equivproofterm{x}{A}{\fst M x}{y}{B}{\snd M y}
+                \equivproofterm{x}{A}{\fste M x}{y}{B}{\snde M y}
             }{
-                \infer[\equiv E_L]{\fst M x : B}{
+                \infer[\equiv E_L]{\fste M x : B}{
                     \deduce[\mathcal{D}]{M : A \equiv B}{}
                     &
                     \infer[u]{x : A}{}
                 }
                 &
-                \infer[\equiv E_R]{\snd M y : A}{
+                \infer[\equiv E_R]{\snde M y : A}{
                     \deduce[\mathcal{D}]{M : A \equiv B}{}
                     &
                     \infer[v]{y : B}{}
@@ -316,6 +328,179 @@ elimination rules.
         \end{center}
 
 \end{enumerate}
+
+\section{Type uniqueness}
+
+\begin{proposition}
+    If $\Gamma \proves M : A$ and $\Gamma \proves M : B$, then $A = B$.
+\end{proposition}
+
+\begin{proof}
+    By structural induction on given derivations.
+
+    \begin{description}
+        \item[Case] $\top I$
+
+            \begin{center}
+                \begin{tabular}{cc}
+                    $\mathcal{D}_1
+                        = \infer[\top I]{\Gamma \proves () : \top}{}$
+                    &
+                    $\mathcal{D}_2
+                        = \infer[\top I]{\Gamma \proves () : \top}{}$
+                \end{tabular}
+            \end{center}
+
+            This is a base case. By reflexivity, $() = ()$.
+
+        \item[Case] $\land I$
+
+            \begin{center}
+                \begin{tabular}{cc}
+                    $
+                    \mathcal{D}_1 = \infer[\land I]{
+                        \Gamma \proves \andproofterm{M}{A_1}{N}{B_1}
+                    }{
+                        \deduce[\mathcal{D}_{11}]{
+                            \Gamma \proves M : A_1
+                        }{}
+                        &
+                        \deduce[\mathcal{D}_{12}]{
+                            \Gamma \proves N : B_1
+                        }{}
+                    }
+                    $
+                    &
+                    $
+                    \mathcal{D}_2 = \infer[\land I]{
+                        \Gamma \proves \andproofterm{M_2}{A_2}{N_2}{B_2}
+                    }{
+                        \deduce[\mathcal{D}_{21}]{
+                            \Gamma \proves M : A_2
+                        }{}
+                        &
+                        \deduce[\mathcal{D}_{22}]{
+                            \Gamma \proves N : B_2
+                        }{}
+                    }
+                    $
+                \end{tabular}
+            \end{center}
+
+            By the induction hypothesis on $\D_{11}$ and $\D_{21}$, we get that
+            $M : A_1 = M : A_2$. Likewise we get that $N : B_1 = N : B_2$.
+            Then by $\land I$ on $\D_{21}$ and $\D_{22}$ we get
+            $\left \langle M, N \right \rangle : A_1 \land B_1$ as required.
+
+        \item[Case] $\land E_L$ (and $\land E_R$)
+
+            \begin{center}
+                \begin{tabular}{cc}
+                    $
+                    \mathcal{D}_1 = \infer[\land E_L]{\fst M : A_1}{
+                        \deduce[\mathcal{D}_1^\prime]{
+                            \Gamma \proves M : A_1 \land B_1
+                        }{}
+                    }
+                    $
+                    &
+                    $
+                    \mathcal{D}_2 = \infer[\land E_L]{\fst M : A_2}{
+                        \deduce[\mathcal{D}_2^\prime]{
+                            \Gamma \proves M : A_2 \land B_2
+                        }{}
+                    }
+                    $
+                \end{tabular}
+            \end{center}
+
+            By the induction hypothesis we can establish that from
+            $\D_2^\prime$, $\Gamma \proves M : A_1 \land M_1$. Then by $\land
+            E_L$ (or $\land E_R$), we conclude from $\D_2^\prime$ that
+            $\Gamma \proves \fst M : A_1$.
+
+            The proof for $\land E_R$ is essentially the same: we change $\fst$
+            to $\snd$ and use $\land E_R$ instead of $\land E_L$.
+
+        \item[Case] $\implies I$
+
+            \begin{center}
+                \begin{tabular}{cc}
+                    $
+                    \mathcal{D}_1 = \infer[\implies I]{
+                        \Gamma \proves \lambda u : A_1 . M : A_1 \implies B_1
+                    }{
+                        \deduce[\mathcal{D}_1^\prime]{
+                            \Gamma, x:A_1 \proves M : B_1
+                        }{}
+                    }
+                    $
+                    &
+                    $
+                    \mathcal{D}_2 = \infer[\implies I]{
+                        \Gamma \proves \lambda u : A_2 . M : A_2 \implies B_2
+                    }{
+                        \deduce[\mathcal{D}_2^\prime]{
+                            \Gamma, x:A_2 \proves M : B_2
+                        }{}
+                    }
+                    $
+                \end{tabular}
+            \end{center}
+
+            By the induction hypothesis on $\D_1^\prime$ and $\D_2^\prime$, we
+            can conclude both $x : A_1 = x : A_2$ and $M : B_1 = M : B_2$. By
+            implication introduction on the right derivation, we derive $\Gamma
+            \proves \lambda x : A_1 . M : A_1 \implies B_1$ as required.
+
+        \item[Case] $\implies E$
+
+            \begin{center}
+                \begin{tabular}{cc}
+                    $
+                    \mathcal{D}_1 = \infer[\implies E]{
+                        \Gamma \proves N x : B_1
+                    }{
+                        \deduce[\mathcal{D}_{11}]{
+                            \Gamma \proves N : A_1 \implies B_1
+                        }{}
+                        &
+                        \deduce[\mathcal{D}_{12}]{
+                            \Gamma \proves x : A_1
+                        }{}
+                    }
+                    $
+                    &
+                    $
+                    \mathcal{D}_2 = \infer[\implies E]{
+                        \Gamma \proves N x : B_2
+                    }{
+                        \deduce[\mathcal{D}_{21}]{
+                            \Gamma \proves N : A_2 \implies B_2
+                        }{}
+                        &
+                        \deduce[\mathcal{D}_{22}]{
+                            \Gamma \proves x : A_2
+                        }{}
+                    }
+                    $
+                \end{tabular}
+            \end{center}
+
+            By the induction hypothesis on $\mathcal{D}_{11}$ and
+            $\mathcal{D}_{21}$, we can conclude from $\Gamma \proves N : A_1
+            \implies B_1$ from $\mathcal{D}_{21}$. Likewise we can conclude
+            that $\Gamma \proves x : A_1$ from $\mathcal{D}_{22}$. Then by
+            $\implies E$, we can derive $\Gamma \proves N x : B_1$ from
+            $\mathcal{D}_{21}$ and $\mathcal{D}_{22}$ as required.
+
+        \item[Case] \ldots
+
+            The other cases follow from essentially the same argument, so we
+            will not include them.
+
+    \end{description}
+\end{proof}
 
 \section{First-order logic proofs}
 
