@@ -50,4 +50,56 @@
     nonconstant size is logarithmically bounded in the size of $w$ as required.
 \end{proof}
 
+\section{Implementing symmetric functions}
+
+A symmetric function $f : \{0, 1\}^n \to \{0, 1\}$ can be thought of as a
+function $f : n \to \{0, 1\}$ from the $n$-set, since the order of the inputs
+doesn't matter. With that in mind, our goal is to construct a circuit that can
+``figure out'' which $i \in n$ is represented by the input bits and output the
+according $f(i)$.
+
+First, we can use a $MAJ$ gate to implement a check that the number of input
+bits set to $1$ \emph{at least} a given number $i$. We start by wiring all
+input bits to the gate.
+
+We now have to pad the gate's inputs with constants to get the right behaviour.
+Our padding scheme is to add $i$ '$0$'s and $n - i + 1$ '$1$'. The total number
+of input wires then comes to $2n + 1$ which is always odd, of which $n - i + 1$
+are always on. The threshold for majority is between $n$ and $n+1$. Hence, at
+least $i$ of the original $n$ variable input wires are set to $1$ if and only
+if the proportion of input wires set to $1$ is at least $\frac{n + 1}{2n + 1}$,
+which is just over half.
+
+Second, we can use a $MAJ$ gate to implement a check that the number of input
+bits set to $1$ is \emph{at most} a given number $i$. We begin as before by
+wiring all the circuit input bits to the gate. This time however we wire all
+the \emph{negated} variable inputs.
+
+Once again, we will pad the gate's inputs with constants. The padding scheme is
+different this time. We add $i + 1$ constant '$1$'s and $n - 1$ constant
+'$0$'s.
+
+Using two of these gates in unison, we can check for equality to a given $i$.
+Now we can get into the meat of the construction of the circuit. For each $i
+\in n$ such that $f(i) = 1$, we add a two $MAJ$ gates, one to implement a check
+that the number of inputs is at most $i$ called $g_{\leq i}$ and the other to
+implement a check that the number of inputs is at least $i$ called
+$g_{\geq i}$. Call each such pair of gates $G_i$.
+
+Next, we add one final $MAJ$ gate whose output is the output of the circuit. We
+wire the outputs of all the gates constructed in the previous step to this
+gate. Let's analyze this situation.
+
+Let $I = \{i \in n | f(i) = 1\}$ and let $i$ be the sum of the input bits.
+There are $2|I|$ wires now coming into this final gate.
+If $i \in I$, then both of the gates in $G_i$ will ouput $i$. All other $G_j$
+for $j \neq i$ will have only one member gate emitting $1$ (else we reach a
+contradiction). In other words if $i \in I$, then the number of wires carrying
+$1$ coming into the final gates is $\frac{I}{2} + 1$, which is a majority.
+On the other hand, if $i \notin I$, then each gate pair $G_i$ for all $i \in n$
+will have only one member gate outputting $1$. Hence, the sum of the inputs
+coming into the final gate is $\frac{I}{2}$, which is not a majority.
+
+This concludes the construction.
+
 \end{document}
