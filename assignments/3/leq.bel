@@ -1,0 +1,15 @@
+LF nat:type = 
+| z : nat
+| s : nat -> nat ;
+
+LF leq: nat -> nat -> type = 
+| le_z: leq z N
+| le_s: leq N M -> leq (s N) (s M);
+
+rec ref: {N: [|-nat]} [|- leq N N] = 
+/ total n (ref n) /
+mlam N => case [|- N] of
+| [|- z] => [|- le_z]
+| [|- s M] => let [|- P] = ref [|- M] in [|- le_s P];
+
+
