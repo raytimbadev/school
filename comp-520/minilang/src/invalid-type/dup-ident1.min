@@ -1,0 +1,4 @@
+# duplicated variable declaration with the same type
+var x : string;
+var y : int;
+var x : string;
