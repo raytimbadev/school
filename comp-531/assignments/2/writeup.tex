@@ -50,6 +50,103 @@
     nonconstant size is logarithmically bounded in the size of $w$ as required.
 \end{proof}
 
+\section{Father-son cycle detection}
+
+\begin{proposition}
+    The father-son algorithm terminates in finite time.
+\end{proposition}
+
+\begin{proof}
+    The algorithm's termination criteria are the following.
+
+    \begin{itemize}
+        \item
+            For all $v \in V$, for all $(v, w) \in E$, if the son leaves along
+            $(v, w)$, then he returns along $(w, v)$. (This is the success
+            criterion.)
+
+        \item
+            For some $v \in V$, for some $(v, w) \in E$, if the son leaves
+            along $(v, w)$, then he returns along some $e \neq (w, v)$. (This
+            is the failure criterion.)
+    \end{itemize}
+
+    These critera are conceptually the same: one is the negation of the other.
+    Indeed, the only way that either could fail to be met is by the son
+    ``getting stuck'' after leaving.
+
+    Suppose that the son gets stuck in a cycle $K = (u, v, \cdots, w, u)$. In
+    particular, the son will travel through $(w, u, v)$ infinitely many times.
+    Let's consider how the son entered this cycle: the son arrived at $u$ from
+    some vertex $w^\prime$, and subsequently went to vertex $v$. This implies
+    that if the edge $(u, v)$ is the $j$th edge at $v$, then $(w^\prime, u$ is
+    the $(j-1)$th edge. The description of the cycle on the other hand implies
+    that $w$ is also the $(j-1)$th edge at $v$. We deduce that $w = w^\prime$.
+    The key conclusion though is that the son cannot \emph{enter} a cycle. He
+    is begins on a vertex that is a part of a cycle or he will never get caught
+    in a cycle.
+
+    Now we can examine the behaviour of the son after leaving the starting
+    vertex $u$ where the father is. Suppose that the son never returns to $u$.
+    The son must thus have entered a loop. From the result in above, we know
+    that the son cannot ``enter'' a loop; he must have started in one. Hence
+    the vertex $u$ is a member of the looping set of vertices and the son will
+    in fact return to the father.
+
+    Finally, we can state that the algorithm terminates in finite time since
+    the son always returns to the father and the father lets the son go only a
+    finite number of times (each vertex has finite degree and there are
+    finitely many vertices).
+\end{proof}
+
+\begin{proposition}
+    The father-son algorithm is correct.
+\end{proposition}
+
+\begin{proof}
+    First, we will show that if there does not exist a cycle in the graph, then
+    the son will always return along the edge that he left along.
+
+    Suppose not, i.e. that the son leaves along an edge $(v, w)$ but returns
+    along $(u, v) \neq (v, w)$. The sequence of vertices visited by the son
+    forms a cycle, which is a contradiction.
+
+    Next, we will show that if there exists a cycle in the graph, then there
+    exists a vertex and an edge such that if the son leaves along that edge
+    then he will return along a different edge.
+
+    Let $K = (u, v, \cdots, w, u)$ be a cycle of minimal size in the graph and
+    suppose the son first leaves from $u$ along $(u, v)$. Now we will
+    systematically rule out the possibility of the son returning to $u$ along
+    $(v, u)$. Consider that in order to ``double back'' along an edge of rank
+    $i$ after arriving at a vertex $u$, according to the description of the
+    algorithm, one of the following circumstances must arise.
+
+    \begin{itemize}
+        \item
+            The vertex $u$ that the son arrives at by following the edge has
+            degree one.
+
+        \item
+            The son leaves from $u$ along an edge of rank $i+1$ and eventually
+            returns along an edge of rank $i-1$.
+    \end{itemize}
+
+    In the first situation, we reach a contradiction of the existence of a
+    cycle: each vertex in a cycle must have degree at least two.
+
+    In the second situation, we reach a contradiction of the minimality of the
+    cycle: a smaller cycle could be constructed by considering the sequence of
+    vertices visited by the son when leaving along the edge of rank $i+1$ until
+    he returns to the vertex $u$.
+
+    Since the father will make the son leave from every vertex and along every
+    adjacent edge thereof, the son will in fact eventually wind up in the
+    situation where he is travelling along a cycle of minimal size.
+    Consequently he will return to the starting vertex along a different edge
+    and the algorithm will report the detection of a cycle, as required.
+\end{proof}
+
 \section{Implementing symmetric functions}
 
 A symmetric function $f : \{0, 1\}^n \to \{0, 1\}$ can be thought of as a
