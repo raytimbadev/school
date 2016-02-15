@@ -115,36 +115,41 @@
     exists a vertex and an edge such that if the son leaves along that edge
     then he will return along a different edge.
 
-    Let $K = (u, v, \cdots, w, u)$ be a cycle of minimal size in the graph and
-    suppose the son first leaves from $u$ along $(u, v)$. Now we will
-    systematically rule out the possibility of the son returning to $u$ along
-    $(v, u)$. Consider that in order to ``double back'' along an edge of rank
-    $i$ after arriving at a vertex $u$, according to the description of the
-    algorithm, one of the following circumstances must arise.
+    Let $K = (u, v, \cdots, w, u)$ be a cycle in the graph and suppose the son
+    first leaves from $u$ along $(u, v)$. If the son returns along $(w, u)$,
+    then the cycle has been detected. In fact, if the son returns along
+    $(w^\prime, u)$ for any $w^\prime \neq v$, then the cycle will be detected.
+
+    That leaves the case of the son returning along $(v, u)$. Suppose the son
+    returns along $(v, u)$. This means that the son had to have ``doubled
+    back'' at some point while travelling along $K$. Additionally, this means
+    that the son had to have departed from $K$ at some point. Let $s$ be the
+    furthest vertex along $K$ upon arriving at which from a vertex in $K$, the
+    son then goes on to some vertex not in $K$. Several cases arise.
 
     \begin{itemize}
         \item
-            The vertex $u$ that the son arrives at by following the edge has
-            degree one.
+            If the son returns to $s$ along the same edge as he departed
+            (repeatedly), then he will eventually move on to another vertex in
+            $K$. This is a contradiction since in doing so, the son will
+            eventually return to $u$ along $(w, u)$, so this case cannot arise.
 
         \item
-            The son leaves from $u$ along an edge of rank $i+1$ and eventually
-            returns along an edge of rank $i-1$.
+            If the son returns to $s$ along a different edge, then when the
+            father is or was at $s$ later or ealier, respectively, in the
+            algorithm, then due to the memorylessness of the cycle searching
+            principle, this behaviour will occur then and the cycle will be
+            detected.
+
+        \item
+            If the son does not return to $s$ but instead returns to some other
+            vertex $t$ along $K$, then if that vertex is further along $K$ than
+            $s$ then we can repeat this same argument; else, if that vertex is
+            earlier along $K$ than $s$, then when the father is positioned at
+            $t$ and has the son leave such that he will eventually reach $s$
+            and return to $t$, the son will be doing so along a different edge
+            than when he left, so this cycle will be detected.
     \end{itemize}
-
-    In the first situation, we reach a contradiction of the existence of a
-    cycle: each vertex in a cycle must have degree at least two.
-
-    In the second situation, we reach a contradiction of the minimality of the
-    cycle: a smaller cycle could be constructed by considering the sequence of
-    vertices visited by the son when leaving along the edge of rank $i+1$ until
-    he returns to the vertex $u$.
-
-    Since the father will make the son leave from every vertex and along every
-    adjacent edge thereof, the son will in fact eventually wind up in the
-    situation where he is travelling along a cycle of minimal size.
-    Consequently he will return to the starting vertex along a different edge
-    and the algorithm will report the detection of a cycle, as required.
 \end{proof}
 
 \section{Implementing symmetric functions}
