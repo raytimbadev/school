@@ -160,7 +160,7 @@ bits set to $1$ \emph{at least} a given number $i$. We start by wiring all
 input bits to the gate.
 
 We now have to pad the gate's inputs with constants to get the right behaviour.
-Our padding scheme is to add $i$ '$0$'s and $n - i + 1$ '$1$'. The total number
+Our padding scheme is to add $i$ `$0$'s and $n - i + 1$ `$1$'. The total number
 of input wires then comes to $2n + 1$ which is always odd, of which $n - i + 1$
 are always on. The threshold for majority is between $n$ and $n+1$. Hence, at
 least $i$ of the original $n$ variable input wires are set to $1$ if and only
@@ -173,8 +173,8 @@ wiring all the circuit input bits to the gate. This time however we wire all
 the \emph{negated} variable inputs.
 
 Once again, we will pad the gate's inputs with constants. The padding scheme is
-different this time. We add $i + 1$ constant '$1$'s and $n - 1$ constant
-'$0$'s.
+different this time. We add $i + 1$ constant `$1$'s and $n - 1$ constant
+`$0$'s.
 
 Using two of these gates in unison, we can check for equality to a given $i$.
 Now we can get into the meat of the construction of the circuit. For each $i
@@ -189,13 +189,13 @@ gate. Let's analyze this situation.
 
 Let $I = \{i \in n | f(i) = 1\}$ and let $i$ be the sum of the input bits.
 There are $2|I|$ wires now coming into this final gate.
-If $i \in I$, then both of the gates in $G_i$ will ouput $i$. All other $G_j$
+If $i \in I$, then both of the gates in $G_i$ will output $i$. All other $G_j$
 for $j \neq i$ will have only one member gate emitting $1$ (else we reach a
 contradiction). In other words if $i \in I$, then the number of wires carrying
-$1$ coming into the final gates is $\frac{I}{2} + 1$, which is a majority.
+$1$ coming into the final gate is $|I| + 1$, which is a majority.
 On the other hand, if $i \notin I$, then each gate pair $G_i$ for all $i \in n$
 will have only one member gate outputting $1$. Hence, the sum of the inputs
-coming into the final gate is $\frac{I}{2}$, which is not a majority.
+coming into the final gate is $|I|$, which is not a majority.
 
 This concludes the construction.
 
