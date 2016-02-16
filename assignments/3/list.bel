@@ -12,27 +12,38 @@ mlam N => case [|- N] of
 | [|- z] => [|- le_z]
 | [|- s M] => let [|- P] = ref [|- M] in [|- le_s P];
 
-% now lists
+% Here we define the a simple theory of lists of naturals.
 
 LF list : type =
 | nil : list
 | cons : nat -> list -> list
 ;
 
+% Define a type family `sorted` with constants to describe that a list is
+% sorted if its element are in increasing order.
+
 LF sorted : list -> type =
-| sort_nil : sorted nil % empty lists are sorted
-| sort_singleton : {N : nat} sorted nil -> sorted (cons N nil)
+| sort_nil : sorted nil % empty lists are trivially sorted
+| sort_singleton : sorted (cons N nil)
 | sort_cons
     : sorted (cons M R)
     -> leq N M
     -> sorted (cons N (cons M R))
 ;
 
+% We don't really need the sort_nil constructor though since it's never used to
+% prove that larger lists are sorted. We leave it for completeness's sake, in
+% the sense that ontologically it makes sense to say that empty lists are
+% empty.
+
 %query 1 1 P : sorted (cons (s (s z)) (cons (s (s (s (s z)))) (cons (s (s (s (s (s (s (s (s z)))))))) nil))).
 
 %query 1 1 P : sorted (cons z (cons (s z) (cons (s (s z)) nil))).
 
 %query 1 1 P : sorted (cons (s z) (cons (s (s (s z))) (cons (s (s (s (s (s z))))) nil))).
+
+% Define a type family `member` that determines whether an element is in a
+% list.
 
 LF member : nat -> list -> type =
 | here : member N (cons N R)
@@ -44,6 +55,9 @@ LF member : nat -> list -> type =
 %query 1 1 P : member z (cons (s z) (cons (s z) (cons (s z) (cons z nil)))).
 
 %query 1 1 P : member (s (s (s z))) (cons z (cons (s z) (cons (s (s z)) (cons (s (s (s z))) (cons (s (s (s (s z)))) nil))))).
+
+% Define a type family `insert` that relates a natural and two lists and such
+% that the insertion preserves ascending order in the list.
 
 LF insert : nat -> list -> list -> type =
 | ins_nil : insert N nil (cons N nil)

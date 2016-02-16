@@ -1,3 +1,7 @@
+% Exercise 1
+
+% Define an extension to the type `o` for disjunction and negation.
+
 LF o : type =
 | imp : o -> o -> o
 | & : o -> o -> o
@@ -5,6 +9,9 @@ LF o : type =
 | top : o
 | bot : o
 ;
+
+% Define constants that correspond to introduction and elimination rules for
+% disjunction and negation using `or` and `bot`.
 
 LF nd : o -> type =
 | topI : nd top
@@ -19,6 +26,9 @@ LF nd : o -> type =
 | botE : nd bot -> nd C
 ;
 
+% Define new term constants that correspond to introduction and elimination
+% rules for disjunction and negation.
+
 LF tm : o -> type =
 | t : tm top
 | fst : tm (& A B) -> tm A
@@ -31,6 +41,9 @@ LF tm : o -> type =
 | match : tm (or A B) -> (tm A -> tm C) -> (tm B -> tm C) -> tm C
 | abort : tm bot -> tm C
 ;
+
+% Decribe proof terms for the following formulas which were proven in the first
+% assignment.
 
 rec q0 :
     [|- tm (imp (or (imp A bot) (imp B bot)) (imp (& A B) bot))]

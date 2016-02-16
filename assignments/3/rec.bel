@@ -1,3 +1,5 @@
+% Some preliminary definitions
+
 LF nat : type =
 | z : nat
 | s : nat -> nat
@@ -16,6 +18,11 @@ and odd : nat -> type =
 | o_s : ev N -> odd (s N)
 ;
 
+% Completeness.
+
+% Rather than do a proof A => (B, C) as asked for, we will do two proofs, A =>
+% B and A => C, separately.
+
 rec completeness1 : [|- even N] -> [|- ev N] =
     (fn e => (case e of
         | [|- ev_z ] => [|- e_z ]
@@ -33,6 +40,10 @@ and completeness2 : [|- even N] -> [|- odd (s N)] =
             in [|- o_s (e_s X)]
         )
     );
+
+% Soundness.
+
+% Our soundness proofs are mutual recursive.
 
 rec soundnessOdd : [|- odd N] -> [|- even (s N)] =
     (fn e =>
