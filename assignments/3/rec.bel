@@ -1,0 +1,49 @@
+LF nat : type =
+| z : nat
+| s : nat -> nat
+;
+
+LF even : nat -> type =
+| ev_z : even z
+| ev_s : even N -> even (s (s N))
+;
+
+LF ev : nat -> type =
+| e_z : ev z
+| e_s : odd N -> ev (s N)
+
+and odd : nat -> type =
+| o_s : ev N -> odd (s N)
+;
+
+rec completeness1 : [|- even N] -> [|- ev N] =
+    (fn e => (case e of
+        | [|- ev_z ] => [|- e_z ]
+        | [|- ev_s E ] =>
+            let [|- X] = completeness1 [|- E]
+            in [|- e_s (o_s X) ]
+        )
+    )
+
+and completeness2 : [|- even N] -> [|- odd (s N)] =
+    (fn e => (case e of
+        | [|- ev_z] => [|- o_s e_z ]
+        | [|- ev_s E ] =>
+            let [|- X] = completeness2 [|- E]
+            in [|- o_s (e_s X)]
+        )
+    );
+
+rec soundnessOdd : [|- odd N] -> [|- even (s N)] =
+    (fn e =>
+        let [|- o_s E] = e
+        in let [|- F] = soundnessEven [|- E]
+        in [|- ev_s F ]
+    )
+
+and soundnessEven : [|- ev N] -> [|- even N] =
+    (fn e => (case e of
+        | [|- e_z] => [|- ev_z]
+        | [|- e_s E] => soundnessOdd [|- E]
+        )
+    );

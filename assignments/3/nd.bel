@@ -1,0 +1,55 @@
+LF o : type =
+| imp : o -> o -> o
+| & : o -> o -> o
+| or : o -> o -> o
+| top : o
+| bot : o
+;
+
+LF nd : o -> type =
+| topI : nd top
+| andEl : nd (& A B) -> nd A
+| andEr : nd (& A B) -> nd B
+| andI : nd A -> nd B -> nd (& A B)
+| impE : nd (imp A B) -> nd A -> nd B
+| impI : (nd A -> nd B) -> nd (imp A B)
+| orIl : nd A -> nd (or A B)
+| orIR : nd B -> nd (or A B)
+| orE : nd (or A B) -> (nd A -> nd C) -> (nd B -> nd C) -> nd C
+| botE : nd bot -> nd C
+;
+
+LF tm : o -> type =
+| t : tm top
+| fst : tm (& A B) -> tm A
+| snd : tm (& A B) -> tm B
+| pair : tm A -> tm B -> tm (& A B)
+| app : tm (imp A B) -> tm A -> tm B
+| fun : (tm A -> tm B) -> tm (imp A B)
+| inl : tm A -> tm (or A B)
+| inr : tm B -> tm (or A B)
+| match : tm (or A B) -> (tm A -> tm C) -> (tm B -> tm C) -> tm C
+| abort : tm bot -> tm C
+;
+
+rec q0 :
+    [|- tm (imp (or (imp A bot) (imp B bot)) (imp (& A B) bot))]
+    = [|- fun \disj.
+        match disj
+            (\abot. fun \ab. app abot (fst ab))
+            (\bbot. fun \ab. app bbot (snd ab)) ];
+
+rec q1 :
+    [|- tm (imp (& (imp A bot) (imp B bot)) (imp (or A B) bot)) ]
+    = [|- fun \nanb.
+        fun \aorb.
+            match aorb
+                (\a. app (fst nanb) a)
+                (\b. app (snd nanb) b) ];
+
+rec q2 :
+    [|- tm (imp (or (& A B) C) (& (or A C) (or B C))) ]
+    = [|- fun \condisj.
+        match condisj
+            (\ab. pair (inl (fst ab)) (inl (snd ab)))
+            (\c. pair (inr c) (inr c)) ];
