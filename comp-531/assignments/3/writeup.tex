@@ -1,0 +1,59 @@
+\documentclass[letterpaper,11pt]{article}
+
+\title{Assignment \#3\\Advanced theory of computation -- COMP 531}
+\author{Jacob Thomas Errington (260636023)}
+\date{7 March 2016}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+
+\newtheorem{proposition}{Proposition}
+
+\begin{document}
+
+\maketitle
+
+\section*{Special iterated addition}
+
+\begin{proposition}
+    The sum of $\log n$ $n$-bit numbers can be computed in $AC^0$.
+\end{proposition}
+
+\begin{proof}
+    We will construct a circuit of polynomial size and constant depth to
+    compute the sum.
+
+    First, let $r = \sqrt {\log n}$. Consider the input numbers in groups of
+    size $r$, further splitting the columns into groups of size $r$ as well.
+    Hence the full input ``grid'' of digits is cut up into squares with side
+    measure $r$. Hence, each square has $r^2 = \log n$ bits in it.
+
+    Next, we construct a circuit that computes the sum of one square. The sum
+    will have at most $r + \log r$ bits, and we can compute each bit by a
+    brute force approach with size
+    $$
+    2^{r + \log r} \leq 2^{2r} = 2^{2 \sqrt {\log n}} \in O(2^{\log n}) = O(n)
+    $$
+    and depth $2$ as an $OR$ of $AND$s representing a lookup table. Since each
+    bit requires $O(n)$ gates to be computed, and there are
+    $O(r + \log r) \in O(n)$ bits to compute per square, and there are a
+    polynomial number of squares, this section of the overall circuit
+    contributes a polynomial number of gates to the final circuit.
+
+    Next, for each row group, we concatenate (with some zero padding) the
+    second, fourth, sixth, etc. squares into one long binary string and
+    similarly concatenate the first, third, fifth, etc. squares into another
+    long binary string. These two strings will each have at most $n + \log r$
+    bits. These two numbers may be added by an $AC^0$ circuit, which will
+    contribute a constant amount of depth and a polynomial amount gates to the
+    overall circuit.
+
+    At this stage in the circuit, each row group, of which there are
+    $\frac{\log n}{r}$, has been collapsed into an
+    $n + \log r + \log{(n + \log r)}$ bit number.
+    This whole process is repeated a second time on these numbers to produce
+    $\frac{\frac{\log n}{r}}{r} = \frac{\log n}{r^2} = 1$ number, which is the
+    answer.
+\end{proof}
+
+\end{document}
