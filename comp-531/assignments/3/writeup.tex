@@ -11,6 +11,7 @@
 \newtheorem{claim}{Claim}
 
 \newcommand{\F}{\mathbb{F}}
+\DeclareMathOperator{\size}{size}
 
 \begin{document}
 
@@ -119,11 +120,61 @@
 
 \begin{proposition}
     Any $n$-input boolean function can be computed by a bounded fan-in circuit
-    of size $O(\frac{2^n}{n})$.
+    of size $O\left(\frac{2^n}{n}\right)$.
 \end{proposition}
 
 \begin{proof}
+    The fact that
+    $$
+    f(x_1, \cdots, x_n)
+    = x_1 \land f(1, x_2, \cdots, x_n)
+    \lor \neg x_1 \land f(0, x_2, \cdots, x_n)
+    $$
+    gives us a recurrence relation for the size of a circuit constructed in
+    this way for a function of $n$ inputs.
+    $$
+    \size{(n)} = 3 + 2 \size{(n - 1)} \in O(2^n)
+    $$
 
+    But this upper bound is looser than desired. However, it gives us a way of
+    representing functions in terms of a so-called ``residual function'' of
+    fewer bits by fixing the values of some bits.
+
+    The trick is to cut off the recursive construction of the circuit in this
+    way after $n - \log{(n - \log n)}$ bits are fixed; the remaining bits can
+    be dealt with separately.
+
+    We know that for finite sets $A$ and $B$, $|\{f : A \to B\}| = |B|^{|A|}$.
+    Hence, there are $2^{2^n}$ boolean functions on $n$ inputs. Consequently,
+    on the remaining $\log{(n - \log n)}$ bits, there are
+    $2^{2^{\log{(n - \log n)}}}$ possible boolean functions.
+
+    Using the recursive construction to compute all such possible functions on
+    the smaller set of inputs gives us that
+    \begin{align*}
+        \size{(\log{(n - \log n)})}
+        &\leq \left(2^{2^{\log{(n - \log n)}}}\right)^2 \\
+        &+ 2 \times 2^{2^{\log{(n - \log n)} - 1}} \\
+        &+ 2^{2^{\log{(n - \log n)}}} \\
+        &= 2^{2^{\log{(n - \log n)}}} (1 + o(1))
+    \end{align*}
+
+    The intuition is that since $2^{2^{\log{(n - \log n)}}}$ is smaller than
+    $2^{n - \log{(n - \log n)}}$, it becomes more efficient in terms of circuit
+    size to ``precompute'' all the functions on the residual bits instead of
+    constructing them recursively at each of the $2^{n - \log{(n - \log n)}}$
+    branches of the recursion at that point.
+
+    The size of the circuit constructed by this two-phase recursive process is
+    given by the sum of the sizes of the circuits constructed by both phases.
+    The size of the first phase circuit is given by the recurrence relation.
+    Considering the cutoff at $n - \log{(n - \log n)}$, the size works out to
+    at most $3 + 2 \times 2^{n - \log{(n - \log n)}}$. The size of the second
+    phase circuit is as computed above. The sum comes out to at most
+    $$
+    3 \frac{2^n}{n - \log n} + \frac{2^n}{n} \in O\left(\frac{2^n}{n}\right)
+    $$
+    as required.
 \end{proof}
 
 \section*{Upper bound for the size of a $PARITY/AND$ circuit}
