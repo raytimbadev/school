@@ -258,13 +258,11 @@ See figures \ref{fig:seq-calc-1} and \ref{fig:seq-calc-2}.
             \infer[\imp L]{\Gamma \seq B}{
                 \infer[\imp R^u]{\Gamma \seq C \imp D}{
                     \infer[\imp L]{\Gamma, u:C \seq D}{
-                        \infer[\imp R^v]{\Gamma, u:C, v:D \imp B \seq C}{
+                        \infer[\imp R^v]{\Gamma, u:C \seq (D \imp B) \imp C}{
                             \infer[\init]{\Gamma, u:C, v:D \imp B \seq C}{}
                         }
                         &
-                        \infer[\init]{}{
-                            \Gamma, u:C, D \seq D
-                        }
+                        \infer[\init]{\Gamma, u:C, D \seq D}{}
                     }
                 }
                 &
