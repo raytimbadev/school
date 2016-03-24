@@ -1,0 +1,211 @@
+\documentclass[11pt,letterpaper]{article}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#4\\Logic and computation -- COMP 527}
+\date{24 March 2016}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amsthm,amssymb,proof}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+
+\DeclareMathOperator{\opNode}{Node}
+\DeclareMathOperator{\opTree}{tree}
+\DeclareMathOperator{\opNat}{nat}
+\DeclareMathOperator{\opTrue}{true}
+\DeclareMathOperator{\opRec}{\mathtt{rec}}
+\DeclareMathOperator{\opLet}{\mathtt{let}}
+\DeclareMathOperator{\opIn}{\mathtt{in}}
+\DeclareMathOperator{\opWith}{\mathtt{with}}
+
+\newcommand{\emptyTree}{\mathrm{Empty}}
+\newcommand{\nodeTree}[3]{\opNode{#1\,#2\,#3}}
+\newcommand{\tree}{\opTree{}}
+\newcommand{\nat}{\opNat{}}
+\newcommand{\with}{\opWith{}}
+\newcommand{\case}[3]{#1\,#2\mapsto #3}
+\newcommand{\orCase}{\mid}
+\newcommand{\rec}[1]{\opRec{\,#1\,}}
+\newcommand{\reducesTo}{\implies}
+\newcommand{\olet}{\opLet{}\,}
+\newcommand{\oin}{\opIn{}\,}
+\newcommand{\proves}{\vdash}
+\renewcommand{\t}{\opTrue{}}
+
+\begin{document}
+
+\maketitle
+
+\section{Induction principles for binary trees}
+
+Consider the following definition of binary trees.
+
+\begin{align*}
+    \infer{\emptyTree : \text{tree}}{}
+    &
+    \quad
+    &
+    \infer{\nodeTree{n}{t_1}{t_2} : \tree}{
+        n : \nat & t_1 : \tree & t_2 : \tree
+    }
+\end{align*}
+
+\begin{enumerate}
+    \item Here is an induction rule for binary trees.
+
+        \begin{equation*}
+            \infer[\tree E^{n, t_1, t_2, ih_1, ih_2}]{A(t) \t}{
+                t : \tree
+                &
+                A(\emptyTree) \t
+                &
+                \infer*{A(\nodeTree{n}{t_1}{t_2}) \t}{
+                    \infer{n : \nat}{}
+                    &
+                    \infer{t_1 : \tree}{}
+                    &
+                    \infer{t_2 : \tree}{}
+                    &
+                    \infer[ih_1]{A(t_1) \t}{}
+                    &
+                    \infer[ih_2]{A(t_2) \t}{}
+                }
+            }
+        \end{equation*}
+
+    \item Here is an induction rule for binary trees annotated with proof
+        terms.
+
+        \begin{equation*}
+            \infer[\tree E^{n, t_1, t_2, ih_1, ih_2}]{
+                \rec{t} \with
+                \case{f}{\emptyTree}{M_E}
+                \orCase
+                \case{f}{\nodeTree{n}{t_1}{t_2}}{M_N}
+                : A(t)
+            }{
+                t : \tree
+                &
+                M_E : A(\emptyTree)
+                &
+                \infer*{M_N : A(\nodeTree{n}{t_1}{t_2})}{
+                    \infer{n : \nat}{}
+                    &
+                    \infer{t_1 : \tree}{}
+                    &
+                    \infer{t_2 : \tree}{}
+                    &
+                    \infer[ih_1]{f\, t_1 : A(t_1)}{}
+                    &
+                    \infer[ih_2]{f\, t_2 : A(t_2)}{}
+                }
+            }
+        \end{equation*}
+
+    \item Here is a reduction rule for recursion on binary trees.
+
+        \begin{equation*}
+            \rec{\emptyTree}
+            \with \case{f}{\emptyTree}{M_E}
+            \orCase \case{f}{\nodeTree{n}{t_1}{t_2}}{M_N} \reducesTo M_E
+        \end{equation*}
+
+        \begin{align*}
+            &\rec{\nodeTree{m}{s_1}{s_2}}
+            \with \case{f}{\emptyTree}{M_E}
+            \orCase \case{f}{\nodeTree{n}{t_1}{t_2}}{M_N} \\
+            \reducesTo
+            &\olet r_1 = \rec{s_1}
+                \with \case{f}{\emptyTree}{M_E}
+                \orCase \case{f}{\nodeTree{n}{t_1}{t_2}}{M_N} \oin \\
+            &\olet r_2 = \rec{s_2}
+                \with \case{f}{\emptyTree}{M_E}
+                \orCase \case{f}{\nodeTree{n}{t_1}{t_2}}{M_N} \oin \\
+            &\left[m/n, s_1/t_1, s_2/t_2, r_1/f\,t_1, r_2/f\,t_2\right]M_N
+        \end{align*}
+
+    \item The proposed rules preserve typing.
+
+        \begin{proof} By examining the operation of the rules.
+            \begin{description}
+                \item[Base case.] Using the first reduction rule.
+
+                    \begin{tabular}{c r}
+                        $
+                        \rec{\emptyTree}
+                        \with \case{f}{\emptyTree}{M_E}
+                        \orCase \case{f}{\nodeTree{n}{t_1}{t_2}}{M_N}
+                        : A(\emptyTree)
+                        $
+                        &
+                        ass. \\
+                        $
+                        M_E : A(\emptyTree)
+                        $
+                        &
+                        by $\tree E$
+                    \end{tabular}
+
+                \item[Step case.] Using the second reduction rule.
+
+                    \begin{tabular}{c r}
+                        $ % ***
+                        \rec{\nodeTree{m}{s_1}{s_2}}
+                        \with \case{f}{\emptyTree}{M_E}
+                        \orCase \case{f}{\nodeTree{n}{t_1}{t_2}}{M_N}
+                        : A(\nodeTree{m}{s_1}{s_2})
+                        $
+                        &
+                        ass. \\
+                        $ % ***
+                        \nodeTree{m}{s_1}{s_2} : \tree,
+                        m : \nat, s_1 : \tree, s_2 : \tree
+                        $
+                        &
+                        by $\tree E$ \\
+                        $ % ***
+                        M_E : A(\emptyTree)
+                        $
+                        &
+                        ~ \\
+                        $ % ***
+                        n : \nat, t_1 : \tree, t_2 : \tree,
+                        ih_1 : A(t_1), ih_2 : A(t_2)
+                        \proves M_N : A(\nodeTree{n}{t_1}{t_2})
+                        $
+                        &
+                        ~ \\
+                        $ % ***
+                        ih_1 : A(s_1), ih_2 : A(s_2)
+                        \proves
+                        \left[m/n, s_1/t_1, s_2/t_2\right]
+                        M_N : A(\nodeTree{m}{s_1}{s_2})
+                        $
+                        &
+                        subst. \\
+                        $ % ***
+                        \proves
+                        \left[
+                            m/n, s_1/t_1, s_2/t_2, r_1/f\, t_1, r_2/f\, t_2
+                        \right]
+                        M_N : A(\nodeTree{m}{s_1}{s_2})
+                        $
+                        &
+                        subst. \\
+                    \end{tabular}
+            \end{description}
+        \end{proof}
+
+    \item Here is a primitive recursive program to compute the size of a binary
+        tree.
+
+        \begin{equation*}
+            \rec{t}
+            \with \case{f}{\emptyTree}{z}
+            \orCase \case{f}{\nodeTree{n}{t_1}{t_2}}{s(f\, t_1 + f\, t_2)}
+        \end{equation*}
+
+\end{enumerate}
+
+\end{document}
