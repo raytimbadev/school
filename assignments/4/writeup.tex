@@ -18,6 +18,7 @@
 \DeclareMathOperator{\opLet}{\mathtt{let}}
 \DeclareMathOperator{\opIn}{\mathtt{in}}
 \DeclareMathOperator{\opWith}{\mathtt{with}}
+\DeclareMathOperator{\opInit}{\mathrm{init}}
 
 \newcommand{\emptyTree}{\mathrm{Empty}}
 \newcommand{\nodeTree}[3]{\opNode{#1\,#2\,#3}}
@@ -31,6 +32,9 @@
 \newcommand{\olet}{\opLet{}\,}
 \newcommand{\oin}{\opIn{}\,}
 \newcommand{\proves}{\vdash}
+\newcommand{\init}{\opInit{}}
+\newcommand{\seq}{\implies}
+\newcommand{\imp}{\supset}
 \renewcommand{\t}{\opTrue{}}
 
 \begin{document}
@@ -207,5 +211,73 @@ Consider the following definition of binary trees.
         \end{equation*}
 
 \end{enumerate}
+
+\section{Sequent calculus}
+
+\subsection{Practice}
+
+See figures \ref{fig:seq-calc-1} and \ref{fig:seq-calc-2}.
+
+\begin{figure}[ht]
+    \centering
+    Let $\Gamma = A \land (B \lor C)$ and $\Gamma^\prime = \Gamma, A, B \lor C$.
+    \begin{equation*}
+        \infer[\land L_l]{\Gamma \seq A \land B \lor A \land C}{
+            \infer[\land L_r]{\Gamma, A \seq A \land B \lor A \land C}{
+                \infer[\lor L^{u,v}]{\Gamma^\prime \seq A \land B \lor A \land C}{
+                    \infer[\lor R_l]{\Gamma^\prime, u:B \seq A \land B \lor A \land C}{
+                        \infer[\land R]{\Gamma^\prime, u:B \seq A \land B}{
+                            \infer[\init]{\Gamma^\prime, u:B \seq A}{}
+                            &
+                            \infer[\init]{\Gamma^\prime, u:B \seq B}{}
+                        }
+                    }
+                    &
+                    \infer[\lor R_r]{\Gamma^\prime, v:C \seq A \land B \lor A \land C}{
+                        \infer[\land R]{\Gamma^\prime, v:C \seq A \land C}{
+                            \infer[\init]{\Gamma^\prime, v:C \seq A}{}
+                            &
+                            \infer[\init]{\Gamma^\prime, v:C \seq C}{}
+                        }
+                    }
+                }
+            }
+        }
+    \end{equation*}
+    \caption{
+        Sequent calculus proofs can be very large sometimes.
+    }
+    \label{fig:seq-calc-1}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    Let $\Gamma = (D \imp B) \imp C \imp D, B \imp A, (C \imp D) \imp B$.
+    \begin{equation*}
+        \infer[\imp L]{\Gamma \seq A}{
+            \infer[\imp L]{\Gamma \seq B}{
+                \infer[\imp R^u]{\Gamma \seq C \imp D}{
+                    \infer[\imp L]{\Gamma, u:C \seq D}{
+                        \infer[\imp R^v]{\Gamma, u:C, v:D \imp B \seq C}{
+                            \infer[\init]{\Gamma, u:C, v:D \imp B \seq C}{}
+                        }
+                        &
+                        \infer[\init]{}{
+                            \Gamma, u:C, D \seq D
+                        }
+                    }
+                }
+                &
+                \infer[\init]{\Gamma, B \seq B}{}
+            }
+            &
+            \infer[\init]{\Gamma, A \seq A}{}
+        }
+    \end{equation*}
+    \caption{
+        I can't tell which is crazier; this one, or the previous one?
+    }
+    \label{fig:seq-calc-2}
+\end{figure}
 
 \end{document}
