@@ -7,7 +7,7 @@
 \usepackage[margin=2.0cm]{geometry}
 \usepackage{amsmath,amsthm,amssymb,proof}
 
-\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
 
 \DeclareMathOperator{\opNode}{Node}
@@ -277,5 +277,89 @@ See figures \ref{fig:seq-calc-1} and \ref{fig:seq-calc-2}.
     }
     \label{fig:seq-calc-2}
 \end{figure}
+
+\section{Optimization}
+
+\begin{lemma}
+    For all propositions $A$, $$\Gamma, A \seq A$$
+\end{lemma}
+
+\begin{proof}
+    By structural induction on $A$.
+
+    \begin{description}
+        \item[Base case.] $A = P$, i.e. $A$ is atomic. Then by $init^\prime$ we
+            have $\Gamma, A \seq A$.
+
+        \item[Base case.] $A = \top$
+
+            By $\top R$, $\Gamma \seq \top$ and by weakening
+            \begin{equation*}
+                \Gamma, \top \seq \top
+            \end{equation*}
+
+        \item[Base case.] $A = \bot$
+
+            By $\bot L$, $\Gamma, \bot \seq C$ for any $C$. Instantiating $C$
+            to $\bot$ completes the construction.
+
+        \item[Case] $A = B \land C$
+
+            \begin{equation*}
+                \infer[\land R]{\Gamma, B \land C \seq B \land C}{
+                    \infer[\land L_l]{\Gamma, B \land C \seq B}{
+                        \deduce[\mathcal{D}]{\Gamma, B \land C, B \seq B}{}
+                    }
+                    &
+                    \infer[\land L_r]{\Gamma, B \land C \seq C}{
+                        \deduce[\mathcal{E}]{\Gamma, B \land C, C \seq C}{}
+                    }
+                }
+            \end{equation*}
+
+            We apply the induction hypothesis on $\Gamma, B \seq B$ and use
+            weakening to build the derivation $\mathcal{D}$. Likewise we apply
+            the induction hypothesis on $\Gamma, C \seq C$ and use weakening to
+            build $\mathcal{E}$.
+
+
+        \item[Case] $A = B \imp C$
+
+            \begin{equation*}
+                \infer[\imp R]{\Gamma, B \imp C \seq B \imp C}{
+                    \infer[\imp L]{\Gamma, B \imp C, B \seq C}{
+                        \deduce[\mathcal{D}]{\Gamma, B \imp C, B \seq B}{}
+                        &
+                        \deduce[\mathcal{E}]{\Gamma, B \imp C, C \seq C}{}
+                    }
+                }
+            \end{equation*}
+
+            We proceed by using the induction hypothesis and weakening as in
+            the case of conjunction.
+
+        \item[Case] $A = B \lor C$
+
+            \begin{equation*}
+                \infer[\lor L^{u, v}]{\Gamma, B \lor C \seq B \lor C}{
+                    \infer[\lor R_l]{\Gamma, B \lor C, u:B \seq B \lor C}{
+                        \deduce[\mathcal{D}]{\Gamma, B \lor C, u:B \seq B}{}
+                    }
+                    &
+                    \infer[\lor R_r]{\Gamma, B \lor C, v:C \seq B \lor C}{
+                        \deduce[\mathcal{E}]{\Gamma, B \lor C, v:C \seq C}{}
+                    }
+                }
+            \end{equation*}
+
+            We proceed by using the induction hypothesis and weakening as in
+            the case of conjunction.
+
+    \end{description}
+\end{proof}
+
+\section{Proving cut}
+
+Omitted.
 
 \end{document}
