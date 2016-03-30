@@ -1,0 +1,104 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#4\\Advanced theory of computation -- COMP 531}
+\date{30 March 2016}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+
+\usepackage{algorithm,algorithmicx,algpseudocode}
+
+\newtheorem{prop}{Proposition}
+\newtheorem{thm}{Theorem}
+
+\DeclareMathOperator{\PrOp}{Pr}
+\DeclareMathOperator{\poly}{poly}
+\renewcommand{\Pr}[1]{\PrOp{\left[\text{#1}\right]}}
+\newcommand{\Z}{\mathbb{Z}}
+
+\begin{document}
+
+\maketitle
+
+\section{Graph matchings and the probabilistic method}
+
+\section{Upper bound on random bits}
+
+\section{Communication complexity of disjointness}
+
+\section{Cliques and independent sets}
+
+A clique and an independent set either intersect at a single vertex or are
+disjoint; this is a special case of the disjointness problem.
+
+We propose the protocol given in algorithm $\ref{alg:clique-indep}$, in which
+we name the players $\#1$ and $\#2$ and we suppose $\#1$ has the clique $C$ and
+$\#2$ has the independent set $I$.
+
+\begin{algorithm}
+    \caption{Computes $|C \cap I|$}
+    \begin{algorithmic}
+        \If{$\exists v \in C$ such that $\deg v < \frac{n}{2}$}
+            \State $\#1$ sends the name of such a $v$ to $\#2$
+            \State $\#2$ sends whether $v \in I$
+            \If{$v \in I$}
+                \State the protocol ends, concluding $|C \cap I| = 0$
+            \Else
+                \State recurse on the subgraph determined by $v$ and its
+                neighbours
+            \EndIf
+        \Else
+            \State $\#1$ sends an empty message to $\#2$
+        \EndIf
+
+        \If{$\exists v \in I$ such that $\deg v \geq \frac{n}{2}$}
+            \State $\#2$ sends the name of such a $v$ to $\#1$
+            \State $\#1$ sends whether $v \in C$
+            \If{$v \in C$}
+                \State the protocol ends, concluding $|C \cap I| > 0$
+            \Else
+                \State recurse on the subgraph determined by $v$ and its
+                non-neighbours
+            \EndIf
+        \Else
+            $\#2$ ends the protocol and concludes that $|C \cap I| = 0$
+        \EndIf
+    \end{algorithmic}
+    \label{alg:clique-indep}
+\end{algorithm}
+
+Each iteration uses $O(\log n)$ bits and there are $O(\log n)$ iterations due
+to the cutting-by-half nature of the recursion, so the overall cost is
+$O(\log^2 n)$.
+
+\section{Randomized discrete logarithms}
+
+\begin{prop}
+    If an algorithm $A$ solves the discrete logarithm problem for
+    $\frac{1}{\poly{n}}$ of the elements of $\Z_p^*$ for a prime $p$ in time
+    $O(\poly n)$ where $n$ is the length of $p$, then there exists a randomized
+    polytime algorithm that solves the discrete logarithm problem on all
+    elements of the finite field with high probability.
+\end{prop}
+
+\begin{proof} By randomized self-reduction.
+
+    Intuitively, if we pick an element $y \in \Z_p^*$ at random and give it to
+    $A$, then $\Pr{$A$ finds $\log_g y$} = \frac{1}{\poly n}$. It
+    suffices to find a way to turn a given $y$ into a random instance
+    distributed uniformly over $\Z_p^*$.
+
+    If $0 \leq t < p$ is chosen uniformly at random and $g^x = y$, then
+    $g^{t+x} \equiv yg^t$ is independent of $y$ and also uniformly distributed
+    over $\Z_p^*$. Thus,
+    \begin{align*}
+        \log_g y
+            &\equiv \log_g{g^{x+t}} - t \\
+            &\equiv \log_g{yg^t} - t
+    \end{align*}
+    so the problem is reduced to finding $\log_g{yg^t}$, which can now be done
+    with probability $\frac{1}{\poly n}$.
+\end{proof}
+
+\end{document}
