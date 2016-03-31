@@ -172,7 +172,10 @@ $DISJ : 2^n \times 2^n \to 2$.
     Since $|F| = 2^n$, there are $2^n$ $DISJ$-monochromatic rectangles, which
     means that $n$ bits of information need to be communicated to inform the
     decision. One more bit is needed to announce the result, which leads to
-    $D(DISJ) = n+1$.
+    $D(DISJ) \geq n+1$.
+
+    Finally, $D(DISJ) \leq n+1$ since the na\"ive protocol has this
+    communication complexity. This establishes that $D(DISJ) = n + 1$.
 \end{proof}
 
 \section{Cliques and independent sets}
