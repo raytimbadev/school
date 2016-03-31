@@ -14,8 +14,10 @@
 
 \DeclareMathOperator{\PrOp}{Pr}
 \DeclareMathOperator{\poly}{poly}
+\DeclareMathOperator{\EOp}{\mathbb{E}}
 \renewcommand{\Pr}[1]{\PrOp{\left[\text{#1}\right]}}
 \newcommand{\Z}{\mathbb{Z}}
+\newcommand{\E}[1]{\EOp{\left[\text{#1}\right]}}
 
 \begin{document}
 
@@ -23,7 +25,116 @@
 
 \section{Graph matchings and the probabilistic method}
 
+\begin{prop}
+    If a graph $G = (V, E)$ contains a matching $M$, then there exists a
+    subgraph $H$ of $G$ with at least $\frac{|E| + |M|}{2}$ edges.
+\end{prop}
+
+\begin{proof} By the probabilistic method.
+
+    We build a bipartite graph with parts $A$ and $B$ as follows.
+    \begin{enumerate}
+        \item
+            Collect all vertices from one side of the matching into part $A$;
+
+        \item
+            Collect all vertices from the other side of the matching into part
+            $B$;
+
+        \item
+            Distribute the remaining vertices randomly among $A$ and $B$.
+    \end{enumerate}
+
+    Every edge that was not originally in $M$ has probability $\frac{1}{2}$ of
+    being valid, i.e. such that its endpoints are in different sides of the
+    bipartite graph. Hence,
+    \begin{align*}
+        \E{\# of ``legal'' edges}
+        &= \Pr{an edge is valid} \cdot |\{\text{non matching edges}\}|
+        + |\{\text{matching edges}\}| \\
+        &= \frac{|E| - |M|}{2} + |M| \\
+        &= \frac{|E| + |M|}{2}
+    \end{align*}
+    as required.
+\end{proof}
+
 \section{Upper bound on random bits}
+
+\begin{prop}
+    If for a problem $\{f_n\}$ we have a randomized protocol $P$ with
+    \begin{equation*}
+        \Pr{$P(x, y, r) \neq f_n(x, y)$} \leq \frac{1}{3}
+    \end{equation*}
+    then there exists a randomized protocol $Q$ using $|r| \in O(\log n)$
+    random bits and still achieving an error rate of at most $\frac{1}{3}$.
+\end{prop}
+
+\begin{proof}
+    By amplification, we first construct $\tilde P$ with error rate $\epsilon$
+    (to be determined later). Let $\Pi$ consist of all the random sequences
+    used by $\tilde P$ and let $p$ be the probability distribution of $\Pi$.
+    Notice that $\tilde P$ is determined by $p$ and
+    $\mathcal{P} = \{P_r | r \in \Pi\}$, where each $P_r$ is a deterministic
+    protocol obtained by fixing the random string in a run of $\tilde P$.
+
+    Next, define an error indicator
+    \begin{equation*}
+        z(x, y, r) = \begin{cases}
+            1\quad \text{if}\, P_r(x,y) \neq f(x, y) \\
+            0\quad \text{else}
+        \end{cases}
+    \end{equation*}
+
+    Since $\tilde P$ computes f with error $\epsilon$, we have that for any
+    $(x, y) \in X \times Y$,
+    \begin{equation*}
+        \mathbb{E}_{r\in\Pi}\left[z(x, y, r)\right]
+        = \sum_{r\in\Pi}{p(r) \cdot z(x, y, r)} \leq \epsilon
+    \end{equation*}
+
+    Now we will show that there exists a set of $t$ deterministic protocols
+    $\mathcal{Q} = \{Q_1, \ldots, Q_t\} \subseteq \mathcal{P}$ such
+    that a uniform probability distribution $q$ over $\mathcal{Q}$
+    (where $Q_i \mapsto \frac{1}{t}\,\forall i)$ will determine $Q$.
+
+    To construct $\mathcal{Q}$, take $t$ arbitrary members of $\mathcal{P}$.
+    Consider the randomized protocol $Q_{1,\ldots,t}$ determined by a uniform
+    probability distribution $q$ over $\mathcal{Q}$.
+
+    Then,
+    \begin{align*}
+        \mathbb{E}_q\left[z(x, y, r)\right]
+        &= \sum_{i=1}^t {q(Q_i) \cdot z(x, y, r_i)} \\
+        &= \sum_{i=1}^t {\frac{1}{t} z(x, y, r_i)}
+    \end{align*}
+    is the expected error of $Q_{1,\ldots,t}$.
+
+    By the Chernoff bound, we have for any $(x, y) \in X \times Y$
+    \begin{equation*}
+        \PrOp_{1, \ldots, t}\left[
+            \frac{1}{t}\sum_{i=1}^t {z(x, y, r_i)} - \epsilon > \epsilon
+        \right]
+        \leq
+        2e^{-2\epsilon^2 t}
+    \end{equation*}
+
+    Now we choose $\epsilon$ and $t$ such that $\epsilon^2 t = n$, e.g.
+    $\epsilon = \frac{1}{6}$ and $t = 36n$, so we get an upper bound of
+    $2^{-2n}$ on the probability that the error rate is high on an input. Then
+    by the union bound, we get that the probability that the error rate is high
+    for at least one input (of which there are $2^{2n}$ possibilities) is
+    \emph{less than} $1$.
+
+    Thus, there exists a selection $r_1, \ldots, r_t$ such that for all $(x, y)
+    \in X \times Y$ the error of the constructed protocol $Q_{1,\ldots,t}$ is
+    at most $\frac{1}{3}$. Since $Q$ is uniformly distributed over the
+    deterministic protocols $\mathcal{Q}$, the amount of random bits needed to
+    run $Q$ is
+    \begin{equation*}
+        \log t = \log {36n} \leq 5 \log n \in O(\log n)
+    \end{equation*}
+    as required.
+\end{proof}
 
 \section{Communication complexity of disjointness}
 
