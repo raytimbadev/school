@@ -138,6 +138,43 @@
 
 \section{Communication complexity of disjointness}
 
+The disjointness problem is defined by the function
+$DISJ : 2^n \times 2^n \to 2$.
+\begin{equation*}
+    DISJ(x, y) = \begin{cases}
+        1 \quad \text{if } x \cap y = \emptyset \\
+        0 \quad \text{else}
+    \end{cases}
+\end{equation*}
+
+\begin{prop}
+    Disjointness has the following lower bound.
+    \begin{equation*}
+        D(DISJ) = n + 1
+    \end{equation*}
+\end{prop}
+
+\begin{proof}
+    Consider
+    \begin{equation*}
+        F = \{(S, \bar S) : S \subseteq \{1, \ldots, n\}\}
+    \end{equation*}
+
+    This is a \emph{fooling set} for $DISJ$; the components of every pair in
+    $F$ are clearly disjoint, but for all $S \neq T$, $S \cap \bar T \neq
+    \emptyset$ or $\bar S \cap T \neq \emptyset$.
+
+    (A fooling set $F \subseteq X \times Y$ for a boolean function
+    $f : X \times Y \to 2$ is such that there exists $z \in 2$ such that for
+    any distinct $(x_1, y_1), (x_2, y_2) \in F$, $f(x_1, y_2) \neq z$ or
+    $f(x_2, y_1) \neq z$.)
+
+    Since $|F| = 2^n$, there are $2^n$ $DISJ$-monochromatic rectangles, which
+    means that $n$ bits of information need to be communicated to inform the
+    decision. One more bit is needed to announce the result, which leads to
+    $D(DISJ) = n+1$.
+\end{proof}
+
 \section{Cliques and independent sets}
 
 A clique and an independent set either intersect at a single vertex or are
