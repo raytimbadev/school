@@ -61,6 +61,8 @@ If I do majors math cs:
             math 235 (required)
             math 318 (required)
 
+            12 credits
+
         Winter 15:
 
             comp 252 (required comp 251)
@@ -68,6 +70,8 @@ If I do majors math cs:
             comp 302 (required)
             hgen 396 (elective)
             math 251 (required math 236)
+
+            15 credits
 
         Fall 15:
 
@@ -77,30 +81,42 @@ If I do majors math cs:
             comp 512 (comp complementary)
             math 315 (required)
 
+            16 credits
+
         Winter 16:
 
             comp 520 (comp complementary)
             comp 527 (comp complementary)
             comp 531 (elective, S/U)
 
+            10 credits
+
         Fall 16:
 
             math 242 - analysis 1 (required)
-            math 317 - numerical analysis (required)
-            math 370 - honours algebra 3 (math complementary)
+            math 248 - honours advanced calculus (math complementary)
+            comp 621 - program analysis and transformations (elective)
+
+            10 credits
 
         Winter 17:
 
             math 323 - probability (required)
-            math 371 - honours algebra 4 (math complementary)
-            + 1 elective (ideally: comp 523 - language-based security)
+            number theory (math complementary)
+            comp 525 - formal verification
+
+            9 credits
 
         Fall 17:
 
-            math 340/350 - discrete structures / combinatorics & graph theory
-            + 1 math complementary
-            + 1 elective
+            math 350 - graph theory (required)
+            algebra 3 (math complementary)
+            +1 elective
+
+            9 credits
 
         Winter 18:
 
-            +2 electives
+            +3 electives
+
+            9 credits
