@@ -1,0 +1,99 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#5\\Logic and computation -- COMP 527}
+\date{12 April 2016}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{proof}
+
+\newtheorem{prop}{Proposition}
+
+\newcommand{\seq}{\implies}
+\newcommand{\imp}{\supset}
+
+\newcommand{\nand}{\barwedge}
+
+\begin{document}
+
+\maketitle
+
+\section{Inversion lemmas}
+
+\begin{prop}
+    If $\Gamma \seq A \imp B$, then $\Gamma, A \seq B$.
+\end{prop}
+
+\begin{proof} ~
+
+
+    \begin{center}
+        \begin{tabular}{c r}
+            $\Gamma, A \imp B, A \seq A$
+            &
+            by init and weakening \\
+            $\Gamma, A, A \imp B, B \seq B$
+            &
+            by init and weakening \\
+            $\Gamma, A, A \imp B \seq B$
+            &
+            by $\imp L$ \\
+            $\Gamma, A \seq B$
+            &
+            by cut
+        \end{tabular}
+    \end{center}
+\end{proof}
+
+\section{A sequent calculus for $\nand$}
+
+Here are sequent calculus rules for $\nand$.
+
+\begin{equation*}
+    \infer[\nand R]{\Gamma, A, B \seq C}{
+        \Gamma, A, B \seq C
+    }
+\end{equation*}
+
+\begin{equation*}
+    \infer[\nand L]{\Gamma, A \nand B \seq C}{
+        \Gamma, A \nand B, p \seq C
+        &
+        \Gamma, A \nand B \seq A
+        &
+        \Gamma, A \nand B \seq B
+    }
+\end{equation*}
+
+\begin{prop}
+    The right rule is invertible.
+\end{prop}
+
+\begin{proof} ~
+
+    \begin{center}
+        \begin{tabular}{c r}
+            $\Gamma \seq A \nand B$
+            &
+            by assumption \\
+            $\Gamma, A, B, A \nand B \seq A$
+            &
+            by init \\
+            $\Gamma, A, B, A \nand B \seq B$
+            &
+            by init \\
+            $\Gamma, A, B, A \nand B, C \seq C$
+            &
+            by init \\
+            $\Gamma, A, B, A \nand B \seq C$
+            &
+            by $\nand L$ \\
+            $\Gamma, A, B \seq C$
+            &
+            by cut
+        \end{tabular}
+    \end{center}
+\end{proof}
+
+\end{document}
