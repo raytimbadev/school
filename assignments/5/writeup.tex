@@ -9,11 +9,18 @@
 \usepackage{proof}
 
 \newtheorem{prop}{Proposition}
+\newtheorem{lemma}{Lemma}
 
 \newcommand{\seq}{\implies}
 \newcommand{\imp}{\supset}
+\newcommand{\step}{\rightarrow}
+\newcommand{\R}{\mathcal{R}}
+\newcommand{\proves}{\vdash}
 
 \newcommand{\nand}{\barwedge}
+
+\DeclareMathOperator{\fst}{\mathtt{fst}}
+\DeclareMathOperator{\snd}{\mathtt{snd}}
 
 \begin{document}
 
@@ -94,6 +101,155 @@ Here are sequent calculus rules for $\nand$.
             by cut
         \end{tabular}
     \end{center}
+\end{proof}
+
+\begin{prop}
+    The left rule is not invertible.
+\end{prop}
+
+\begin{proof}
+\end{proof}
+
+\section{Weak normalization}
+
+We will extend the language of the simply-typed $\lambda$ calculus with
+products, and prove weak normalization for this extension.
+
+First, we add the following reducibility candidate.
+\begin{equation*}
+    \mathcal{R}_{A \times B} = \{ M
+        | M \;\text{halts}\;
+        \;\text{and}\; \fst{M} \in \mathcal{R}_A
+        \;\text{and}\; \snd{M} \in \mathcal{R}_B
+    \}
+\end{equation*}
+
+Next, we show an additional case for the backwards closure lemma.
+
+\begin{lemma}
+    If $M \step M^\prime$ and $M^\prime \in \R_C$, then $M \in \R_C$.
+\end{lemma}
+
+\begin{proof} by induction on $C$
+
+    \begin{description}
+        \item[Case] $C = A \times B$
+
+            \begin{center}
+                \begin{tabular}{c r}
+                    $M^\prime \in \R_{A \times B}$
+                    &
+                    by assumption \\
+                    %
+                    $\fst M^\prime \in \R_A$
+                    &
+                    by congruence \\
+                    %
+                    $\snd M^\prime \in \R_B$
+                    &
+                    by congruence \\
+                    %
+                    $\fst M \in \R_A$
+                    &
+                    by I.H. \\
+                    %
+                    $\snd M \in \R_B$
+                    &
+                    by I.H. \\
+                    %
+                    $M$ halts
+                    &
+                    by $\step^*$ definition \\
+                    %
+                    $M \in \R_{A \times B}$
+                    &
+                    by $\R_{A \times B}$ since $M$ halts
+                \end{tabular}
+            \end{center}
+    \end{description}
+\end{proof}
+
+Finally, we show additional cases for the fundamental lemma.
+
+\begin{lemma}
+    If $\Gamma \proves M : A$ and $\sigma \in \R_\Gamma$,
+    then $[\sigma]M \in \R_A$
+\end{lemma}
+
+\begin{proof} by induction on $\Gamma \proves M : A$
+
+    \begin{description}
+        \item[Case] $\fst{}$
+
+            \begin{equation*}
+                \mathcal{D} = \infer[\times E_l]{\Gamma \proves \fst M : A}{
+                    \deduce[\mathcal{D}^\prime]{\Gamma \proves M : A \times B}{}
+                }
+            \end{equation*}
+
+            \begin{center}
+                \begin{tabular}{c r}
+                    $\sigma \in \R_\Gamma$ &
+                    by assumption \\
+                    %
+                    $[\sigma]M \in \R_{A \times B}$ &
+                    by I.H. on $\mathcal{D}^\prime$ \\
+                    %
+                    $\fst{([\sigma]M)} \in \R_A$ &
+                    by $\R_{A \times B}$ definition \\
+                    %
+                    $[\sigma]\fst M \in \R_A$ &
+                    by subsitution definition
+                \end{tabular}
+            \end{center}
+
+        \item[Case] $\snd{}$
+
+            This proof is essentially the same as for $\fst{}$, so we will omit
+            it.
+
+        \item[Case] $\times I$
+
+            \begin{equation*}
+                \mathcal{D} =
+                \infer[\times I]{\Gamma \proves (M, N) : A \times B}{
+                    \deduce[\mathcal{D}_1]{\Gamma \proves M : A}{}
+                    &
+                    \deduce[\mathcal{D}_2]{\Gamma \proves N : B}{}
+                }
+            \end{equation*}
+
+            \begin{center}
+                \begin{tabular}{c r}
+                    $\sigma \in \R_\Gamma$ &
+                    by assumption \\
+                    %
+                    $[\sigma]M \in \R_A$ &
+                    by I.H. on $\mathcal{D}_1$ \\
+                    %
+                    $[\sigma]N \in \R_B$ &
+                    by I.H. on $\mathcal{D}_2$ \\
+                    %
+                    $[\sigma]M$, $[\sigma]N$ halt &
+                    by $\R_A$, $\R_B$ definitions \\
+                    %
+                    $([\sigma]M, [\sigma]N)$ halts &
+                    by $\step^*$ and ``halt'' definition \\
+                    %
+                    $\fst{([\sigma]M, [\sigma]N)} \in \R_A$ &
+                    by backwards closure lemma \\
+                    %
+                    $\snd{([\sigma]M, [\sigma]N)} \in \R_B$ &
+                    by backwards closure lemma \\
+                    %
+                    $([\sigma]M, [\sigma]N) \in \R_{A \times B}$ &
+                    by $R_{A \times B}$ definition \\
+                    %
+                    $[\sigma](M, N) \in \R_{A \times B}$ &
+                    by subtitution definition
+                \end{tabular}
+            \end{center}
+    \end{description}
 \end{proof}
 
 \end{document}
