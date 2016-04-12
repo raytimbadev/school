@@ -21,6 +21,8 @@
 
 \DeclareMathOperator{\fst}{\mathtt{fst}}
 \DeclareMathOperator{\snd}{\mathtt{snd}}
+\DeclareMathOperator{\initOp}{init}
+\newcommand{\init}{\initOp{}}
 
 \begin{document}
 
@@ -58,8 +60,8 @@
 Here are sequent calculus rules for $\nand$.
 
 \begin{equation*}
-    \infer[\nand R]{\Gamma, A, B \seq C}{
-        \Gamma, A, B \seq C
+    \infer[\nand R]{\Gamma \seq A \nand B}{
+        \Gamma, A, B \seq p
     }
 \end{equation*}
 
@@ -108,12 +110,43 @@ Here are sequent calculus rules for $\nand$.
 \end{prop}
 
 \begin{proof}
+    If the left rule were invertible, then it could be eagerly applied without
+    reaching a dead end when trying to prove a true statement.
+
+    First, we will show $A \nand B \seq B \nand A$.
+
+    \begin{equation*}
+        \infer[\nand R]{A \nand B \seq B \nand A}{
+            \infer[\nand L]{A \nand B, A, B \seq p}{
+                \infer[\init\; q \sim p]{A \nand B, A, B, q \seq p}{}
+                &
+                \infer[\init]{A \nand B, A, B \seq A}{}
+                &
+                \infer[\init]{A \nand B, A, B \seq B}{}
+            }
+        }
+    \end{equation*}
+
+    However, if we apply the left rule first, we are backed into a dead end.
+
+    \begin{equation*}
+        \infer[\nand L]{A \nand B \seq B \nand A}{
+            \infer[\init\; p \sim B \nand A]{A \nand B, p \seq B \nand A}{}
+            &
+            \infer{A \nand B \seq A}{???}
+            &
+            \infer{A \nand B \seq B}{???}
+        }
+    \end{equation*}
+
+    If the rule were invertible, we would not have this problem. Hence, the
+    left rule is not invertible.
 \end{proof}
 
 \section{Weak normalization}
 
-We will extend the language of the simply-typed $\lambda$ calculus with
-products, and prove weak normalization for this extension.
+We consider an extension of the simply-typed $\lambda$ calculus with products,
+and prove weak normalization for it.
 
 First, we add the following reducibility candidate.
 \begin{equation*}
