@@ -13,3 +13,6 @@
 [submodule "comp-520/peephole"]
 	path = comp-520/peephole
 	url = git@github.com:djeik/peephole.git
+[submodule "comp-621/wu-wei"]
+	path = comp-621/wu-wei
+	url = https://github.com/Sable/wu-wei-benchmarking-toolkit.git
