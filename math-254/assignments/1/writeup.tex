@@ -1,0 +1,189 @@
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage[margin=2.0cm]{geometry}
+
+\usepackage{amsmath,amsthm,amssymb}
+
+\newtheorem{prop}{Proposition}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#1\\Honours Analysis 1 -- MATH 254}
+\date{Tuesday, 20 September 2016}
+
+\begin{document}
+    \maketitle
+
+\section*{\#1 -- Closed form by induction}
+
+\begin{prop}
+    The following is a closed form for the series.
+
+    \begin{equation*}
+        \sum_{i=1}^n \frac{i}{(i+1)!} = \frac{(n+1)! - 1}{(n+1)!}
+    \end{equation*}
+\end{prop}
+
+\begin{proof}
+    By induction.
+
+    \begin{description}
+        \item[Base case.]
+            Have $n = 1$.
+
+            \begin{equation*}
+                \sum_{i=1}^1 \frac{i}{(i+1)!}
+                    = \frac{1}{2!} = \frac{2! - 1}{2!}
+            \end{equation*}
+            as required.
+
+        \item[Step case.]
+            Have $n = k$ and want to show the proposition for $n = k+1$.
+
+            The induction hypothesis is
+            \begin{equation*}
+                \sum_{i=1}^k \frac{i}{(i+1)!} = \frac{(k+1)! - 1}{(k+1)!}
+            \end{equation*}
+
+            We want to show
+            \begin{equation*}
+                \sum_{i=1}^{k+1} \frac{i}{(i+1)!} = \frac{(k+2)! - 1}{(k+2)!}
+            \end{equation*}
+
+            So
+            \begin{align*}
+                  & \sum_{i=1}^{k+1} \frac{i}{(i+1)!} \\
+                = & \sum_{i=1}^k \frac{i}{(i+1)!} + \frac{k+1}{(k+2)!} \\
+                = & \frac{(k+1)! - 1}{(k+1)!} + \frac{k+1}{(k+2)!} \\
+                = & \frac{(k+2)((k+1)! - 1) + (k + 1)}{(k+2)!} \\
+                = & \frac{(k+2)! - k - 2 + k + 1}{(k+2)!} \\
+                = & \frac{(k+2)! - 1}{(k+2)!}
+            \end{align*}
+            as required.
+    \end{description}
+\end{proof}
+
+\section*{\#3 -- Minimal element of a family of sets}
+
+\begin{prop}
+    Let $n \in \mathbb{N}$ such that $n > 1$ and let
+    $\mathcal{A} = \{A_1, \ldots, A_n\}$ be pairwise distinct sets.
+    There exists some minimal set $A \in \mathcal{A}$, i.e. $A$ is a superset
+    of no other set in $\mathcal{A}$.
+\end{prop}
+
+\begin{proof}
+    By induction.
+
+    \begin{description}
+        \item[Base case.]
+            Have $n = 2$.
+
+            We know that $A_1 \neq A_2$. Three cases arise.
+
+            \begin{enumerate}
+                \item $A_1 \subseteq A_2$. Then $A_1$ is minimal.
+                \item $A_2 \subseteq A_1$. Then $A_2$ is minimal.
+                \item The sets do not contain each other.
+                    Then both are minimal.
+            \end{enumerate}
+
+            A minimal set has been found, so this completes the base case.
+
+        \item[Step case.]
+            Have $n = k$.
+
+            The induction hypothesis is that the family of sets
+            $\mathcal{A_k} = \{A_1, \ldots, A_k\}$ has some $A_i$ that is
+            minimal.
+
+            We wish to add $A_{k+1}$ to the collection. Three cases arise.
+
+            \begin{enumerate}
+                \item $A_i \subseteq A_{k+1}$.
+                    Then $A_i$ remains the minimal set so far.
+                \item $A_{k+1} \subseteq A_i$.
+                    Then $A_{k+1}$ becomes the minimal set.
+                \item $A_{k+1}$ and $A_i$ are incomparable.
+                    Then $A_i$ remains the minimal set so far. $A_{k+1}$ may in
+                    fact also be minimal, but we choose to simply stick with
+                    $A_i$.
+            \end{enumerate}
+    \end{description}
+\end{proof}
+
+\section*{\#5 -- A characterization of bijective functions}
+
+\begin{prop}
+    $f : A \to B$ is bijective if, and only if,
+    \begin{equation*}
+        \forall G \in \mathcal{P}(A), f(A \setminus G) = B \setminus f(G)
+    \end{equation*}
+\end{prop}
+
+\begin{proof}
+    First, we will show the forwards direction: suppose $f$ is bijective. Now
+    we proceed by contradiction: assume there exists $G \in \mathcal{P}(A)$
+    such that $f(A \setminus G) \neq B \setminus f(g)$. Two cases arise.
+
+    \begin{enumerate}
+        \item $\exists x \in f(A \setminus G)$ such that
+            $x \notin B \setminus f(G)$.
+
+            Due to the surjectivity of $f$,
+            $\forall b \in B, \exists a \in A$ such that $f(a) = b$.
+            Hence, $\exists y \in A$ such that $f(y) = x$.
+
+            Thus, $f(y) \notin B \setminus f(G)$. We know that $f(y) \in B$, so
+            in order for $f(y) \notin B \setminus f(G)$ to be true,
+            $f(y) \in f(G)$. By the injectivity of $f$, we deduce that
+            $y \in G$ as in the unique element in $A$ mapped to $x$ by $f$.
+            We also have that, $x = f(y) \in f(A \setminus G)$. Again by the
+            injectivity of $f$, we deduce that $y \in A \setminus G$, which
+            contradicts that $y \in G$.
+
+        \item The other case, in which $\exists x \in B \setminus f(G)$
+            such that $x \notin f(A \setminus G)$. Take $y$ such that
+            $f(y) = x$ due to the surjectivity of $f$. In order to satisfy
+            $f(y) \notin f(A \setminus G)$, we establish that
+            $y \notin A \setminus G$ with the injectivity of $f$. Since we know
+            that $y \in A$, we can deduce that $y \in G$ in order to maintain
+            that $y \notin A \setminus G$. Consequently, $x = f(y) \in f(G)$.
+            However, $f(y) = x \in B \setminus f(G)$, which is a contradiction.
+    \end{enumerate}
+
+    Net, we will show the backwards direction: suppose
+    $\forall G \in \mathcal{P}(A): f(A \setminus B) = B \setminus f(G)$. We
+    want to show that $f$ is bijective. To do so, we will show that with this
+    assumption, we can show that $f$ is both injective and surjective.
+
+    \begin{description}
+        \item[Injectivity.] We will proceed by contradiction.
+            Suppose $f(a) = f(b)$, but $a \neq b$.
+
+            Since the proposition is a ``forall'', it suffices to find a
+            particular $G$ in order to produce a contradiction. Take some
+            arbitrary $G$ such that $a \in G$. Since $a \neq b$, we deduce
+            $b \notin G$. Since $b \notin G$, then $b \in A \setminus G$, so
+            $f(b) \in f(A \setminus G)$. Contrariwise, since $a \in G$,
+            $a \notin A \setminus G$, so $a \notin f(A \setminus G$. However,
+            this is a contradiction, since $f(a) = f(b)$.
+
+            Thus, $f$ must be injective.
+
+        \item[Surjectivity.] We will proceed again by contradiction.
+            Suppose $\exists y \in B:\, \forall x \in A:\, f(x) \neq y$, i.e.
+            there is an unmapped element in $B$. An equivalent phrasing is that
+            there exists no $A\prime \in A$ such that $y \in f(A\prime)$.
+
+            Hence, $y \in B \setminus f(G)$ for any nonempty
+            $G \in \mathcal{P}(A)$. (If there were some nonempty $G$ such that
+            $y \in B \setminus f(G)$, then we could conclude that there is some
+            $x \in G$ such that $f(x) = y$ which would contradict that $y$ is
+            unmapped to.) However, $y \notin f(A \setminus G)$, which
+            contradicts that $f(A \setminus G) = B \setminus f(G)$.
+
+            Thus, $f$ must be surjective.
+    \end{description}
+\end{proof}
+
+\end{document}
