@@ -135,15 +135,15 @@
 
             Thus, $f(y) \notin B \setminus f(G)$. We know that $f(y) \in B$, so
             in order for $f(y) \notin B \setminus f(G)$ to be true,
-            $f(y) \in f(G)$. By the injectivity of $f$, we deduce that
-            $y \in G$ as in the unique element in $A$ mapped to $x$ by $f$.
-            We also have that, $x = f(y) \in f(A \setminus G)$. Again by the
+            $f(y) \in f(G)$. By the injectivity of $f$, we deduce that $y \in
+            G$ is in the unique element in $A$ mapped to $x$ by $f$.  We also
+            have that, $x = f(y) \in f(A \setminus G)$. Again by the
             injectivity of $f$, we deduce that $y \in A \setminus G$, which
             contradicts that $y \in G$.
 
         \item The other case, in which $\exists x \in B \setminus f(G)$
-            such that $x \notin f(A \setminus G)$. Take $y$ such that
-            $f(y) = x$ due to the surjectivity of $f$. In order to satisfy
+            such that $x \notin f(A \setminus G)$ is similar. Take $y$ such
+            that $f(y) = x$ due to the surjectivity of $f$. In order to satisfy
             $f(y) \notin f(A \setminus G)$, we establish that
             $y \notin A \setminus G$ with the injectivity of $f$. Since we know
             that $y \in A$, we can deduce that $y \in G$ in order to maintain
@@ -151,7 +151,7 @@
             However, $f(y) = x \in B \setminus f(G)$, which is a contradiction.
     \end{enumerate}
 
-    Net, we will show the backwards direction: suppose
+    Next, we will show the backwards direction: suppose
     $\forall G \in \mathcal{P}(A): f(A \setminus B) = B \setminus f(G)$. We
     want to show that $f$ is bijective. To do so, we will show that with this
     assumption, we can show that $f$ is both injective and surjective.
@@ -160,20 +160,21 @@
         \item[Injectivity.] We will proceed by contradiction.
             Suppose $f(a) = f(b)$, but $a \neq b$.
 
-            Since the proposition is a ``forall'', it suffices to find a
-            particular $G$ in order to produce a contradiction. Take some
-            arbitrary $G$ such that $a \in G$. Since $a \neq b$, we deduce
-            $b \notin G$. Since $b \notin G$, then $b \in A \setminus G$, so
-            $f(b) \in f(A \setminus G)$. Contrariwise, since $a \in G$,
-            $a \notin A \setminus G$, so $a \notin f(A \setminus G$. However,
-            this is a contradiction, since $f(a) = f(b)$.
+            Take some arbitrary $G$ such that $a \in G$. Since $a \neq b$, we
+            deduce $b \notin G$. Since $b \notin G$, then
+            $b \in A \setminus G$, so
+            $f(b) \in f(A \setminus G)$.
+            Contrariwise, since $a \in G$,
+            $a \notin A \setminus G$, so $a \notin f(A \setminus G$.
+            However, this is a contradiction, since $f(a) = f(b)$.
 
             Thus, $f$ must be injective.
 
         \item[Surjectivity.] We will proceed again by contradiction.
             Suppose $\exists y \in B:\, \forall x \in A:\, f(x) \neq y$, i.e.
             there is an unmapped element in $B$. An equivalent phrasing is that
-            there exists no $A\prime \in A$ such that $y \in f(A\prime)$.
+            there exists no $A^\prime \subseteq A$ such that $y \in
+            f(A^\prime)$.
 
             Hence, $y \in B \setminus f(G)$ for any nonempty
             $G \in \mathcal{P}(A)$. (If there were some nonempty $G$ such that
