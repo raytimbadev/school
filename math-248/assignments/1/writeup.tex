@@ -1,0 +1,133 @@
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+
+\newtheorem{prop}{Proposition}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment 1\\Honours Advanced Calculus -- MATH 248}
+\date{27 September 2016}
+
+\newcommand{\diff}[1]{\,\text{differentiable at}\,#1}
+\newcommand{\R}{\mathbb{R}}
+
+\begin{document}
+
+\maketitle
+
+\begin{enumerate}
+    \item
+        \begin{enumerate}
+            \item
+                The function $f(x) = \sin{(\frac{1}{x})}$ is not continuous at
+                $x = 0$, since $\frac{1}{x} \to \infty$ as $x \to 0$, and
+                $\lim_{x\to\infty} {sin(x)}$ does not exist.
+
+            \item
+                The function $f(x) = x \sin{(\frac{1}{x})}$ is continuous at
+                $x = 0$. Suppose there is a sequence $\{x_i\} \to 0$.
+                $f(\{x_i\}) \to 0$ as well, since the factor
+                $\sin{(\frac{1}{x_i})}$ remains bounded within $[-1, 1]$ for
+                any $i$, but the factor $x_i \to 0$. Consequently, the overall
+                limit will tend to $0$.
+
+                Furthermore, the function $f$ is not differentiable at $x=0$.
+                Consider the limit that defines the notion of
+                differentiability, specialized for $f$.
+                \begin{equation*}
+                    \lim_{x\to y}{
+                        \frac
+                        {x \sin{(\frac{1}{x})} - y \sin{(\frac{1}{y})}}
+                        {x - y}
+                    }
+                \end{equation*}
+
+                Since $y=0$, the limit becomes $\sin{(\frac{1}{x})}$ as
+                $x \to 0$, which as discussed earlier, does not exist. Hence
+                the function is not differentiable, despite being continuous.
+
+            \item
+                The function $f(x) = x^2 \sin{(\frac{1}{x})}$ is continuous by
+                the same argument as given immediately above. However, it
+                differs from the function above as $f$ here is differentiable.
+                Consider the limit again: this time there will remain an
+                additional factor $x$ in the numerator. Consequently, by the
+                same argument that showed that $f$ is continuous in the
+                previous problem, we find that the limit for differentiability
+                of $f$ in this problem exists
+        \end{enumerate}
+
+    \item
+        We wish to show that differentiability is a local property.
+
+        \begin{prop}
+            Differentiability is a local property, i.e. $f : K \to \R$ is
+            differentiable at $y$ if and only if
+            $g = f|_{(y-\epsilon, y+\epsilon)}$ is differentiable at $y$.
+        \end{prop}
+
+        \begin{proof}
+            First we show the forwards direction. Using the sequential
+            criterion, this is extremely straightforward. Since $f$ is
+            differentiable at $y$, we know that for all sequences
+            $\{x_i\} \subseteq K$ converging to values in $\R$, the limit
+            \begin{equation*}
+                \lim_{n\to\infty}{
+                    \frac{f(x_i) - f(y)}{x - y} = f^\prime (x)
+                }
+            \end{equation*}
+            exists and defines the derivative of $f$ at $y$. If we retrict our
+            attention to those sequences that are bounded within the domain of
+            $g$, then of course $f$ is differentiable there as well and the
+            associated limits of those sequences converge. Since the values in
+            those limits are bounded, and $f$ operating on that restricted
+            domain is simply $g$, we can conclude that $g$ is differentiable
+            there as well, by the sequential criterion.
+
+            For the reverse direction, we will employ a similar argument using
+            the sequential criterion of differentiability. Assume that $g$ is
+            differentiable at $y$. Consider an arbitrary sequence
+            $\{x_i\} \subseteq K$ converging to $y$. Now consider
+            $\lim_{n\to\infty}{\frac{f(x_i) - g(y)}{x - y}}$. We want to show
+            that this limit exists. By definition of a convergent sequence,
+            for any $\epsilon > 0$, there exists some index $k$ such that
+            $|x_k - y| < \epsilon$. Consequently, we instantiate this universal
+            statement taking its $\epsilon$ to be the $\epsilon$ of the
+            restricted domain of $g$ and consider a new sequence
+            $\{x_i^\prime\}$ constructed from $\{x_i\}$ by dropping all items
+            before $k$. This restricted sequence can be used applied to
+            instantiate the sequential criterion for $g$
+            \begin{equation*}
+                \lim_{n\to\infty}{
+                    \frac{g(x_i^\prime) - g(y)}{x - y}
+                }
+            \end{equation*}
+            However, we know that $g$ is defined by $f$ in the domain
+            $(y-\epsilon, y+\epsilon)$ within which lie each $x_i^\prime$, so
+            we may replace $g$ with $f$ to obtain the convergent limit
+            \begin{equation*}
+                \lim_{n\to\infty}{
+                    \frac{f(x_i^\prime) - f(y)}{x - y}
+                }
+            \end{equation*}
+            This is almost the sequential criterion for $f$. All that remains
+            is to return to the sequence $x_i$ instead of $x_i^\prime$: we know
+            that for any convergent sequent $x_i$, prepending finitely many
+            elements to it does not affect its convergence. The relationship
+            between our initial sequence $x_i$ and our constructed sequence
+            $x_i^\prime$ is precisely that there is some finite number ($k$ to
+            be exact) of initial elements in $x_i$ before it is the same as
+            $x_i^\prime$. Thus, we can replace $x_i^\prime$ with $x_i$ and
+            obtain the convergent limit
+            \begin{equation*}
+                \lim_{n\to\infty}{
+                    \frac{f(x_i) - f(y)}{x - y}
+                }
+            \end{equation*}
+            which is precisely the sequential criterion for $f$, showing that
+            $f$ is differentiable at $y$.
+        \end{proof}
+\end{enumerate}
+
+\end{document}
