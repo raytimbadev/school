@@ -11,6 +11,7 @@
 
 \newcommand{\diff}[1]{\,\text{differentiable at}\,#1}
 \newcommand{\R}{\mathbb{R}}
+\newcommand{\as}[1]{\quad\text{as}\;#1}
 
 \begin{document}
 
@@ -127,6 +128,35 @@
             \end{equation*}
             which is precisely the sequential criterion for $f$, showing that
             $f$ is differentiable at $y$.
+        \end{proof}
+
+    \item Uniqueness of the derivative.
+
+        \begin{prop}
+            Let $f : (a, b) \to \R^n$ and $y \in (a, b)$. If
+            $\lambda_1, \lambda_2, \mu_1, \mu_2 \in \R^n$ satisfy
+            \begin{align}
+                f(x) &= \lambda_1 + \mu_1(x-y) + o(x-y)\as{x \to y}
+                \label{eq:uniqderiv1} \\
+                f(x) &= \lambda_2 + \mu_2(x-y) + o(x-y)\as{x \to y}
+                \label{eq:uniqderiv2}
+            \end{align}
+            then $\lambda_1 = \lambda_2 = f(y)$ and
+            $\mu_1 = \mu_2 = f^\prime(y)$.
+        \end{prop}
+
+        \begin{proof}
+            First, we will show that $\lambda_1 = \lambda_2 = f(y)$. To do so,
+            is simple. Simply remark that as $x \to y$, $f(x) \to f(y)$ and the
+            non-$\lambda$ terms in each equation vanish, so
+            $\lambda_1 = \lambda_2 = f(y)$. Thus we have
+            \begin{align*}
+                f(x) &= f(y) - \mu_1(x-y) + o(x-y) \as{x \to y} \\
+                f(x) &= f(y) - \mu_2(x-y) + o(x-y) \as{x \to y}
+            \end{align*}
+            Then, due to the lemma seen in class on equivalent definitions of
+            differentiability of vector-valued functions, we can immediately
+            conclude that $\mu_1 = \mu_2$ is the derivative of $f$ at $y$.
         \end{proof}
 \end{enumerate}
 
