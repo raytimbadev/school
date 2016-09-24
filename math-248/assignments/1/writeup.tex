@@ -4,6 +4,7 @@
 \usepackage{amsmath,amssymb,amsthm}
 
 \newtheorem{prop}{Proposition}
+\newtheorem{definition}{Definition}
 
 \author{Jacob Thomas Errington (260636023)}
 \title{Assignment 1\\Honours Advanced Calculus -- MATH 248}
@@ -13,6 +14,7 @@
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\as}[1]{\quad\text{as}\;#1}
 \newcommand{\inv}[1]{\frac{1}{#1}}
+\renewcommand{\d}[1]{\frac{\text{d}}{\text{d}#1}}
 
 \begin{document}
 
@@ -348,6 +350,127 @@
                 = \left(n \left(\max_{i=1}^n |x_i|\right)^p\right)^\inv{p}
                 = n^\inv{p} \max_{k=1}^n |x_k|
             \end{equation*}
+        \end{proof}
+
+    \item Equivalent statements.
+
+        \begin{prop}
+            Let $f : F \to \R^n$, $h : K \to \R$, $0 < p < \infty$, and
+            $y \in \R$. Then,
+            \begin{equation*}
+                \lim_{x \to y} \frac{|f(x)|_\infty}{|h(x)|} = 0
+                \iff
+                \lim_{x \to y} \frac{|f(x)|_p}{|h(x)|} = 0
+            \end{equation*}
+        \end{prop}
+
+        \begin{proof}
+            First, we will show the backwards direction: suppose
+            $\lim_{x \to y} \frac{|f(x)|_p}{|h(x)|} = 0$.
+
+            We have already shown that $|x|_\infty \leq |x|_p$, so
+            $|f(x)|_\infty \leq |f(x)|_p$. Therefore, we have
+            \begin{equation*}
+                0
+                \leq
+                \lim_{x\to y} \frac{|f(x)|_\infty}{|h(x)|}
+                \leq
+                \lim_{x\to y} \frac{|f(x)|_p}{|h(x)|} = 0
+            \end{equation*}
+
+            By the Squeeze Theorem, we conclude that
+            \begin{equation*}
+                \lim_{x \to y} \frac{|f(x)|_\infty}{|h(x)|} = 0
+            \end{equation*}
+
+            Next, we will show the forwards direction: suppose
+            $\lim_{x \to y} \frac{|f(x)|_\infty}{|h(x)|} = 0$.
+
+            We have already shown that $|x|_p \leq n^\inv{p} |x|_\infty$, so
+            $|f(x)|_p \leq n^\inv{p} |f(x)|_\infty$. Therefore, we have
+            \begin{equation*}
+                0
+                \leq
+                \lim_{x \to y} \frac{|f(x)|_p}{|h(x)|}
+                \leq
+                n^\inv{p} \lim_{x \to y} \frac{|f(x)|_\infty}{|h(x)|} = 0
+            \end{equation*}
+
+            Again by the Squeeze Theorem, we conclude that
+            \begin{equation*}
+                \lim_{x \to y} \frac{|f(x)|_p}{|h(x)|} = 0
+            \end{equation*}
+        \end{proof}
+
+    \item Definitions for continuity and differentiability using the
+        $p$-quasinorm.
+
+        \begin{definition}
+            A vector-valued function $f : K \to \R^n$, with $K \subseteq \R$,
+            is \emph{continuous} at $y \in K$ if
+            \begin{equation*}
+                \lim_{x \to y} |f(x) - f(y)|_p = 0
+            \end{equation*}
+        \end{definition}
+
+        \begin{definition}
+            A vector-valued function $f : K \to \R^n$, with $K \subseteq \R$,
+            is \emph{differentiable} at $y \in K$ if
+            \begin{equation*}
+                \lim_{x \to y} \frac{|f(x) - f(y)|_p}{|x - y|} = 0
+            \end{equation*}
+        \end{definition}
+
+        These definitions are equivalent to the little-$o$ definitions of
+        continuity and differentiability seen in class (using the infinity
+        norm) due to the above proof showing equivalence of infinity norm
+        little-$o$ and $p$-quasinorm little-$o$.
+
+    \item Let $A : (a, b) \to \R^{m \times n}$ and $x : (a, b) \to \R^n$ be
+        both differentiable at $t \in (a, b)$.
+
+        \begin{prop}
+            The product $Ax : (a, b) \to \R^m$, defined by $s \mapsto A(s)x(s)$
+            is differentiable at $t$, with
+            \begin{equation*}
+                (Ax)^\prime (t) = A^\prime (t) x(t) + A(t) x^\prime (t)
+            \end{equation*}
+        \end{prop}
+
+        \begin{proof}
+            First, we will show that the product is differentiable.
+
+            Let $f_{A(t)} : \R^n \to \R^m$ denote the function represented by
+            the matrix $A(t)$. We argue that it is differentiable because each
+            of its partial derivatives exist and are differentiable in $\R^n$,
+            since each function to take the derivative of is simply a linear
+            function, it is differentiable and its derivative is continuous.
+
+            Now we will find the derivative. To do so, we will look at the
+            components of $Ax$. The $k$th component of $Ax$ is given by the
+            formula for multiplying a matrix by a vector.
+            \begin{equation*}
+                ((Ax)(s))_k = \sum_{i=1}^n (A(s))_{ki} x(s)_i
+            \end{equation*}
+            Notice that for a fixed $i$, $(A(s))_{ki}$ can be thought of as a
+            function $\R \to \R$; the same applies to $x(s)_i$. Hence, we can
+            use the single-variable product rule to find the derivative of the
+            $k$th component.
+            \begin{align*}
+                \d{s} \sum_{i=1}^n (A(s))_{ki} x(s)_i
+                &= \sum_{i=1}^n { \d{s} (A(s))_{ki} x(s)_i } \\
+                &= \sum_{i=1}^n \left(
+                    ((A(s))_{ki})^\prime x(s)_i + (A(s))_{ki} (x(s)_i)^\prime
+                \right)\\
+                &= \sum_{i=1}^n \left(
+                    (A^\prime (s))_{ki} x(s)_i + (A(s))_{ki} (x^\prime (s))_i
+                \right)\\
+                &= \sum_{i=1}^n (A^\prime (s))_{ki} x(s)_i
+                + \sum_{i=1}^n (A(s))_{ki} (x^\prime (s))_i \\
+            \end{align*}
+            But these last two terms are precisely the $k$th component of
+            $A^\prime (s) x(s)$ and $A(s) x^\prime (s)$, which is what we were
+            seeking to show.
         \end{proof}
 \end{enumerate}
 
