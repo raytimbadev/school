@@ -12,6 +12,7 @@
 \newcommand{\diff}[1]{\,\text{differentiable at}\,#1}
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\as}[1]{\quad\text{as}\;#1}
+\newcommand{\inv}[1]{\frac{1}{#1}}
 
 \begin{document}
 
@@ -136,9 +137,9 @@
             Let $f : (a, b) \to \R^n$ and $y \in (a, b)$. If
             $\lambda_1, \lambda_2, \mu_1, \mu_2 \in \R^n$ satisfy
             \begin{align}
-                f(x) &= \lambda_1 + \mu_1(x-y) + o(x-y)\as{x \to y}
+                f(x) &= \lambda_1 + \mu_1(x-y) + o(x-y) \as{x \to y}
                 \label{eq:uniqderiv1} \\
-                f(x) &= \lambda_2 + \mu_2(x-y) + o(x-y)\as{x \to y}
+                f(x) &= \lambda_2 + \mu_2(x-y) + o(x-y) \as{x \to y}
                 \label{eq:uniqderiv2}
             \end{align}
             then $\lambda_1 = \lambda_2 = f(y)$ and
@@ -157,6 +158,196 @@
             Then, due to the lemma seen in class on equivalent definitions of
             differentiability of vector-valued functions, we can immediately
             conclude that $\mu_1 = \mu_2$ is the derivative of $f$ at $y$.
+        \end{proof}
+
+    \item Consider the $p$-quasinorm of $x \in \R^n$:
+        \begin{equation*}
+            |x|_p = \left( \sum_{k=1}^n |x_k|^p\right)^\frac{1}{p}
+        \end{equation*}
+
+        \begin{prop}
+            $|x|_p = 0 \implies x = 0$
+        \end{prop}
+
+        \begin{proof}
+            First, let us show the case where $p$ is a finite positive real.
+
+            We will show the contrapositive. We wish to show that
+            $|x|_p \neq 0$. Suppose $x \neq 0$. Then $\exists k \in [n]$ such
+            that $x_k \neq 0$. Hence, $\sum_{k=1}^n {|x_k|^p}$ is positive,
+            since the summand is non-negative for all $k$ and, at least for
+            one $k$, the summand is positive. Taking the $p$-th root of the sum
+            does not make it zero, so $|x|_p$ is positive and thus nonzero, as
+            required.
+
+            Next, let us consider the case $|x|_\infty$.
+
+            We will again show the contrapositive. Again, there is at least one
+            $k$ such that $x_k \neq 0$. Consequently, $\max_{k=1}^n |x_k|$ is
+            positive, so $|x|_\infty \neq 0$ as required.
+        \end{proof}
+
+        \begin{prop}
+            $|\lambda x|_p = |\lambda| \cdot |x|_p$ for $\lambda \in \R$.
+        \end{prop}
+
+        \begin{proof}
+            First, let us show the case where $p$ is finite.
+
+            By the definition of the $p$-quasinorm, we have
+            \begin{equation*}
+                \left( \sum_{k=1}^n |\lambda x_k|^p \right) ^ \frac{1}{p}
+            \end{equation*}
+
+            We can rewrite the summand to $|\lambda|^p |x_k|^p$ and factor out
+            the $\lambda$ factor from the sum. The $p$-th root distributes over
+            the the product of the $\lambda$ factor and the sum, and will
+            cancel the $p$-th power on the $\lambda$ factor, leaving us with
+            \begin{equation*}
+                |\lambda| \left ( \sum_{k=1}^n |x_k|^p \right) ^ \frac{1}{p}
+            \end{equation*}
+            which is $|\lambda| \cdot |x|_p$, as required.
+
+            Next, let us consider the case $|\lambda x|_\infty$.
+
+            We have $\max_{k=1}^n |\lambda x_k|$, which can be rewritten
+            $\max_{k=1}^n (|\lambda| \cdot |x_k|)$. If
+            \begin{equation*}
+                |\lambda| \cdot |x_k| \geq |\lambda| \cdot |x_i|\,
+                \forall i \in [n]
+            \end{equation*}
+            then we can simply divide through by $|\lambda|$, allowing us to
+            rewrite the expression we're working on to
+            \begin{equation*}
+                |\lambda| \max_{k=1}^n |x_k| = |\lambda| \cdot |x|_\infty
+            \end{equation*}
+            as required.
+        \end{proof}
+
+        \begin{prop}
+            Let $x, y \in \R^n$, and $\alpha = \min\{1, p\}$. Then,
+            \begin{equation*}
+                |x + y|_p^\alpha \leq |x|_p^\alpha + |y|_p^\alpha
+            \end{equation*}
+        \end{prop}
+
+        \begin{proof}
+            We must consider three cases.
+
+            First, suppose $0 < p \leq 1$. The $p$-th root and the $p$-th power
+            will cancel.
+            \begin{equation*}
+                |x + y|_p^p
+                = \left(
+                \left( \sum_{k=1}^n |x_k + y_k|^p \right) ^ \frac{1}{p}
+                \right) ^ p
+                = \sum_{k=1}^n |x_k + y_k|^p
+            \end{equation*}
+            Then, we apply the triangle inequality in each term of the sum, and
+            use the fact that $\forall a,b > 0$ and $0 < p \leq 1$,
+            $(a + b)^p \leq a^p + b^p$ to obtain the following.
+            \begin{align*}
+                \sum_{k=1}^n |x_k + y_k|^p
+                &\leq \sum_{k=1}^n (|x_k| + |y_k|)^p \\
+                &\leq \sum_{k=1}^n (|x_k|^p + |y_k|^p) \\
+                &= \sum_{k=1}^n |x_k|^p + \sum_{k=1}^n |y_k|^p \\
+                &= |x|_p^p + |y|_p^p
+            \end{align*}
+            as required.
+
+            Next, suppose $1 < p < \infty$. We want to show
+            \begin{equation*}
+                \left(\sum_{k=1}^n |x_k + y_k|^p \right)^\frac{1}{p}
+                \leq
+                \left(\sum_{k=1}^n |x_k|^p \right)^\frac{1}{p}
+                +
+                \left(\sum_{k=1}^n |y_k|^p \right)^\frac{1}{p}
+            \end{equation*}
+
+            Here is our deduction.
+            \begin{align*}
+                \left(\sum_{k=1}^n |x_k + y_k|^p\right)^\inv{p}
+                &\leq \left(\sum_{k=1}^n (|x_k| + |y_k|)^p\right)^\inv{p} \\
+                &\leq \left(\sum_{k=1}^n |x_k|^p\right)^\inv{p}
+                + \left(\sum_{k=1}^n |y_k|^p\right)^\inv{p}
+            \end{align*}
+            since $\sum (|x_k| + |y_k|)^p \geq \sum |x_k|^p + \sum |y_k|^p$.
+
+            Finally, suppose $p = \infty$. We want to show
+            \begin{equation*}
+                \max_{k=1}^n |x_k + y_k|
+                \leq \max_{k=1}^n |x_k| + \max_{k=1}^n |y_k|
+            \end{equation*}
+
+            Using the triangle inequality, we get
+            \begin{equation*}
+                \max_{k=1}^n |x_k + y_k| \leq \max_{k=1}^n (|x_k| + |y_k|)
+            \end{equation*}
+
+            Suppose that it is not the case that
+            $\max_{k=1}^n (|x_k| + |y_k|)
+            \leq \max_{k=1}^n |x_k| + \max_{k=1}^n |y_k|$. Then, for \emph{any}
+            choice of $k_1$ and $k_2$,
+            $|x_{k_1}| + |y_{k_2}| > \max_{k=1}^n (|x_k| + |y_k|)$. Of course,
+            this is impossible because we could choose $k_1 = k_2 = k^\prime$
+            where $k^\prime$ is such that it is the arg max of the RHS of the
+            inequality.
+        \end{proof}
+
+        \begin{prop}
+            $$|x|_\infty \leq |x|_p \leq n^\inv{p} |x|_\infty$$
+        \end{prop}
+
+        \begin{proof}
+            First, we will show $|x|_\infty \leq |x|_p$ by induction on the
+            number of dimensions $n$.
+
+            Base case: $n = 1$. Clearly,
+            \begin{equation*}
+                \max \{ |x_1| \} = |x_1|
+                \leq
+                \left(|x_1|^p\right)^\inv{p} = |x_1|
+            \end{equation*}
+
+            Step case: assume
+            $\max_{k=1}^n |x_k|
+            \leq \left(\sum_{k=1}^n |x_k|^p \right)^\inv{p}$. We wish to add
+            another component to the vector $x$, so that it has $n+1$
+            components. Notice
+            \begin{equation*}
+                \max_{k=1}^{n+1} |x_k|
+                = \max\{\max_{k=1}^n |x_k|,\, |x_{n+1}|\}
+            \end{equation*}
+            so there are two cases to consider.
+
+            \begin{enumerate}
+                \item The maximum component does not change. Then
+                    \begin{equation*}
+                        \max_{k=1}^{n+1} |x_k| = \max_{k=1}^n |x_k|
+                        \leq \left(\sum_{k=1}^n |x_k|^p\right)^\inv{p}
+                        \leq \left(\sum_{k=1}^{n+1} |x_k|^p\right)^\inv{p}
+                    \end{equation*}
+                    as required.
+
+                \item The maximum component becomes $x_{n+1}$. Clearly,
+                    \begin{equation*}
+                        x_{n+1} = \left(|x_{n+1}|^p\right)^\inv{p}
+                        \leq \left(\sum_{k=1}^{n+1} |x_k|^p\right)^\inv{p}
+                    \end{equation*}
+                    as required.
+            \end{enumerate}
+
+            Next, we will show the second inequality. This involves nothing
+            more than a simple algebraic manipulation.
+            \begin{equation*}
+                \left(\sum_{k=1}^n |x_k|^p\right)^\inv{p}
+                \leq
+                \left(
+                    \sum_{k=1}^n \left(\max_{i=1}^n |x_i|\right)^p
+                \right)^\inv{p}
+                = \left(n \left(\max_{i=1}^n |x_i|\right)^p\right)^\inv{p}
+                = n^\inv{p} \max_{k=1}^n |x_k|
+            \end{equation*}
         \end{proof}
 \end{enumerate}
 
