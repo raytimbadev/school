@@ -1,0 +1,78 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#2\\Honours Analysis 1 -- MATH 254}
+\date{4 October 2016}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\Union}{\bigcup}
+
+\newtheorem{prop}{Proposition}
+\newtheorem{definition}{Definition}
+
+\begin{document}
+
+\maketitle
+
+\section*{\# 3 -- The algebraic numbers}
+
+\begin{definition}
+    The algebraic numbers $\A \subseteq \R$ are given by the following
+    description.
+
+    \begin{equation*}
+        \A = \left\{
+            x | \exists n \in \N, \exists a \in \Z_*^n :
+            \sum_{i=0}^n {a_i x^i} = 0
+        \right\}
+    \end{equation*}
+    where $\Z_*^n$ is defined by $\Z_*^0 = \Z \setminus \{0\}$, and
+    $\Z_*^n = \Z^{n-1} \times (\Z \setminus \{0\})$ for $n > 0$.
+\end{definition}
+
+Verbally, the algebraic numbers are those reals that can be obtained as a root
+of a polynomial of some degree $n$ with integer coefficients.  This definition
+involving $Z_*^n$ avoids the possibility of the leading coefficient of the
+polynomial being zero.
+
+\begin{prop}
+    The algebraic numbers are countable.
+\end{prop}
+
+\begin{proof}
+    We will write the algebraic numbers as a countable sum, from which it will
+    follow that they are countable. Informally, all we have to do is ``pull out
+    the existentials'' from our definition of $\A$ to produce the countable
+    sum. First, let's pull out the $\exists n \in \N$.
+    \begin{equation*}
+        \A = \Union_{n=0}^\infty \left\{
+            x | \exists a \in \Z_*^n :
+            \sum_{i=0}^n {a_i x^i} = 0
+        \right\}
+    \end{equation*}
+
+    Next, we need to ``pull out'' the $\exists a \in \Z)*^n$.
+    \begin{equation*}
+        \A = \Union_{n=0}^\infty {
+            \Union_{a \in \Z_*^n} \left\{
+                x | \sum_{i=0}^n {a_i x^i} = 0
+            \right\}
+        }
+    \end{equation*}
+    Note that $\Z_*^n$ is countable because it is the cross product of a finite
+    number of countable sets.
+
+    For $n \in \N$ and $a \in \Z_*^n$, $\sum_{i=0}^n {a_i x^n} = 0$ has at
+    most $n$ roots, so $\left\{ x | \sum_{i=0}^n {a_i x^i} \right\}$ is finite.
+    The countable union of finite sets is countable, so for fixed $n \in \N$,
+    $\Union_{a \in \Z_*^n} \left\{ x | \sum_{i=0}^n {a_i x^i} \right\}$ is
+    countable.  Hence, $\A$ is countable, since it is a countable union of
+    countable sets.
+\end{proof}
+
+\end{document}
