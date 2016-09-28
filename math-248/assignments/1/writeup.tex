@@ -472,6 +472,71 @@
             $A^\prime (s) x(s)$ and $A(s) x^\prime (s)$, which is what we were
             seeking to show.
         \end{proof}
+
+    \item Differentiability along restrictions.
+
+        \begin{prop}
+            The function $u : \R^2 \to \R$ defined by
+            \begin{equation*}
+                u(x, y) = \begin{cases}
+                    1 &\mbox{if } e^\frac{-2}{x} \leq y \leq e^\frac{-1}{x} \\
+                    0 &\mbox{else}
+                \end{cases}
+            \end{equation*}
+            is discontinuous at $0 \in \R^2$, but is continuous along every
+            restriction to a polynomial curve.
+        \end{prop}
+
+        In particular, approaching along a curve bounded between the two
+        exponential curves will produce a limit of $1$ at the origin, but
+        approaching along any polynomial curve will produce a limit of $0$
+
+        \begin{proof}
+            First, the function $u$ is discontinuous since approaching the
+            origin along the sequence
+            $\{(\frac{1}{n}, e^\frac{-2}{\frac{1}{n}})\}$ as $n \to \infty$
+            results in a limit of $1$, but approaching along the sequence
+            $\{(\frac{1}{n}, 0)\}$ as $n \to \infty$ results in a limit of $0$.
+
+            Next, take an arbitrary polynomial $p(t)$. Several cases arise.
+            \begin{enumerate}
+                \item If $p$ is the zero polynomial, then
+                    $u(t, p(t)) = u(t, 0) \to 0$ as
+                    $t \to 0$ and $u(0, 0) = 0$, so $u$ is continuous along
+                    this curve.
+
+                \item If $p(0) \neq 0$, then as $t \to 0$, $(t, p(t))$ does not
+                    approach $(0, 0)$, so $u$ is continuous at $(0, 0)$ along
+                    this curve as well.
+
+                \item If $p(0) = 0$, then we can bound the polynomial in a
+                    neighbourhood around the zero. Specifically, let $n$ be the
+                    multiplicity of the zero $t = 0$. Then there exist $c > 0$
+                    and $d > 0$ such that for $t \in [0, d]$ either
+                    \begin{align*}
+                        p(t) &\geq ct^n \quad \text{or}\\
+                        p(t) &\leq -ct^n
+                    \end{align*}
+
+                    In the first case, the polynomial is above both exponential
+                    curves as $t \to 0$, since the exponential curves approach
+                    $0$ exponentially fast, must faster than $ct^n$. Hence the
+                    limit along the polynomial curve is again $0$, which
+                    corresponds with the function value at $(0, 0)$. Thus $u$
+                    is continuous along this polynomial curve as well.
+
+                    In the second case, there is nothing to show since the
+                    polynomial is negative and does not interact whatsoever
+                    with the exponential curves. Again the limit value will
+                    correspond with the function value, so $u$ is continuous
+                    along this curve.
+            \end{enumerate}
+
+            Thus, since the choice of $p(t)$ was arbitrary, we can generalize
+            to all polynomial curves; the function $u$ we have constructed is
+            discontinuous at $0 \in \R^2$, but is continuous along any
+            polynomial curve through the origin.
+        \end{proof}
 \end{enumerate}
 
 \end{document}
