@@ -8,11 +8,13 @@
 \usepackage{amsmath,amssymb,amsthm}
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\N}{\mathbb{N}}
+\renewcommand{\P}{\mathbb{P}}
 \newcommand{\Z}{\mathbb{Z}}
 \newcommand{\A}{\mathcal{A}}
 \newcommand{\Union}{\bigcup}
 
 \newtheorem{prop}{Proposition}
+\newtheorem{lemma}{Lemma}
 \newtheorem{definition}{Definition}
 
 \begin{document}
@@ -73,6 +75,179 @@ polynomial being zero.
     $\Union_{a \in \Z_*^n} \left\{ x | \sum_{i=0}^n {a_i x^i} \right\}$ is
     countable.  Hence, $\A$ is countable, since it is a countable union of
     countable sets.
+\end{proof}
+
+\section*{\#4 -- Some facts about real numbers}
+
+First let's show some (extremely) useful lemmas to help us with our proofs.
+
+\begin{lemma}
+    Zero is the absorbing element of multiplication, i.e.
+    \begin{equation*}
+        \forall a \in \R:\, 0 \cdot a = a \cdot 0 = 0
+    \end{equation*}
+    \label{lem:zeroabsorb}
+\end{lemma}
+
+\begin{proof}
+    Consider the true statement $1 = 1 + 0$ obtained by the fact that $0$ is
+    the neutral element of addition. Then multiply both sides by an arbitrary
+    real $a$.
+    \begin{align*}
+        1 \cdot a &= (1 + 0)a & ~ \\
+        1 \cdot a &= 1 \cdot 0 + 0 \cdot a
+            & \quad\text{distributivity of (+)} \\
+        0 = 1 \cdot a - 1 \cdot a &= 0 \cdot a
+            & \quad\text{by existence of inverse elements for addition}
+    \end{align*}
+
+    Since the choice of $a$ was arbitrary, we generalize to
+    $\forall a: 0 \cdot a = 0$, which is precisely what we wanted to show.
+\end{proof}
+
+\begin{lemma}
+    For any $x \in \R$, $-x = -1 \cdot x$.
+    \label{lem:minusone}
+\end{lemma}
+
+\begin{proof}
+    In other words, we want to show that $-1 \cdot x$ is the inverse of $x$. It
+    suffices to show that $-1 \cdot x + x = 0$. Here is our deduction.
+
+    \begin{center}
+        \begin{tabular}{r l | r}
+            ~ & $-1 \cdot x + x$ & ~ \\
+            = & $-1 \cdot x + 1 \cdot x$
+                & $1$ is the neural element of $(\cdot)$ \\
+            = & $(-1 + 1) \cdot x$ & distributivity of $(\cdot)$ over $(+)$ \\
+            = & $0 \cdot x$ & $-1$ is the additive inverse of $1$ \\
+            = & $0$ & by lemma \ref{lem:zeroabsorb}
+        \end{tabular}
+    \end{center}
+
+    Hence, $-1 \cdot x$ is the inverse of $x$, so it is equal to $-x$.
+\end{proof}
+
+\begin{lemma}
+    For any $x \in \R$, $-(-x) = x$.
+    \label{lem:doubleneg}
+\end{lemma}
+
+\begin{proof}
+    Since $-(-x)$ is the inverse of $-x$, we can write
+    \begin{equation*}
+        -(-x) + (-x) = 0
+    \end{equation*}
+    Adding $x$ to both sides of the equation, we get
+    \begin{equation*}
+        -(-x) + (-x) + x = x
+    \end{equation*}
+    Since $-x$ is the inverse of $x$, we can write
+    \begin{equation*}
+        -(-x) + 0 = x
+    \end{equation*}
+    Since $0$ is the neutral element of addition, we can simplify to
+    \begin{equation*}
+        -(-x) = x
+    \end{equation*}
+    which is precisely what we wanted to show.
+\end{proof}
+
+Now we are ready to attack the main proposition.
+
+\begin{prop}
+    Suppose $x, y \in \R$ are arbitrary reals.
+    \begin{equation*}
+        (-x)(-y) = xy
+    \end{equation*}
+\end{prop}
+
+\begin{proof}
+    Here is our deduction.
+
+    \begin{center}
+        \begin{tabular}{r l | r}
+            ~ & $(-x)(-y)$ & ~ \\
+            = & $(-1) \cdot x \cdot (-1) \cdot y$
+                & by lemma \ref{lem:minusone} \\
+            = & $((-1)(-1))(xy)$ & by associativity \\
+            = & $(-(-1))(xy)$ & by lemma \ref{lem:minusone} \\
+            = & $(1)(xy)$ & by lemma \ref{lem:doubleneg} \\
+            = & $xy$ & because $1$ is the neutral element of $(\cdot)$
+        \end{tabular}
+    \end{center}
+\end{proof}
+
+Next, we will show an ordering property for reals, but we will need a lemma
+first.
+
+\begin{lemma}
+    Let $x \in \R$, $x \neq 0$. Then $\frac{1}{x} > 0 \iff x > 0$.
+    \label{lem:invsign}
+\end{lemma}
+
+\begin{proof}
+    Suppose $x \neq 0$. Consider $\frac{1}{x}\cdot\frac{1}{x}$. Clearly, since
+    $\frac{1}{x} = \frac{1}{x}$, they are either both positive or both
+    negative, so by a property seen in class, $\frac{1}{x}\frac{1}{x}$ is
+    positive. We can multiply it with $x$ and obtain some result, say $p$. By a
+    result seen in class, $p$, being a product of two things, will
+    be positive if either both factors are positive, or both factors are
+    negative. Obviously, they cannot be both negative, as we have shown that
+    one of those factors is always positive. Consequently, $p > 0 \iff x > 0$.
+
+    Since $\frac{1}{x}$ is the multiplicative inverse of $x$, we can simplify
+    $p$.
+    \begin{equation*}
+        p = x\frac{1}{x}\frac{1}{x} = 1 \frac{1}{x} = \frac{1}{x}
+    \end{equation*}
+    so $\frac{1}{x} > 0 \iff x > 0$, which is precisely what we wanted to show.
+\end{proof}
+
+\begin{prop}
+    If $x, y \in \R$ are arbitrary reals, then
+    \begin{equation*}
+        x < y < 0 \implies \frac{1}{y} < \frac{1}{x} < 0
+    \end{equation*}
+\end{prop}
+
+\begin{proof}
+    Since $x$ is negative (by the transitivity property seen in class),
+    $\frac{1}{x}$ is negative by lemma \ref{lem:invsign}. Since $y$ is
+    negative, $\frac{y}{x}$ is positive by the result shown in class, since
+    both factors are negative.
+
+    Since $x < y$, $y - x \in \P$, so multiplying $y - x$ with another positive
+    number will yield a positive number by the closure property of $\P$. Let's
+    multiply by $\frac{y}{x}$ and use distributivity to get
+    \begin{equation*}
+        (y - x)\frac{y}{x}
+        = y \frac{y}{x} - x \frac{y}{x}
+        = y \frac{y}{x} - x \frac{1}{x} y
+        = y \frac{y}{x} - 1 \cdot y
+        = y \frac{y}{x} - y \in \P
+    \end{equation*}
+    using distributivity, associativity of $(\cdot)$, property of
+    multiplicative inverse, and $1$ as neutral element of multiplication.
+
+    Then, consider $\frac{1}{y}\frac{1}{y}$. Being the product of equal things,
+    it is positive by the result seen in class. Let's multiply it with our
+    the result we just computed to get the following positive number by the
+    closure property.
+    \begin{equation*}
+        \left(y \frac{y}{x} - y\right)\frac{1}{y}\frac{1}{y}
+        = y \frac{y}{x}\frac{1}{y}\frac{1}{y} - y\frac{1}{y}\frac{1}{y}
+        = \left(y \frac{1}{y}\right) \frac{1}{x} \left(y \frac{1}{y}\right)
+        - \left(y\frac{1}{y}\right)\frac{1}{y}
+        = 1 \cdot \frac{1}{x} \cdot 1 - 1 \cdot \frac{1}{y}
+        = \frac{1}{x} - \frac{1}{y} \in \P
+    \end{equation*}
+
+    So $\frac{1}{y} < \frac{1}{x}$, which is \emph{almost} what we want to
+    show. All that remains is that $\frac{1}{x} < 0$, which follows immediately
+    from lemma \ref{lem:invsign} since $x < 0$ by assumption.
+
+    Thus, $\frac{1}{y} < \frac{1}{x} < 0$.
 \end{proof}
 
 \end{document}
