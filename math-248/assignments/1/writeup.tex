@@ -703,21 +703,23 @@
                 terms if $j = p$:
                 \begin{equation*}
                     \del{x_p} {
-                        \sum_{i=1\\i\neq p}^n x_i A_{ip} x_p
+                        \sum_{\substack{i=1\\i\neq p}}^n x_i A_{ip} x_p
                     }
                     =
-                    \sum_{i=1\\i\neq p}^n { x_i A_{ip} }
+                    \sum_{\substack{i=1\\i\neq p}}^n { x_i A_{ip} }
                 \end{equation*}
+                All other terms vanish if $j \neq p$.
 
                 Then, if $i = p$ and as $j$ runs from $1$ to $n$ skipping $p$,
                 we have these terms:
                 \begin{equation*}
                     \del{x_p} {
-                        x_p \sum_{j=1\\j\neq p}^n { A_{pj} x_j }
+                        x_p \sum_{\substack{j=1\\j\neq p}}^n { A_{pj} x_j }
                     }
                     =
-                    \sum_{j=1\\j\neq p}^n { A_{pj} x_j }
+                    \sum_{\substack{j=1\\j\neq p}}^n { A_{pj} x_j }
                 \end{equation*}
+                All other terms vanish if $i \neq p$.
 
                 But wait! If we look at the ``missing'' terms from each of the
                 two sums we have computed, we notice that they are precisely
@@ -731,7 +733,7 @@
                         \sum_{i,k=1}^n A_{ik}x_ix_k + \sum_{i=1}^n b_i x_i
                     \right)}
                     =
-                    \sum_{i=1}^n { (A_{ip} + A_{pi} x_i }
+                    \sum_{i=1}^n { (A_{ip} + A_{pi}) x_i }
                     +
                     b_p
                 \end{equation*}
