@@ -15,6 +15,7 @@
 \newcommand{\as}[1]{\quad\text{as}\;#1}
 \newcommand{\inv}[1]{\frac{1}{#1}}
 \renewcommand{\d}[1]{\frac{\text{d}}{\text{d}#1}}
+\newcommand{\del}[1]{\frac{\partial}{\partial#1}}
 
 \begin{document}
 
@@ -479,8 +480,8 @@
             The function $u : \R^2 \to \R$ defined by
             \begin{equation*}
                 u(x, y) = \begin{cases}
-                    1 &\mbox{if } e^\frac{-2}{x} \leq y \leq e^\frac{-1}{x} \\
-                    0 &\mbox{else}
+                    1 &\text{if } e^\frac{-2}{x} \leq y \leq e^\frac{-1}{x} \\
+                    0 &\text{else}
                 \end{cases}
             \end{equation*}
             is discontinuous at $0 \in \R^2$, but is continuous along every
@@ -537,6 +538,209 @@
             discontinuous at $0 \in \R^2$, but is continuous along any
             polynomial curve through the origin.
         \end{proof}
+
+    \item Continuity of multivariate functions.
+
+        \begin{enumerate}
+            \item The Weierstrass definition of continuity for multivariate
+                functions.
+
+                \begin{prop}
+                    For all $h : [0, \infty) \to \R$ such that $h(t) = o(1)$ as
+                    $t \to 0$, if $K \subseteq \R^n$ and $f : K \to \R$ such
+                    that
+                    \begin{equation*}
+                        |f(x) - f(y)| \leq h(|x - y|_\infty)
+                        \quad \forall x, y \in K
+                    \end{equation*}
+                    then $f$ is continuous on $K$.
+                \end{prop}
+
+                \begin{proof}
+                    Take an arbitrary sequence $S = \{x^{(i)}\} \subseteq K$
+                    converging to $y \in K$. We want to show that $f$ is
+                    continuous, i.e.  $\{f(x^{(i)})\} \to f(y)$.
+
+                    Since $|f(x) - f(y)| \leq h(|x - y|_\infty)$ for all
+                    $x, y \in K$, we can replace $x$ here with any element of
+                    $S$ to get
+                    \begin{equation*}
+                        0 \leq |f(x^{(i)}) - f(y)| < h(|x^{(i)} - y|_\infty)
+                    \end{equation*}
+                    for any $i$.
+
+                    Notice that since $\{x^{(i)}\} \to y$,
+                    $\{|x^{(i)} - y|_\infty\} \to 0$ as $i \to \infty$, so
+                    $\{h(|x^{(i)} - y|_\infty\} \to 0$ as $i \to \infty$
+                    because $h(t) = o(1)$.
+
+                    By the Squeeze Theorem,
+                    \begin{equation*}
+                        \lim_{i\to\infty} {|f(x^{(i)} - f(y)|} = 0
+                    \end{equation*}
+                    so $\{f(x^{(i)})\} \to f(y)$, and $f(x) = f(y) + o(1)$.
+
+                    This shows that $f$ is continuous.
+                \end{proof}
+
+            \item Continuity of the $p$-quasinorm.
+
+                \begin{prop}
+                    Consider the function $f : \R^n \to \R$ defined by the
+                    $p$-quasinorm, $x \mapsto |x|_p$. $f$ is continuous, for
+                    $0 < p \leq \infty$.
+                \end{prop}
+
+                \begin{proof}
+                    First suppose $0 < p \leq 1$. Then,
+                    \begin{equation*}
+                        |x|_p = \sum_{k=1}^n |x_k|^p
+                    \end{equation*}
+
+                    Take an arbitrary convergent sequence $\{x^{(i)}\} \to y$
+                    as $i \to \infty$.
+                    To show continuity of $f$ at $y$, we must show that
+                    $\{|x^{(i)}|_p\} \to |y|_p$ as $i \to \infty$. This
+                    deduction follows mainly from the properties of sequences.
+                    \begin{align*}
+                        \lim_{i\to\infty} \{|x^{(i)}|_p\}
+                        &= \lim_{i\to\infty} {
+                            \left\{ \sum_{k=1}^n |x_k^{(i)}|^p \right\}
+                        } \\
+                        &= \sum_{k=1}^n {
+                            \lim_{i\to\infty} {
+                                \{|x_k^{(i)}|^p\}
+                            }
+                        } \\
+                        &= \sum_{k=1}^n {
+                            \lvert
+                            \lim_{i\to\infty} \{ x_k^{(i)} \}
+                            \rvert
+                        }^p \\
+                        &= \sum_{k=1}^n {|y_k|^p} \\
+                        &= |y|_p
+                    \end{align*}
+
+                    The deduction is the same for $1 < p < \infty$, except that
+                    we ``push'' the sequence inside the $p$-th root before
+                    proceeding the same way.
+
+                    The deduction is also the same for the maximum norm
+                    $|\cdot|_\infty$, except that instead of ``pushing'' the
+                    sequence inside the sum, we move into into the $\max{}$.
+                \end{proof}
+        \end{enumerate}
+
+    \item
+        \begin{enumerate}
+            \item Power of an absolute value of a product.
+
+                Consider the function $f : \R^2 \to \R$ defined by
+                \begin{equation*}
+                    f(x, y) = \begin{cases}
+                        |xy|^\alpha &\quad\text{if } xy \neq 0 \\
+                        0           &\quad\text{if } xy = 0
+                    \end{cases}
+                \end{equation*}
+
+                We wish to find the values of the parameter $\alpha$ so that
+                $f$ is continuous everywhere. Using the fact that the existence
+                and continuity of the partial derivatives implies the
+                differentiability of the function, it is easy to see that the
+                only place there might be a problem is when $xy = 0$, since the
+                absolute value function is not differentiable there.
+
+                First, if $\alpha = 0$, then $f(x, y) = 1$ everywhere except
+                when $xy = 0$, when $f(x, y) = 0$. Since $f$ is discontinuous
+                in this case at $0$, it is not differentiable.
+
+                Next, if $\alpha \neq 0$, we can find the partial derivatives
+                of $f$ for $xy \neq 0$ using the chain rule and the power rule,
+                considering $\d{x} {|x|} = \frac{|x|}{x}$, illustrating that
+                the derivative is undefined at $x = 0$.
+                \begin{align*}
+                    \del{x} {|xy|^\alpha}
+                    &= |y|^\alpha \d{x} |x|^\alpha \\
+                    &= |y|^\alpha \alpha |x|^{\alpha - 1} \frac{|x|}{x} \\
+                    &= \alpha \frac{|xy|^\alpha}{x}
+                \end{align*}
+
+                The limit of the partial derivative as $(x, y) \to (0, 0)$
+                diverges at $x = 0$ if and only if the denominator approaches
+                $0$ faster than the numerator does. This happens precisely when
+                its degree exceeds the degree of the numerator, which happens
+                for $0 < \alpha < \frac{1}{2}$. If
+                $\frac{1}{2} < \alpha < \infty$, the numerator will approach
+                zero faster than the denominator, and the value of the
+                partial derivative will approach $0$. If $\alpha < 0$, then the
+                numerator is just the constant $\alpha$, so the partial
+                derivative will diverge.
+
+            \item Differentiability of vector operations.
+
+                Consider the function $f : \R^n \to \R$ defined by
+                \begin{equation*}
+                    x \mapsto x^T Ax + b^T x
+                    = \sum_{i,k=1}^n A_{ik}x_ix_k + \sum_{i=1}^n b_i x_i
+                \end{equation*}
+                for some fixed $A \in \R^{n \times n}$ and $b \in \R^n$.
+
+                It is obvious that $f$ is differentiable, because it produces a
+                polynomial, and all polynomials are differentiable.
+
+                To compute the derivative of $f$, we must find each of its
+                partial derivatives. Suppose we wish to find the $p$th partial
+                derivative of $f$. Any term not involving $x_p$ will vanish, so
+                $\del{x_p} {\sum_{i=1}^n {b_i x_i}} = b_p$. As for the other
+                sum, we have to watch out for $i = p$, and $j = p$. When
+                $i = j = p$, then we have a quadratic term:
+                \begin{equation*}
+                    \del{x_p} {x_p A_{pp} x_p} = 2 A_{pp} x_p
+                \end{equation*}
+                This is a term in our $p$th partial derivative.
+
+                Then, as $i$ runs from $1$ to $n$, skipping $p$, we have these
+                terms if $j = p$:
+                \begin{equation*}
+                    \del{x_p} {
+                        \sum_{i=1\\i\neq p}^n x_i A_{ip} x_p
+                    }
+                    =
+                    \sum_{i=1\\i\neq p}^n { x_i A_{ip} }
+                \end{equation*}
+
+                Then, if $i = p$ and as $j$ runs from $1$ to $n$ skipping $p$,
+                we have these terms:
+                \begin{equation*}
+                    \del{x_p} {
+                        x_p \sum_{j=1\\j\neq p}^n { A_{pj} x_j }
+                    }
+                    =
+                    \sum_{j=1\\j\neq p}^n { A_{pj} x_j }
+                \end{equation*}
+
+                But wait! If we look at the ``missing'' terms from each of the
+                two sums we have computed, we notice that they are precisely
+                $A_{pp} x_p$, of which we have two thanks to the
+                differentiation of the quadratic term.
+
+                Consequently, we can write the $p$th partial derivative like
+                this.
+                \begin{equation*}
+                    \del{x_p} {\left(
+                        \sum_{i,k=1}^n A_{ik}x_ix_k + \sum_{i=1}^n b_i x_i
+                    \right)}
+                    =
+                    \sum_{i=1}^n { (A_{ip} + A_{pi} x_i }
+                    +
+                    b_p
+                \end{equation*}
+
+                Since we know how to find the $p$th partial derivative for any
+                $p$, to compute the Jacobian (the overall derivative of $f$),
+                we just run $p$ from $1$ to $n$ and collect the partial
+                derivatives in a matrix.
+        \end{enumerate}
 \end{enumerate}
 
 \end{document}
