@@ -16,3 +16,6 @@
 [submodule "comp-621/wu-wei"]
 	path = comp-621/wu-wei
 	url = https://github.com/Sable/wu-wei-benchmarking-toolkit.git
+[submodule "comp-621/assignments/1/matlab-implementation-template"]
+	path = comp-621/matlab-implementation-template
+	url = https://github.com/Sable/matlab-implementation-template
