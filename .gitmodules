@@ -19,3 +19,6 @@
 [submodule "comp-621/assignments/1/matlab-implementation-template"]
 	path = comp-621/matlab-implementation-template
 	url = https://github.com/Sable/matlab-implementation-template
+[submodule "comp-621/assignments/AspectMatlab"]
+	path = comp-621/AspectMatlab
+	url = https://github.com/Sable/AspectMatlab.git
