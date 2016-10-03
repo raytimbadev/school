@@ -1,0 +1,21 @@
+{
+    "type": "implementation",
+    "short-name":"matlab",
+    "description":"Template for matlab implementations",
+    "language":"matlab",
+    "core-source-files": [
+       { "file": "./kernel.m"}
+    ],
+    "runner-source-file": { "file": "./runner.m" },
+    "runner-arguments": [
+        { "expand": "/experiment/input-size" }
+    ],
+    "libraries": [
+        { "file": "./verify.m" }
+    ],
+    "compatibilities": [
+        "https://github.com/Sable/ostrich-matlab-concatenate-compiler.git",
+        "https://github.com/Sable/ostrich-matlab-environment.git",
+        "https://github.com/Sable/ostrich-octave-environment.git"
+    ]
+}

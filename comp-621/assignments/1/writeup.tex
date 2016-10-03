@@ -1,0 +1,237 @@
+\documentclass[11pt,letterpaper]{article}
+
+\author{Jacob Thomas Errington}
+\title{Assignment \#1\\Program Analysis \& Transformations}
+\date{6 October 2016}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+
+\newcommand{\matlab}{\textsc{Matlab}}
+
+\begin{document}
+
+\maketitle
+
+\section{Background}
+
+The program we have chosen to benchmark is an implementation of an $n$-body
+simulation.  The key property of an $n$-body system is that it consists of $n$
+distinct parts -- the bodies -- which act independently on all of each other.
+The system is generally held to the assumption that the bodies do not collide,
+and that they are points (i.e. they have no volume). In a gravitational
+$n$-body system, each \emph{planet} acts on each other planet in a pairwise
+fashion according to the laws of gravity. Our program simulates an $n$-body
+Newtonian gravitational system.
+
+$n$-body simulations are interesting for several reasons. In physics, many
+problems can be modelled as $n$-body problems, sometimes with very large $n$.
+For example, the solar system is an $n$-body system. (However, The solar system
+is a somewhat uninteresting $n$-body system because the sun dominates the
+system. It is usually possible to neglect the action of the other bodies
+without loss of much precision, and instead study several 2-body systems.)
+Other systems in which many particles interact can be modelled similarly, such
+a systems of subatomic particles, provided that the inter-particle interactions
+are pairwise. In specifically gravitational systems, it is possible to find a
+closed, analytic solution for $n = 2$ and for special situations when $n = 3$,
+but there is no general analytic solution otherwise. Hence, our simulation uses
+numerical methods to find the solution. More specifically, our solution is
+obtained by numerically solving differential equations. Many other problems in
+science are solved by numerically solving systems of differential equations, so
+looking into the optimiation of these numerical solutions can have many
+practical outcomes.
+
+From the perspective of a compiler optimizer, the numerical integration method
+that we implemented is straightforward, but exhibits a number of interesting
+properties. Specifically, there is a nested loop, a few auxiliary functions,
+floating-point arithmetic, and many vector operations.
+
+\section{Data}
+
+\subsection{Running the benchmark}
+
+Our simulation can be run by invoking the \texttt{runner} function with the
+desired value of $n$ and the amount of time to run the simulation for. This
+amount of time is not a \emph{real} number of sections, but rather a number of
+seconds \emph{in the system}. Due to the pairwise operation of the laws of
+physics, and the fact that we have used a straightforward naive implementation
+without any approximations, the main algorithm has quadratic runtime in the
+number of bodies, and a linear runtime in the amount of time simulated.
+
+\subsection{First results}
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{|c|}
+        \textbf{Runtime (s)} \\ \hline \hline
+        6.8777 \\
+        7.0278 \\
+        6.9381 \\
+        7.1604 \\
+        6.9999 \\
+        6.9287 \\
+        6.9442 \\
+        6.9730 \\
+        7.0078 \\
+        6.9989
+    \end{tabular}
+
+    \caption{
+        Some runtimes for the simulation. We ran the simulation with fifteen
+        bodies in the system with randomly generated positions and momenta. The
+        system was simulated for two seconds, with a time step of $0.001$
+        giving $2000$ iterations per run.
+        Minimum runtime: $6.8777$.
+        Maximum runtime: $7.1604$.
+        Average runtime: $6.9857$ (standard deviation $0.0762$).
+    }
+    \label{data:unoptimized-run}
+\end{figure}
+
+Figure \ref{data:unoptimized-run} shows ten runs of the simulation with
+identical parameters. Although the starting conditions of the simulation are
+randomized, we seed the random number generator with the same value in order to
+ensure determinism of the results. This data was obtained using \matlab r2015a
+on a laptop running Arch Linux, kernel version 4.4.19, with a (dual-core) Intel
+Celeron 2957U processor $1.40 \text{GHz}$.
+
+\section{Aspect\matlab}
+
+The program we are benchmarking makes use of three very important arrays:
+\begin{enumerate}
+    \item
+        \texttt{X} tracks the current position of each of the bodies.
+    \item
+        \texttt{P} tracks the current momentum of each of the bodies.
+    \item
+        \texttt{M} holds the mass of each of the bodies. This quantity does not
+        change.
+\end{enumerate}
+
+It could be interesting to track reads and writes to each of these arrays, so
+we wrote an Aspect\matlab aspect to do just that. One would expect read and
+write counts to be proportional to the number of iterations performed by the
+simulation.
+
+\subsection{Remarks on running the woven code}
+
+The introduction of the aspect \emph{substantially} slowed down the execution
+of the benchmark. And by \emph{substantially}, I mean \emph{seriously
+considerably really a lot}. Looking at the woven code reveals why: a tremedous
+number of temporary variables are introduced by Aspect\matlab! I believe this
+to be the primary cause of the slowdown. In almost all cases, these temporaries
+serve no purpose in the woven code. Certainly, they are useful for other types
+of pointcuts, but for those that we used in our aspect.
+
+This suggests a number of optimization opportunities in the Aspect\matlab
+compiler!
+
+\subsection{Data}
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{|c|}
+        \textbf{Runtime (s)} \\ \hline \hline
+        201.9215 \\
+        203.2561 \\
+        216.6258 \\
+        222.9545 \\
+        201.9432 \\
+        203.7011 \\
+        201.5871 \\
+        201.4031 \\
+        202.5537 \\
+        202.9298 \\
+    \end{tabular}
+
+    \caption{
+        We ran the woven code produced by the Aspect\matlab compiler with the
+        exact same configuration as the unwoven code used to produce that data
+        in figure \ref{data:unoptimized-run}.
+        Minimum runtime: $201.4031$.
+        Maximum runtime: $222.9545$.
+        Average runtime: $205.8876$ (standard deviation $7.5133$).
+    }
+    \label{fig:wovenrun}
+\end{figure}
+
+As we can see in figure \ref{fig:wovenrun}, the runtimes are substantially
+increased, due to the overhead introduced by the Aspect\matlab compiler
+
+\section{Using the \matlab profiler}
+
+We ran the builtin \matlab profiler on the simulation. The program spends most
+of its time inside the inner \texttt{for} loop, as expected. What was revealed
+by the profiler is that the program spends almost all its time invoking two
+particular functions in the inner \texttt{for} loop: the \texttt{gforce}
+function computes the force of gravity exerted by one body on another, and the
+\texttt{feq} function determines whether two bodies have collided or not. The
+former function is essential to the simulation; the latter function is needed
+to avoid computing the force of gravity when two bodies have collided (the
+force goes to infinity in this case).
+
+\subsection{Hand optimization}
+
+With this knowledge, we know that we must optimize the \texttt{gforce}
+function. The function is based on the following equation, which gives the
+force of gravity exerted by body $j$ on body $i$ in three-dimensional space.
+\begin{equation}
+    \vec{F_{ij}} =
+    \frac{G m_i m_j}{\left\| \vec{x_j} - \vec{x_i} \right\|^3}
+    \left(\vec{x_i} - \vec{x_j}\right)
+    \label{eq:gravity}
+\end{equation}
+where
+\begin{itemize}
+    \item $G$ is Newton's constant of gravity;
+    \item $m_k$ is the mass of body $k$;
+    \item $\vec{x_k}$ is the position of body $k$ in three-space;
+    \item $\|\cdot\|$ is the Euclidean norm.
+\end{itemize}
+
+Our implementation of this equation in the \texttt{gforce} function is naive:
+\begin{verbatim}
+function force = gforce(m1, m2, q1, q2)
+force = G * m1 * m2 .* (q2 - q1) / norm(q1 - q2)^3;
+end
+\end{verbatim}
+The quantity $G m_1 m_2$ is constant with respect to time, whereas the
+quantities involving the positions varies; a simple optimization could be to
+precompute the product $G m_i m_j$ for all $i$ and $j$, store them in a lookup
+table, and use those values instead of recalculating the product each time
+\texttt{gforce} is called.
+
+\subsection{Data}
+
+\begin{figure}[ht]
+    \centering
+    \begin{tabular}{|c|}
+        \textbf{Runtime (s)} \\ \hline \hline
+        6.8181 \\
+        6.7735 \\
+        6.8095 \\
+        6.8103 \\
+        6.8335 \\
+        6.8057 \\
+        6.9649 \\
+        6.8553 \\
+        6.8306 \\
+        6.8279
+    \end{tabular}
+
+    \caption{
+        We adjusted the \texttt{gforce} function to use a lookup table for the
+        product $G m_i m_j$ that is precomputed before the first iteration of
+        the simulation. Minimum runtime: $6.7735$. Maximum runtime: $6.9649$.
+        Average runtime: $6.8329$ (standard deviation $0.0511$).
+    }
+    \label{data:optimizedrun}
+\end{figure}
+
+Figure \ref{data:optimizedrun} shows the data for the optimized version of our
+code. There is a slight improvement thanks to the introduction of the lookup
+table. The speedup is not very considerable though, since the bulk of the time
+consumed by \texttt{gforce} function probably comes from the vector operations
+and the calculation of the cubed norm rather than the scalar products.
+
+\end{document}
