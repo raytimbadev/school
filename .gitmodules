@@ -22,3 +22,6 @@
 [submodule "comp-621/assignments/AspectMatlab"]
 	path = comp-621/AspectMatlab
 	url = https://github.com/Sable/AspectMatlab.git
+[submodule "comp-621/mcsaf-intro"]
+	path = comp-621/mcsaf-intro
+	url = https://github.com/Sable/mcsaf-intro
