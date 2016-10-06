@@ -15,7 +15,7 @@
 \DeclareMathOperator{\killOp}{kill}
 \DeclareMathOperator{\genOp}{gen}
 \newcommand{\In}[1]{\inputOp{(#1)}}
-\newcommand{\Out}[1]{\outputOp}{(#1)}
+\newcommand{\Out}[1]{\outputOp{(#1)}}
 \newcommand{\Kill}[1]{\killOp{(#1)}}
 \newcommand{\Gen}[1]{\genOp{(#1)}}
 
@@ -460,7 +460,7 @@ The extended basic blocks are the following.
         \Tree
             [.$B_1$
                 [.$B_2$ [.$B_3$ $B_4$ ] ]
-                [.$B_5$ [.$B_6$ [.$B_7$ .$B_8$ ] $B_9$ ] ]
+                [.$B_5$ [.$B_6$ [.$B_7$ $B_8$ ] $B_9$ ] ]
                 $B_{10}$
             ]
     \end{tikzpicture}
@@ -473,7 +473,7 @@ The extended basic blocks are the following.
 
 \begin{figure}[ht]
     \centering
-    \begin{tabular}{r | l}
+    \begin{tabular}{|r|p{13cm}|}
         \hline \\
         \textbf{Line number} & \textbf{Reaching definitions} \\ \hline
         $5$ : & $\{(n, 1), (m, 2), (x, 3), (y, 4)\}$ \\ \hline
@@ -495,8 +495,9 @@ The extended basic blocks are the following.
             (i, 26), (t_1, 20), (t_2, 22)\}$ \\ \hline
         $30$ : & $\{
             (n, 1), (m, 2), (x, 3), (y, 4), (s, 6), (t_1, 8), (t_2, 9),
-            (t_3, 10), (n, 11), (p, 16), (i, 17), (p, 25), (i, 26), (t_1, 20),
-            (t_2, 22)\}$ \\ \hline
+            (t_3, 10), (n, 11)\}$ \linebreak $\cup \{
+            (p, 16), (i, 17), (p, 25), (i, 26), (t_1, 20), (t_2, 22)\}$ \\
+        \hline
     \end{tabular}
 
     \caption{The reaching definition at various points in the program.}
@@ -728,7 +729,7 @@ program path might lead to a type error, such as in figure
 JIT-compiled code. \texttt{transpose} requires its argument to be an array, so
 it must check this at runtime in general; if we can prove that along all paths,
 its argument is in fact an array, then we can replace the call to
-\texttt{transpose} with a call to \texttt{unsafe_transpose} that does not
+\texttt{transpose} with a call to \texttt{unsafe\_transpose} that does not
 perform the check, and is consequently faster. (I believe a similar
 optimization exists in Java, where array bounds-checking is skipped if the
 JIT-compiler can guarantee than the index is within the array bounds.)
