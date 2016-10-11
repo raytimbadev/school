@@ -1,0 +1,42 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#3\\Honours analysis 1 -- MATH 254}
+\date{18 October 2016}
+
+\usepackage{amsmath,amssymb,amsthm}
+
+\newtheorem{prop}{Proposition}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Q}{\mathbb{Q}}
+
+\begin{document}
+
+\maketitle
+
+\section*{\#3 -- The accumulation points of $\Q$}
+
+\begin{prop}
+    The set of accumulation points of $\Q$ is $\R$.
+\end{prop}
+
+\begin{proof}
+    Take arbitrary $x \in \R$ and consider an arbitrary nonempty interval
+    $(x - \epsilon, x + \epsilon)$ around $x$. By the density of $\Q$, there
+    exists $q \in Q$ such that $q \in (x - \epsilon, x + \epsilon)$.
+    Some cases arise.
+    \begin{description}
+        \item[Case] $q = x$. Then, using the density of $\Q$, there exists
+            $q^\prime \in Q$ such that $q \in (x - \epsilon, x)$. Rename
+            $q^\prime$ to $q$.
+        \item[Case] $q \neq x$. Then there is nothing to do.
+    \end{description}
+    Hence, $q \in \Q \cap (x - \epsilon, x + \epsilon)$. Therefore,
+    $\Q \cap (x - \epsilon, x + \epsilon) \neq \emptyset$. Since arbitrary
+    $x \in R$ result in the satisfaction of the defining property of an
+    accumulation point, we conclude that $\R$ is the set of accumulation points
+    of $\Q$.
+\end{proof}
+
+\end{document}
