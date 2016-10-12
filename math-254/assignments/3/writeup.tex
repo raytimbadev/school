@@ -40,4 +40,87 @@
     of $\Q$.
 \end{proof}
 
+For any bounded infinite set $S \subset \R$, let
+\begin{equation*}
+    A = \{ x \in \R : (x, \infty) \cap S \text{ infinite}\}
+\end{equation*}
+
+\begin{prop}
+    The set $A$ is nonempty, and $\sup{S}$ is an upper bound of $A$.
+\end{prop}
+
+\begin{proof}
+    First, we will show $\exists x \in \R$ such that $(x, \infty) \cap S$ is
+    infinite. We know that
+    \begin{equation*}
+        S \subseteq [\inf{S}, \sup{S}] \subset [\inf{S}, \infty)
+    \end{equation*}
+    so taking $x = \inf{S}$, we get that $[x, \infty) \cap S = S$ is infinite.
+    Consider then $(x, \infty) \cap S$. It differs from $[x, \infty) \cap S$ by
+    a finite number (specifically one) of elements from $(x, \infty) \cap S$.
+    Adding or removing a finite number of elements from an infinite set results
+    in an infinite set, so $(x, \infty) \cap S$ is infinite.
+    Hence, $\inf{S} \in A$, so $A$ is nonempty.
+
+    Next, we want to show that $\sup{S}$ is an upper bound of $A$, i.e.
+    \begin{equation*}
+        \forall x \in A: x \leq \sup{S}
+    \end{equation*}
+
+    Take arbitrary $x \in A$. We want to show that $x \leq \sup{S}$. Suppose by
+    contradiction that $x > \sup{S}$. We know that $(x, \infty) \cap S$ is
+    infinite. In particular, it must be nonempty, so
+    $\exists y \in (x, \infty) \cap S$. By definition of set intersection,
+    $y \in (x, \infty)$ -- which means $y > x$ -- and $y \in S$. We know that
+    $S \subset [\inf{S}, \sup{S}]$, so $\inf{S} \leq y \leq \sup{S}$. But
+    $y \leq \sup{S} < x < y$ which is a contradiction. Hence $x \leq \sup{S}$,
+    and since $x$ was arbitrary, we have by generalization that
+    $\forall x \in A$, $x \leq \sup{S}$. This is the definition of an upper
+    bound.
+\end{proof}
+
+\begin{prop}
+    $\sup{A}$ is an accumulation point of the set $S$ that underlies its
+    definition.
+\end{prop}
+
+\begin{proof}
+    Take arbitrary $\epsilon > 0$. We want to show that $\sup{A}$ satisfies
+    \begin{equation*}
+        S \cap (\sup{A} - \epsilon, \sup{A} + \epsilon) \setminus \{\sup{A}\}
+        \neq \emptyset
+    \end{equation*}
+    so we need to find $y \in \R$ such that
+    \begin{itemize}
+        \item $y \in S$
+        \item $y \in (\sup{A} - \epsilon, \sup{A} + \epsilon)$
+        \item $y \neq \sup{A}$
+    \end{itemize}
+
+    Suppose by contradiction that such a $y$ does not exist. Then in
+    particular, $S \cap (\sup{A} - \epsilon, \sup{A}) = \emptyset$ and
+    $S \cap (\sup{A}, \sup{A} + \epsilon) = \emptyset$.
+
+    Now supose further that $\sup{A} \in A$.
+    Then $(\sup{A}, \infty) \cap S$ is not finite.
+    Since the region between $\sup{A}$ and $\sup{A} + \epsilon$ is empty (in
+    the sense that it contains no elements of $S$), there are also infinitely
+    many elements in $(\sup{A} + \epsilon, \infty) \cap S$ because all we did
+    was ``cut off'' the empty region. But then this set satisfies the
+    definition for elements of $A$, so $\sup{A} + \epsilon \in A$.
+    But then
+    $\sup{A} < \sup{A} + \epsilon \in A$ which
+    contradicts the definition of $\sup{A}$. Hence, $\sup{A} \notin A$.
+    But then, since the region $(\sup{A} - \epsilon, \sup{A})$ contains no
+    elements of $S$, there can be no elements of $A$ in that region either, as
+    they would fail to satisfy the defining property of $A$.
+    But then
+    $\sup{A} - \epsilon$ is greater than every element of $A$, which
+    contradicts the definition of $\sup{A}$. Hence there must exist
+    $y \in S
+    \cap (\sup{A} - \epsilon, \sup{A} + \epsilon) \setminus \{\sup{A}\}$,
+    so that set is nonempty, as required by the definition of an accumulation
+    point.
+\end{proof}
+
 \end{document}
