@@ -6,11 +6,18 @@
 
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage[margin=2.0cm]{geometry}
+\usepackage{mathtools}
+
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 
 \newtheorem{prop}{Proposition}
 
+\newcommand{\D}{\mathbb{D}}
+\newcommand{\K}{\mathbb{K}}
+\newcommand{\N}{\mathbb{N}}
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\Q}{\mathbb{Q}}
+\newcommand{\Z}{\mathbb{Z}}
 
 \begin{document}
 
@@ -121,6 +128,55 @@ For any bounded infinite set $S \subset \R$, let
     \cap (\sup{A} - \epsilon, \sup{A} + \epsilon) \setminus \{\sup{A}\}$,
     so that set is nonempty, as required by the definition of an accumulation
     point.
+\end{proof}
+
+\begin{prop}[Variant of the Archimedean property]
+    \begin{equation*}
+        \forall x \in \R: \exists k \in \N: 10^k > x
+    \end{equation*}
+\end{prop}
+
+\begin{proof}
+    By contradiction. Suppose not. Then
+    \begin{equation*}
+        \exists x \in R: \forall k \in \N: 10^k \leq x
+    \end{equation*}
+
+    Hence, $x$ is an upper bound of the set $\K = \{ 10^k | k \in \N \}$.
+    By the completeness of $\R$, $\exists u \in \R : u = \sup{K}$.
+    Since $\forall p \in \K: p \leq u$, $\K \ni 10p \leq u$.
+    Hence, $p \leq \frac{u}{10}$. But then $\frac{u}{10}$ is an upper bound of
+    $\K$. Since $\frac{u}{10} < u$, this is a contradiction of $u = \sup{K}$.
+\end{proof}
+
+\begin{prop}
+    The set
+    \begin{equation*}
+        \D = \left\{ \frac{a}{10^k} : a \in \Z,\, k \in \N \right\}
+    \end{equation*}
+    is dense in $\R$.
+\end{prop}
+
+\begin{proof}
+    Take arbitrary $x, y \in \R$ and suppose $x < y$.
+    Then $y - x > 0$.
+    Hence $\frac{1}{y - x} > 0$.
+    Using the variant of the Archimedean property shown above,
+    \begin{equation*}
+        \exists k \in \N: 10^n > \frac{1}{y - x}
+    \end{equation*}
+    Hence, $10^k y - 10^k x > 1$.
+    Finally,
+    \begin{equation*}
+        10^k x < \floor*{10^k x + 1} \geq 10^k x + 1 < 10^k y
+    \end{equation*}
+    from which it follows that
+    \begin{equation*}
+        x < d = \frac{\floor*{10^k + 1}}{10^k} < y
+    \end{equation*}
+
+    Since $\floor*{10^k + 1} \in \Z$, $d \in \D$, which shows that between any
+    two distinct reals, there exists an element of $\D$. Thus $\D$ is dense.
 \end{proof}
 
 \end{document}
