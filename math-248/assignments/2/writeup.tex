@@ -1,0 +1,112 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#2\\Honours advanced calculus -- MATH 248}
+\date{20 October 2016}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+
+\newtheorem{prop}{Proposition}
+
+\newcommand{\R}{\mathbb{R}}
+
+\begin{document}
+
+\maketitle
+
+\begin{enumerate}
+    \item
+        Let $f : \R^2 \to \R$ be defined by
+        \begin{equation*}
+            f(x, y) = \begin{cases}
+                xy &\quad\text{if } -|x| < y < |x| \\
+                0  &\quad\text{else}
+            \end{cases}
+        \end{equation*}
+
+        \begin{enumerate}
+            \item
+                First, we will compute the first partial derivatives.
+                \begin{align*}
+                    \partial_x f &= \begin{cases}
+                        y &\quad\text{if }
+                            -|x| < y < |x| \lor x = 0\\
+                        0 &\quad\text{if }
+                            y > |x| \lor y < -|x|
+                    \end{cases} \\
+                    \partial_y f &= \begin{cases}
+                        x &\quad\text{if }
+                            -|x| < y < |x| \\
+                        0 &\quad\text{if }
+                            y > |x| \lor y < -|x| \lor x = 0
+                    \end{cases}
+                \end{align*}
+
+                Notice that these partial derivatives are undefined along the
+                boundary between the two functions that make up $f$, except at
+                the origin. $f$ is discontinuous along the boundary, due to the
+                jump from $xy \neq 0$ to $0$, but at the origin, there is no
+                such jump. This is due to the fact that one of the factors in
+                $xy$ will be zero as we approach the origin along the standard
+                basis vectors. Consequently, the limit that defines the partial
+                derivative will converge. However, the question of \emph{what}
+                it converges to depends on how exactly the origin is
+                approached.
+
+                In $\partial_x f$, the origin is approached along the basis
+                vector $(1, 0)$, so the limit that defines the partial
+                derivative
+                \begin{equation*}
+                    \lim_{t \to 0} \frac{(x + t)y - xy}{t}
+                    = \lim_{t \to 0} \frac{ty}{t}
+                    = y
+                \end{equation*}
+                converges to $y$.
+
+                In $\partial_y f$ however, the origin is approached along the
+                basis vector $(0, 1)$, so the limit that defines the partial
+                derivative converges to $0$.
+
+                That is why the $x = 0$ case gives $0$ in $\partial_y$, but
+                gives $y$ in the $\partial_x$ case. Of course, \emph{at} the
+                origin, the function values of both partial derivatives agree.
+
+                Now let us look at the second partial derivatives.
+                \begin{align*}
+                    \partial_y \partial_x f &= \begin{cases}
+                        1 &\quad\text{if }
+                            -|x| < y < |x| \lor x = 0\\
+                        0 &\quad\text{if }
+                            y > |x| \lor y < -|x|
+                    \end{cases} \\
+                    \partial_x \partial_y f &= \begin{cases}
+                        1 &\quad\text{if }
+                            -|x| < y < |x| \\
+                        0 &\quad\text{if }
+                            y > |x| \lor y < -|x| \lor x = 0
+                    \end{cases}
+                \end{align*}
+
+                Although these two functions appear suspiciously similar, they
+                are different in one major way,
+                \begin{equation*}
+                    1 = \partial_y \partial_x f(0, 0)
+                    \neq
+                    \partial_x \partial_y f(0, 0) = 0
+                \end{equation*}
+                due to the change in placement of the $x = 0$ case in the
+                definition.
+
+            \item
+                Although this difference appears to contradict the theorem on
+                the symmetricity of the Hessian, it does not; the theorem
+                requires that the second partial derivatives exist and be
+                continuous in some box domain (more generally in some
+                neighbourhood). It is not hard to see that there is no
+                neighbourhood containing the origin in which these second
+                partial derivatives would be continuous.
+        \end{enumerate}
+\end{enumerate}
+
+\end{document}
