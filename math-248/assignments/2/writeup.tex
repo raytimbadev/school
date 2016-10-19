@@ -9,8 +9,15 @@
 
 \newtheorem{prop}{Proposition}
 
+\DeclareMathOperator{\D}{D}
+
+\newcommand{\N}{\mathbb{N}}
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\Z}{\mathbb{Z}}
+\newcommand{\as}{\quad\text{as }}
+\newcommand{\norm}[1]{\left|#1\right|}
+\newcommand{\inftynorm}[1]{\norm{#1}_\infty}
+\newcommand{\parens}[1]{\left(#1\right)}
 \renewcommand{\d}[1]{\frac{\mathrm{d}}{\mathrm{d}#1}}
 
 \begin{document}
@@ -208,6 +215,239 @@
                 $\cos{}$ term does not approach a finite value as $x \to 0$).
                 Hence, the Inverse Function Theorem does not apply.
         \end{enumerate}
+
+    \item
+        We want to show some algebraic properties of the differentiation
+        operator $\D{}$. Suppose $f, g : \R^n \to \R$ are differentiable.
+
+        \begin{prop}
+            $(f + g) : \R^n \to \R$ is differentiable, and
+            \begin{equation*}
+                \D{(f + g)} = \D{f} + \D{g}
+            \end{equation*}
+        \end{prop}
+
+        \begin{proof}[Sum Rule]
+            Since $f, g$ are differentiable, we know that
+            $\exists \Lambda_f, \Lambda_g$ such that
+            \begin{align*}
+                \lim_{x \to y} {
+                    \frac{f(x) - f(y) - \Lambda_f (x - y)} {
+                        \inftynorm{x - y}
+                    }
+                }
+                &= 0 \\
+                \lim_{x \to y} {
+                    \frac{g(x) - g(y) - \Lambda_g (x - y)} {
+                        \inftynorm{x - y}
+                    }
+                }
+                &= 0
+            \end{align*}
+
+            We want to show that $\exists \Lambda$ such that
+            \begin{equation*}
+                \lim_{x \to y} {
+                    \frac{(f + g)(x) - (f + g)(y) - \Lambda (x - y)}{
+                        \inftynorm{x - y}
+                    }
+                }
+                = 0
+            \end{equation*}
+
+            Take $\Lambda = \Lambda_f + \Lambda_g$.
+            \begin{equation*}
+                \lim_{x \to y} {
+                    \frac{(f + g)(x) - (f + g)(y) - \Lambda} {
+                        \inftynorm{x - y}
+                    }
+                }
+                = \lim_{x \to y} \parens{
+                    \frac{f(x) - f(y) - \Lambda_f} {
+                        \inftynorm{x - y}
+                    }
+                    +
+                    \frac{g(x) - g(y) - \Lambda_g} {
+                        \inftynorm{x - y}
+                    }
+                }
+                = 0 + 0
+            \end{equation*}
+            as required.
+
+            Hence, $(f + g)$ is differentiable, and
+            $\D{(f + g)} = \D{f} + \D{g}$.
+        \end{proof}
+
+        \begin{prop}[Product Rule]
+            $fg$ is differentiable in $\R^n$ and
+            \begin{equation*}
+                \D{(fg)} = f \D{g} + g \D{f}
+            \end{equation*}
+        \end{prop}
+
+        \begin{proof}
+            Since $f$ is differentiable,
+            \begin{equation*}
+                \lim_{h \to 0} {
+                    \frac{f(x+h) - f(x) - \D{f}h}{\inftynorm{h}}
+                }
+                = 0
+            \end{equation*}
+            and we have a similar converging limit for $g$.
+
+            Since $g$ is continuous, we also have
+            \begin{equation*}
+                \lim_{h \to 0} \frac{g(x + h)}{\inftynorm{h}} = g(x)
+            \end{equation*}
+
+            So we can write
+            \begin{align}
+                0 &=
+                \lim_{h \to 0} {
+                    \frac{
+                        \parens{ f(x + h) - f(x) - \D{f}h } g(x + h)
+                        +
+                        f(x) \parens{ g(x + h) - g(x) - \D{g}h }
+                    }{
+                        \inftynorm{h}
+                    }
+                } \notag \\
+                &= \lim_{h \to 0} {
+                    \frac{
+                        (fg)(x + h) - (fg)(x) - \parens{
+                            \D{f} g(x + h) + f(x) \D{g}
+                        } h
+                    }{
+                        \inftynorm{h}
+                    }
+                }
+                \label{eq:star}
+            \end{align}
+
+            Furthermore, because of the continuity of $g$,
+            \begin{align*}
+                \frac{
+                    \norm{\D{f} h \parens{ g(x + h) - g(x) }}
+                }{
+                    \inftynorm{h}
+                }
+                &=
+                \frac{
+                    \norm{\D{f} h} \norm{ g(x + h) - g(x) }
+                }{
+                    \inftynorm{h}
+                } \\
+                &\leq
+                C
+                \frac{
+                    \inftynorm{h}
+                    \norm{ g(x + h) - g(x) }
+                }{
+                    \inftynorm{h}
+                } \\
+                &= C \norm{g(x + h) - g(x) } \to 0 \as h \to 0
+            \end{align*}
+
+            Hence
+            \begin{equation*}
+                \lim_{h \to 0} {
+                    \frac{
+                        \D{f} h \parens{ g(x + h) - g(x) }
+                    }{
+                        \inftynorm{h}
+                    }
+                } = 0
+            \end{equation*}
+            which we add to equation \ref{eq:star} to obtain
+            \begin{align*}
+                0 &=
+                \lim_{h \to 0} {
+                    \frac{
+                        (fg)(x + h)
+                        - (fg)(x)
+                        - \parens{ g(x + h) \D{f} + f(x) \D{g} } h
+                        + \parens{ g(x + h) \D{f} - g(x) \D{f} } h
+                    }{
+                        \inftynorm{h}
+                    }
+                } \\
+                &=
+                \lim_{h \to 0} {
+                    \frac{
+                        (fg)(x + h)
+                        - (fg)(x)
+                        - \parens{f(x) \D{g} + g(x) \D{f}} h
+                    }{
+                        \inftynorm{h}
+                    }
+                }
+            \end{align*}
+
+            This demonstrates that $D{(fg)} = f \D g + g \D f$.
+        \end{proof}
+
+        \begin{prop}
+            The derivative in the direction of a sum is the sum of the
+            directional derivatives, i.e.
+            \begin{equation*}
+                \D_{v + w} f = \D_v f + \D_w f
+            \end{equation*}
+        \end{prop}
+
+        \begin{proof}
+            By a result seen in class,
+            \begin{equation*}
+                \D_{v+w} f = \D{f} (v + w)
+            \end{equation*}
+            since $\D f$ exists.
+
+            Then since $\D{f}$ is linear map, we have by linearity that
+            \begin{equation*}
+                \D{f} (v + w) = \D{f} v + \D{f} w
+            \end{equation*}
+
+            Applying the result from class twice more, but in reverse, gives
+            the desired result.
+        \end{proof}
+
+        \begin{prop}[Power Rule]
+            For any $m \in \N$, $f^m$ is differentiable and
+            \begin{equation*}
+                \D{f^m} = m f^{m-1} \D f
+            \end{equation*}
+        \end{prop}
+
+        \begin{proof}
+            By induction. Since we have by assumption already that $f = f^1$ is
+            differentiable, it suffices to observe that $\D{f} = 1 f^0 \D{f}$
+            to confirm the base case.
+
+            Next, suppose $f^m$ is differentiable and that
+            \begin{equation*}
+                \D{f^m} = m f^{m-1} \D{f}
+            \end{equation*}
+
+            We want to show that $f^{(m+1)}$ is differentiable and that
+            \begin{equation*}
+                \D{f^{(m+1)}} = (m+1) f^m \D{f}
+            \end{equation*}
+
+            Notice that $f^{m+1} = f f^m$. By the Power Rule, $f^{m+1}$ is
+            differentiable, and
+            \begin{equation*}
+                \D{(f f^m)} = f \D{(f^m)} + f^m \D{f}
+            \end{equation*}
+            but we can further expand $\D{(f^m)}$ by the Induction Hypothesis
+            to obtain the result
+            \begin{align*}
+                f \D{(f^m)} + f^m \D{f}
+                &= f m f^{m-1} \D{f} + f^m \D{f} \\
+                &= m f^m \D{f} + f^m \D{f} \\
+                &= (m + 1) f^m \D{f}
+            \end{align*}
+            as required.
+        \end{proof}
 \end{enumerate}
 
 \end{document}
