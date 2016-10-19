@@ -451,6 +451,178 @@
             \end{align*}
             as required.
         \end{proof}
+
+    \item
+        \begin{enumerate}
+            \item
+                We wish to verify that
+                \begin{equation*}
+                    u(x, t) = \frac{1}{\sqrt{t}} \exp\parens{-\frac{x^2}{4t}}
+                \end{equation*}
+                satisfies
+                \begin{equation*}
+                    \frac{\partial u}{\partial t}
+                    =
+                    \frac{\partial^2 u}{{\partial x}^2}
+                \end{equation*}
+
+                To do so, we compute $\frac{\partial u}{\partial t}$ and
+                $\frac{\partial^2 u}{\partial x^2}$ separately and verify that
+                they are both equal to the same expression.
+
+                First,
+                \begin{align*}
+                    \partial_t \parens{
+                        \frac{1}{\sqrt{t}} \exp\parens{-\frac{x^2}{4t}}
+                    }
+                    &=
+                    \partial_t \parens{
+                        \frac{1}{\sqrt{t}}
+                    }
+                    \exp\parens{-\frac{x^2}{4t}}
+                    +
+                    \frac{1}{\sqrt{t}}
+                    \partial_t \parens{
+                        \exp\parens{-\frac{x^2}{4t}}
+                    } \\
+                    &=
+                    \frac{-1}{2} t^{\frac{-3}{2}}
+                    \exp\parens{-\frac{x^2}{4t}}
+                    +
+                    \frac{1}{\sqrt{t}}
+                    \exp\parens{-\frac{x^2}{4t}}
+                    \partial_t \parens{-\frac{x^2}{4t}} \\
+                    &=
+                    \frac{-1}{2 t^{\frac{3}{2}}}
+                    \exp\parens{-\frac{x^2}{4t}}
+                    +
+                    \frac{1}{\sqrt{t}}
+                    \exp\parens{-\frac{x^2}{4t}}
+                    \parens{\frac{x^2}{4t^2}} \\
+                    &=
+                    \parens{
+                        \frac{x^2}{
+                            4
+                            t^2
+                            \sqrt{t}
+                        }
+                        -
+                        \frac{1}{
+                            2
+                            t
+                            \sqrt{t}
+                        }
+                    }
+                    \exp\parens{-\frac{x^2}{4t}}
+                \end{align*}
+
+                Next, (I will show fewer steps this time because typing so much
+                \LaTeX{} gets to be tedious,)
+                \begin{align*}
+                    \partial_x \parens{
+                        \partial_x \parens{
+                            \frac{
+                                1
+                            }{
+                                \sqrt{t}
+                            }
+                            \exp\parens{
+                                \frac{
+                                    - x^2
+                                }{
+                                    4 t
+                                }
+                            }
+                        }
+                    }
+                    &=
+                    \partial_x \parens{
+                        \frac{
+                            -x
+                        }{
+                            2 t \sqrt{t}
+                        }
+                        \exp\parens{
+                            - \frac{
+                                x^2
+                            }{
+                                4 t
+                            }
+                        }
+                    } \\
+                    &=
+                    \frac{
+                        -1
+                    }{
+                        2 t \sqrt{t}
+                    }
+                    \exp\parens{
+                        - \frac{
+                            x^2
+                        }{
+                            4 t
+                        }
+                    }
+                    +
+                    \frac{
+                        x^2
+                    }{
+                        4 t^2 \sqrt{t}
+                    }
+                    \exp\parens{
+                        - \frac{
+                            x^2
+                        }{
+                            4 t
+                        }
+                    } \\
+                    &=
+                    \parens{
+                        \frac{
+                            -1
+                        }{
+                            2 t \sqrt{t}
+                        }
+                        +
+                        \frac{
+                            x^2
+                        }{
+                            4 t^2 \sqrt{t}
+                        }
+                    }
+                    \exp\parens{
+                        - \frac{
+                            x^2
+                        }{
+                            4 t
+                        }
+                    } \\
+                    &=
+                    \parens{
+                        \frac{
+                            x^2
+                        }{
+                            4 t^2 \sqrt{t}
+                        }
+                        -
+                        \frac{
+                            1
+                        }{
+                            2 t \sqrt{t}
+                        }
+                    }
+                    \exp\parens{
+                        - \frac{
+                            x^2
+                        }{
+                            4 t
+                        }
+                    }
+                \end{align*}
+
+                These two final expressions are the same, so the property we
+                were investigating is satisfied.
+        \end{enumerate}
 \end{enumerate}
 
 \end{document}
