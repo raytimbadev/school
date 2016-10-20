@@ -622,6 +622,86 @@
 
                 These two final expressions are the same, so the property we
                 were investigating is satisfied.
+
+            \item
+                Next, we want to show the following equality.
+
+                \begin{prop}
+                    Suppose $g : \R^2 \to \R^m$ is defined by
+                    \begin{equation*}
+                        g(u, v) = f(au + bv, cu + dv))
+                    \end{equation*}
+                    where $f : \R^2 \to \R^m$ is twice differentiable on its
+                    domain.
+                    Then,
+                    \begin{equation*}
+                        \partial_u \partial_v g
+                        =
+                        ab \partial_x^2 f
+                        +
+                        \parens{ab + bc} \partial_x \partial_y f
+                        +
+                        cd \partial_y^2 f
+                    \end{equation*}
+                \end{prop}
+
+                \begin{proof}
+                    We write
+                    \begin{align*}
+                        g(u, v) &= f(x(u, v), y(u, v)) \\
+                        x(u, v) &= au + bv \\
+                        y(u, v) &= cu + dv
+                    \end{align*}
+                    and apply the chain rule for partial derivatives
+                    \begin{align*}
+                        \frac{\partial^2 g}{\partial u \partial v}
+                        &= \frac{\partial}{\partial u} \parens {
+                            b \frac{\partial f}{\partial x}
+                            +
+                            d \frac{\partial f}{\partial y}
+                        } \\
+                        &= b \parens{
+                            \frac{\partial}{\partial x} \parens{
+                                \frac{\partial f}{\partial x}
+                            }
+                            \frac{\partial x}{\partial u}
+                            +
+                            \frac{\partial}{\partial y} \parens{
+                                \frac{\partial f}{\partial x}
+                            }
+                            \frac{\partial y}{\partial u}
+                        }
+                        + d \parens {
+                            \frac{\partial}{\partial x} \parens{
+                                \frac{\partial f}{\partial y}
+                            }
+                            \frac{\partial x}{\partial u}
+                            +
+                            \frac{\partial}{\partial y} \parens{
+                                \frac{\partial f}{\partial y}
+                            }
+                            \frac{\partial y}{\partial u}
+                        } \\
+                        &=
+                        b a \frac{\partial^2 f}{\partial x^2}
+                        +
+                        b c \frac{\partial^2 f}{\partial y \partial x}
+                        +
+                        d a \frac{\partial^2 f}{\partial x \partial y}
+                        +
+                        d c \frac{\partial^2 f}{\partial y^2} \\
+                        &=
+                        b a \frac{\partial^2 f}{\partial x^2}
+                        +
+                        (d a + b c) \frac{\partial^2 f}{\partial x \partial y}
+                        +
+                        d c \frac{\partial^2 f}{\partial y^2} \\
+                    \end{align*}
+
+                    Note that we make use of the symmetricity of the Hessian in
+                    order to switch the order of differentiation and sum the
+                    off-diagonal partial derivatives at the end.
+                \end{proof}
         \end{enumerate}
 \end{enumerate}
 
