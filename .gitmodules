@@ -25,3 +25,6 @@
 [submodule "comp-621/mcsaf-intro"]
 	path = comp-621/mcsaf-intro
 	url = https://github.com/Sable/mcsaf-intro
+[submodule "comp-621/mclab-core"]
+	path = comp-621/mclab-core
+	url = https://github.com/Sable/mclab-core
