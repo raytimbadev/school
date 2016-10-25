@@ -1,0 +1,66 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington}
+\title{Assignment \#2\\Program analysis \& transformation -- COMP 621}
+\date{25 October 2016}
+
+\newcommand{\matlab}{\textsc{Matlab}}
+
+\begin{document}
+
+\section{Code coverage}
+
+Our approach is to use a global variable called \texttt{g__linemap} of type
+\texttt{containers.Map} to hold an association from line numbers to integers,
+indicating whether a given line is executed or not. We consider executable
+lines to be those containing statements, so for each statement, we inject a
+statement like \texttt{g__linemap(':X') = 1} before it. By injecting our code
+before each statement, we avoid issues with \texttt{return}, \texttt{continue},
+and \texttt{break} statements which prevent the subsequent line from executing.
+
+This approach is sadly \emph{too} simple, as it fails to account for the loop
+statement in a \texttt{for}-loop: naively trying to prepend a statement to the
+loop initializer will fail because a loop initializer may contain only
+\emph{one} statement. In this case, we inject the statement that marks the loop
+initializer as covered as the first statement of the loop body.
+
+Now we have one last problem: the map is initially empty and our injected code
+only marks lines as having been covered, so we are unable to determine which
+lines did \emph{not} get executed. To remedy this, our analysis sets up the
+initial state of the global map at the ``entry point'' of the file. I use scare
+quotes because a file comes in two varieties in \matlab{}: functions and
+scripts. For a function-file, we inject the intialization logic at the
+beginning of the first function in the file. For a script, we inject at the
+beginning of the file. In both cases, a \texttt{global} declaration is needed
+at the beginning of every scope (I say scope to refer to either a function or a
+script) to allow us to access the map.
+
+Here is a recap of the different situations and how our transformation handles
+them.
+\begin{description}
+    \item[For-loop.]
+        Inject the coverage marker for the loop initializer in the body of the
+        loop.
+
+    \item[Any statement.]
+        Inject the coverage marker before the statement.
+
+    \item[Beginning of a scope.]
+        Inject a global declaration for the line map.
+
+    \item[Beginning of the first function or of a script.]
+        Inject the initialization logic of the line map, setting all executable
+        lines (i.e. those lcontaining statements) as having not been covered,
+        unless that line has been covered already.
+\end{description}
+
+The ``unless'' clause in the initialization logic is essential! Otherwise if
+the function is invoked multiple times, then its coverage information would be
+erased. Instead, by checking whether each line has known coverage status, we
+effectively take the union of the coverage statuses across multiple executions
+of the same function within a single session, as required.
+
+To test our implementation, we used a slightly modified version of the program
+we wrote for the first assignment, since it makes use of most language features
+of \matlab{}. We also use the simple \texttt{for_script} example that was
+provided to verify that things work as expected in a script too.
