@@ -4,17 +4,38 @@
 \title{Assignment \#2\\Program analysis \& transformation -- COMP 621}
 \date{25 October 2016}
 
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{listings}
+
 \newcommand{\matlab}{\textsc{Matlab}}
+
+\DeclareMathOperator{\genOp}{gen}
+\DeclareMathOperator{\killOp}{kill}
+\DeclareMathOperator{\insetOp}{in}
+\DeclareMathOperator{\outsetOp}{out}
+\DeclareMathOperator{\immOp}{Imm}
+\DeclareMathOperator{\effOp}{Eff}
+
+\newcommand{\gen}[1]{\genOp{\left(#1\right)}}
+\newcommand{\killset}[1]{\killOp{\left(#1\right)}}
+\newcommand{\inset}[1]{\insetOp{\left(#1\right)}}
+\newcommand{\outset}[1]{\outsetOp{\left(#1\right)}}
+\newcommand{\imm}[1]{\immOp{\left(#1\right)}}
+\newcommand{\eff}[1]{\effOp{\left(#1\right)}}
 
 \begin{document}
 
+\maketitle
+
 \section{Code coverage}
 
-Our approach is to use a global variable called \texttt{g__linemap} of type
-\texttt{containers.Map} to hold an association from line numbers to integers,
-indicating whether a given line is executed or not. We consider executable
-lines to be those containing statements, so for each statement, we inject a
-statement like \texttt{g__linemap(':X') = 1} before it. By injecting our code
+Our approach is to use a global variable called
+\texttt{g\char`_\char`_linemap} of type \texttt{containers.Map} to hold an
+association from line numbers to integers, indicating whether a given line is
+executed or not. We consider executable lines to be those containing
+statements, so for each statement, we inject a statement like
+\texttt{g\char`_\char`_linemap(':X') = 1} before it. By injecting our code
 before each statement, we avoid issues with \texttt{return}, \texttt{continue},
 and \texttt{break} statements which prevent the subsequent line from executing.
 
@@ -62,5 +83,268 @@ of the same function within a single session, as required.
 
 To test our implementation, we used a slightly modified version of the program
 we wrote for the first assignment, since it makes use of most language features
-of \matlab{}. We also use the simple \texttt{for_script} example that was
+of \matlab{}. We also use the simple \texttt{for\char`_script} example that was
 provided to verify that things work as expected in a script too.
+
+\section{Implementing an analysis -- Possibly not defined}
+
+We chose to implement the possibly not defined (PND) analysis.
+
+\begin{description}
+    \item[Precise statement.]
+        A variable $v$ is said to be \emph{possibly not defined} at a program
+        point $p$ if there exists a path leading to $p$ along which the
+        variable $v$ may not have been assigned a value.
+
+    \item[Approximation domain.]
+        To track whether a variable has been given a value has a value, we use
+        a set of variables: a variable is in the set if and only if it has a
+        definite value.
+
+    \item[Analysis direction.]
+        Because we are interested in the paths \emph{leading up to} a certain
+        program point, this is a \emph{forwards} analysis.
+
+    \item[Merge operator.]
+        A variable is not defined if it is not in the set. If we have one path
+        into a join node along which the variable \emph{is} defined and
+        another path into the join node along which the variable is \emph{not}
+        defined, then we would like it to be \emph{not} defined in the join
+        node. Hence, we use set intersection.
+
+    \item[Flow equations.]
+        There are a few important cases to consider.
+
+        \begin{description}
+            \item[Case] $S$ : \texttt{x = <expr>}
+
+                Then,
+                \begin{align*}
+                    \gen{S} &= \{x\} \\
+                    \killset{S} &= \emptyset
+                \end{align*}
+
+            \item[Case] $S$ : \texttt{x(y) = <expr>}
+
+                Then,
+                \begin{align*}
+                    \gen{S} &= \{x\} \\
+                    \killset{S} &= \emptyset
+                \end{align*}
+        \end{description}
+        and
+        $\outset{S} = \left(\inset{S} \cup \gen{S}\right) \setminus \killset{S}$,
+        but the kill-set is always empty so we could omit it from the equation.
+
+        In all other cases, the in-set is equal to the out-set.
+
+    \item[Initial conditions.]
+        At the start of every function, the in-set consists of all top-level
+        functions and all parameters to the function.
+
+        At the start of a script, the in-set is empty.
+\end{description}
+
+Notice that this analysis is in fact essentially the same thing as a definite
+assignment analysis.
+
+(A variable $v$ is said to be \emph{definitely assigned} at a program point $p$
+if along all paths leading up to $p$, $v$ is assigned to.)
+
+In fact, \emph{possibly not defined} analysis is just the negation of
+\emph{definitely assigned} analysis. We take advantage of this by performing a
+definite assignment analysis (which is really what our six steps are doing) and
+then negating the result: when we print our results, we scan each statement to
+extract its variables, and for each variable in the statement not present in
+our set of definitely assigned variables, we say that it is possibly not
+defined.
+
+We were unable to get McSAF to include the top-level definitions and parameters
+of functions as the initial flows in functions, despite trying a few different
+things. A non-working approach is included in our code. Discounting this, our
+analysis appears to work correctly. We tested it on the simple
+\texttt{for\char`_script.m} to verify that scripts work as expected, on
+\texttt{function\char`_and\char`_for.m} to try to get parameters and top-level
+definitions to be propagated, and on \texttt{kernel.m} (our code from
+assignment 1) to verify that other language features work as expected.
+
+\section{Effectively bound variables}
+
+The analysis we are interested in exploring is a variant of a free variable
+analysis, in the context of nested functions. The goal of this analysis is to
+determine which variables are \emph{effectively bound} within a nested
+function, so as to determine whether the function is a closure or not. If the
+function is not closing over any variables, then it can safely be lifted to the
+top-level. If the function is closing over some variables, then it can be
+lifted up one or more levels, sometimes with modifications to its signature and
+call sites.
+
+Lifting functions is beneficial in several ways. First, compiling top-level
+functions, which depend only on their arguments (and possibly global state), is
+significantly simpler than compiling closures, which must be treated specially.
+(In particular, the transformation we described is essentially performed at
+compile-time and is invisible to the programmer.)
+
+\begin{figure}[ht]
+    \begin{lstlisting}
+function test()
+
+function isEven = foo(x)
+    isEven = mod(x, 2) == 0;
+end
+
+function B = removeEven(A)
+    B = []
+    k = 1;
+    for j = 1:length(A)
+        if isEven(A(j))
+            B(k) = A(j)
+            k = k + 1
+        end
+    end
+end
+
+end
+    \end{lstlisting}
+
+    \caption{
+        A motivating example for free variable analysis. The variable
+        \texttt{isEven} is free in the function \texttt{removeEven}. Performing
+        the proposed lifting refactor will add an additional parameter
+        \texttt{isEven} to the \texttt{removeEven} function's signature. But
+        now we have in fact generalized this function; it has become the
+        well-known \texttt{filter} function!
+    }
+    \label{lst:motivation}
+\end{figure}
+
+The proposed ``lifting'' refactor is quite complex, since it would also require
+a kind analysis to ensure that the call sites of the function to lift are
+passed the appropriate things. In listing \ref{lst:motivation} for example, it
+would be necessary to use a function handle when calling the lifted function.
+
+Rather than look into the general case of lifting arbitrary functions, possibly
+changing their signatures and call sites, we will focus on lifting functions so
+that their signatures and call sites do not need to be modified. This is the
+essential purpose of the effectively bound variables analysis.
+
+\begin{figure}[ht]
+    \begin{lstlisting}
+function foo(a)
+    % x is effectively bound; it derives from a
+    x = a;
+    function bar(b)
+        % y is not effectively bound; it derives from x which is
+        % defined in the parent scope.
+        y = x + 2;
+        function baz()
+            % z is effectively bound; it derives from x which is
+            % defined two scopes up.
+            z = x + 2;
+        end
+    end
+end
+    \end{lstlisting}
+
+    \caption{
+        This listing demonstrates what is meant by ``effectively bound''. If a
+        nested function contains only effectively bound variables, then it can
+        be lifted to be become a sibling of its parent function with \emph{no
+        change to its signature}.
+    }
+    \label{lst:effectively-bound}
+\end{figure}
+
+Before we can give the Six Steps breakdown of the analysis, we must establish
+one more definition. We say that a variable is \emph{immediately bound} if it
+is a formal argument of a function or it is derived from a formal argument of a
+function.
+
+Here we give a Six Steps breakdown of the effectively bound variables analysis.
+
+\begin{description}
+    \item[Precise statement.]
+        A variable $v$ is \emph{effectively bound} at a program point $p$
+        within the scope of an immediately enclosing function $f$ if either
+        \begin{itemize}
+            \item
+                it is defined in $f$'s signature; or
+            \item
+                it is derived from other effectively bound variables in the
+                scope determined by $f$; or
+        \end{itemize}
+        and it is not immediately bound in the parent scope of $f$.
+
+    \item[Approximation domain.]
+        Sets of variables.
+
+    \item[Analysis direction.]
+        Because we are interested in how certain values are derived, this is a
+        forwards analysis.
+
+    \item[Merge operator.]
+        We use set union: if along one path, a variable is derived from bound
+        variables but in another it is free, then we must consider the variable
+        to be potentially free in the join node, and hence everywhere in the
+        scope.
+
+    \item[Flow equations.]
+        Nested functions cannot appear within control flow statements, so there
+        is not much to do for flow equations. The only consideration is
+        assignments. Our analysis considers all assignments to decide whether
+        the variable being assigned to is effectively bound in its current
+        scope.
+
+        \begin{description}
+            \item[Case] $S$ : \texttt{global x}
+
+                We consider all global variables effectively bound; it's as if
+                they are infinitely many scopes higher.
+
+            \item[Case] $S$ : \texttt{x = C}
+
+                If $C$ is a constant, then $x$ is effectively bound.
+
+            \item[Case] $S$ : \texttt{x = g(...)}
+
+                If $g$ is immediately bound and all its arguments are
+                immediately bound, then $x$ is immediately bound.
+
+                If $g$ is effectively bound and all its arguments are
+                effectively bound, then $x$ is effectively bound.
+        \end{description}
+
+        Then, we must process the nested functions. Each nested function starts
+        out with a set of effectively bound variables given by the set of
+        effectively bound variables of its parent function minus the
+        immediately bound variables of its parent function. This makes sense:
+        if the nested function refers to something that its parent function is
+        computing from its arguments, then it is not safe to lift the nested
+        function into a sibling of the parent function. However, we can add the
+        immediately bound variables of the function of the parent function's
+        parent function!
+
+        Suppose that $f_0$ is the function we wish to enter, and $f_i$ is its
+        $i$th parent function. Let $\eff{f}$ denote the effectively bound
+        variables of $f$ and let $\imm{f}$ defnote the immediately bound
+        variables of $f$. Then, upon entering a function, we have the following
+        equation.
+        \begin{equation*}
+            \effOp^*{(f_0)} = (\eff{f_1} \setminus \imm{f_1}) \cup \imm{f_2}
+        \end{equation*}
+        where $\effOp^*{(f)}$ denotes the initial effectively bound variables
+        of $f$.
+
+    \item[Initial conditions.]
+        We must decide on $\effOp^*{(f)}$ for every top-level function $f$.
+        This is simply the set of all built-in \matlab{} functions.
+
+        We must also decide on the in-set for the first statement of each
+        block: this is simply the empty set.
+\end{description}
+
+This is a rough sketch of the analysis; it does not consider mututally
+recursive families of nested functions, which we think can be lifted if some
+additional considerations are made.
+
+\end{document}
