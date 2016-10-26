@@ -1,0 +1,302 @@
+\documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+
+\author{Jacob Thomas Errington}
+\title{
+    Implementing lazy functional languages on stock hardware:\\
+    the Spineless Tagless G-machine
+}
+\institute{McGill University}
+\date{27 October 2016}
+
+\usepackage{listings}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{tikz}
+
+\usetikzlibrary{arrows,shapes}
+
+\tikzstyle{every picture}+=[remember picture]
+\everymath{\displaystyle}
+
+\DeclareMathOperator{\ErrorOp}{\mathtt{error}}
+\newcommand{\Error}[1]{\ErrorOp{\, \text{#1}}}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+    \frametitle{About me}
+
+    \begin{itemize}
+        \item Third-year Mathematics \& Computer Science student.
+        \item Last semester:
+            COMP 520 (Compiler Design),
+            COMP 527 (Logic and Computation),
+            COMP 531 (Advanced Theory of Computing).
+        \item Our compiler Goto: written in Haskell using some advanced
+            techniques.
+        \item Research interests: applications of logic to programming
+            languages, techniques for ensuring code correctness by
+            construction.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{About this presentation}
+
+    A whirlwind tour of the backend of the Glasgow Haskell Compiler (GHC), as
+    presented in the paper \emph{Implementing lazy functional languages on
+    stock hardware: the Spineless Tagless G-machine} (Peyton Jones 1992).
+
+    \tableofcontents
+\end{frame}
+
+\section{Introduction}
+
+\subsection{Motivation}
+
+\begin{frame}[fragile,shrink]
+    \frametitle{Motivating example}
+
+    \begin{lstlisting}
+module Main where
+
+data Nat = Z | S Nat
+
+instance Show Nat where
+    show n = show (natToInt n) where
+        natToInt Z = 0
+        natToInt (S n) = 1 + natToInt n
+
+three, five :: Nat
+three = S (S (S Z))
+five = S (S (S (S (S Z))))
+
+plus :: Nat -> Nat -> Nat
+plus Z m = m
+plus (S n) m = S (plus n m)
+
+main :: IO ()
+main = print (three `plus` five)
+-- "8" appears on standard out
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Features of Haskell}
+
+    \begin{itemize}
+        \item
+            Can define recursive, algebraic datatypes.
+        \item
+            Can implement recursive functions.
+        \item
+            Can pattern match on datatypes; values ``remember'' how they were
+            constructed.
+        \item
+            Overloading via typeclasses: the print function uses the
+            \texttt{Show} instance.
+        \item
+            Purely functional: side effects marked via the IO type constructor
+        \item
+            Lazy: we can forget about the evaluation order for the most part,
+            and ``let the computer figure it out''.
+    \end{itemize}
+
+    We would like to compile a language with these kinds of features to
+    efficient native code.
+\end{frame}
+
+\subsection{Background}
+
+\begin{frame}
+    \frametitle{Transforming functional languages}
+
+    \begin{itemize}
+        \item
+            Simple means simple.
+
+        \item
+            Lazy languages are more amenable to transformation than strict
+            languages.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{$\beta$-reduction}
+
+    A strict functional language uses the \alert{call-by-value} reduction
+    strategy for its underlying lambda calculus. A lazy functional language
+    uses \alert{call-by-name}.
+
+    \begin{block}{Call-by-name}
+        Function application is performed before evaluating the arguments.
+    \end{block}
+
+    \begin{block}{Call-by-value}
+        Arguments are evaluated before function application.
+    \end{block}
+\end{frame}
+
+\begin{frame}
+    \begin{equation}
+        (\lambda x. 5) (\Error{``oh no''})
+        \label{eq:cbn-vs-cbv}
+    \end{equation}
+
+    \begin{block}{Question}
+        What does equation \ref{eq:cbn-vs-cbv} reduce to in call-by-name? In
+        call-by-value?
+    \end{block}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Consequences of call-by-name reduction}
+
+    As a transformation, $\beta$-reduction (applying a function to its
+    arguments) can always be performed statically in a lazy language.
+
+    In a strict language, it can only be performed if the function
+    \alert{evaluates its argument}.
+\end{frame}
+
+\subsection{Compiling Haskell}
+
+\begin{frame}
+    \frametitle{Compilation route for Haskell}
+
+    \begin{enumerate}
+        \item Source language: Haskell, a strongly-typed, non-strict,
+            purely-functional language.
+        \item Haskell to Core
+            \begin{itemize}
+                \item Syntactic sugar: eliminated
+                    % Do notation, proc notation, etc. is replaced by its
+                    % equivalent semantics given by functions.
+                \item Overloading: made explicit
+                    % Typeclasse instances are normally plumbed around
+                    % implicitly by the compiler, which makes writing code more
+                    % pleasant, but at some point, we have to know which
+                    % instance is being used.
+                \item Pattern matching: simplified
+                    % All equations for a function are unified into a single
+                    % equation using a case expression, and each case
+                    % expression is made to analyze only one constructor deep
+            \end{itemize}
+
+        \item Many analyses and transformations are performed on the Core.
+
+        \item Core to STG: simple translation.
+
+        \item STG to Abstract C. (This is where we cross the
+            functional/imperiative boundary.)
+
+        \item Abstract C to the backend: native code generator, C code
+            generator, LLVM, etc.
+    \end{enumerate}
+
+    We will focus on the STG language and its translation to Abstract C, as
+    well as how certain language features are represented in hardware.
+\end{frame}
+
+\section{The design space}
+
+\begin{frame}
+    \frametitle{Three key questions}
+
+    \begin{enumerate}
+        \item What are the representations of
+            \begin{itemize}
+                \item function values?
+                \item data values?
+                \item unevaluated expressions?
+            \end{itemize}
+
+        \item How is function application performed?
+
+        \item How is case analysis performed?
+    \end{enumerate}
+\end{frame}
+
+\subsection{Representations}
+
+\begin{frame}
+    \frametitle{Functions}
+
+    A function is a suspended computation: when applied to arguments, the
+    computation is performed.
+
+    \begin{block}{Compact representation of a closure}
+        \begin{itemize}
+            \item
+                a (pointer to a) block of \alert{static code} (shared between
+                all instances of the function); and
+            \item
+                zero or more pointers for the \alert{free variables}.
+        \end{itemize}
+    \end{block}
+
+    % Many Lisp systems as well as SML of New Jersey use this flat
+    % representation.
+
+    \begin{block}{Entering a closure}
+        \begin{itemize}
+            \item
+                set the \alert{environment pointer} (a distinguished register)
+                to the beginning of the closure representation; and
+            \item
+                jump to the static code given in the code pointer.
+        \end{itemize}
+        Free variables are accessed by offsetting the environment pointer.
+        Arguments are accessed by a usual calling convention.
+    \end{block}
+\end{frame}
+
+\begin{frame}
+    \frametitle{A closure}
+
+    \begin{figure}
+        \begin{tabular}{|c|}
+            \hline
+            \tikz[baseline]{\node (codeptr) {code pointer}} \\ \hline
+            free variable $1$ \\ \hline
+            \textellipsis \\ \hline
+            free variable $n$ \\ \hline
+        \end{tabular}
+
+        \begin{tikzpicture}[overlay]
+            \node [left=3cm] at (codeptr) (f) {closure};
+            \node [right=2cm] at (codeptr) (code) {\texttt{shared code}};
+
+            \draw[->] (f) -- (codeptr);
+            \draw[->] (codeptr) -- (code);
+        \end{tikzpicture}
+
+        \caption{
+            A closure contains a pointer to some code, which computes the value
+            of the closure. This code can be shared amongst all instances of
+            the closure. The code expects that a distinguished register called
+            the environment pointer to be pointing at the beginning of the
+            closure. By offsetting the environment pointer, the code in the
+            closure can access the free variables captured in the closure.
+        }
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Thunks}
+
+    Recall the inductive equation for \texttt{plus}.
+    \begin{lstlisting}
+plus (S n) m = S (plus n m)
+    \end{lstlisting}
+    If we reduce \texttt{plus (S Z) (S Z)} what do we get? The right-hand side
+    of the equation captured
+
+    \begin{itemize}
+        \item A thunk is a suspended computation, taking no arguments.
+\end{frame}
+
+\end{document}
