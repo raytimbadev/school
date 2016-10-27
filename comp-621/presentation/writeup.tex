@@ -46,9 +46,9 @@
 \begin{frame}
     \frametitle{About this presentation}
 
-    A whirlwind tour of the backend of the Glasgow Haskell Compiler (GHC), as
-    presented in the paper \emph{Implementing lazy functional languages on
-    stock hardware: the Spineless Tagless G-machine} (Peyton Jones 1992).
+    A whirlwind tour of how the Glasgow Haskell Compiler (GHC), as presented in
+    the paper, represents functional features, and how Haskell code is
+    translated into STG.
 
     \tableofcontents
 \end{frame}
@@ -197,11 +197,11 @@ main = print (three `plus` five)
             generator, LLVM, etc.
     \end{enumerate}
 
-    We will focus on the STG language and its translation to Abstract C, as
-    well as how certain language features are represented in hardware.
+    We will focus on the representations of major functional features and give
+    a brief overview of the STG language and how Haskell is translated to it.
 \end{frame}
 
-\section{The design space}
+\section{Representations}
 
 \begin{frame}
     \frametitle{Three key questions}
@@ -220,10 +220,10 @@ main = print (three `plus` five)
     \end{enumerate}
 \end{frame}
 
-\subsection{Representations}
+\subsection{Functions}
 
 \begin{frame}
-    \huge{Representations}
+    \huge{Functions}
 \end{frame}
 
 \begin{frame}
@@ -431,7 +431,242 @@ plus (S n) m = S (plus n m)
 \frame{\huge{Function application}}
 
 \begin{frame}
-    hello
+    \frametitle{Function application}
+    \begin{block}{Considerations}
+        \begin{itemize}
+            \item
+                Higher-order language: functions are first-class, polymorphism.
+            \item
+                Currying by default.
+        \end{itemize}
+    \end{block}
+    \begin{block}{Eval-apply}
+        \begin{enumerate}
+            \item Evaluate the function.
+            \item Evaluate the argument. (Skipped in non-strict languages.)
+            \item Apply the function to the argument.
+        \end{enumerate}
+    \end{block}
+    \begin{block}{Push-enter}
+        \begin{enumerate}
+            \item Push arguments onto evaluation stack.
+            \item Tail-call (\emph{enter}) the function.
+        \end{enumerate}
+        Evaluation stack allocated in contiguous chunks on the heap.
+    \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Eval-apply versus push-enter}
+    \begin{lstlisting}
+const :: a -> (b -> a)
+const x y = x
+-- currying is nice
+
+apply3 :: (a -> b -> c -> d) -> a -> b -> c -> d
+apply3 f x y z = f x y z
+-- push-enter is nice
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Three key questions}
+
+    \begin{enumerate}
+        \item What is the representation of
+            \begin{itemize}
+                \item a function value? A closure.
+                \item a data value? A closure.
+                \item an unevaluated expression? A closure.
+            \end{itemize}
+
+        \item How is function application performed? \alert{Push-enter}.
+
+        \item How is case analysis performed?
+    \end{enumerate}
+\end{frame}
+
+\subsection{Algebraic data structures}
+
+\frame{\huge{Algebraic data structures}}
+
+\begin{frame}[fragile]
+    \begin{itemize}
+        \item Build up data structures with \alert{contructors}.
+        \item Take apart data structures with \alert{case analysis}.
+    \end{itemize}
+
+    \begin{lstlisting}
+data Tree a = Empty | Branch a (Tree a) (Tree a)
+
+tree :: Tree ()
+tree = Branch () (Branch () Empty Empty) Empty
+
+size :: Tree a -> Int
+size t = case t of
+    Empty -> 0
+    Branch _ t1 t2 -> 1 + size t1 + size t2
+
+treeSize :: Int
+treeSize = size tree -- gives 2
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Case expressions = evaluation}
+
+    \begin{itemize}
+        \item Pattern matching \emph{is} evaluation:
+            \texttt{case t of ...} must evaluate $t$ to determine what
+            constructor was used.
+        \item Datatype-specific \alert{return convention} determines how to
+            the knowledge of the alternative is used, e.g. by returning a
+            constructor tag or by passing in a jump table to return into the
+            code associated with an alternative.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Three key questions}
+
+    \begin{enumerate}
+        \item What is the representations of
+            \begin{itemize}
+                \item a function value? A closure.
+                \item a data value? A closure.
+                \item an unevaluated expression? A closure.
+            \end{itemize}
+
+        \item How is function application performed? Push-enter.
+
+        \item How is case analysis performed? With datatype-specific
+            \alert{return conventions}.
+    \end{enumerate}
+\end{frame}
+
+\section{The STG language}
+
+\begin{frame}
+    \Huge{The STG language}
+\end{frame}
+
+\begin{frame}
+    \frametitle{The STG language}
+
+    \begin{itemize}
+        \item An austere, purely-functional language.
+        \item Has a formal operational semantics.
+    \end{itemize}
+
+    \begin{center}
+        \begin{tabular}{|l l|}
+            \hline Construct & Operational reading \\ \hline
+            Function application & Tail call \\
+            Let expression & Heap allocation \\
+            Case expression & Evaluation \\
+            Constructor application & Return to continuation \\
+            \hline
+        \end{tabular}
+    \end{center}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Important properties of STG}
+
+    \begin{itemize}
+        \item
+            All function and constructor arguments are \alert{simple variables}
+            or \alert{constants}.
+            % Corresponds to the operational reality that arguments must be
+            % *prepared* prior to a call. To satisfy this, when translating
+            % from Core, additional let bindings are added.
+        \item All constructors and built-in operations are \alert{saturated}.
+            % Guaranteed by eta-expansion. In general, it is not possible to
+            % saturate a function in a higher-order language due to the
+            % interplay of currying/polymorphism.
+        \item Pattern matching is performed only by \texttt{case} expressions.
+            % The value scrutinized by a case expression can be an arbitrary
+            % value. A restriction to a variable would just involve building
+            % and immediately entering a closure.
+        \item There is a special form of binding, to a \alert{lambda form}:
+            \begin{equation*}
+                f = \{ v_1, \ldots, v_n \}
+                \backslash \pi
+                \{ x_1, \ldots, x_n \}
+                \to
+                e
+            \end{equation*}
+            % free variables are explicitly named
+            % whether the closure should be updated is explicitly marked
+        \item STG supports \alert{unboxed values}.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Example STG program}
+
+    \begin{lstlisting}
+g = {} \n {f, xs} ->
+  case xs of
+    Nil {} -> Nil {}
+    Cons {y, ys} ->
+      let fy = {f, y} \u {} -> f {y}
+          myf = {f, ys} \u {} -> g {f, ys}
+      in Cons {fy, mfy}
+    \end{lstlisting}
+
+    \begin{block}{Question}
+        What well-known function does this program implement?
+    \end{block}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Translation to STG}
+
+    \begin{enumerate}
+        \item Replace binary application with multiple application:
+            \begin{equation*}
+                (\cdots((f e_1) e_2)\cdots) e_n
+                \implies f \{ e_1, \ldots, e_n \}
+            \end{equation*}
+            % The semantics are the same as curried application, but the STG
+            % machine just applies all available arguments at once rather than
+            % one at a time.
+
+        \item Saturate all constructors and built-in operations.
+
+        \item Introduce \texttt{let}-bindings for non-atomic function arguments
+            and lambda functions.
+
+        \item Convert the RHS of each \texttt{let} binding into a lambda form.
+    \end{enumerate}
+\end{frame}
+
+\section{Conclusion}
+
+\begin{frame}
+    \frametitle{Conclusion}
+
+    \begin{itemize}
+        \item Covered only about half of the paper!
+
+        \item Closures are used pervasively as representations.
+
+        \item A complex language like Haskell can be straightforwardly be converted
+            to a simple language like STG.
+
+        \item STG has a formal operational semantics (detailed in the second half
+            of the paper) given in terms of a state transition system. This guides
+            the implementation of the compilation of STG into Abstract C.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Question}
+
+    \alert{Strictness analysis} attempts to determine which paramters a
+    function will always evaluate. How can strictness analysis be used to
+    optimize a function?
 \end{frame}
 
 \end{document}
