@@ -4,7 +4,7 @@
 
 \author{Jacob Thomas Errington}
 \title{
-    Implementing lazy functional languages on stock hardware:\\
+    Implementing lazy functional languages on stock hardware:
     the Spineless Tagless G-machine
 }
 \institute{McGill University}
@@ -14,7 +14,7 @@
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{tikz}
 
-\usetikzlibrary{arrows,shapes}
+\usetikzlibrary{arrows,shapes,calc}
 
 \tikzstyle{every picture}+=[remember picture]
 \everymath{\displaystyle}
@@ -223,6 +223,10 @@ main = print (three `plus` five)
 \subsection{Representations}
 
 \begin{frame}
+    \huge{Representations}
+\end{frame}
+
+\begin{frame}
     \frametitle{Functions}
 
     A function is a suspended computation: when applied to arguments, the
@@ -285,7 +289,7 @@ main = print (three `plus` five)
     \end{figure}
 \end{frame}
 
-\begin{frame}
+\begin{frame}[fragile]
     \frametitle{Thunks}
 
     Recall the inductive equation for \texttt{plus}.
@@ -293,10 +297,141 @@ main = print (three `plus` five)
 plus (S n) m = S (plus n m)
     \end{lstlisting}
     If we reduce \texttt{plus (S Z) (S Z)} what do we get? The right-hand side
-    of the equation captured
+    of the equation captured in a \alert{thunk}.
 
     \begin{itemize}
-        \item A thunk is a suspended computation, taking no arguments.
+        \item Also a closure.
+            % Thunks can capture free variables, but have no arguments.
+        \item \alert{Forcing} a thunk: enter the same way as a function.
+            % A continuation is placed on the stack
+            % The closure is entered. If the closure is a thunk (unevaluated),
+            % then it arranges for an update to be performed when the
+            % evaluation completes; otherwise, it just returns the computed
+            % value.
+        \item Self-updating.
+            % The thunk knows its location on the heap (it's in the env ptr),
+            % so it can overwrite itself with the computed value, which will
+            % also be a closure that can be jumped into. If the computed value
+            % is bigger than the thunk, then the thunk is overwritten with an
+            % indirection.
+    \end{itemize}
+\end{frame}
+
+\newcommand{\makeboxes}[2]{
+    \def\name{#1}
+    \def\num{#2}
+    \pgfmathsetmacro{\ylim}{0.5}
+    \pgfmathsetmacro{\xsep}{1}
+
+    \pgfmathsetmacro{\xnum}{\num - 1}
+    \foreach \y in {0, \ylim} {
+        \foreach \x in {0,...,\xnum}{
+            \draw (\x * \xsep, \y) -- (\x * \xsep + \xsep, \y);
+        }
+    }
+
+    \foreach \x in {0,...,\num} {
+        \draw (\x * \xsep, 0) -- (\x * \xsep, \ylim);
+        \pgfmathsetmacro{\xpos}{\x * \xsep + \xsep * 0.5}
+        \pgfmathsetmacro{\ypos}{\ylim * 0.5}
+        \node (\name-box-\x) at (\xpos, \ypos) {};
+    }
+}
+
+\begin{frame}[shrink]
+    \begin{figure}
+        \begin{tikzpicture}
+            %%%%% BEFORE UPDATING
+
+            \def\posname{top}
+            \makeboxes{\posname}{3}
+
+            \draw (\posname-box-1) ++(0, 0.2)
+                node[anchor=south] {Before updating};
+
+            \draw[->] (\posname-box-0) -- ++(0, -2) -- ++(0.5, 0)
+                node[anchor=west] {Code pointer};
+
+            \draw[->] (\posname-box-1) -- ++(0, -1);
+            \draw[->] (\posname-box-2) -- ++(0, -1);
+            \draw (\posname-box-1) ++(0.5, -1)
+                node[anchor=north] {Free variables};
+
+            %%%%% AFTER UDPATE (LARGE VALUE)
+
+            \def\posname{botleft}
+            \tikzset{xshift=-3cm, yshift=-3cm}
+            \makeboxes{\posname}{2}
+
+            \draw[->] (\posname-box-0) -- ++(0, -1) -- ++(0.5, 0)
+                node[anchor=west] {Indirection};
+
+            \draw[->] (\posname-box-1) -- ++(1, 0)
+                node[anchor=west] {Value};
+
+            %%%%% AFTER UPDATE (SMALL VALUE)
+
+            \def\posname{botright}
+            \tikzset{xshift=6cm}
+            \makeboxes{\posname}{2}
+
+            \draw[->] (\posname-box-0) -- ++(0, -1) -- ++(0.5, 0)
+                node[anchor=west] {\texttt{S} code};
+
+            \draw[->] (\posname-box-1) -- ++(1, 0)
+                node[anchor=west, align=center] {smaller nat\\thunk};
+        \end{tikzpicture}
+
+        \caption{
+            Different heap objects.
+            From left to right: a large data value, a thunk, a small data
+            value.
+        }
+    \end{figure}
+\end{frame}
+
+\begin{frame}
+    \begin{block}{Question}
+        How can the updating of thunks be optimized or eliminated?
+    \end{block}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Extra uses of thunks}
+
+    \begin{itemize}
+        \item Loop detection.
+        \item Synchronization.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Three key questions}
+
+    \begin{enumerate}
+        \item What is the representations of
+            \begin{itemize}
+                \item a function value? \alert{A closure.}
+                \item a data value? \alert{A closure.}
+                \item an unevaluated expression? \alert{A closure.}
+            \end{itemize}
+
+        \item How is function application performed?
+
+        \item How is case analysis performed?
+    \end{enumerate}
+
+    \pause
+
+    \huge{Heap objects have a uniform representation: \alert{closures}.}
+\end{frame}
+
+\subsection{Function application}
+
+\frame{\huge{Function application}}
+
+\begin{frame}
+    hello
 \end{frame}
 
 \end{document}
