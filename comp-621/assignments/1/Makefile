@@ -1,6 +1,6 @@
 .PHONY: all
 
-all: writeup.pdf errington.tar.gz
+all: writeup.pdf
 
 writeup.pdf: writeup.tex
 	pdflatex writeup.tex
