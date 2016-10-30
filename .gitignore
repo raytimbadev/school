@@ -1,4 +1,8 @@
 *.log
 *.aux
 *.out
+*.nav
+*.toc
+*.snm
+*.vrb
 writeup.pdf
