@@ -1,0 +1,286 @@
+\documentclass[11pt,letterpaper]{article}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#4\\Honours analysis 1 -- MATH 254}
+\date{1 November 2016}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+
+\newcommand{\makebb}[1]{
+  \expandafter\newcommand\csname #1\endcsname{\mathbb{#1}}
+}
+\makebb{R}
+\makebb{N}
+
+\newcommand{\abs}[1]{\left|#1\right|}
+\newcommand{\absdiff}[2]{\abs{#1 - #2}}
+
+% Definition of convergence.
+\newcommand{\convergence}[5]{
+  \forall #1 > 0\,
+  \exists #2 \in \N\,
+  \forall #3 \geq #2:\,
+  \absdiff{#4}{#5} < #1
+}
+
+% Convergence after instantiating the forall.
+\newcommand{\convergenceinst}[5]{
+  \exists #2 \in \N\,
+  \forall #3 \geq #2:\,
+  \absdiff{#4}{#5} < #1
+}
+
+\newtheorem{prop}{Proposition}
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+
+\maketitle
+
+\begin{prop}[Problem \#6]
+  Suppose $(x_n)$ is a sequence in $\R$.
+  Let $A$ be the set of all limits of converging subsequences of $(x_n)$.
+  Let $(y_n)$ be a sequence in $\R$ such that $\forall n \in \N: y_n \in A$.
+  If $(y_n)$ converges, then
+  \begin{equation*}
+    \lim_{n\to\infty} {y_n} \in A
+  \end{equation*}
+\end{prop}
+
+\begin{proof}
+  Suppose $(y_n)$ converges.
+
+  Denote $\lim_{n\to\infty} {y_n} = y$.
+
+  Then we want to show that $\exists (x^\prime_n) \subseteq (x_n)$ and
+  $(x^\prime_n) \to x^\prime$ as $n \to \infty$ such that $x^\prime = y$.
+  In other words, we must construct an explicit subsequence $(x^\prime_n)$ of
+  $(x_n)$ that converges to $y$.
+
+  Since each element of $(y_n)$ is the limit of a converging subsequence of
+  $(x_n)$, then for each $n \in \N$, there exists a sequence
+  $(y_n^{(k)})_{k \in \N}$ which we call the \emph{associated sequence} of
+  $y_n$, which converges to $y_n$.
+
+  Consider the sequence $(x^\prime_n)$ given by
+  \begin{equation*}
+    x^\prime_n = y_n^{(n)}
+  \end{equation*}
+
+  We claim that this sequence converges to $y$ as $n \to \infty$.
+
+  Take arbitrary $\epsilon > 0$.
+
+  From the convergence of $(y_n)$ and $y_n^{(k)}$, we know that
+  \begin{align}
+    \convergence{\epsilon}{M_1}{n}{y_n}{y} \label{eq:cvg-yn} \\
+    \convergence{\epsilon}{M_2}{k}{y_n^{(k)}}{y_n} \label{eq:cvg-ynk}
+  \end{align}
+  and we want to show
+  \begin{equation}
+    \convergence{\epsilon}{M_3}{n}{y_n^{(n)}}{y} \label{eq:cvg-want}
+  \end{equation}
+
+  Notice that in the limit, we have
+  \begin{equation}
+    \abs{y_n^{(n)} - y}
+    = \abs{y_n^{(n)} - y_n + y_n - y}
+    \leq \absdiff{y_n^{(n)}}{y_n} + \absdiff{y_n}{y}
+    \label{eq:tri-ineq-lim}
+  \end{equation}
+  and we control both of these quantities.
+
+  Instantiating $\frac{\epsilon}{2}$ for $\epsilon$ in \eqref{eq:cvg-ynk},
+  we obtain $\convergenceinst{\frac{\epsilon}{2}}{M_2}{k}{y_n^{(k)}}{y_n}$.
+  If $n \geq M_2$, then we're fine, since we can instantiate $\forall k$ with
+  $n$ to obtain $\abs{y_n^{(n)} - y_n} < \frac{\epsilon}{2}$.
+
+  Instantiating $\frac{\epsilon}{2}$ for $\epsilon$ in \eqref{eq:cvg-yn},
+  we obtain $\convergenceinst{\frac{\epsilon}{2}}{M_1}{n}{y_n}{y}$. There are
+  no tricky considerations to be made here.
+
+  Now we must select $M_3$, for the convergence criterion we want to show, in
+  \eqref{eq:cvg-want}. Taking $M_3 = \sup\{M_1, M_2\}$, we guarantee that $n$
+  in the forall will be greater than $M_2$, so we can -- broadly speaking --
+  perform the required instantiation of $k$.
+
+  Specifically, take arbitrary $n \geq M_3$. Then $n \geq M_1$ and
+  $n \geq M_2$ by the definition of $M_3$.
+  We know that
+  \begin{equation*}
+    \forall k \geq M_2:\, \absdiff{y_n^{(k)}}{y_n} < \frac{\epsilon}{2}
+  \end{equation*}
+  %
+  Since $n \geq M_2$, we can instantiate $n$ for $k$ to obtain
+  \begin{equation*}
+    \absdiff{y_n^{(n)}}{y_n} < \frac{\epsilon}{2}
+  \end{equation*}
+  %
+  Next, we know that
+  \begin{equation*}
+    \forall m \geq M_1:\, \absdiff{y_m}{y} < \frac{\epsilon}{2}
+  \end{equation*}
+  %
+  Since $n \geq M_1$, we can instantiate $n$ for $m$ to obtain
+  \begin{equation*}
+    \absdiff{y_n}{y} < \frac{\epsilon}{2}
+  \end{equation*}
+  %
+  Finally, by our derivation in \eqref{eq:tri-ineq-lim}, we have
+  \begin{equation*}
+    \absdiff{y_n^{(n)}}{y}
+    \leq \frac{\epsilon}{2} + \frac{\epsilon}{2}
+    = \epsilon
+  \end{equation*}
+
+  This shows $(x^\prime_n) = (y_n^{(n)}) \to y$ as $n \to \infty$. Since the
+  limit of $(y_n)$ is equal to the limit of a subsequence of $(x_n)$, $y$
+  satisfies the definition of $A$. Hence, $y \in A$. This completes the proof.
+\end{proof}
+
+\begin{prop}[Problem \#9]
+  Suppose $(x_n)$ is a sequence in $\R$, and $(y_n)$ is a sequence given by
+  \begin{equation*}
+    y_n = \frac{x_1 + \cdots + x_n}{n}
+  \end{equation*}
+  %
+  If $(x_n)$ is bounded, then
+  \begin{enumerate}
+    \item $(y_n)$ is bounded; and
+    \item we have the following relation between the sequences' associated
+      limits
+      \begin{equation*}
+        \limsup_{n\to\infty}{x_n}
+        \leq
+        \liminf_{n\to\infty}{y_n}
+        \leq
+        \limsup_{n\to\infty}{y_n}
+        \leq
+        \limsup_{n\to\infty}{x_n}
+      \end{equation*}
+  \end{enumerate}
+\end{prop}
+
+\begin{proof}
+  Suppose $(x_n)$ is bounded.
+
+  We have
+  \begin{align}
+    \exists M^\circ \in \R\, \forall n \in \N:\, x_n &\leq M^\circ
+    \label{eq:xn-bounded-above} \\
+    \exists M_\circ \in \R\, \forall n \in \N:\, M_\circ &\leq x_n
+    \label{eq:xn-bounded-below}
+  \end{align}
+
+  Take arbitrary $n \in \N$. Notice that
+  \begin{equation*}
+    y_n
+    = \frac{x_1 + \cdots + x_n}{n}
+    \leq \frac{M^\circ + \cdots + M^\circ}{n}
+    = \frac{n M^\circ}{n}
+    = M^\circ
+  \end{equation*}
+  which \emph{does not depend on $n$}. Hence $(y_n)$ is bounded above by
+  $M^\circ$.
+
+  The same reasoning shows that $M_\circ$ is a lower bound of $(y_n)$.
+
+  Hence, $(y_n)$ is bounded.
+
+  Next, we want to show
+  \begin{equation}
+    \limsup_{n\to\infty}{y_n}
+    \leq
+    \limsup_{n\to\infty}{x_n}
+  \end{equation}
+
+  Take arbitrary $N \in \N$, let $n \geq N$, and consider the following
+  derivation.
+  \begin{align*}
+    y_n
+    &= \frac{1}{n} \sum_{i=1}^n {x_i} \\
+    &= \frac{1}{n} \sum_{i=1}^N {x_i}
+      + \frac{1}{n} \sum_{N+1}^n {x_i} \\
+    &\leq \frac{1}{n} \sum_{i=1}^N {x_i}
+      + \frac{n-N}{n} \sup \{x_i\}_{i=N+1}^n \\
+    &\leq \frac{1}{n} \sum_{i=1}^N {x_i}
+      + \sup \{x_i\}_{i=N+1}^\infty
+  \end{align*}
+
+  Essentially, we split the calculation of the average after $N$ terms, and
+  replace the second part with its infimum.
+
+  Next, we take the limit superior on both sides.
+  \begin{equation*}
+    \limsup_{n\to\infty} {y_n}
+    \leq \limsup_{n\to\infty} {
+      \frac{1}{n} \sum_{i=1}^N {x_i} + \sup \{x_i\}_{i=N+1}^\infty
+    }
+    = \sup \{x_i\}_{i=N+1}^\infty
+  \end{equation*}
+  since $\frac{1}{n} \sum_{i=1}^N {x_i} \to 0$ as $n \to \infty$, and the
+  second term does not depend on $n$.
+
+  Then since our choice of $N$ was arbitrary, this equation is in fact valid
+  for all $N$, so we can rewrite the right-hand side to give
+  \begin{equation*}
+    \limsup_{n\to\infty} {y_n}
+    \leq \lim{N\to\infty} \sup \{ x_n : n > N \}
+    = \limsup_{n\to\infty} x_n
+  \end{equation*}
+  which is exactly the rightmost inequality we wanted to show.
+
+  This will also be true if we negate all the terms in each sequence, giving us
+  \begin{align*}
+    \limsup_{n\to\infty}{-y_n} &\leq \limsup_{n\to\infty}{-x_n} \\
+    -\liminf_{n\to\infty}{y_n} &\leq -\liminf_{n\to\infty}{x_n} \\
+    \liminf_{n\to\infty}{x_n} &\leq \liminf_{n\to\infty}{y_n}
+  \end{align*}
+  which shows the leftmost inequality.
+
+  All that remains is the middle inequality.
+
+  Expanding a definition of $\limsup{}$ and $\liminf{}$ we get
+  \begin{equation*}
+    \lim_{N\to\infty} \inf \{ y_n : n > N \}
+    \leq
+    \lim_{N\to\infty} \sup \{ y_n : n > N \}
+  \end{equation*}
+  as the statement we want to prove.
+
+  Consider the sequences
+  \begin{align}
+    \left( \inf \{ y_n : n > N \} \right)_{N \in \N} \label{eq:infterms} \\
+    \left( \sup \{ y_n : n > N \} \right)_{N \in \N} \label{eq:supterms}
+  \end{align}
+  which underly the limit inferior and limit superior, respectively.
+
+  Notice that since $(x_n)$ and $(y_n)$ are bounded, these sequences that
+  underly their limits inferior and limits superior are monotone and bounded,
+  and hence convergent. Hence all the limits inferior and limits superior we've
+  been studying in this problem exist. (Probably should have said this sooner.)
+
+  Anyway, notice that each term in \eqref{eq:infterms} is at most its
+  corresponding term in \eqref{eq:supterms}, since we know that for any
+  nonempty bounded $R \subseteq \R$, $\inf R \leq \sup R$, and we know that
+  for any $N \in \N$, $\{ y_n : n > N \}$ is bounded since it is a subset of a
+  bounded set.
+
+  Next, by a property of limits seen in class, if for each $n$, $a_n \leq b_n$,
+  then $\lim_{n\to\infty} a_n \leq \lim_{n\to\infty}$. This property is
+  satisfied by the two sequences we're examining.
+
+  Hence,
+  \begin{align*}
+    \lim_{N\to\infty} \inf \{ y_n : n > N \} &\leq
+    \lim_{N\to\infty} \sup \{ y_n : n > N \} \\
+    \liminf_{n\to\infty} y_n &\leq \limsup_{n\to\infty} y_n
+  \end{align*}
+
+  Notice that this result is actually a bit more general that in our current
+  setup; it did not use any information about $(y_n)$ except that it is
+  bounded.
+\end{proof}
+
+\end{document}
