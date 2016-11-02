@@ -283,4 +283,81 @@
   bounded.
 \end{proof}
 
+\begin{prop}
+  The sequence
+  \begin{align*}
+    a_1 &= \sqrt{2} \\
+    a_{n+1} &= \sqrt{1 + a_n}
+  \end{align*}
+  converges, and its limit is
+  \begin{equation*}
+    \frac{1 + \sqrt{5}}{2}
+  \end{equation*}
+\end{prop}
+
+\begin{proof}
+  Suppose $(a_n)$ converges, and let its limit be $L$. Then,
+  \begin{equation*}
+    L = \sqrt{1 + \sqrt{1 + \cdots}}
+  \end{equation*}
+  Squaring both sides, we obtain
+  \begin{align*}
+    L^2 &= 1 + \sqrt{1 + \cdots} \\
+    L^2 &= 1 + L
+  \end{align*}
+  Solving this second-degree equation gives us the positive result
+  \begin{align*}
+    L = \frac{1 + \sqrt{5}}{2}
+  \end{align*}
+
+  Hence, \emph{if} $(a_n)$ converges, then its limit is
+  $\frac{1 + \sqrt{5}}{2}$, as required.
+
+  Now it suffices to show that it actually does converge. To do this, we will
+  ignore the hint which says to write it as a contractive sequence and instead
+  show that it is monotone and bounded.
+
+  First, we will show that the sequence is strictly increasing. We will show
+  this by induction. We will take the base case $a_1 < a_2$.
+  Since $\sqrt{2} > 1$,
+  \begin{equation*}
+    1 + 1 < 1 + \sqrt{1 + 1}
+  \end{equation*}
+  and since the square root function is monotone, it preserves the ordering of
+  the reals, so
+  \begin{equation*}
+    \sqrt{1 + 1} < \sqrt{1 + \sqrt{1 + 1}}
+  \end{equation*}
+  as required.
+
+  Next, the induction hypothesis is that
+  \begin{equation*}
+    a_n < a_{n+1} = \sqrt{1 + a_n}
+  \end{equation*}
+  and our goal is to show
+  \begin{equation*}
+    \sqrt{1 + a_n} = a_{n+1} < a_{n+2} = \sqrt{1 + a_{n+1}}
+  \end{equation*}
+
+  This is trivial. Adding one to both sides of the induction hypothesis and
+  taking the square root -- both operations preserve the ordering of $\R$ --
+  gives us the goal.
+
+  Hence, $(a_n)$ is monotone, in particular strictly increasing. Next we must
+  show that it is bounded above. We will again show this by induction. We
+  select $2$ as the bound.
+
+  The base case $\sqrt{2} < 2$ is obvious, since for any $c > 1$,
+  $\sqrt{c} > 1$.
+
+  The induction hypothesis is that $a_n < 2$, and our goal is to show that
+  $a_{n+1} = \sqrt{1 + a_n} < 2$. By the induction hypothesis, we have:
+  \begin{equation*}
+    \sqrt{1 + a_n} < \sqrt{1 + 2} = \sqrt{3} < 2
+  \end{equation*}
+  The last step can easily be verified numerically.
+
+  Hence, since $(a_n)$ is bounded above and increasing, it is convengent, and
+  its limit is $\frac{1 + \sqrt{5}}{2}$.
+\end{proof}
 \end{document}
