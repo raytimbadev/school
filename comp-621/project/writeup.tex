@@ -1,0 +1,446 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington}
+\title{McFAS: a functional analysis suite for imperative programs}
+\date{Fall 2016\\Project \#7}
+
+\usepackage[utf8]{inputenc}
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{csquotes}
+\usepackage{listings}
+
+\newcommand{\codesnip}{\texttt}
+\newcommand{\typename}{\codesnip}
+\newcommand{\mcfas}{\textsc{McFAS}}
+\newcommand{\mcsaf}{\textsc{McSAF}}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction and motivation}
+
+Object-oriented programming is the paradigm of choice for many projects.
+Languages in this paradigm are generally backed by large corporations, such as
+Microsoft or Oracle, and as such attract many developers seeking lucrative
+careers. However, it is not the only paradigm available for the development of
+software. Functional programming is increasingly becoming popular for a number
+of compelling reasons.
+
+\begin{itemize}
+  \item As multicore processors are ubiquitous, concurrent programming is a
+    paramount strategy for harnessing the full strength of modern machines. In
+    purely functional programming languages, data races are essentially
+    impossible to produce, thanks to immutable data and pure functions.
+
+  \item Thanks to powerful type systems offered by modern purely functional
+    languages, many useful invariants can be checked statically by the
+    compiler. Dependently-typed languages take this even further, by offering
+    a first-order logic as a programming language: a compiler for a
+    dependently-typed language can guarantee that the arguments to a
+    \codesnip{printf} function match its format string, or that a list is
+    nonempty. Some functional languages are slowly incorporating features from
+    dependently-typed languages. Consequently, myriad errors which manifest
+    otherwise only at runtime can be eliminated at compile-time.
+
+  \item By using concepts borrowed from mathematics, functional programming
+    languages offer new insights into both classic problems and new problems.
+    Specifically, many generalizations of common programming patterns have been
+    developed in functional programming languages, which results in improved
+    code readability and reuse.
+\end{itemize}
+
+With these reasons in mind, we are motivated to design \mcfas{}, a functional
+analysis suite for imperative programs. This framework stands in contrast to
+\mcsaf{}, which is written in Java and in some aspects difficult to use, for
+reasons to be described later. We hope to create a minimal functional framework
+as a proof of concept that is pleasant to use and that makes it difficult when
+implementing analyses to aim the gun at one's foot.
+
+\section{Background and related work}
+
+Here we will provide a discussion on object-oriented programming versus
+functional programming in the context of modelling languages. This is key to
+the background of our framework, as \mcfas{} seeks to provide functionality
+equivalent to that of an object-oriented static analysis framework. Hence it is
+vital to examine what kinds of intrinsic strengths and weaknesses both
+paradigms are characterized by, as well as what strategies exist in both
+paradigms for patching up those weaknesses.
+
+\subsection{The expression problem} \label{sec:expr}
+
+The expression problem\cite{Wadler1998} is a situation that arises when
+modelling languages. It relates the host language's capacity for
+\emph{expressivity}. Neither the object-oriented paradigm nor the functional
+paradigm fully address the problem: neither one is perfectly expressive. In
+fact, each paradigm offers orthogonal benefits when confronted with the
+expression problem.
+
+As a simple example, consider the typical example of different types of shapes.
+We would like to compute their area. In Haskell, one might write the code in
+listing \ref{lst:shapes-area-hs}, and in Java, one might write the code in
+listing \ref{lst:shapes-area-java}.
+
+\begin{lstlisting}[
+  language=Haskell,
+  caption={Shapes and area in Haskell.},
+  label={lst:shapes-area-hs}
+]
+data Shape
+  = Circle { radius :: Double }
+  | Square { side :: Double }
+
+area :: Shape -> Double
+area s = case s of
+  Circle { radius = r } -> pi * r * r
+  Square { side = c } -> c * c
+\end{lstlisting}
+
+\begin{lstlisting}[
+  language=Java,
+  caption={Shapes and area in Java.},
+  label={lst:shapes-area-java}
+]
+interface Shape {
+  double getArea();
+}
+
+final class Square implements Shape {
+  private final double side;
+
+  public Square(final double side) {
+    this.side = side;
+  }
+
+  public double getArea() {
+    return side * side;
+  }
+}
+
+final class Circle implements Shape {
+  private final double radius;
+
+  public Circle(final double radius) {
+    this.radius = radius;
+  }
+
+  public double getArea() {
+    return Math.PI * radius * radius;
+  }
+}
+\end{lstlisting}
+
+The expression problem hits us when we want to \emph{extend} this model in some
+way. There are essentially two directions in which it can be extended.
+\begin{description}
+  \item[Horizontally.] We may want to add new types of shapes, which extends
+    the \emph{breadth} of our model.
+  \item[Vertically.] We may want to add new operations to our shapes, which
+    extends the \emph{depth} of our model.
+\end{description}
+
+Object-oriented programming makes it easy to extend the model horizontally. To
+add a triangle shape, it suffices to create a new class \typename{Triangle}
+implementing the \typename{Shape} interface. However, adding a new operation --
+say \texttt{perimeter} to the \typename{Shape} interface, i.e. vertically
+extending the model, means rewriting every implementation of the interface to
+ensure that it implements this new method.
+
+Conversely, functional programming makes it difficult to extend the model
+horizontally. Adding a \typename{Triangle} constructor to the \typename{Shape}
+datatype will require rewriting every case analysis on the \typename{Shape}
+type to account for the new constructor. However, adding a new operation is
+trivial: it suffices to write a new function, e.g.
+\codesnip{perimeter :: Shape -> Double}.
+
+When analyzing and transforming programs, we deal not in \typename{Shape}s and
+\codesnip{area}s but in abstract syntax trees and use-def chains. However, the
+essential idea is the there: the breadth of the model is determined by the
+language we are modelling, and the depth of the model is determined by the
+kinds of analyses and transformations we would like to perform.
+
+\subsubsection{Solution with object-oriented programming}
+
+The \mcsaf{} framework\cite{McSAF} solves the expression problem by using
+object-oriented design patterns. Rather than require each node in the abstract
+syntax tree to implement the methods necessary for the computation of some
+analysis (which would be completely untenable), the code for each individual
+analysis is abstracted out into a separate class. However, the logic of an
+analysis is fundamentally recursive, as the analysis must traverse the syntax
+tree of the program being analyzed. This recursive operation of analysing
+different node cases is captured by the \emph{visitor pattern}, in which each
+case is identified with a method that is called when that case is reached.
+
+Hence in \mcsaf{} each analysis is a visitor. If the analysis requires state --
+practically all interesting analyses do, especially in considering the
+formulation of analyses in terms of in-sets and out-sets computed by dataflow
+equations -- then the state can be held in the visitor object, and shared
+between all case analyses. Certain common analysis patterns such as forward
+analyses and backward analyses are given builtin helper classes which
+implement the least fixed-point solution algorithm.
+
+\subsubsection{Solution with functional programming}
+
+In the domain of program analysis and transformation, the required direction of
+extension for the model is vertical. That is why in the object-oriented
+paradigm must resort to specialized implementation techniques like the visitor
+pattern -- object-oriented programming is at its core more well suited to
+domains that are to be extended horizontally.
+
+In functional programming by contrast, extending the domain vertically is
+trivial: each new analysis we wish to implement will be nothing more than a
+function. We will give a more detailed explanation of this strategy in section
+\ref{sec:strategy}.
+
+For the sake of providing a proper comparison of object-oriented programming
+and functional programming in regards to the expression problem, we will show
+here how a functional program can be extended horizontally. Using an
+implementation technique called Datatypes à la Carte\cite{Swierstra2008}, the
+programmer can separate what would normally be separate cases of one datatype
+into multiple datatypes.
+
+Consider an expression tree for simple arithmetic expressions, containing
+integer constants and addition, as given in listing \ref{lst:arith-naive}.
+
+\begin{lstlisting}[
+  language=Haskell,
+  caption={A straightforward tree for simple arithmetic expressions.},
+  label={lst:arith-naive}
+]
+data Expr
+  = Val Int
+  | Add Expr Expr
+
+eval :: Expr -> Int
+eval e = case e of
+  Val n -> n
+  Add e1 e2 -> eval e1 + eval e2
+\end{lstlisting}
+
+First, we can eliminate explicit recursion in the datatype by extracting its
+\emph{signature}, leaving holes where the recursive instances of the type would
+go.
+
+\begin{lstlisting}[language=Haskell]
+data ExprF e
+  = ValF Int
+  | AddF e e
+\end{lstlisting}
+
+From this signature \codesnip{ExprF} we can recover the original datatype
+\codesnip{Expr} by applying a fixpoint. In Haskell, this fixpoint is typically
+expressed in the following way.
+
+\begin{lstlisting}[language=Haskell]
+newtype Fix f = Fix { unFix :: f (Fix f) }
+
+type Expr' = Fix ExprF
+
+twoPlusTwo :: Expr
+twoPlusTwo = Add (Val 2) (Val 2)
+
+twoPlusTwo' :: Expr'
+twoPlusTwo' = Fix (AddF (Fix (ValF 2)) (Fix (ValF 2)))
+\end{lstlisting}
+
+Remark: In Haskell, the \codesnip{newtype} construct is a limited kind of
+datatype declaration generally used for creating wrapper types. The restriction
+is that the wrapper may only contain one field. The compiler optimizes these
+single-field datatypes by \emph{completely eliminating} them at runtime, making
+wrapping and unwrapping operations have no cost.
+
+The expression \codesnip{twoPlusTwo'} is significantly more cluttered than
+\codesnip{twoPlusTwo}, but just by eliminating explicit recursion, the
+programmer may use generalized recursion schemes\cite{RecursionSchemes} instead
+of writing explicit recursion. Using the recursion scheme formally called a
+\emph{catamorphism}, we can recover the \codesnip{eval} function. The function
+\codesnip{phi} in listing \ref{lst:cata} is an instance of what is formally
+called an \emph{F-algebra}.
+
+\begin{lstlisting}[
+  language=Haskell,
+  label={lst:cata},
+  caption={Recovering the evaluation function with a catamorphism.}
+]
+cata :: Functor f => (f a -> a) -> Fix f -> a
+cata phi = phi . fmap (cata phi) . unFix
+
+eval' :: Expr' -> Int
+eval' = cata phi where
+  phi :: ExprF Int -> Int
+  phi e = case e of
+    ValF n -> n
+    AddF n1 n2 -> n1 + n2
+\end{lstlisting}
+
+The first thing that stands out is \codesnip{Functor} and \codesnip{fmap}.
+A functor in Haskell is a concept borrowed from category theory. Broadly
+speaking, it generalizes the notion of a structure in which an operation can be
+performed uniformly without modifying the shape of the structure. The simplest
+example is the list structure and the \codesnip{map} operation that applies a
+function to each element of the list. The \emph{structure} of the list does not
+change: the number of elements in the list remains the same. But each element
+was changed somehow.  So whereas the \codesnip{map} function takes a function
+$a \to b$ and produces a function $[a] \to [b]$, the \codesnip{fmap} function
+takes a function $a \to b$ and produces a function $f a \to f b$, where $f$ is
+the functor associated with the particular use of \codesnip{fmap}.
+
+It turns out that \codesnip{ExprF} is a functor! Hence why we chose to append
+``F'' to ``Expr''. For the structure that is the expression tree, applying
+\codesnip{fmap} to some function $f$ produces a function that operates
+differently according to what case is found: if we have \codesnip{ValF n}, we
+do nothing; else, if we have \codesnip{AddF e1 e2}, we apply the given function
+$f$ to both $e1$ and $e2$.
+
+The next thing to remark about the catamorphism is that in the case
+\codesnip{AddF n1 n2}, the bindings \codesnip{n1} and \codesnip{n2} are
+integers. This is due to the bottom-up operation of the catamorphism: the part
+\codesnip{fmap (cata phi)} of its implementation causes the transformation
+\codesnip{phi} to tunnel into the datatype as far as possible, specifically
+until a \emph{constant functor} is reached. These constant functors are
+specifically the ``do nothing'' cases in the implementation of \codesnip{fmap}
+for our functor.
+
+The use of recursion schemes, specifically catamorphisms, was immensely useful
+in the development of the Goto\cite{Goto} compiler for GoLite. It allowed the
+same syntax tree signature to be used in many stages of the compiler.
+Concretely, during typechecking, an annotation wrapper was applied to the
+syntax tree signature to produce a type-safe \emph{annotated syntax tree}
+datatype. Compilers not using a similar strategy typically embed the typing
+annotations wrapped in an option type in the explicitly recursive syntax tree
+as illustrated in listing \ref{lst:bad-annotations}.
+
+\begin{lstlisting}[
+  language=Haskell,
+  label={lst:bad-annotations},
+  caption={A syntax tree with explicit annotations.}
+]
+data Type = Int | String
+type Ann = Maybe Type
+
+data AnnExpr
+  = ValS Ann String
+  | ValI Ann Int
+  | Add Ann AnnExpr AnnExpr
+\end{lstlisting}
+
+Such a syntax tree with embedded annotations is constructed during parsing by
+giving the value \codesnip{Nothing} to all the annotations. During
+typechecking, types are determined and filled in. The problem with this
+approach is that it does not capture the invariant that prior to typechecking
+there is no type information at all, and that after typechecking, every
+expression has determined type.
+
+The next step in the Datatypes à la Carte transformation is to split each case
+of the \codesnip{ExprF} datatype into its own datatype. Each of these split
+datatypes will itself also be a functor. We can recover the joint datatype by
+using a construction borrowed also from category theory called a
+\emph{coproduct} or \emph{sum}. It turns out that a coproduct of functors is
+also a functor. We denote the coproduct of functors $A$ and $B$ as $A + B$.
+
+The final step in the construction requires establishing a sort of subtyping
+relation between functors and coproducts, so that the functor $A$ is considered
+a ``subtype'' of the coproduct $A + B$.
+What this subtyping relation allows one to do is to generically combine a
+function $f : F A \to X$ and a function $g : G A \to X$ into a function
+$h : (F + G) A \to X$.
+Hence, the different cases in the original \codesnip{eval} function become
+separate functions which can be mixed and matched to suit the coproduct in
+question.
+By leveraging Haskell's typeclass-based overloading system, one can avoid
+writing the specific boilerplate code required for determining which
+combination of functions suits a particular coproduct of functions.
+This strategy was used in a very simple just-in-time compiler for
+Brainfuck\cite{Fuckdown}.
+
+To recap, object-oriented programming reinvents case analysis via the visitor
+pattern in order to support vertical extensibility of the language model.
+Conversely, functional programming reinvents subclassing and virtual dispatch
+via functor coproducts to support horizontal extensibility of the language
+model. We argue that in an analysis framework, we can eschew horizontal
+extensibility, instead favouring vertical extensibility: the languages we model
+change infrequently, so being able to easily extend the syntax tree is not very
+important. There are numerous other strategies that each paradigm can employ to
+improve the extensibility of a language model, but we hope that this gives a
+sufficient overview of some well-known strategies.
+
+\section{Specific problem statement}
+
+The analysis of programs in object-oriented languages can be cumbersome, if not
+outright awkward at times. The use of subclassing as a mechanism for defining
+new analyses is inflexible, and very little safety is afforded to a programmer
+seeking to write new analyses. Much care must be taken in writing new analyses,
+and examination of the source code of the analysis framework is sometimes
+necessary in order to understand why an analysis or transformation does not
+execute as expected. These obstacles lead to \emph{cargo culting} in which
+chunks of code known to be functional are copied around as a substitute for a
+proper understanding of the framework's operation.
+
+\section{Solution strategy} \label{sec:strategy}
+
+Our proposed solution is a functional analysis framework for imperative
+programs, written in a language with an advanced type system such as Haskell.
+We will target a simple imperative language with Matlab-like features, not
+unlike the one studied in assignment \#1. We will call this language Oatlab,
+since ``O'' comes after ``N'', and oats are delicious.
+
+We can represent the syntax tree of Oatlab as a fixed point of a signature, so
+that we can use generalized recursion schemes as the backbone of
+transformations in our framework. We can apply a generalized annotation
+scheme\cite{Goto} to this signature: the annotations will be used to store user
+state associated with each node. Finally, transformations can be written by
+the programmer as an F-algebra that reconstructs the transformed tree.
+
+As for analyses, our framework will provide some builtins not unlike McSAF for
+common patterns. The major difference is that our framework will use Haskell's
+advanced type system to ensure that the functions written by the user touch
+only the parts of the syntax tree that our builtin functions expect.
+Consequently, a user function cannot break invariants expected by our builtins.
+
+Since the result of an analysis is merely an annotated syntax tree, multiple
+analyses can be chained together to build on top of each other. Hence, we can
+develop a library of \emph{analysis combinators} which perform common analysis
+tasks. A programmer using our framework can then chain together multiple
+combinators to form more complex analyses out of simple building blocks. This
+strategy is employed with great success in the development of parsers, for
+example.
+
+\section{Schedule of activities}
+
+Here we give a breakdown of the work that needs to be done to develop \mcfas{}
+and to create the material needed to compare \mcfas{} and \mcsaf{}. We estimate
+the time required to complete each of these major steps.
+
+\begin{enumerate}
+  \item Review and refine the syntax tree annotation strategy employed in
+    Goto\cite{Goto}, and adapt it to define the Oatlab syntax tree.
+    \emph{Should take one day.}
+  \item Write a parser for Oatlab programs. \emph{Should take an afternoon.}
+  \item Write a few transformations as F-algebras, to see how it can be
+    generalized. \emph{Should take one day.}
+  \item Implement the dataflow equation fixed-point solver algorithm, by
+    storing the sets in annotations. \emph{Should take a few days.}
+  \item Implement a forward and backward analysis in \mcfas{} and \mcsaf{}.
+    \emph{Should take a day.}
+  \item Investigation and implementation of a small analysis combinator
+    library. \emph{Should take a few days.}
+\end{enumerate}
+
+\section{Expected results and evaluation method}
+
+We expect that analyses and transformations written using our framework be more
+concise and less error-prone than similar ones written in \mcsaf{}. These are
+both subjective qualities of an analysis: we cannot precisely quantify the
+\emph{error-proneness} of a framework.
+
+To decide this, we will perform a qualitative review of some equivalent
+analyses implemented in \mcsaf{} and in \mcfas{}. We will discuss possible
+mistakes a programmer may make in writing analyses in both frameworks. We will
+give a detailed account of the general process for writing analyses in
+\mcfas{}, drawing parallels with the work of Jesse Doherty on \mcsaf{}\cite{McSAF}.
+
+\bibliographystyle{plain}
+\bibliography{bibliography}
+
+\end{document}
