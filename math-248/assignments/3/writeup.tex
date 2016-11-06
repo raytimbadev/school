@@ -1,0 +1,110 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#3\\Honours advanced calculus -- MATH 248}
+\date{8 November 2016}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+
+\newtheorem{prop}{Proposition}
+
+\newcommand{\makebb}[1]{
+  \expandafter\newcommand\csname #1\endcsname{\mathbb{#1}}
+}
+\newcommand{\parens}[1]{\left(#1\right)}
+\newcommand{\D}{\mathrm{D}}
+\renewcommand{\d}[2]{\frac{\mathrm{d}#1}{\mathrm{d}#2}}
+\newcommand{\dd}[1]{\d{}{#1}}
+
+\makebb{R}
+\makebb{N}
+
+\begin{document}
+
+\maketitle
+
+\section{Elliptical motion of the planets}
+
+Consider the function $f : \R \to \R^2$ that defines the catesian coordinates
+of a planet in terms of its angular position $\theta$ and the parameters
+$a \geq b > 0$ of its elliptical motion.
+\begin{equation*}
+  f(\theta) = \parens{
+    \begin{array}{l}
+      a \cos \theta \\
+      a \sin \theta
+    \end{array}
+  }
+\end{equation*}
+
+\emph{Kepler's equation} gives us the angular position in terms of the time $t$
+elapsed since the planet passes through $(a, 0)$.
+\begin{equation}
+  kt = \theta -\epsilon \sin \theta
+  \label{eq:kepler}
+\end{equation}
+where $\epsilon = \frac{c}{a}$ and $(c, 0)$ is the position of the Sun.
+
+\begin{prop}
+  It is possible to solve for $\theta$ in terms of $t$, for all $t \in \R$.
+\end{prop}
+
+\begin{proof}
+  We will use the Implicit Function Theorem. First, we must put
+  \eqref{eq:kepler} into a suitable form. Let $g : \R^2 \to \R$ be given by
+  \begin{equation*}
+    g(t, \theta) = kt + \epsilon \sin \theta - \theta
+  \end{equation*}
+  and consider $g(t, \theta) = 0$.
+  Next, we verify $g(0, 0) = k \cdot 0 + \epsilon \sin 0 - 0 = 0$.
+  We compute
+  \begin{equation*}
+    \partial_\theta g(t, \theta) = \epsilon \cos \theta - 1
+  \end{equation*}
+  Notice that this partial derivative is independent of $t$, and that it is
+  nonzero whenever $\cos \theta \neq \frac{a}{c}$. Since $c > 0$ and $a > 0$,
+  $\frac{a}{c} > 0$. Suppose $a < c$. Then we have a ``physical
+  contradiction'', since the Sun will not be contained within the ellipse
+  traced by the orbit of the planet. Hence $a \geq c$. We dispense with the
+  case $a = c$ because the planet cannot pass through the Sun. Hence,
+  physically, we deduce that $a > c$. Since $-1 \leq \cos \theta \leq 1$ for
+  all $\theta$, there is no $\theta \in \R$ such that
+  $\cos \theta = \frac{a}{c} > 1$. Therefore,
+  $\partial_\theta g(t, \theta) \neq 0$ for all $t \in \R$.
+
+  Next, since the partial derivatives of $g$ exist and are continuous, $\D g$
+  exists, is equal to $J_g$, and is differentiable. Then by the Implicit
+  Function Theorem, $\exists h : \R \to \R$ such that $\theta = h(t)$ for all
+  $t \in \R$, i.e. we can write $\theta$ in terms of $t$.
+\end{proof}
+
+The implicit function theorem gives us an additional result concerning the
+derivative of the implicit function, namely
+\begin{equation*}
+  \dd{t} h(t)
+  = - \frac{\partial_t g(t, \theta)}{\partial_\theta g(t, \theta)}
+  = \frac{k}{1 - \epsilon \cos \theta}
+  = \frac{k}{1 - \epsilon \cos {h(t)}}
+\end{equation*}
+
+We are interested in the values of $g$ that produce extreme values of
+$h^\prime$. These will coincide with the values of $\theta$ that produce
+extreme values of $\cos \theta$, i.e. $0$ and $\pi$.
+
+\begin{description}
+  \item[Case] $\theta = 0$. Then $\cos \theta = 1$ and $1 > 1 - \epsilon > 0$,
+    by the argument given in the above proof, so this gives us a maximum value
+    for $h^\prime$. Physically, this makes sense since this is when the planet
+    is closest to the Sun.
+
+  \item[Case] $\theta = \pi$. Then $\cos \theta = -1$ and $1 + \epsilon > 1$.
+    This gives us a minimum value for $h^\prime$. Again, this makes sense
+    because this is when the planet is the farthest from the Sun.
+\end{description}
+
+We can't say exactly what the values of $t$ are that produce these maxima and
+minima, because the Implicit Function Theorem is not constructive: it shows
+that the implicit function exists without giving us its form.
+
+\end{document}
