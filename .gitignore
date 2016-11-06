@@ -5,4 +5,6 @@
 *.toc
 *.snm
 *.vrb
+*.bbl
+*.blg
 writeup.pdf
