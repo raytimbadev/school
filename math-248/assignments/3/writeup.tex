@@ -18,6 +18,7 @@
 \renewcommand{\d}[2]{\frac{\mathrm{d}#1}{\mathrm{d}#2}}
 \newcommand{\dd}[1]{\d{}{#1}}
 \newcommand{\pprime}{\prime\prime}
+\newcommand{\inv}[1]{#1^{-1}}
 
 \makebb{R}
 \makebb{N}
@@ -198,6 +199,55 @@ and substitu $x^2 = \frac{1 - 2y^2}{2}$ in $f(x, y) = C$ gives
     y = \pm \frac{1}{2} \sqrt{C + \frac{3}{4}}
 \end{equation*}
 which gives us explicit points where $y^\prime(x) = 0$.
+
+\section*{\#5 -- Manifolds involving invertible real symmetric matrices}
+
+Let $A$ be an $n \times n$ invertible real symmetric matrix.
+
+\begin{prop}
+    $M = \{ x \in \R^n | x^T A x = 1 \} \subset \R^n$ is an $n-1$-dimensional
+    manifold.
+\end{prop}
+
+\begin{proof}
+    Since $A$ is a symmetric real matrix, we assume without loss of generality
+    that $A$ is diagonal (real symmetric matrices are diagonalizable).
+    Then,
+    \begin{equation*}
+    x^T A x = \sum_{i=1}^n {a_{ii} x_i^2} = 1
+    \end{equation*}
+    defines the unit sphere embedded in $R^n$, which is known to be a manifold
+    of dimension $n - 1$.
+\end{proof}
+
+\begin{prop}
+    $M = \{ X \in \R^{n \times n} | X^T A X = A \} \subset \R^{n \times n}$ is
+    a manifold of dimension ??.
+\end{prop}
+
+\begin{proof}
+    First, assume again that $A$ is diagonal.
+    % Then $X^T A X$ must also be diagonal.
+    By matrix multiplication,
+    \begin{equation*}
+        (AX)_{ij} = \sum_{k=1}^n {A_{ik} X_{kj}} = A_{ii} X_{ij}
+    \end{equation*}
+    since for $i \neq k$, $A_{ik} = 0$.
+
+    It is not clear how I should proceed from here. We can show that $X^T A X$
+    is symmetric, and therefore also diagonalizable. Then there exists and
+    invertible matrix $P$ such that $Q = \inv{P} X^T A X P$ is diagonal and
+    represents the same linear transformation as $X^T A X$.
+
+    Hence, equation $i$ in the system of equations given by $X^T A X = A$ will
+    have a left-hand side of the following form.
+    \begin{equation*}
+        Q_{ii} = A_{ii}
+    \end{equation*}
+    where $Q_{ii}$ is a polynomial of at most $2$, i.e. involving at most two
+    entries from $X$. Then I am not sure how to show that this is a manifold
+    nor what its dimension is.
+\end{proof}
 
 \section*{\#6 -- Local minima and maxima}
 
