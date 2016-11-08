@@ -17,6 +17,7 @@
 \newcommand{\D}{\mathrm{D}}
 \renewcommand{\d}[2]{\frac{\mathrm{d}#1}{\mathrm{d}#2}}
 \newcommand{\dd}[1]{\d{}{#1}}
+\newcommand{\pprime}{\prime\prime}
 
 \makebb{R}
 \makebb{N}
@@ -198,4 +199,51 @@ and substitu $x^2 = \frac{1 - 2y^2}{2}$ in $f(x, y) = C$ gives
 \end{equation*}
 which gives us explicit points where $y^\prime(x) = 0$.
 
+\section*{\#6 -- Local minima and maxima}
+
+Suppose $f : \R^2 \to \R$ is given by
+\begin{equation*}
+    (x, y) \mapsto (y - x^2)(y - 2x^2)
+\end{equation*}
+
+Since $f(x, y)$ is a polynomial, it is continuously differentiable.
+
+\begin{prop}
+    The restriction of $f$ to any line has a local minimum at the origin.
+\end{prop}
+
+\begin{proof}
+    First we will consider non-vertical lines, so $y = mx$ for $m \in \R$.
+    \begin{align*}
+        g(x) &= f(x, mx) = (mx - x^2)(mx - 2x^2) = 2x^4 - 3mx^3 + m^2x^2 \\
+        g^\prime(x) &= 8x^3 - 9mx^2 + 2m^x \\
+        g^\pprime &= 24x^2 - 18mx + 2m^2
+    \end{align*}
+    If $x = 0$, then $y = mx = 0$ and $g^\prime(0) = 0$, so we have a critical
+    point at the origin. Since $g^\pprime(x) = 2m^2 \geq 0$. If $m > 0$, then
+    $g$ is concave up at the origin, so we have a local minimum. If $m=0$, then
+    $y = 0$, so $f(x, 0) = 2x^4$ which has a global minimum at $x = 0$.
+    This shows that for the restriction to any line passing though the origin,
+    we have a local minimum at the origin.
+\end{proof}
+
+\begin{prop}
+    The origin is not a local minimum of $f$.
+\end{prop}
+    First, we want to find the critical points of the $f$. We compute the
+    partial derivatives of $f$ and consider a system of equations in which they
+    are zero.
+    \begin{equation*}
+        \begin{cases}
+            \partial_x f(x, y) = 8x^3 - 6xy &= 0 \\
+            \partial_y f(x, y) = -3x^2 + 2y &= 0
+        \end{cases}
+    \end{equation*}
+    Solving this gives us that $(0, 0)$ is the only critical point. We compute
+    $f(0, 0) = 0$. If we solve $f(x, y) = 0$ we find that the function values
+    are zero when $y = x^2$ and $y = 2x^2$. If $y > 2x^2$, then $f(x, y) > 0$.
+    If $y < x^2$, then $f(x, y) > 0$. If $x^2 < y < 2x^2$, then $f(x, y) < 0$.
+    Since there is a region including $(0, 0)$ where function values become
+    more negative, the origin is not a local minimum; it is saddle point.
+\end{proof}
 \end{document}
