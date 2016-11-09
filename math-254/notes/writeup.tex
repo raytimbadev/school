@@ -1,0 +1,408 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington}
+\title{Notes\\Honours analysis 1 -- MATH 254}
+\date{}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+
+\newtheorem{prop}{Proposition}
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}{Lemma}
+\newtheorem{defn}{Definition}
+\newtheorem{axm}{Axiom}
+\newtheorem{rem}{Remark}
+
+\newcommand{\makebb}[1]{
+  \expandafter\newcommand\csname #1\endcsname{\mathbb{#1}}
+}
+\makebb{R}
+\makebb{N}
+
+\newcommand{\union}{\cup}
+\newcommand{\Union}{\bigcup}
+\newcommand{\intersn}{\cap}
+\newcommand{\Intersn}{\bigcap}
+
+\begin{document}
+
+\maketitle
+
+\section{Properties of real numbers}
+
+\subsection{Supremum and infimum}
+
+\begin{axm}
+  The set of real numbers $\R$ is a complete ordered field.
+\end{axm}
+
+We already know $\R$ is an ordered field (which we saw as the definition of
+$\R$). Completeness is also taken to be an axiom in this course. Concretely,
+what this means is that for any set $A \subset \R$ that is bounded above, there
+exists a \emph{supremum} $\sup A = u$ that is the least upper bound of $A$,
+i.e. for any upper bound $M$ of $A$, $u \leq M$.
+
+\begin{rem}
+  Suppose that $u = \sup A$ exists for an arbitrary set $A$. By definition, $u$
+  is an upper bound of $A$, so $A$ is bounded above. This is the converse
+  property of the completeness axiom.
+\end{rem}
+
+\begin{thm}
+  For any set $A \subset \R$ that is bounded below, there exists a greatest
+  lower bound $u \in \R$ of $A$, i.e. for any lower bound $M$ of $A$, $M \leq
+  u$.
+  \label{thm:exists-infimum}
+\end{thm}
+
+\begin{proof}
+  For any set $A \subseteq \R$, define $-A = \{ -x | x \in A \}$. Let $M$ be a
+  lower bound of $A$. Then $M$ is an upper bound of $-A$. Hence, $-A$ is
+  bounded above, and by the completeness of $\R$, there exists $\sup(-A)$ which
+  is its least upper bound. Let $u = \sup(-A)$.
+
+  Take $y \in -A$. Then by definition, $y = -x$ for some $x \in A$. By
+  definition of the supremum, $u > y = -x$, so $-u < x$. Since $x$ is
+  arbitrary, we have that $-u$ is a lower bound of $A$.
+
+  Suppose there is a lower bound $v$ of $A$ such that $v > -u$. Then for any
+  $x \in A$, $v < x$ and $u < x$. $-v$ is an upper bound of $-A$ by reasoning
+  just like above. But then $-v < u$ is an upper bound of $-A$, which
+  contradicts the definition $u = \sup(-A)$ as being the least upper bound on
+  $-A$.
+\end{proof}
+
+\begin{defn}[Infimum]
+  The greatest lower bound of a set $A$ that is bounded below is called the
+  \emph{infimum}, denoted $\inf A$.
+\end{defn}
+
+\begin{rem}
+  The infimum is guaranteed by theorem \ref{thm:exists-infimum}. Furthermore,
+  the proof of the theorem shows a useful relation between the infimum and the
+  supremum
+  \begin{equation}
+    \inf A = - \sup(-A)
+    \label{eq:inf-sup-neg}
+  \end{equation}
+\end{rem}
+
+\begin{defn}[Maximum]
+  Suppose $A \subseteq \R$ is a set of reals.
+  The \emph{maximum} of $A$, denoted $\max A$, is a maximal element of $A$ if
+  one exists, i.e. $M = \max A \in A$ is such that for all $x \in A$,
+  $x \leq M$.
+\end{defn}
+
+There is a connection between the maximal elements of a set of reals and the
+supremum of the set. Before exploring this, we will show that some sets of
+reals do not have a maximal element.
+
+\begin{prop}
+  The interval $A = [0, 1)$ does not have a maximal element.
+\end{prop}
+
+\begin{proof}
+  Suppose there exists a maximal element $M \in A$.
+  Consider $x = \frac{M + 1}{2}$.
+  Since $M < 1$, $M + 1 < 2$ so $x < 1$.
+  Obviously $x > 0$.
+  Hence $x \in A$.
+  But then, consider this derivation.
+  \begin{align*}
+    M &< 1 \\
+    2M &< M + 1 \\
+    M &< \frac{M + 1}{2}
+  \end{align*}
+  Hence, $M < x = \frac{M + 1}{2} < 1$, so there is an element in $A$ greater
+  than the maximal element $M$, which is a contradiction.
+\end{proof}
+
+Now that we know that some sets do not have maximal elements, we can explore
+the connection between the supremum and the maximum.
+
+\begin{thm}
+  A set of reals $A \subseteq \R$ has a maximal element if and only if
+  $\sup A \in A$.
+
+  If $\max A$ exists, then $\max A = \sup A$.
+\end{thm}
+
+\begin{proof}
+  Suppose $\sup A \in A$. Suppose further that $A$ has no maximum, i.e. that
+  given any element $x \in A$, there exists $y \in A$ such that $x < y$. Then
+  there exists in particular some $y \in A$ such that $\sup A < y$. This
+  contradicts the fact that $\sup A$ is an upper bound.
+
+  Suppose $\max A$ exists. By definition, $\max A \in A$ and
+  $\forall x \in A$, $x \leq \max A$. Hence, $\max A$ is an upper bound of $A$,
+  so $A$ is bounded above and the supremum exists by completeness. Next suppose
+  there exists $M \in A$ that is an upper bound for $A$ where $M < \max A$.
+  But this contradiction the definition of $\max A$ as the maximum.
+  Hence $\max A$ is the least upper bound of $A$, so $\max A = \sup A$.
+\end{proof}
+
+We can relate the infimum to the supremum in another way: they must respect a
+certain ordering. Intuitively, this idea is that the greatest lower bound must
+be less than or equal to the least upper bound.
+
+\begin{thm}
+  Suppose $A \subseteq \R$, and $\inf A$ and $\sup A$ exist.
+  Then,
+  \begin{enumerate}
+    \item $\inf A > \sup A$ implies that $A = \emptyset$.
+    \item $\inf A = \sup A$ if and only if $A$ is a singleton set.
+    \item $\inf A < \sup A$ if and only if $A$ contains at least two (distinct)
+      elements.
+  \end{enumerate}
+\end{thm}
+
+\begin{proof}
+  Suppose $\inf A > \sup A$.
+  By definition, $\forall x \in A: x \leq \sup A$
+  and $\forall x \in A: \inf A \leq x$.
+  Thus, for all $x \in A$, we have $x \leq \sup A < \inf A \leq x$ which means
+  $x < x$. Therefore, there must be no $x \in A$.
+
+  Suppose $\inf A = \sup A$.
+  By definition, $\forall x \in A: x \leq \sup A$
+  and $\forall x \in A: \inf A \leq x$.
+  Taking arbitrary $x \in A$, we establish
+  \begin{equation*}
+    \sup A = \inf A \leq x \leq \sup A = \inf A
+  \end{equation*}
+  so $x = \sup A = \inf A$. Since $x$ is arbitrary, we generalize that
+  $\forall x \in A: x = \sup A = \inf A$, so
+  $A = \{x = \sup A = \inf A\}$ is a singleton set.
+
+  Suppose $A = \{x\}$ is a singleton set. Then
+  $x = \sup A \geq y \forall y \in A$, by exhaustively checking this property
+  for all one elements of $A$. The same goes for concluding that $\inf A = x$.
+  Hence, by transitivity of equality, $\inf A = \sup A$.
+
+  Suppose $A$ contains two distinct elements $x, y$. Assume without loss of
+  generality that $x < y$. Then, $\inf A \leq x < y \leq \sup A$, so by
+  transitivity, $\inf A < \sup A$.
+
+  Suppose $\inf A < \sup A$. Suppose that $A$ does not have two distinct
+  elements. Two cases arise.
+  \begin{itemize}
+    \item $A$ is a singleton, in which case $\inf A = \sup A$ is a
+      contradiction.
+    \item $A$ is the empty set. Then it is vacuously bounded above and below by
+      any number, so $\inf A$ and $\sup A$ also have arbitrary values, and we
+      can select them so that $\sup A < \inf A$, which is also a contradiction.
+  \end{itemize}
+\end{proof}
+
+\begin{prop}
+  If $A, B \subseteq \R$ have suprema, then
+  \begin{equation*}
+    A \subseteq B \implies \sup A \leq \sup B
+  \end{equation*}
+  \label{prop:subset-sup-leq}
+\end{prop}
+
+\begin{proof}
+  Suppose $\sup B < \sup A$.
+  Since $A \subseteq B$, then $\forall x: x \in A \implies x \in B$.
+  By definition, $\forall x \in B: x \leq \sup B$.
+  Then, $\forall x \in A: x \leq \sup B < \sup A$.
+  So $\sup B$ is an upper bound of $A$, and is strictly less than $\sup A$.
+  This contradicts that $\sup A$ is the least upper bound on $A$.
+\end{proof}
+
+\begin{prop}
+  If $A, B \subseteq \R$ have suprema,
+  then $\sup{A \union B} = \max\{\sup A, \sup B\}$
+  exists.
+\end{prop}
+
+\begin{proof}
+  Let $M = \max \{ \sup A, \sup B \}$.
+  By definition, $\sup A \leq M$
+  and $\sup B \leq M$.
+  Take arbitrary $x \in A \union B$.
+  \begin{description}
+    \item[Case] $x \in A$.
+      Then $x \leq \sup A$ by definition of the supremum,
+      and $\sup A \leq M$ by definition of $M$,
+      so $x \leq M$ by transitivity.
+    \item[Case] $x \in B$. Then $x \leq M$ by the same reasoning.
+  \end{description}
+  Hence $M$ is an upper bound of $A \union B$.
+
+  Suppose there exists an upper bound $u < M$ of $A \union B$.
+  \begin{description}
+    \item[Case] $M = \sup A$, so $u < \sup A$.
+      Since $\forall x: x \in A \implies x \in A \union B$,
+      we have that $\forall x \in A: x \leq u$, which contradicts that $\sup A$
+      is the supremum of $A$.
+      So this case is impossible.
+    \item[Case] $M = \sup B$. Same reasoning, so this case is also impossible.
+  \end{description}
+
+  Therefore, $M = \max \{ \sup A, \sup B \} = \sup A \union B$ is the least
+  upper bound of $A \union B$.
+\end{proof}
+
+The argument of this proof naturally lends itself to induction, but we have the
+additional caveat that the union of the family of bounded sets must also be
+bounded.  Obviously, a countable union of bounded sets is not always bounded:
+consider the union $\Union_{n=0}^\infty [0-n, n+1]$. This union is equal to
+$\R$, which is unbounded.
+
+\begin{lem}
+  Suppose $A \subseteq B \subseteq \R$, and $B$ is bounded. Then $A$ is
+  bounded.
+\end{lem}
+
+\begin{proof}
+  Since $B$ is bounded, there exist $L, U \in \R$ such that
+  $\forall y \in B: L \leq y \leq U$.
+  Take arbitrary $x \in A$.
+  By assumption, $\forall y: y \in A \implies y \in B$, so $x \in B$.
+  Hence $L \leq x \leq U$.
+  This shows $\exists L, U \in \R: \forall x \in A: L \leq x \leq U$,
+  so $A$ is bounded.
+\end{proof}
+
+Let $L_X, U_X \in \R$ represent lower and upper bounds of a bounded set $X$.
+
+\begin{lem}
+  Suppose $A, B \subseteq \R$ are bounded,
+  then $A \intersn B$ is bounded and
+  \begin{align*}
+    L_{A \intersn B} &= \max\{L_A, L_B\} \\
+    U_{A \intersn B} &= \min\{U_A, U_B\}
+  \end{align*}
+\end{lem}
+
+\begin{proof}
+  Since $A \intersn B \subseteq A$ and $A \intersn B \subseteq B$,
+  then by applying the previous lemma twice, we have that for any
+  $x \in A \intersn B$,
+  \begin{align*}
+    L_A \leq &x \leq U_A \\
+    L_B \leq &x \leq U_A
+  \end{align*}
+  Let $M_L = \max \{ L_A, L_B \}$ and $M_U = \min \{ U_A, U_B \}$.
+  Then we have $\forall x \in A \intersn B: M_L \leq x \leq M_U$, so the
+  intersection is bounded, and the lower and upper bounds are the maximum and
+  minimum of the intersected sets.
+  Notice that this reasoning applies even if $A \intersn B$ is empty, in that
+  case it is trivially bounded by any values.
+\end{proof}
+
+This lemma can in fact be considered two lemmas: one for sets that are bounded
+above and one for sets that are bounded below. We will consider it as such.
+
+\begin{prop}
+  If $A, B \subseteq \R$ have suprema and if $A \intersn B$ is nonempty,
+  then $\sup \{ A \intersn B \} \leq \min \{ \sup A, \sup B \}$.
+\end{prop}
+
+\begin{proof}
+  By the previous lemma, be get that
+  $\min \{ U_A, U_B \}$ is an upper bound of $A \intersn B$.
+  Since suprema are upper bounds, we specialize the lemma to obtain that
+  $\min \{ \sup A, \sup B \}$ is an upper bound of $A \intersn B$.
+  Since $A \intersn B$ is bounded, by the lemma, its supremum must exist by
+  completeness of $\R$.
+  Since the supremum is the least upper bound, we have that
+  \begin{equation*}
+    \sup \{ A \intersn B \} \leq \min \{ \sup A, \sup B \}
+  \end{equation*}
+\end{proof}
+
+\begin{prop}
+  Suppose $A, B \subseteq \R$ are nonempty sets of reals. (We have no
+  boundedness assumptions on $A$ and $B$.)
+  If $\forall a \in A \forall b \in B: a \leq b$,
+  then $\sup A$ and $\inf B$ exist and $\sup A \leq \inf B$.
+\end{prop}
+
+\begin{proof}
+  Since $A, B$ are nonempty choose some $a \in A$ and $b \in B$ arbitrarily.
+  By assumption, $\forall b \in B: a \leq b$, so $a$ is a lower bound of $B$.
+  Similarly, $\forall a \in A: b \leq a$, so $b$ is an upper bound of $A$.
+  Then by completeness, $\sup A$ and $\inf B$ must exist.
+  Since $a$ is a lower bound of $B$, then by the definition of the infimum,
+  $a \leq \inf B$.
+  But then since $a$ is arbitrary, we have that
+  $\forall a \in A:a \leq \inf B$ is an upper bound of $A$.
+  By the definition of the supremum, we deduce that $\sup A \leq \inf B$.
+\end{proof}
+
+Now we can examine the notion of suprema and infima of functions.
+
+\begin{defn}
+  Let $A \subseteq X \subseteq \R$.
+  We say that $f : X \to \R$ is \emph{bounded on $A$} if the image of $A$ under
+  $f$ is bounded.
+
+  We we simply say $f$ is bounded, then it is understood that we mean that it
+  is bounded \emph{on its domain}.
+\end{defn}
+
+This definition is just like the earlier lemma: it is really two definitions,
+one for \emph{bounded above} and one for \emph{bounded below}.
+
+\begin{defn}
+  The supremum of a function $f : X \to \R$ (on $A$), denoted $\sup_A f$ is
+  \begin{equation*}
+    \sup_A f = \sup f(A)
+  \end{equation*}
+
+  Again, omitting $A$ is to be understood as taking the supremum of the image
+  of $f$.
+\end{defn}
+
+\begin{prop}
+  Suppose $\sup f$ exists. Then $\sup f|_{X^\prime \subseteq X} \leq \sup f$.
+\end{prop}
+
+\begin{proof}
+  For any $f : X \to \R$ and any $A \subseteq X$, if $A^\prime \subseteq A$,
+  then $f(A^\prime) \subseteq f(A)$. This follows easily from functional
+  dependency.
+  The proof is complete by invoking proposition \ref{prop:subset-sup-leq}.
+\end{proof}
+
+\section{Dense and open sets}
+
+\begin{defn}[Open set]
+  A subset $U \subseteq \R$ is \emph{open} if
+  \begin{equation*}
+    \forall a \in U: \exists r \in \R: (a - r, a + r) \subseteq U
+  \end{equation*}
+\end{defn}
+
+\begin{defn}[Dense set]
+  A subset $U \subseteq \R$ is \emph{dense} in $\R$ if for any $x, y \in \R$,
+  if $x < y$, then
+  \begin{equation*}
+    \exists a \in U: x < a < y
+  \end{equation*}
+\end{defn}
+
+\begin{prop}
+  Suppose $U \subseteq \R$ is dense. Then $U$ is nonempty.
+\end{prop}
+
+\begin{proof}
+  Take arbitrary reals $x, y$. Then by density $\exists a \in U$ such that
+  $x < a < y$, so $U$ is nonempty.
+\end{proof}
+
+\begin{prop}
+  Suppose $\exists x, y \in R: x < y$ and $U \subseteq \R$ is open and dense.
+  Then, $\exists x^\prime, y^\prime \in \R$ such that if $x^\prime < y^\prime$,
+  then
+  \begin{equation*}
+    [x^\prime, y^\prime] \subseteq U \intersn (x, y)
+  \end{equation*}
+\end{prop}
+
+\end{document}
