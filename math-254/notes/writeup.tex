@@ -388,21 +388,90 @@ one for \emph{bounded above} and one for \emph{bounded below}.
 \end{defn}
 
 \begin{prop}
-  Suppose $U \subseteq \R$ is dense. Then $U$ is nonempty.
+  Suppose $U \subseteq \R$ is dense.
+  Then $U$ is nonempty and if $U \subseteq V \subseteq \R$ then $V$ is dense.
 \end{prop}
 
 \begin{proof}
   Take arbitrary reals $x, y$. Then by density $\exists a \in U$ such that
   $x < a < y$, so $U$ is nonempty.
+
+  Suppose $U \subseteq V \subseteq \R$.
+  Take arbitrary $x, y \in \R$.
+  Since $U$ is dense, then $\exists a \in U: x < a < y$.
+  Since $U \subseteq V$, $a \in U \implies a \in V$.
+  Therefore, $\exists a \in V: x < a < y$.
+  By definition, $V$ is dense.
 \end{proof}
 
-\begin{prop}
+\begin{lem}
   Suppose $\exists x, y \in R: x < y$ and $U \subseteq \R$ is open and dense.
   Then, $\exists x^\prime, y^\prime \in \R$ such that if $x^\prime < y^\prime$,
   then
   \begin{equation*}
     [x^\prime, y^\prime] \subseteq U \intersn (x, y)
   \end{equation*}
+  \label{lem:open-dense-interval}
+\end{lem}
+
+\begin{proof}
+  Since $U$ is dense, $\exists z \in U: x < z < y$.
+  Since $U$ is open, $\exists r \in \R: (z-r, z+r) \subseteq U$.
+  Since $U$ is dense, there exist reals $x^\prime$ and $y^\prime$
+  such that $\max \{z-r, x\} < x^\prime < z$
+  and $z < y^\prime < \max \{r, z+r\}$.
+  Since $z - r < x^\prime$ and $y^\prime < z + r$,
+  $[x^\prime, y^\prime] \subseteq (z - r, z + r) \subseteq U$.
+  Since $\max \{z - r, x\} < x^\prime$, $x < x^\prime$.
+  Similarly, $y^\prime > y$. Hence $[x^\prime, y^\prime] \subseteq (x, y)$.
+  Therefore, $[x^\prime, y^\prime] \subseteq U \intersn (x, y)$.
+\end{proof}
+
+\begin{prop}
+  Suppose $x_0, y_0 \in \R$ such that $x_0 < y_0$, and
+  $\forall n \in \N: \exists U_n \subseteq \R$ such that $U_n$ is open and
+  dense.
+  Then,
+  \begin{equation*}
+    \forall n \in \N: \exists x_{n+1}, y_{n+1} \in \R:
+    [x_{n+1}, y_{n+1}] \subseteq U_n \intersn (x_n, y_n)
+  \end{equation*}
 \end{prop}
+
+\begin{proof}
+  By induction.
+  \begin{description}
+    \item[Base case.]
+      We have that $U_0$ is open and dense.
+      Then by lemma
+      \ref{lem:open-dense-interval}
+      that $\exists x^\prime, y^\prime : x^\prime < y^\prime$
+      and
+      \begin{equation*}
+        [x^\prime, y^\prime] \subseteq U_1 \intersn (x_0, y_0)
+      \end{equation*}
+      Taking $x_1 = x^\prime$ and $y_1 = y^\prime$ completes the base case.
+
+    \item[Step case.]
+      The induction hypothesis is
+      \begin{equation*}
+        \exists x_n, y_n \in \R: x_n < y_n
+        \land
+        \exists x_{n+1}, y_{n+1} \in \R: x_{n+1} < y_{n+1}
+        \land
+        [x_{n+1}, y_{n+1}] \subseteq U_n \intersn (x_n, y_n)
+      \end{equation*}
+
+      Applying lemma \ref{lem:open-dense-interval} for $x_{n+1}$, $y_{n+1}$,
+      and $U_{n+1}$ (which is dense and open by assumption) gives us
+      \begin{equation*}
+        \exists x^\prime, y^\prime \in \R: x^\prime < y^\prime
+        \land
+        [x^\prime, y^\prime] \subseteq U_{n+1} \intersn (x_{n+1}, y_{n+1})
+      \end{equation*}
+      Taking $x_{n+2} = x^\prime$ and $y_{n+2} = y^\prime$ completes the step
+      case.
+  \end{description}
+\end{proof}
 
 \end{document}
