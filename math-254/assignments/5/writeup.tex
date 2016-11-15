@@ -1,0 +1,338 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#5\\Honours analysis 1 -- MATH 254}
+\date{17 November 2016}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{cases}
+
+\newcommand{\makebb}[1]{
+    \expandafter\newcommand\csname #1\endcsname{\mathbb{#1}}
+}
+
+\makebb{N}
+\makebb{Q}
+\makebb{R}
+\makebb{Z}
+
+\newcommand{\floor}[1]{\left\lfloor#1\right\rfloor}
+\newcommand{\parens}[1]{\left(#1\right)}
+\newcommand{\abs}[1]{\left|#1\right|}
+\newcommand{\intersn}{\cap}
+\newcommand{\union}{\cup}
+\newcommand{\half}{\frac{1}{2}}
+\newcommand{\quarter}{\frac{1}{4}}
+
+\newtheorem{prop}{Proposition}
+
+\begin{document}
+
+\maketitle
+
+\section*{\#6 -- Continuity}
+
+\begin{prop}
+    The function $f : \R \to \R$ defined by
+    \begin{equation*}
+        f(x) = \floor{x} + \sqrt{x - \floor{x}}
+    \end{equation*}
+\end{prop}
+
+\begin{proof}
+    Note that $\floor{x}$ is continuous everywhere except for $x \in \Z$ due to
+    the jump in the function value, i.e. the limit from the left is not equal
+    to the limit from the right.
+    A similar reasoning applies to $\sqrt{x - \floor{x}}$ the function is
+    continuous everywhere except for integers: the limit from the left as $x$
+    approches an integer is $1$, but the limit from the right is $0$.
+    Therefore, it suffices to show that $f$ is continuous when $x$ is an
+    integer, as everywhere else $f$ is a sum/composition of continuous
+    functions.
+
+    Suppose $x$ is an integer, and consider
+    \begin{equation*}
+        \lim_{x^* \to x^-}\parens{\floor{x^*} + \sqrt{x^* - \floor{x^*}}}
+    \end{equation*}
+    Notice that we can consider a sequence that defines this limit such that
+    all its terms are between $x - 1$ and $x$. Consequently, we can
+    evaluate $\floor{x^*}$ to $x - 1$ in the limit.
+    \begin{equation*}
+        \lim_{x^* \to x^-}\parens{x^* - 1 + \sqrt{x^* - x + 1}}
+        = x - 1 + 1
+        = x
+    \end{equation*}
+    Next, consider
+    \begin{equation*}
+        \lim_{x^* \to x^+}\parens{\floor{x^*} + \sqrt{x^* - \floor{x^*}}}
+    \end{equation*}
+    Again, we can consider an underlying sequence consisting only of terms
+    between $x$ and $x + 1$, allowing us to evaluate $\floor{x^*}$ to $x$ in
+    the limit.
+    \begin{equation*}
+        \lim_{x^* \to x^-}\parens{x + \sqrt{x^* - x}}
+        = x + 0
+        = x
+    \end{equation*}
+    This shows that the left limit is equal to the right limit for any integer
+    $x$. Therefore, the limit of the function exists for all integers $x$.
+
+    Next, we must check that the function value is equal to the limit value for
+    all integers $x$.
+    Suppose again that $x \in \Z$. Then $\floor{x} = x$, so
+    \begin{equation*}
+        f(x)
+        = \floor{x} + \sqrt{x - \floor{x}}
+        = x + 0 = x
+    \end{equation*}
+    which is equal to the limit value.
+
+    Therefore, $f$ is continuous everywhere.
+\end{proof}
+
+\section*{\#7 -- Bijiective function that is continuous nowhere}
+
+Consider the function $f : [0, 1] \to [0, 1]$ defined by
+\begin{numcases}{f(x) = }
+    x & if $x \in \Q \intersn (0, 1] \setminus \{\half\}$ \label{eq:f-1} \\
+    1 - x & if $x \in (0, 1) \setminus \Q$ \label{eq:f-2} \\
+    0 & if $x = \half$ \label{eq:f-3} \\
+    \half & if $x = 0$ \label{eq:f-4}
+\end{numcases}
+
+\begin{prop}
+    The function $f$ is bijective, but continuous nowhere on its domain.
+\end{prop}
+
+\begin{proof}
+    First we will show bijectivity. To do so, we will examine every point $y$
+    in the codomain, and show that there exists a unique element in the domain
+    that maps to $y$. This will establish both injectivity and surjectivity in
+    one shot: since every element in the codomain is mapped to by some element
+    in the domain, $f$ will be surjective; and since that element mapping to
+    $y$ is \emph{unique}, $f$ will be injective.
+
+    \begin{description}
+        \item[Case] $y = 0$.
+            Consider the preimage of $\{0\}$ under $f$, $A = f^{-1}(\{0\})$.
+            The elements of $A$ must match one of the cases in $f$. Notice that
+            $A$ is nonempty because $0 \in A$.
+            Take arbitrary $x \in A$. We will now proceed to dispel every
+            equation besides \eqref{eq:f-3}, i.e. $x = \half$.
+            \begin{description}
+                \item[Case] $y = x \in \Q \intersn (0, 1] \setminus \{\half\}$,
+                    but $0 \notin (0, 1]$, so this is a contradiction.
+                \item[Case] $1 - x = y$, so $x = 1 - y$, but since $y = 0$,
+                    then $x = 1$. Since $x \notin (0, 1) \setminus \Q$, this
+                    case is impossible.
+                \item[Case] $y = 0$, then $x = \half$.
+                \item[Case] $y = 0 = \half$ is a contradiction, so this case is
+                    impossible.
+            \end{description}
+            Since $x$ is arbitrary, we conclude $\forall x \in A: x = \half$.
+            Since $A$ is nonempty, this establishes that $A$ is a singleton.
+            Therefore, there is a unique element in the domain of $f$ that maps
+            to $0$
+
+        \item[Case] $y = \half$.
+            The reasoning in this case is practically the same as for the only
+            constant case. Rather than give a detailed case analysis, we will
+            instead briefly give an overview of the analysis. The preimage is
+            nonempty due to \eqref{eq:f-4}. Case \eqref{eq:f-3} is impossible
+            because $0 \neq \half$. Case \eqref{eq:f-2} is impossible because
+            $x = \half \notin (0, 1) \setminus \Q$. Case \eqref{eq:f-1} is
+            impossible because
+            $\half \notin \Q \intersn (0, 1] \setminus \{\half\}$.
+
+            Therefore we conclude that $\forall x \in A: x = 0$, and thus that
+            $A$ is a singleton, so there is a unique element in the domain of
+            $f$ that maps to $\half$.
+
+        \item[Case] $y \in [0, 1] \setminus \{0, \half\}$.
+            Notice that equations \eqref{eq:f-3} and \eqref{eq:f-4} are
+            impossible because $y \neq 0$ and $y \neq \half$.
+
+            We further split this case according to whether $y \in \Q$.
+            \begin{description}
+                \item[Case] $y \in \Q$.
+                    Consider the preimage under $f$,
+                    $A = f^{-1}(\{y\})$.
+                    Note that $A$ is nonempty because choosing $x = y$ gives
+                    $x$ matching the requirement for \eqref{eq:f-1}.
+                    Take arbitrary $x \in A$.
+                    \begin{description}
+                        \item[Case] \eqref{eq:f-1} i.e. $y = x$.
+                            Since $x = y$, we can infer from
+                            $y \in \Q \intersn (0, 1] \setminus \{\half\}$
+                            that
+                            $x \in \Q \intersn (0, 1] \setminus \{\half\}$.
+
+                        \item[Case] \eqref{eq:f-2} i.e. $y = 1 - x$, so
+                            $x = 1 - y$. Since $y \in \Q$, then $x \in Q$ by
+                            the closure properties of $\Q$.
+                            But this is a contradiction, since for
+                            \eqref{eq:f-2}, we must have
+                            $x \in (0, 1) \setminus \Q$, so this case is
+                            impossible.
+                    \end{description}
+                    Therefore, we can conclude that $\forall x \in A: x = y$,
+                    which establishes that $A$ is a singleton, so there is a
+                    unique element mapped to $y$.
+                \item[Case] $y \notin \Q$.
+                    The argument is the same as in the previous case, so we
+                    will not go into as much detail.
+                    This time, case \eqref{eq:f-3} is impossible and
+                    case \eqref{eq:f-4} is possible. We will establish that the
+                    preimage of $y$ is nonempty, and that all its elements are
+                    equal to $1 - y$, so it is a singleton. Hence there is a
+                    unique element mapping to $y$.
+            \end{description}
+    \end{description}
+
+    This establishes that $f$ is injective and surjective and thus, bijective.
+
+    Next, we will show that $f$ is continuous nowhere on its domain, i.e.
+    \begin{equation*}
+        \forall x \in [0, 1]:
+        \exists \epsilon > 0:
+        \forall \delta > 0:
+        \exists x^* \in [0, 1]:
+        \abs{x - x^*} < \delta \land \abs{f(x) - f(x^*)} \geq \epsilon
+    \end{equation*}
+
+    Take arbitrary $x \in [0,1]$.
+    \begin{description}
+        \item[Case] $x = 0$.
+            Then $f(x) = \half$.
+            Choose $\epsilon = \quarter$.
+            Take arbitrary $\delta > 0$.
+            \begin{description}
+                \item[Case] $\delta > \quarter$.
+                    Then choose $0 < x^* < \quarter < \delta$
+                    such that $x^* \in \Q$.
+                    Notice $x^* \in \Q \intersn (0, 1] \setminus \{\half\}$.
+                    So $0 < f(x^*) = x^* < \quarter < \delta$.
+
+                    Our goal is to show
+                    \begin{equation*}
+                        \abs{x - x^*} < \delta
+                        \land \abs{f(x) - f(x^*)} \geq \epsilon
+                    \end{equation*}
+                    Substituting known values gives us a refined goal
+                    \begin{equation*}
+                        \abs{x^*} < \delta
+                        \land
+                        \abs{\half - x^*} \geq \quarter
+                    \end{equation*}
+                    Since $0 < x^* < \quarter < \delta$, we only have to know
+                    $\abs{\half - x^*} \geq \quarter$.
+                    Here is our deduction.
+                    \begin{align*}
+                        x^* < \quarter \\
+                        -x^* > \quarter \\
+                        \half - x^* > \half + \quarter > \quarter = \epsilon
+                    \end{align*}
+                    So $\abs{\half - x^*} > \epsilon$ as required.
+
+                \item[Case] $\delta < \quarter$.
+                    Choose $0 < x^* < \delta < \quarter$
+                    such that $x^* \in \R \setminus \Q$.
+                    Hence $x^* \in (0, 1) \setminus \Q$,
+                    so $f(x^*) = 1 - x^*$.
+                    By definition, $|x^*| < \delta$,
+                    so it remains only to show
+                    $\abs{\half - 1 + x^*} \geq \quarter$.
+                    Here is our deduction.
+                    \begin{align*}
+                        0 < x^* < \quarter \\
+                        -\quarter < x^* < 0 \\
+                        1 - \quarter < 1 - x^* < 1 \\
+                        -1 < x^* - 1 < \quarter - 1 \\
+                        \half - 1 < \half + x^* - 1 < \half + \quarter - 1 \\
+                        -\half < \half + x^* - 1 = \half - f(x^*) < -\quarter \\
+                        \epsilon = \quarter < f(x^*) - \half \\
+                        \epsilon = \quarter < \abs{\half - f(x^*)}
+                    \end{align*}
+                    So $\abs{\half - f(x^*)} > \epsilon$ as required.
+            \end{description}
+
+            This establishes that $f$ is not continuous at $x = 0$.
+
+        \item[Case] $0 < x < \half$.
+
+            Define the sequence $(x_n)_{n\in\N}$ by $x_1 = r$ where $r$ is
+            an arbitrary rational strictly between $0$ and $x$ and
+            $x_{n+1} = r_{n+1}$ where $r_n$ is an arbitrary rational strictly
+            between $x_n$ and $x$. This sequence's supremum is obviously $x$.
+            Notice that the sequence is bounded above and increasing, so it is
+            convergent, specifically to $x$.
+
+            Use a similar construction for $(y_n)_{n\in\N}$ consisting only of
+            irrationals, but always \emph{decreasing} towards $x$. Notice that
+            both $(y_n)$ and $(x_n)$ converge to $x$.
+
+            Consider the sequence $(f(x_n))_{n\in\N}$. Its terms are
+            applications of $f$ to rationals (other than $0$ and $\half$), so
+            we can evaluate $f$ to obtain that $f(x_n) = x_n$, so
+            \begin{equation*}
+                \lim_{n\to\infty} f(x_n) = x
+            \end{equation*}
+
+            Consider the sequence $(f(y_n))_{n\in\N}$. Its terms are
+            applications of $f$ to irrationals, so we can evaluate $f$ to
+            obtain that $f(y_n) = 1 - y_n$. Since the constant sequence $1$
+            converges, and the sequence $y_n$ converges, we obtain
+            \begin{equation*}
+                \lim_{n\to\infty} f(y_n) = 1 - x
+            \end{equation*}
+
+            However, this is a contradiction of the sequential criterion: the
+            limit of $f$ approching $x$ therefore does not exist, since we
+            found two sequences that when passed through the function produce
+            sequences that do not converge to the same value.
+
+        \item[Case] $\half < x < 1$.
+            The same reasoning as in the previous case applies, so we will not
+            repeat the argument. The reason we split the cases was to avoid the
+            possibility of the terms in the sequences being $\half$, which
+            trips up the very simple argument showing that the sequences
+            converge.
+
+        \item[Case] $x = \half$.
+            We will show that the limit of $f$ at $x = \half$ exists, and is
+            equal to $\half$.
+
+            First, let us study the limit on the left. Suppose we have a
+            convergent sequence $(x_n)$ such that
+            $\lim_{n\to\infty} x_n = \half$ and every $x_n < \half$. Take some
+            arbitrary term in the sequence $x_n$. It is either rational or
+            irrational, so $x_n \leq f(x_n) \leq 1 - x_n$
+            (since $x_n < \half$).
+            By the squeeze theorem, $\lim_{n\to\infty} f(x_n) = \half$, since
+            both $\lim_{n\to\infty} x_n = \half$
+            and $\lim_{n\to\infty} (1 - x_n) = \half$.
+
+            The same reasoning applies to the limit on the right, except that
+            the bounds for $f(x_n)$ will be $1 - x_n < f(x_n) < x_n$ since
+            $x_n > \half$.
+
+            Hence, $\lim_{x \to \half} f(x) = \half$. However, $f(\half) = 0$,
+            so $f$ is not continuous at $x = \half$.
+
+        \item[Case] $x = 1$.
+            We construct two convergent sequences $(x_n)$ and $(y_n)$, the
+            former consisting only of rationals and the latter consisting only
+            of irrationals. Both sequences are strictly increasing, and are
+            bounded by $1$. (We use the same construction again using repeated
+            uses of the density of both sets.)
+
+            Passing the sequences through $f$ will produce different limits,
+            namely $1$ and $0$, by the same argument again. This contradicts
+            the sequential criterion, so $f$ is not continuous at $1$ either.
+    \end{description}
+
+    Hence, $\forall x \in [0, 1]$, $f$ is not continuous.
+\end{proof}
+
+\end{document}
