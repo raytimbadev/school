@@ -28,3 +28,6 @@
 [submodule "comp-621/mclab-core"]
 	path = comp-621/mclab-core
 	url = https://github.com/Sable/mclab-core
+[submodule "comp-621/project/code"]
+	path = comp-621/project/code
+	url = git@github.com:tsani/mcfas.git
