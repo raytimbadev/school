@@ -1,0 +1,221 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington}
+\title{Assignment \#4\\Honours advanced calculus -- MATH 248}
+\date{22 November 2016}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+
+\newcommand{\makebb}[1]{
+  \expandafter\newcommand\csname #1\endcsname{\mathbb{#1}}
+}
+
+\makebb{N}
+\makebb{R}
+
+\newtheorem{prop}{Proposition}
+
+\newcommand{\union}{\cup}
+\newcommand{\intersn}{\cap}
+
+\begin{document}
+
+\maketitle
+
+\section{Open and closed sets}
+
+Let $A, B \subset \R^n$.
+
+\begin{prop}
+  Suppose $A, B$ are open sets. Then,
+  \begin{enumerate}
+    \item $A \union B$ is an open set.
+    \item $A \intersn B$ is an open set.
+  \end{enumerate}
+\end{prop}
+
+\begin{proof}
+  ~
+
+  \begin{enumerate}
+    \item
+      Take arbitrary $p \in A \union B$. Then $p \in A \lor p \in B$.
+      \begin{description}
+        \item[Case] $p \in A$.
+
+          Since $A$ is open, $\exists \delta > 0 : Q_\delta(p) \subseteq A$.
+          Since $A \subseteq A \union B$, $Q_\delta(p) \subseteq A \union B$ by
+          transitivity.
+
+        \item[Case] $p \in B$. The same argument applies, using instead the
+          openness of $B$.
+      \end{description}
+
+      Therefore,
+      \begin{equation*}
+        \forall p \in A \union B:
+        \exists \delta_p > 0:
+        Q_{\delta_p} \subseteq A \union B
+      \end{equation*}
+      so $A \union B$ is open.
+
+    \item
+      Take arbitrary $p \in A \intersn B$. Then $p \in A \land p \in B$. Since
+      both these sets are open,
+      \begin{align*}
+        \exists \delta_A > 0 : Q_{\delta_A}(p) &\subseteq A \\
+        \exists \delta_B > 0 : Q_{\delta_B}(p) &\subseteq B
+      \end{align*}
+      Let $\delta = \min\{\delta_A, \delta_B\}$. Then,
+      \begin{align*}
+        Q_\delta(p) &\subseteq Q_{\delta_A}(p) \subseteq A \\
+        Q_\delta(p) &\subseteq Q_{\delta_B}(p) \subseteq B
+      \end{align*}
+      so $Q_\delta(p) \subseteq A \intersn B$.
+
+      Therefore,
+      \begin{equation*}
+        \forall p \in A \union B:
+        \exists \delta_p > 0:
+        Q_{\delta_p} \subseteq A \intersn B
+      \end{equation*}
+      so $A \intersn B$ is open.
+  \end{enumerate}
+\end{proof}
+
+\begin{prop}
+  Suppose $A, B$ are closed sets. Then,
+  \begin{enumerate}
+    \item
+      $A \union B$ is closed.
+
+    \item
+      $A \intersn B$ is closed.
+  \end{enumerate}
+\end{prop}
+
+\begin{proof}
+  ~
+
+  \begin{enumerate}
+    \item
+      Take an arbitrary sequence $(x_n)_{n\in\N}$ in $\R^n$.
+      Suppose that $\forall n \in \N : x_n \in A \union B$,
+      and that $\lim_{n\to\infty} x_n = x \in \R^n$ exists.
+      We want to show that $x \in A \union B$.
+
+      Since $(x_n)$ is a convergent sequence, then all its subsequences are
+      convergent, and converge to the same limit. Therefore, consider the
+      subsequence $(x_{n_k})$ such that $\forall k \in \N : x_{n_k} \in A$.
+      Since $A$ is closed, it contains all its limit points, so
+      \begin{equation*}
+        \lim_{k\to\infty} x_{n_k} = x \in A
+      \end{equation*}
+      Since $A \subseteq A \union B$, $x \in A \implies x \in A \union B$.
+      Hence, for any convergent sequence with terms in $A \union B$ converges
+      to a value in $A \union B$, so $A \union B$ is closed.
+
+      (There is a slight problem with this argument as is: it requires that we
+      can construct the subsequence $(x_{n_k})$ consisting only of elements of
+      $A$. This is not necessarily possible; in the arbitrary sequence $(x_n)$
+      there might only be finitely many terms in $A$. In that case however,
+      there will be infinitely many terms in $B$, and we can just use the
+      variant of the argument where we show that the limit is in $B$ rather
+      than in $A$.)
+
+    \item
+      Take an arbitrary sequence $(x_n)_{n\in\N}$ in $\R^n$.
+      Suppose that $\forall n \in \N : x_n \in A \intersn B$,
+      and that $\lim_{n\to\infty} x_n = x \in \R^n$ exists.
+      We want to show that $x \in A \intersn B$.
+
+      Since $\forall n \in \N : x_n \in A \intersn B$,
+      $x_n \in A \land x_n \in B$. Since $A$ and $B$ are closed, they contain
+      they contain their limit points, so
+      \begin{align*}
+        \lim_{n\to\infty} x_n = x \in A \\
+        \lim_{n\to\infty} x_n = x \in B
+      \end{align*}
+      Hence, $x \in A \intersn B$.
+      Therefore, for any convergent sequence with terms in $A \intersn B$
+      converges to a limit in $A \intersn B$, so $A \intersn B$ is closed.
+  \end{enumerate}
+\end{proof}
+
+\begin{prop}
+  Suppose $\Omega \subseteq \R^n$ is an open set and $\phi : \Omega \to \R$ is
+  a continuous function. Then, $U = \{ x \in \Omega : \phi(x) > 0\}$ is an open
+  set.
+\end{prop}
+
+\begin{proof}
+  Since $\Omega$ is open,
+  \begin{equation*}
+    \forall \omega \in \Omega : \exists \delta_\omega > 0 :
+    Q_{\delta_\omega}(\omega) \subseteq \Omega
+  \end{equation*}
+  Since $\phi$ is continuous on its domain,
+  \begin{equation*}
+    \forall x \in \Omega :
+    \forall \epsilon > 0 :
+    \exists \delta_\epsilon > 0:
+    \forall x^* \in \Omega :
+    x^* \in Q_{\delta_\epsilon}(x) \implies \phi(x^*) \in Q_\epsilon(\phi(x))
+  \end{equation*}
+
+  Take arbitrary $u \in U$.
+  Then $\phi(u) > 0$ by definition,
+  and $\exists \delta_u > 0 : Q_{\delta_u}(u) \subseteq \Omega$ because
+  $u \in U \subseteq \Omega$ and $\Omega$ is open.
+  We want to find $\delta_u^\prime > 0$ such that
+  $Q_{\delta_u^\prime}(u) \subseteq U$.
+
+  Let $\epsilon = \phi(u)$.
+  By continuity of $\phi$,
+  \begin{equation*}
+    \exists \delta_\epsilon > 0 :
+    \forall x^* \in U :
+    x^* \in Q_{\delta_\epsilon}(u) \implies \phi(x^*) \in Q_\epsilon(\phi(u))
+  \end{equation*}
+
+  Consider $Q_{\delta_\epsilon}(u)$. Every point in it is such that when mapped
+  by $\phi$ gives a value in $Q_\epsilon(\phi(u))$. This cube is the open
+  interval with half-length $\epsilon = \phi(u)$, centered at $\phi(u)$, i.e.
+  $(0, 2\phi(u))$. All points in this interval are greater than zero.
+  Therefore, $Q_{\delta_\epsilon}(u) \subseteq U$,
+  for any point $u \in U$, we can find a nonempty open cube centered at
+  that point that is contained in $U$. Therefore, $U$ is an open set.
+\end{proof}
+
+\begin{prop}
+  Suppose $C \subseteq \R^n$ is a closed set, and $\phi : C \to \R$ is a
+  continuous function. Then, $K = \{ x \in C : \phi(x) \geq 0 \}$ is a closed
+  set.
+\end{prop}
+
+\begin{proof}
+  Take an arbitrary sequence $(x_n)_{n\in\N}$. Suppose that
+  $\forall n \in N : x_n \in K$ and that $\lim_{n\to\infty} x_n = x$ exists.
+  We want to show that $x \in K$, i.e. $\phi(x) \geq 0$.
+
+  By the sequential criterion, we know that the sequence $(\phi(x_n))_{n\in\N}$
+  is convergent, and that its limit is $\phi(x)$.
+
+  Suppose that $\phi(x) < 0$. By the definition of convergence of a sequence,
+  \begin{equation*}
+    \forall \epsilon > 0 : \exists N_\epsilon : \forall n > N_\epsilon :
+    \phi(x_n) \in Q_\epsilon(\phi(x))
+  \end{equation*}
+  we know that for any choice of size for a ``box'' around $\phi(x)$, there is
+  a threshold beyond which all subsequent terms in the sequence $(\phi(x_n))$
+  are inside that box. Since this is a one-dimensional box, it is simply an
+  open interval. Instatiating $\epsilon$ with $\phi(x)$ gives us in particular
+  that beyond some threshold, all subsequent $\phi(x_n)$ are in the interval
+  $(-2\phi(x), 0)$, and therefore that they are negative. But each $x_n \in K$
+  means that $\phi(x_n) \geq 0$, so this is a contradiction.
+
+  Therefore, $\phi(x) \geq 0$, so $x \in K$.
+\end{proof}
+
+\end{document}
