@@ -1,0 +1,151 @@
+\documentclass[letterpaper,11pt]{article}
+
+\newcommand{\mcfas}{\textsc{McFAS}}
+\newcommand{\matlab}{\textsc{Matlab}}
+\newcommand{\oatlab}{\textsc{Oatlab}}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{\mcfas{} -- Milestone \#1}
+\date{15 November 2015}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{listings}
+\usepackage{hyperref}
+
+\newcommand{\codesnip}{\texttt}
+
+\begin{document}
+
+\maketitle
+
+\section{Current state of \mcfas{}}
+
+We spent quite some time designing \oatlab{}, the language that \mcfas{}
+operates on. We based ourselves on the simple \matlab{}-like language given in
+assignment \#1, but we augmented it in some ways.
+
+\begin{itemize}
+  \item
+    Whereas the language in assignment \#1 is merely a sequence of statements,
+    an \oatlab{} program consists of a sequence of top-level function
+    declarations. Program execution begins at the distinguished function whose
+    name matches the name of the file (as in \matlab{}).
+
+  \item
+    Unlike \matlab{}, \oatlab{} does not have a module system; the entire
+    program must be contained within a single file.
+
+  \item
+    Rather than hardcode some interesting functions into the grammar as in
+    assignment \#1, we instead support true function calls as expressions. A
+    hypothetical \oatlab{} interpreter would have a number of builtin functions
+    such as \codesnip{write} or \codesnip{print}.
+
+  \item
+    Unlike in assignment \#1 but like in \matlab{}, \oatlab{} has a notion of
+    ranges. Furthermore, \oatlab{} has both \codesnip{while}-loops and
+    \codesnip{for}-loops.
+\end{itemize}
+
+Rather than give a detailed EBNF grammar here, we refer the reader to the
+definition of the syntax tree in our code
+\footnote{\url{https://github.com/tsani/mcfas/blob/bfa460884a54d79baef3262a0a11bc89ff162180/mcfas-backend/Language/Oatlab/Syntax.hs\#L25}}.
+
+As discussed in the proposal, we are expressing the syntax tree as a signature.
+However, we are doing something slightly more advanced than taking a functor
+fixed point to recover the type of syntax trees. The reason is that in a more
+complex language, in which for example there is a distinction between
+statements and expressions, we cannot use the same datatype to represent both.
+(In principle, one \emph{can} use the same datatype for everything, but this
+opens up the possibility of putting statements as the operands of expressions.
+Why bother using a strongly-typed language if that could happen?)
+If we represent the syntax tree using multiple datatypes, how can we extract
+the signature of the family of datatypes? A 2009 paper presented
+at ICFP dicusses this problem in much more detail, and identifies a solution to
+it\footnote{
+  Alexey Rodriguez, Stefan Holdermans, Andres Löh, Johan Jeuring. Generic
+  programming with fixed points for mutually recursive datatypes. ICFP 2009.
+}.
+
+We recreate a part of the scheme developed in the paper, using more modern
+features available in GHC. (The compiler has changed quite a bit since 2009.)
+In essence, we develop a theory of \emph{higher-order} functors, $F$-algebras,
+and folds. This allows us to represent \oatlab{} syntax trees as a higher-order
+fixed points of a higher-order functor.
+
+Our framework will heavily make use of the notion of \emph{annotations} on
+parts of the syntax tree. In Goto, an annotation scheme was developed that
+operates on simple functors
+\footnote{\url{https://github.com/tsani/goto/blob/master/libgoto/Language/Common/Annotation.hs\#L33}};
+we have now extended it to operate on higher-order functors
+\footnote{\url{https://github.com/tsani/mcfas/blob/bfa460884a54d79baef3262a0a11bc89ff162180/mcfas-backend/Language/Oatlab/Syntax.hs\#L108}}.
+
+With just this small part of the framework implemented, we are already able to
+reap some very interesting benefits. For example, we express a function to
+pretty-print a single node in the AST as a higher-order $F$-algebra
+\footnote{\url{https://github.com/tsani/mcfas/blob/bfa460884a54d79baef3262a0a11bc89ff162180/mcfas-backend/Language/Oatlab/Syntax.hs\#L169}},
+and using a generalized recursion scheme, we can pretty-print a whole AST
+\footnote{\url{https://github.com/tsani/mcfas/blob/bfa460884a54d79baef3262a0a11bc89ff162180/mcfas-backend/Language/Oatlab/Syntax.hs\#L255}}.
+Another stunning result is that we can strip all annotations from an annotated
+syntax tree using a $\sim 15$ character expression
+\footnote{\url{https://github.com/tsani/mcfas/blob/bfa460884a54d79baef3262a0a11bc89ff162180/mcfas-backend/Language/Oatlab/Syntax.hs\#L251}}.
+
+% First, we develop a simple datatype that is used to identify which part of the
+% syntax tree we are in.
+% \begin{lstlisting}[language=Haskell]
+% data AstNode
+%   = ProgramDeclNode
+%   | TopLevelDeclNode
+%   | VarDeclNode
+%   | StatementNode
+%   | ExpressionNode
+%   | IdentifierNode
+% \end{lstlisting}
+% Using the \codesnip{DataKinds} language extension, this datatype is promoted to
+% a \emph{kind}, and its values are promoted to \emph{types}. Consequently,
+% \codesnip{ProgramDeclNode} for example, could appear on the type level. Then,
+% we can define the syntax tree (with explicit recursion) as a single datatype
+% \emph{indexed} by values of type \codesnip{AstNode}.
+% \begin{lstlisting}[language=Haskell]
+% data OatlabAst' :: AstNode -> * where
+%   ProgramDecl
+%     :: [OatlabAst' TopLevelDeclNode] -> OatlabAst' ProgramDeclNode
+%   FunctionDecl
+%     :: OatlabAst' IdentifierNode
+%     -> [OatlabAst' IdentifierNode]
+%     -> [OatlabAst' StatementNode]
+%     -> OatlabAst' TopLevelDeclNode
+%   Branch
+%     :: OatlabAst' ExpressionNode
+%     -> [OatlabAst' StatementNode]
+%     -> Maybe [OatlabAst' StatementNode]
+%     -> OatlabAst' StatementNode
+%   ...
+% \end{lstlisting}
+% The major advantage of using type indices in this way is that, supposing we
+% have a value of type \codesnip{OatlabAst' ProgramDeclNode}, pattern matching on
+% this value requires only analyzing the \codesnip{ProgramDecl} construtor: none
+% of the other constructors could have produced a value of this type.
+
+\section{Upcoming work}
+
+Next, we will design some specialized recursion schemes that implement a
+dataflow fixedpoint solver, and we will implement forwards and backwards
+analyses that use it. We will also investigate whether it is possible, using
+the \codesnip{TypeFamilies} extension, to express that the type of annotation
+at a particular node depends on the type index that identifies what part of the
+tree the node is in. This way, the programmer can specify, in the type of their
+analysis, that it will annotate, say, statements with in-sets and out-sets, and
+that other types of nodes will not be annotated.
+
+Sadly, we did not write a parser for \oatlab{} programs yet. The reason is that
+we are still unsure of what the final form of the language will be. Our
+pretty-printer emits code that vaguely resembles JavaScript; we have not yet
+decided whether we will make it look more like \matlab{}.
+
+We are thinking about writing an interpreter for \oatlab{} programs, so that we
+can verify that the transformations written using \mcfas{} preserve the
+semantics of the programs. However, this might be an unnecessarily large
+undertaking.
+
+\end{document}
