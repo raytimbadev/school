@@ -143,10 +143,30 @@ data HAnn (x :: *) (h :: (k -> *) -> k -> *) (f :: k -> *) (a :: k)
     -- ^ The annotated data.
     }
 
+data PAnn (p :: k -> *) (h :: (k -> *) -> k -> *) (f :: k -> *) (a :: k)
+  = PAnn
+    { annP :: !(p a)
+    , bareP :: h f a
+    }
+
+type family MyAnn (node :: AstNode) :: * where
+   MyAnn 'ProgramDeclNode = ()
+   MyAnn 'TopLevelDeclNode = ()
+   MyAnn 'VarDeclNode = ()
+   MyAnn 'StatementNode = String
+   MyAnn 'ExpressionNode = ()
+   MyAnn 'IdentifierNode = ()
+
+newtype MyAnnW (node :: AstNode) = MyAnnW { unMyAnnW :: MyAnn node }
+
 type HAnnFix x h = HFix (HAnn x h)
+
+type PAnnFix p h = HFix (PAnn p h)
 
 -- | An annotated Oatlab abstract syntax tree.
 type OatlabAnnAst x = HAnnFix x OatlabAstF
+
+type OatlabMyAnnAst = PAnnFix MyAnnW OatlabAstF
 
 -- | Natural transformations.
 type f :~> g = forall a. f a -> g a
