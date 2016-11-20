@@ -2,15 +2,18 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeInType #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ViewPatterns #-}
 
 module Language.Oatlab.Syntax where
 
+import Data.Kind
 import Text.PrettyPrint
 
 data AstNode
@@ -72,10 +75,37 @@ data OatlabAstF :: (AstNode -> *) -> AstNode -> * where
     :: ast 'ExpressionNode
     -> OatlabAstF ast 'StatementNode
 
+  Assignment
+    -- | The expression to assign to.
+    -- The expression must be "assignable" (an lvalue), which in Oatlab means
+    -- it is either an indexing expression or a variable.
+    :: ast 'ExpressionNode
+    -- | The expression whose value is assigned to the left-hand side.
+    -> ast 'ExpressionNode
+    -> OatlabAstF ast 'StatementNode
+
+  -- | Expressions can be used as statements.
+  Expression
+    -- | The expression to evaluate.
+    :: ast 'ExpressionNode
+    -> OatlabAstF ast 'StatementNode
+
   -- | A variable is an expression.
   Var
     -- | The name of the variable.
     :: ast 'IdentifierNode
+    -> OatlabAstF ast 'ExpressionNode
+
+  -- | A string is an expression.
+  StringLiteral
+    -- | The string literal.
+    :: String
+    -> OatlabAstF ast 'ExpressionNode
+
+  -- | A number is an expression.
+  NumericLiteral
+    -- | The numeric literal.
+    :: Double
     -> OatlabAstF ast 'ExpressionNode
 
   -- | A binary operation is an expression.
@@ -146,6 +176,14 @@ instance HFunctor OatlabAstF where
       Call (f expr) (f <$> exprs)
     Identifier name ->
       Identifier name
+    Assignment lhs rhs ->
+      Assignment (f lhs) (f rhs)
+    Expression expr ->
+      Expression (f expr)
+    StringLiteral str ->
+      StringLiteral str
+    NumericLiteral num ->
+      NumericLiteral num
 
 instance HFunctor h => HFunctor (HAnn x h) where
   hfmap f (HAnn a h) = HAnn a (hfmap f h)
@@ -210,6 +248,10 @@ ppHAlg node = case node of
     K (
       parens expr <> parens (hcat $ punctuate ", " exprs)
     )
+  Assignment (K lhs) (K rhs) -> K (lhs <+> "=" <+> rhs <> ";")
+  Expression (K expr) -> K (expr <> ";")
+  StringLiteral str -> K (doubleQuotes (text str))
+  NumericLiteral num -> K (double num)
   Identifier name -> K (text name)
 
 example :: OatlabAnnAst Int 'ProgramDeclNode
