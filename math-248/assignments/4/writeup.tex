@@ -307,4 +307,35 @@ of dimensions increases, the maximum value of $f$ tends to zero. This is
 another instance of the very interesting phenomenon that spheres in high
 dimensions are in some sense ``pointy''.
 
+\section*{\#4 -- Maximizing the area of a triangle}
+
+\begin{prop}
+  Of all triangles with a fixed perimeter $p$, the one with the greatest area
+  is equilateral.
+\end{prop}
+
+\begin{proof}
+  We can phrase this problem as a constrained optimization problem.
+  \begin{align*}
+    \text{maximize} &\quad \sqrt{s(s-x)(s-y)(s-z)} \\
+    \text{subject to} &\quad x + y + z = p
+  \end{align*}
+  which can be solved straightforwardly using the method of Lagrange
+  multipliers. The system of equations to solve becomes
+  \begin{align}
+    (s-x)(s-y)(s-z) - s(s-y)(s-z) + s(s-x)(s-z) + s(s-x)(s-y) & = 2 \lambda
+    \label{eq:partderivx} \\
+    (s-x)(s-y)(s-z) + s(s-y)(s-z) - s(s-x)(s-z) + s(s-x)(s-y) & = 2 \lambda
+    \label{eq:partderivy} \\
+    (s-x)(s-y)(s-z) + s(s-y)(s-z) + s(s-x)(s-z) - s(s-x)(s-y) & = 2 \lambda
+    \label{eq:partderivz} \\
+    x + y + z & = p
+    \label{eq:perimeter}
+  \end{align}
+  Subtracting \eqref{eq:partderivy} from \eqref{eq:partderivz} gives $y = z$.
+  Similarly, subtracting \eqref{eq:partderivx} from \eqref{eq:partderivy} gives
+  $x = y$. Hence $x = y = z$ and \eqref{eq:perimeter} imply that each length is
+  equal to a third of the permeter, and that the triangle is equilateral.
+\end{proof}
+
 \end{document}
