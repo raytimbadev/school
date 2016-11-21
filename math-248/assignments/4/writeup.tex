@@ -288,15 +288,18 @@ Let $A, B \subset \R^n$.
   and the system has a unique solution, which is precisely the one we found.
 
   Now we can compute the value of $x_1^2$ using the constraint, by substituting
-  $\frac{1}{n}$ for each $x_i^2$ for $i \in \{2, \ldots, n\}$. Then,
+  $\frac{1}{n}$ for each $x_i^2$ for $i \in \{2, \ldots, n\}$, and we find that
+  $x_1 = \frac{1}{n}$ as well.
+  Then,
   \begin{equation*}
     f\parens{\overbrace{\frac{1}{n}, \ldots, \frac{1}{n}}^\text{$n$ times}}
     = \prod_{i=1}^n \frac{1}{n} = \frac{1}{n^n}
   \end{equation*}
 
   Notice that all other critical points have at least one component equal to
-  zero, so the function value is maximal for the critical point(s) on which our
-  discussion was more elaborate.
+  zero, so the function value is zero for all the critical points except those
+  in which each $x_i^2 = \frac{1}{2}$. Hence, the maximum of the function is
+  $\frac{1}{n^n}$.
 \end{proof}
 
 Furthermore, notice that $\lim_{n\to\infty} \frac{1}{n^n} = 0$. As the number
