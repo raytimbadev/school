@@ -1,6 +1,9 @@
 module Main where
 
-import Language.Oatlab.Syntax
+import Data.Annotation ( bareH )
+import Data.HFunctor ( hcata, unK )
+import Language.Oatlab.Example ( example )
+import Language.Oatlab.Pretty ( ppAlg, renderOatlab )
 
 main :: IO ()
-main = putStrLn "Hello world!"
+main = putStrLn . renderOatlab . unK . hcata (ppAlg . bareH) $ example

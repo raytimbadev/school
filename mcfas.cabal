@@ -23,6 +23,11 @@ source-repository head
 
 library
   exposed-modules:
+    Data.Annotation
+    Data.HFunctor
+    Language.Oatlab.Analysis
+    Language.Oatlab.Example
+    Language.Oatlab.Pretty
     Language.Oatlab.Syntax
   -- other-modules:       
   -- other-extensions:    
