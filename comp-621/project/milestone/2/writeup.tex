@@ -1,0 +1,80 @@
+\documentclass[letterpaper,11pt]{article}
+
+\newcommand{\mcfas}{\textsc{McFAS}}
+\newcommand{\matlab}{\textsc{Matlab}}
+\newcommand{\oatlab}{\textsc{Oatlab}}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{\mcfas{} -- Milestone \#2}
+\date{22 November 2015}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{listings}
+\usepackage{hyperref}
+
+\newcommand{\codesnip}{\texttt}
+
+\begin{document}
+
+\maketitle
+
+\section{Current state of \mcfas{}}
+
+Sadly, not a tremendous amount of concrete progress has been made since the
+last milestone. In the last milestone, we wanted to have finished writing the
+specialized recursion schemes for dataflow fixpoint solution as well as have
+finished implementing a forward and backward analysis using these recursion
+schemes. Instead, we got stuck in figuring out how to represent analyses and in
+how to get the types to line up for the forward analysis $F$-algebra.
+
+Luckily, we now have determined how analyses will be represented.
+They are represented as a record that contains the answers to all six of
+Laurie's analysis steps: two of the steps are answered directly in the type of
+the analysis, and the rest are represented in fields of the record. In fact,
+the record that we designed contains nothing specific to \oatlab{} and could
+in principle be used to represent analyses for any other languages that are
+represented as the fixed point of a higher-order functor.
+
+We have also written the bulk of the forward analysis $F$-algebra: what is
+missing are the tricky cases for conditionals and loops. In implementing these
+cases, we will probably need to revise our analysis record to include a field
+containing a function allowing the $F$-algebra to compare approximations for
+equality. This will be essential to decide whether a fixed point has been
+reached.
+
+The reason it was so difficult to get the types right in the $F$-algebra is
+that we needed to introduce many auxiliary datatypes and type-level functions
+to handle the fact that statements work differently from other kinds of nodes
+in the syntax tree. (Statements have an in-set and compute an out-set in a
+forwards analysis. The in-set of the first statement in a function is computed
+by a field in the analysis record.) However, this work pays off because the
+passing around of in-sets and out-sets is made very obvious in the code.
+
+Another thing that was tricky to deal with is that fact that catamorphisms
+implement a bottom-up recursion. How then can we implement a forward analysis,
+which is intuitively top-down? The solution is that when the $F$-algebra
+encounters a statement node, rather than immediately computing a new statement
+node, (which cannot be done because the $F$-algebra doesn't have access to
+the in-set,) a \emph{function} is computed instead. Essentially, by returning a
+function, we can defer passing in the in-set to whatever nodes in the syntax
+tree contain statements. These are precisely function declarations as well as
+control flow structures. It is then up to these constructs to feed an in-set to
+the first statement in the list, extract its out-set, feed it to the next
+statement, etc. We can imagine each statement in the list having been
+transformed into a function, and the nodes that handle lists of statements must
+then compose them all together. (I think I will include a diagram of this idea
+in my presentation, since I think it's a pretty sweet idea.)
+
+\section{Upcoming work}
+
+The next item on the agenda is the presentation, in a week from now. By then,
+it is imperative that we complete the forward analysis $F$-algebra and
+implement an analysis with it such as reaching definitions. Ideally by then,
+we would also have completed the backward analysis $F$-algebra and implemented
+an analysis with it such as liveness analysis.
+
+We also really ought to implement a parser for \oatlab{}. This is not strictly
+necessary, but it is extremely tedious to write out the syntax trees by hand
+currently.
+
+\end{document}
