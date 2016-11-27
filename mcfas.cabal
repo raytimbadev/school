@@ -25,6 +25,7 @@ library
   exposed-modules:
     Data.Annotation
     Data.HFunctor
+    Data.Reflection
     Language.Oatlab.Analysis
     Language.Oatlab.Analysis.ReachingDefinitions
     Language.Oatlab.Example

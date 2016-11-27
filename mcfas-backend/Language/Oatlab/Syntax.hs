@@ -13,12 +13,16 @@ Stability   : experimental
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ViewPatterns #-}
 
 module Language.Oatlab.Syntax where
 
 import Data.Annotation
 import Data.HFunctor
+import Data.Reflection
+
+import Data.Proxy
 
 -- | Kind of indices for nodes in the Oatlab AST.
 data AstNode
@@ -35,6 +39,16 @@ data AstNode
   -- ^ Each expression has this index.
   | IdentifierNode
   -- ^ Each identifier has this index.
+  deriving (Eq, Ord, Read, Show)
+
+type instance Demote' ('KProxy :: KProxy AstNode) = AstNode
+
+instance Reflect 'ProgramDeclNode where reflect _ = ProgramDeclNode
+instance Reflect 'TopLevelDeclNode where reflect _ = TopLevelDeclNode
+instance Reflect 'VarDeclNode where reflect _ = VarDeclNode
+instance Reflect 'StatementNode where reflect _ = StatementNode
+instance Reflect 'ExpressionNode where reflect _ = ExpressionNode
+instance Reflect 'IdentifierNode where reflect _ = IdentifierNode
 
 -- | Singletons for 'AstNode'.
 data AstNodeS :: AstNode -> * where
@@ -44,6 +58,15 @@ data AstNodeS :: AstNode -> * where
   StatementNodeS :: AstNodeS 'StatementNode
   ExpressionNodeS :: AstNodeS 'ExpressionNode
   IdentifierNodeS :: AstNodeS 'IdentifierNode
+
+type instance DemoteS' ('KProxy :: KProxy AstNode) = AstNodeS
+
+instance ReflectS 'ProgramDeclNode where reflectS _ = ProgramDeclNodeS
+instance ReflectS 'TopLevelDeclNode where reflectS _ = TopLevelDeclNodeS
+instance ReflectS 'VarDeclNode where reflectS _ = VarDeclNodeS
+instance ReflectS 'StatementNode where reflectS _ = StatementNodeS
+instance ReflectS 'ExpressionNode where reflectS _ = ExpressionNodeS
+instance ReflectS 'IdentifierNode where reflectS _ = IdentifierNodeS
 
 -- | The higher-order functor that represents the signature of the syntax tree.
 data OatlabAstF :: (AstNode -> *) -> AstNode -> * where
@@ -234,14 +257,6 @@ type OatlabHAnnAst x = HAnnFix x OatlabAstF
 type OatlabIAnnAst p = IAnnFix p OatlabAstF
 
 instance HTraversable OatlabAstF where
-  -- traverseH
-  --   :: forall
-  --     (m :: * -> *)
-  --     (f :: AstNode -> *)
-  --     (a :: AstNode).
-  --     Applicative m
-  --     => OatlabAstF (MonadH m f) a
-  --     -> m (OatlabAstF f a)
   sequenceH = \case
     ProgramDecl (traverse unMonadH -> topLevelDecls)
       -> ProgramDecl <$> topLevelDecls
