@@ -8,18 +8,27 @@ Stability   : experimental
 -}
 
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ViewPatterns #-}
 
 module Language.Oatlab.Example where
 
+import Control.Monad.State
 import Data.Annotation
 import Data.HFunctor
+import Language.Common.Analysis
 import Language.Oatlab.Syntax
+import Language.Oatlab.Analysis
+
+import qualified Data.Set as S
 
 type family MyAnn (node :: AstNode) :: * where
    MyAnn 'ProgramDeclNode = ()
@@ -83,3 +92,5 @@ rAlg = \case
   ProgramDecl (map unR -> _) -> R ()
   FunctionDecl _ _ (map unR -> _) -> R ()
   _ -> error "rAlg"
+
+type TrivialInterpretation = K ()

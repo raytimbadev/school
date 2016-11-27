@@ -8,9 +8,12 @@ Stability   : experimental
 -}
 
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ViewPatterns #-}
 
 module Language.Oatlab.Syntax where
 
@@ -42,27 +45,6 @@ data AstNodeS :: AstNode -> * where
   ExpressionNodeS :: AstNodeS 'ExpressionNode
   IdentifierNodeS :: AstNodeS 'IdentifierNode
 
-{-
-data AstShape :: AstNode -> * where
-  ProgramDeclShape :: AstShape 'TopLevelDeclNode -> AstShape 'ProgramDeclNode
-  FunDeclShape
-    :: AstShape 'IdentifierNode
-    -> AstShape '[AstShape 'IdentifierNode]
-    -> AstShape 'StatementNode
-    -> AstShape 'TopLevelDeclNode
-  WhileLoopShape
-    :: AstShape 'ExpressionNode
-    -> AstShape 'StatementNode
-    -> AstShape 'StatementNode
-    -> AstShape 'StatementNode
-  ForLoopShape
-    :: AstShape 'IdentifierNode
-    -> AstShape 'ExpressionNode
-    -> AstShape 'StatementNode
-    -> AstShape 'StatementNode
-    -> AstShape 'StatementNode
--}
-
 -- | The higher-order functor that represents the signature of the syntax tree.
 data OatlabAstF :: (AstNode -> *) -> AstNode -> * where
   -- | A list of top-level declarations is a program.
@@ -89,9 +71,9 @@ data OatlabAstF :: (AstNode -> *) -> AstNode -> * where
     -- The body of the loop.
     -> OatlabAstF ast 'StatementNode
 
-  -- | A for-loops is a statement.
+  -- | A for-loop is a statement.
   ForLoop
-    :: ast 'IdentifierNode
+    :: ast 'VarDeclNode
     -- The variable bound by the loop.
     -> ast 'ExpressionNode
     -- The expression providing values to the variable.
@@ -172,6 +154,44 @@ data OatlabAstF :: (AstNode -> *) -> AstNode -> * where
     -- The identifier's value.
     -> OatlabAstF ast 'IdentifierNode
 
+{- Handy patterns for copy-pasta.
+  ProgramDecl topLevelDecls
+  FunctionDecl name params body
+  WhileLoop expr body
+  ForLoop var expr body
+  Branch expr thenBody mElseBody
+  Return expr
+  Assignment lhs rhs
+  Expression expr
+  Var name
+  StringLiteral str
+  NumericLiteral num
+  BinaryOperation op opl opr
+  Call expr args
+  Identifier str
+-}
+
+-- | Collapses an 'OatlabAstF' into an 'AstNodeS' preserving only the type
+-- index. The reason you'd want to do this is if you only care about the index
+-- and have extremely repetitive matches that depend only on the index.
+collapseIndex
+  :: forall (f :: AstNode -> *) (a :: AstNode). OatlabAstF f a -> AstNodeS a
+collapseIndex = \case
+  ProgramDecl _ -> ProgramDeclNodeS
+  FunctionDecl _ _ _ -> TopLevelDeclNodeS
+  WhileLoop _ _ -> StatementNodeS
+  ForLoop _ _ _ -> StatementNodeS
+  Branch _ _ _ -> StatementNodeS
+  Return _ -> StatementNodeS
+  Assignment _ _ -> StatementNodeS
+  Expression _ -> StatementNodeS
+  Var _ -> ExpressionNodeS
+  StringLiteral _ -> ExpressionNodeS
+  NumericLiteral _ -> ExpressionNodeS
+  BinaryOperation _ _ _ -> ExpressionNodeS
+  Call _ _ -> ExpressionNodeS
+  Identifier _ -> IdentifierNodeS
+
 -- | OatlabAstF is a higher-order functor.
 instance HFunctor OatlabAstF where
   hfmap f hf = case hf of
@@ -212,6 +232,45 @@ type OatlabHAnnAst x = HAnnFix x OatlabAstF
 
 -- | An indexed-annotated Oatlab abstract syntax tree.
 type OatlabIAnnAst p = IAnnFix p OatlabAstF
+
+instance HTraversable OatlabAstF where
+  -- traverseH
+  --   :: forall
+  --     (m :: * -> *)
+  --     (f :: AstNode -> *)
+  --     (a :: AstNode).
+  --     Applicative m
+  --     => OatlabAstF (MonadH m f) a
+  --     -> m (OatlabAstF f a)
+  sequenceH = \case
+    ProgramDecl (traverse unMonadH -> topLevelDecls)
+      -> ProgramDecl <$> topLevelDecls
+    FunctionDecl (MonadH name) (traverse unMonadH -> vars) (traverse unMonadH -> body)
+      -> FunctionDecl <$> name <*> vars <*> body
+    WhileLoop (MonadH expr) (traverse unMonadH -> body)
+      -> WhileLoop <$> expr <*> body
+    ForLoop (MonadH var) (MonadH expr) (traverse unMonadH -> body)
+      -> ForLoop <$> var <*> expr <*> body
+    Branch
+      (MonadH expr)
+      (traverse unMonadH -> thenBody)
+      (traverse (traverse unMonadH) -> elseBody)
+      -> Branch <$> expr <*> thenBody <*> elseBody
+    Return (MonadH expr)
+      -> Return <$> expr
+    Assignment (MonadH lhs) (MonadH rhs)
+      -> Assignment <$> lhs <*> rhs
+    Expression (MonadH expr)
+      -> Expression <$> expr
+    Var (MonadH name)
+      -> Var <$> name
+    BinaryOperation op (MonadH opl) (MonadH opr)
+      -> BinaryOperation <$> pure op <*> opl <*> opr
+    Call (MonadH expr) (traverse unMonadH -> params)
+      -> Call <$> expr <*> params
+    Identifier name -> pure (Identifier name)
+    StringLiteral str -> pure (StringLiteral str)
+    NumericLiteral num -> pure (NumericLiteral num)
 
 -- | A binary operator.
 data BinaryOperator

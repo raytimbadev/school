@@ -26,6 +26,7 @@ library
     Data.Annotation
     Data.HFunctor
     Language.Oatlab.Analysis
+    Language.Oatlab.Analysis.ReachingDefinitions
     Language.Oatlab.Example
     Language.Oatlab.Pretty
     Language.Oatlab.Syntax
@@ -34,7 +35,7 @@ library
   build-depends:
     base >=4.9 && <4.10,
     megaparsec >=4.2 && <4.4,
-    containers >=0.5,
+    containers >=0.5 && <0.6,
     mtl >=2.2 && <2.3,
     pretty >=1.1 && <1.2,
     recursion-schemes >=5 && <5.1,

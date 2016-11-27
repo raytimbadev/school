@@ -19,12 +19,19 @@ annotations and mutual recursion.
 {-# LANGUAGE TypeOperators #-}
 
 module Data.HFunctor
-( HFunctor(..)
-, type (:~>)
+( -- * Natural transformations
+  type (:~>)
+  -- * Higher-order functors
+, HFunctor(..)
+  -- ** Higher-order fixed points and folds
 , HFix(..)
 , hcata
+  -- * Important functors
 , K(..)
 , I(..)
+  -- * Higher-order generic traversals
+, HTraversable(..)
+, MonadH(..)
 ) where
 
 -- | The class of polykinded higher-order functors.
@@ -59,16 +66,51 @@ newtype HFix (h :: (k -> *) -> k -> *) (a :: k)
 --
 -- Folds a higher-order functor fixpoint into a functor in a bottom-up fashion.
 -- The @h f :~> f@ parameter is a higher-order F-algebra.
-hcata :: HFunctor h => (h f :~> f) -> HFix h :~> f
+hcata
+  :: forall (h :: (k -> *) -> k -> *) (f :: k -> *) (a :: k). HFunctor h
+  => (forall (b :: k). h f b -> f b)
+  -> HFix h a -> f a
 hcata hAlg = hAlg . hfmap (hcata hAlg) . unHFix
+
+-- hcataM
+--   :: HFunctor h
+--   => forall (a :: k).
+--     (forall (a :: k). h f a -> m (f a))
+--   -> HFix h a
+--   -> m (f a)
+-- hcataM hAlgM = (>>= hAlgM) . hcata (htraverse (>>= hAlgM))
 
 -- | Constant functor.
 --
+-- Can be considered a type-level constant function.
+--
 -- The @fmap@ implementation simply ignores the given function, and rewrites
 -- the type.
-newtype K x a = K { unK :: x } deriving Functor
+newtype K x (a :: k) = K { unK :: x } deriving Functor
 
--- | Identity functor.
+-- | Identity functor. This is just a box around a value.
 --
--- The @fmap@ implementation simply applies the
+-- The @fmap@ implementation simply applies the function to the boxed value.
 newtype I a = I { unI :: a } deriving Functor
+
+-- | Class of higher-order functors whose side-effects can be sequenced
+-- left-to-right.
+class HTraversable (h :: (k -> *) -> k -> *) where
+  -- | If a higher-order functor contains side effects in its recursive
+  -- positions, then they can be sequenced left-to-right, hoisting the actions
+  -- up.
+  --
+  -- Generalizes
+  -- @sequenceA :: (Traversable t, Applicative f) => t (f a) -> f (t a)@.
+  sequenceH :: Applicative m => h (MonadH m f) a -> m (h f a)
+
+-- | Presents a monadic wrapper in a uniform way on the type-level.
+newtype MonadH
+  (m :: * -> *)
+  (f :: k -> *)
+  (a :: k)
+  = MonadH
+    { unMonadH :: m (f a) }
+
+instance Functor m => HFunctor (MonadH m) where
+  hfmap f (MonadH m) = MonadH (f <$> m)
