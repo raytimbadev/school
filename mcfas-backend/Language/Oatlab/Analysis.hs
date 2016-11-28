@@ -203,34 +203,42 @@ analyzeForward analysis@(Analysis {..}) (IAnn ann node) = case node of
 
     (approx', body) <- chainStmts analysisGetApproximation approx bodyFs
 
+    let node' = WhileLoop expr' body
+
+    approx'' <- analysisMerge approx approx'
+
+    approx''' <- analysisDataflow (IAnn ann node') approx''
+
     -- get the list of approximations, one for each stmt in the body
     let approxes = stmtApprox <$> body
 
     -- chain the statements a second time with the dataflow
-    (_, body') <- chainStmts'
+    (approx'''', body') <- chainStmts'
       (analysisDataflow . unHFix)
       analysisUpdateApproximation
-      approx'
+      approx'''
       body
 
     -- and get the list of approximations for the second run
     let approxes' = stmtApprox <$> body'
 
-    let node' = WhileLoop expr' body'
-    ann' <- analysisUpdateApproximation approx' ann
+    approx''''' <- analysisMerge approx approx''''
+
+    let node'' = WhileLoop expr' body'
+    ann' <- analysisUpdateApproximation approx''''' ann
 
     -- if all lists of approximations are the same ...
     if all id (zipWith analysisApproximationEq approxes approxes')
     then do
       -- we found the fixed point, so we can just return this AST
-      pure $ HFix (IAnn ann' node')
+      pure $ HFix (IAnn ann' node'')
     else do
       -- decrease the number of iterations remaining in this node by one
       ann'' <- analysisUpdateIterations (subtract 1) ann'
       -- build a bona fide AST out of this node
-      let ast = HFix (IAnn ann'' node')
+      let ast = HFix (IAnn ann'' node'')
       -- and recurse
-      imResult (result (runForwardOatlabAnalysis analysis ast) approx)
+      imResult (result (runForwardOatlabAnalysis analysis ast) approx''''')
 
   ForLoop (FR (IMR var)) (FR (IMR expr)) (map result -> bodyFs)
     -> FR $ \approx -> IMR $ do
@@ -247,26 +255,30 @@ analyzeForward analysis@(Analysis {..}) (IAnn ann node) = case node of
 
       approx'' <- analysisDataflow (IAnn ann node') approx'
 
+      approx''' <- analysisMerge approx approx''
+
       let approxes = stmtApprox <$> body
 
-      (approx''', body') <- chainStmts'
+      (approx'''', body') <- chainStmts'
         (analysisDataflow . unHFix)
         analysisUpdateApproximation
-        approx''
+        approx'''
         body
 
       let approxes' = stmtApprox <$> body'
 
       let node'' = ForLoop var' expr' body'
 
-      ann' <- analysisUpdateApproximation approx''' ann
+      approx''''' <- analysisMerge approx approx''''
+
+      ann' <- analysisUpdateApproximation approx''''' ann
 
       if all id (zipWith analysisApproximationEq approxes approxes')
-      then pure $ HFix (IAnn ann' node')
+      then pure $ HFix (IAnn ann' node'')
       else do
         ann'' <- analysisUpdateIterations (subtract 1) ann'
         let ast = HFix (IAnn ann'' node'')
-        imResult (result (runForwardOatlabAnalysis analysis ast) approx''')
+        imResult (result (runForwardOatlabAnalysis analysis ast) approx''''')
 
   Branch (FR (IMR expr)) (map result -> thenBodyFs) mElseBodyFs
     -> FR $ \approx -> IMR $ do

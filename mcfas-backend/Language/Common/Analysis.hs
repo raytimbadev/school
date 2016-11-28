@@ -41,7 +41,8 @@ import Data.Reflection ( ReflectS )
 -- 'analysisApproximationEq' is needed to determine when a fixed point has been
 -- found. The remaining fields enable the programmer to use highly customizable
 -- annotations on AST node, provided that the programmer provides ways for
--- retrieving and storing data essential to the dataflow analysis.
+-- retrieving and storing data essential to the dataflow analysis in those
+-- annotations.
 --
 -- * @h@ - the AST to analyze
 -- * @f@ - the result of the analysis, indexed by the type of the node; usually
