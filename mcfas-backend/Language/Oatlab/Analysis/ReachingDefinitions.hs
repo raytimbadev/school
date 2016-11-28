@@ -5,6 +5,8 @@ Copyright   : (c) Jacob Errington 2016
 License     : MIT
 Maintainer  : mcfas@mail.jerrington.me
 Stability   : experimental
+
+TODO use real chunks of AST instead of strings for representing the definitions.
 -}
 
 {-# LANGUAGE DataKinds #-}
@@ -17,7 +19,11 @@ Stability   : experimental
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Language.Oatlab.Analysis.ReachingDefinitions where
+module Language.Oatlab.Analysis.ReachingDefinitions
+( reachingDefinitions
+, initializeReachingDefinitions
+, initializeReachingDefinitionsAlg
+) where
 
 import Data.Annotation
 import Data.HFunctor
@@ -33,6 +39,8 @@ import Data.Proxy
 import qualified Data.Map as M
 import qualified Data.Set as S
 
+-- | Helper for adding a definition to the set of definitions associated with a
+-- given expression.
 addDefinition
   :: String
   -> StatementNumber
@@ -42,12 +50,18 @@ addDefinition s n = M.alter f s where
   f :: Maybe (S.Set StatementNumber) -> Maybe (S.Set StatementNumber)
   f = Just . S.insert n . maybe S.empty id
 
+-- | Type-level function that says that statements are approximated with maps
+-- from expressions (represented by strings) to sets of statement numbers
+-- (their definiting statements), and that all other AST node are approximated
+-- with trivial data.
 type family ReachingDefinitionsApprox (node :: AstNode) :: * where
   ReachingDefinitionsApprox 'StatementNode
     = M.Map String (S.Set StatementNumber)
   ReachingDefinitionsApprox _ = ()
 
 -- | The approximation used in the reaching definitions analysis.
+--
+-- Simulates the action of the type-level function 'ReachingDefinitionsApprox'.
 newtype ReachingDefinitionsApproxP (node :: AstNode)
   = ReachingDefinitionsApproxP
     { unReachingDefinitionsApproxP :: ReachingDefinitionsApprox node
@@ -94,7 +108,7 @@ instance ReflectS a => Eq (ReachingDefinitionsApproxP a) where
       ExpressionNodeS -> x == y
       IdentifierNodeS -> x == y
 
--- | Construct an initial reaching definitions annotations.
+-- | Construct an initial reaching definitions annotation for statements.
 initialReachingDefinitions :: StatementNumber -> ReachingDefinitions 'StatementNode
 initialReachingDefinitions number
   = ReachingDefinitions
@@ -146,6 +160,10 @@ initializeReachingDefinitions = hcata phi where
     . numberStatementAlg
     . IAnn (K ())
 
+-- | The dataflow equations for the reaching definitions analysis.
+--
+-- * When a for-loop is encountered, it is considered to define its variable
+-- * When an assignment is encounteded, it is considered to define its LHS
 reachingDefinitionsDataflow
   :: forall (m :: * -> *) (a :: AstNode). (Monad m, ReflectS a)
   => IAnn ReachingDefinitionsP OatlabAstF (OatlabIAnnAst ReachingDefinitionsP) a
@@ -182,6 +200,7 @@ reachingDefinitionsDataflow (IAnn a node) approx
     ExpressionNodeS -> approx
     IdentifierNodeS -> approx
 
+-- | The reaching definitions analysis.
 reachingDefinitions
   :: Monad m
   => OatlabAnalysis

@@ -102,9 +102,11 @@ type HAnnFix x h = HFix (HAnn x h)
 -- | The fixpoint of an indexed-annotated higher-order functor.
 type IAnnFix p h = HFix (IAnn p h)
 
+-- | Extract the annotation at the root of the tree.
 topAnnI :: IAnnFix p h a -> p a
 topAnnI (HFix (IAnn a _)) = a
 
+-- | Apply a function to the annotation at the root of the tree.
 mapTopAnnI :: (p a -> p a) -> IAnnFix p h a -> IAnnFix p h a
 mapTopAnnI f (HFix (IAnn a s)) = HFix (IAnn (f a) s)
 

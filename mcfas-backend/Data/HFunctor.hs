@@ -72,6 +72,7 @@ newtype HFix (h :: (k -> *) -> k -> *) (a :: k)
 
 infix 4 ===
 
+-- | Higher-order equality.
 class HEq (f :: k -> *) where
   (===) :: f a -> f a -> Bool
 

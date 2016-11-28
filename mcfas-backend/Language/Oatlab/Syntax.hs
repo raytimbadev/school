@@ -349,6 +349,9 @@ instance HEq f => Eq (OatlabAstF f a) where
 -- | An unannotated Oatlab abstract syntax tree.
 type OatlabAst = HFix OatlabAstF
 
+-- | Decides whether an AST represents an lvalue.
+--
+-- /Higher-order F-algebra/
 isLValueAlg :: OatlabAstF (K Bool) b -> K Bool b
 isLValueAlg node = case collapseIndex node of
   ExpressionNodeS -> case node of
@@ -361,13 +364,12 @@ isLValueAlg node = case collapseIndex node of
 isLValue :: OatlabAst :~> K Bool
 isLValue = hcata isLValueAlg
 
+-- | Extracts the name of the declared variable from a variable declaration
+-- node.
 nameFromVarDecl :: OatlabAst 'VarDeclNode -> String
 nameFromVarDecl (HFix (VarDecl (HFix (Identifier name)))) = name
 
-makeVarExpr :: String -> OatlabAst 'ExpressionNode
-makeVarExpr name = HFix (Var (HFix (Identifier name)))
-
--- | An unindexed-annotated Oatlab abstract syntax tree.
+-- | A uniformly annotated Oatlab abstract syntax tree.
 type OatlabHAnnAst x = HAnnFix x OatlabAstF
 
 -- | An indexed-annotated Oatlab abstract syntax tree.

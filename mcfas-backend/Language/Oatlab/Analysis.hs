@@ -30,6 +30,16 @@ import Language.Oatlab.Syntax
 -- | An Oatlab analysis is an analysis over an indexed-annotated Oatlab AST.
 type OatlabAnalysis f p = Analysis (IAnn p OatlabAstF) f p
 
+-- | A dataflow analysis fundamentally operates on statements: those are the
+-- nodes in the syntax tree where we attach annotations containing
+-- approximations.
+--
+-- This type-level function delegates to the given type-level function @f@ for
+-- all nodes except statements, where it requires a function type. These
+-- functions are what we use to connect the input flow-set of a statement to
+-- the output flow-set of the previous statement.
+--
+-- See 'chainStmts'.
 type family StatementFlowAnalysis
   (node :: AstNode)
   (approx :: AstNode -> *)
@@ -47,12 +57,18 @@ type family StatementFlowAnalysis
     StatementFlowAnalysis 'IdentifierNode _ f
       = f 'IdentifierNode
 
+-- | A monadic computation that produces an indexed-annotated Oatlab AST.
+--
+-- This wrapper exists so that the type parameters can be uniformly presented
+-- on the type-level, allowing partial application.
 newtype IndexedMonadicResult
   (m :: * -> *)
   (p :: AstNode -> *)
   (node :: AstNode)
   = IMR { imResult :: m (OatlabIAnnAst p node) }
 
+-- | A newtype wrapper that simulates the action of the 'StatementFlowAnalysis'
+-- type-level function.
 newtype StatementFlowResult
   (m :: * -> *)
   (p :: AstNode -> *)
@@ -78,12 +94,12 @@ class MonadAnalysis m where
 -- approximation of the last statement is computed.
 chainStmts
   :: Monad m
-  -- | A strategy for extracting approximations from annotations.
   => (p 'StatementNode -> approx)
-  -- | The in-set for the initial statement.
+  -- ^ A strategy for extracting approximations from annotations.
   -> approx
-  -- | The statements to chain.
+  -- ^ The in-set for the initial statement.
   -> [approx -> IndexedMonadicResult m p 'StatementNode]
+  -- ^ The statements to chain.
   -> m (approx, [OatlabIAnnAst p 'StatementNode])
 chainStmts _ approx [] = pure (approx, [])
 chainStmts extract approx (f:fs) = do
@@ -91,6 +107,8 @@ chainStmts extract approx (f:fs) = do
   (approx', stmts) <- chainStmts extract (extract (topAnnI stmt)) fs
   pure (approx', stmt:stmts)
 
+-- | Feed an approximation through a list of statements that have already been
+-- chained, and reexecute the dataflow equation on each.
 chainStmts'
   :: Monad m
   => (OatlabIAnnAst p 'StatementNode -> approx -> m approx)
@@ -105,6 +123,8 @@ chainStmts' dataflow update approx (stmt:stmts) = do
   (approx'', stmts') <- chainStmts' dataflow update approx' stmts
   pure (approx'', mapTopAnnI (const ann') stmt : stmts')
 
+-- | Converts an 'OatlabAnalysis' into a higher-order F-algebra that performs
+-- the action of that analysis locally.
 analyzeForward
   :: (Monad m, MonadAnalysis m)
   => OatlabAnalysis
@@ -337,9 +357,17 @@ analyzeForward analysis@(Analysis {..}) (IAnn ann node) = case node of
 
     pure $ HFix (IAnn ann' node')
 
+-- | Perform a forward analysis on a syntax tree.
 runForwardOatlabAnalysis
   :: forall (m :: * -> *) (approx :: AstNode -> *) (p :: AstNode -> *).
     (Monad m, MonadAnalysis m)
-  => OatlabAnalysis (OatlabIAnnAst p) p approx 'StatementNode 'StatementNode m 'Forward
+  => OatlabAnalysis
+    (OatlabIAnnAst p)
+    p
+    approx
+    'StatementNode
+    'StatementNode
+    m
+    'Forward
   -> OatlabIAnnAst p :~> StatementFlowResult m p approx
 runForwardOatlabAnalysis analysis = hcata (analyzeForward analysis)
