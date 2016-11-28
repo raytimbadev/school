@@ -13,10 +13,13 @@ annotations and mutual recursion.
 
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Data.HFunctor
 ( -- * Natural transformations
@@ -32,7 +35,12 @@ module Data.HFunctor
   -- * Higher-order generic traversals
 , HTraversable(..)
 , MonadH(..)
+  -- * Higher-order equality
+, HEq(..)
 ) where
+
+import Data.Function ( on )
+import Data.Functor.Compose
 
 -- | The class of polykinded higher-order functors.
 --
@@ -61,6 +69,27 @@ type f :~> g = forall a. f a -> g a
 -- | The fixed point of a higher order functor.
 newtype HFix (h :: (k -> *) -> k -> *) (a :: k)
   = HFix { unHFix :: h (HFix h) a }
+
+infix 4 ===
+
+class HEq (f :: k -> *) where
+  (===) :: f a -> f a -> Bool
+
+-- | /Undecidable ?/
+instance HEq (f (HFix f)) => HEq (HFix f) where
+  (===) = (===) `on` unHFix
+
+instance HEq (f :: k -> *) => HEq (Compose [] f) where
+  Compose [] === Compose [] = False
+  Compose [] === Compose (_:_) = False
+  Compose (_:_) === Compose [] = False
+  Compose (x:xs) === Compose (y:ys) = x === y && Compose xs === Compose ys
+
+instance HEq (f :: k -> *) => HEq (Compose Maybe f) where
+  Compose Nothing === Compose Nothing = True
+  Compose (Just _) === Compose Nothing = False
+  Compose Nothing === Compose (Just _) = False
+  Compose (Just x) === Compose (Just y) = x === y
 
 -- | Higher-order catamorphism.
 --

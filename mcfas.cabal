@@ -28,6 +28,7 @@ library
     Data.Reflection
     Language.Oatlab.Analysis
     Language.Oatlab.Analysis.ReachingDefinitions
+    Language.Oatlab.Analysis.StatementNumbering
     Language.Oatlab.Example
     Language.Oatlab.Pretty
     Language.Oatlab.Syntax

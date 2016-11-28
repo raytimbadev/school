@@ -21,14 +21,8 @@ Stability   : experimental
 
 module Language.Oatlab.Example where
 
-import Control.Monad.State
-import Data.Annotation
 import Data.HFunctor
-import Language.Common.Analysis
 import Language.Oatlab.Syntax
-import Language.Oatlab.Analysis
-
-import qualified Data.Set as S
 
 type family MyAnn (node :: AstNode) :: * where
    MyAnn 'ProgramDeclNode = ()
@@ -39,41 +33,6 @@ type family MyAnn (node :: AstNode) :: * where
    MyAnn 'IdentifierNode = ()
 
 newtype MyAnnW (node :: AstNode) = MyAnnW { unMyAnnW :: MyAnn node }
-
-example :: OatlabHAnnAst Int 'ProgramDeclNode
-example
-  = HFix (
-    HAnn 1 (
-      ProgramDecl [
-        HFix (
-          HAnn 2 (
-            FunctionDecl
-              ( HFix (HAnn 3 (Identifier "foo")) )
-              [ HFix (HAnn 4 (Identifier "x")) ]
-              [
-                HFix (
-                  HAnn 5 (
-                    Return (
-                      HFix (
-                        HAnn 6 (
-                          Var (
-                            HFix (
-                              HAnn 7 (
-                                Identifier "x"
-                              )
-                            )
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              ]
-          )
-        )
-      ]
-    )
-  )
 
 type family Result (node :: AstNode) :: * where
   Result 'ProgramDeclNode = ()

@@ -30,13 +30,22 @@ import Language.Oatlab.Syntax
 -- | An Oatlab analysis is an analysis over an indexed-annotated Oatlab AST.
 type OatlabAnalysis f p = Analysis (IAnn p OatlabAstF) f p
 
-type family StatementFlowAnalysis (node :: AstNode) (approx :: *) (f :: AstNode -> *) :: * where
-  StatementFlowAnalysis 'ProgramDeclNode _ f = f 'ProgramDeclNode
-  StatementFlowAnalysis 'TopLevelDeclNode _ f = f 'TopLevelDeclNode
-  StatementFlowAnalysis 'VarDeclNode _ f = f 'VarDeclNode
-  StatementFlowAnalysis 'StatementNode approx f = approx -> f 'StatementNode
-  StatementFlowAnalysis 'ExpressionNode _ f = f 'ExpressionNode
-  StatementFlowAnalysis 'IdentifierNode _ f = f 'IdentifierNode
+type family StatementFlowAnalysis
+  (node :: AstNode)
+  (approx :: AstNode -> *)
+  (f :: AstNode -> *) :: * where
+    StatementFlowAnalysis 'ProgramDeclNode _ f
+      = f 'ProgramDeclNode
+    StatementFlowAnalysis 'TopLevelDeclNode _ f
+      = f 'TopLevelDeclNode
+    StatementFlowAnalysis 'VarDeclNode _ f
+      = f 'VarDeclNode
+    StatementFlowAnalysis 'StatementNode approx f
+      = (approx 'StatementNode) -> f 'StatementNode
+    StatementFlowAnalysis 'ExpressionNode _ f
+      = f 'ExpressionNode
+    StatementFlowAnalysis 'IdentifierNode _ f
+      = f 'IdentifierNode
 
 newtype IndexedMonadicResult
   (m :: * -> *)
@@ -47,9 +56,11 @@ newtype IndexedMonadicResult
 newtype StatementFlowResult
   (m :: * -> *)
   (p :: AstNode -> *)
-  (approx :: *)
+  (approx :: AstNode -> *)
   (node :: AstNode)
-  = FR { result :: StatementFlowAnalysis node approx (IndexedMonadicResult m p) }
+  = FR
+    { result :: StatementFlowAnalysis node approx (IndexedMonadicResult m p)
+    }
 
 -- | A class of monads for analyses.
 -- This is just an error monad for raising an exception when the iterations are
@@ -96,7 +107,14 @@ chainStmts' dataflow update approx (stmt:stmts) = do
 
 analyzeForward
   :: (Monad m, MonadAnalysis m)
-  => OatlabAnalysis (IAnnFix p OatlabAstF) p approx 'StatementNode m 'Forward
+  => OatlabAnalysis
+    (IAnnFix p OatlabAstF)
+    p
+    approx
+    'StatementNode
+    'StatementNode
+    m
+    'Forward
   -> IAnn p OatlabAstF (StatementFlowResult m p approx)
   :~> StatementFlowResult m p approx
 analyzeForward analysis@(Analysis {..}) (IAnn ann node) = case node of
@@ -110,7 +128,10 @@ analyzeForward analysis@(Analysis {..}) (IAnn ann node) = case node of
 
     pure $ HFix (IAnn ann' node')
 
-  FunctionDecl (FR (IMR name)) (map (imResult . result) -> params) (map result -> fstmts)
+  FunctionDecl
+    (FR (IMR name))
+    (map (imResult . result) -> params)
+    (map result -> fstmts)
     -> FR $ IMR $ do
       name' <- name
       params' <- sequenceA params
@@ -118,7 +139,9 @@ analyzeForward analysis@(Analysis {..}) (IAnn ann node) = case node of
       (_, body') <- chainStmts analysisGetApproximation startingApprox fstmts
       let node' = FunctionDecl name' params' body'
 
-      approx' <- analysisDataflow (IAnn ann node') (analysisGetApproximation ann)
+      approx' <- analysisDataflow
+        (IAnn ann node')
+        (analysisGetApproximation ann)
       ann' <- analysisUpdateApproximation approx' ann
 
       pure $ HFix (IAnn ann' node')
@@ -200,26 +223,30 @@ analyzeForward analysis@(Analysis {..}) (IAnn ann node) = case node of
 
       (approx', body) <- chainStmts analysisGetApproximation approx bodyFs
 
+      let node' = ForLoop var' expr' body
+
+      approx'' <- analysisDataflow (IAnn ann node') approx'
+
       let approxes = stmtApprox <$> body
 
-      (_, body') <- chainStmts'
+      (approx''', body') <- chainStmts'
         (analysisDataflow . unHFix)
         analysisUpdateApproximation
-        approx'
+        approx''
         body
 
       let approxes' = stmtApprox <$> body'
 
-      let node' = ForLoop var' expr' body'
-      ann' <- analysisUpdateApproximation approx' ann
+      let node'' = ForLoop var' expr' body'
+
+      ann' <- analysisUpdateApproximation approx''' ann
 
       if all id (zipWith analysisApproximationEq approxes approxes')
-      then do
-        pure $ HFix (IAnn ann' node')
+      then pure $ HFix (IAnn ann' node')
       else do
         ann'' <- analysisUpdateIterations (subtract 1) ann'
-        let ast = HFix (IAnn ann'' node')
-        imResult (result (runForwardOatlabAnalysis analysis ast) approx)
+        let ast = HFix (IAnn ann'' node'')
+        imResult (result (runForwardOatlabAnalysis analysis ast) approx''')
 
   Branch (FR (IMR expr)) (map result -> thenBodyFs) mElseBodyFs
     -> FR $ \approx -> IMR $ do
@@ -283,6 +310,15 @@ analyzeForward analysis@(Analysis {..}) (IAnn ann node) = case node of
 
     pure $ HFix (IAnn ann' node')
 
+  VarDecl (FR (IMR ident)) -> FR $ IMR $ do
+    ident' <- ident
+    let node' = VarDecl ident'
+
+    approx' <- analysisDataflow (IAnn ann node') (analysisGetApproximation ann)
+    ann' <- analysisUpdateApproximation approx' ann
+
+    pure $ HFix (IAnn ann' node')
+
   Identifier name -> FR $ IMR $ do
     let node' = Identifier name
 
@@ -302,8 +338,8 @@ analyzeForward analysis@(Analysis {..}) (IAnn ann node) = case node of
     pure $ HFix (IAnn ann' node')
 
 runForwardOatlabAnalysis
-  :: forall (m :: * -> *) (approx :: *) (p :: AstNode -> *).
+  :: forall (m :: * -> *) (approx :: AstNode -> *) (p :: AstNode -> *).
     (Monad m, MonadAnalysis m)
-  => OatlabAnalysis (OatlabIAnnAst p) p approx 'StatementNode m 'Forward
+  => OatlabAnalysis (OatlabIAnnAst p) p approx 'StatementNode 'StatementNode m 'Forward
   -> OatlabIAnnAst p :~> StatementFlowResult m p approx
 runForwardOatlabAnalysis analysis = hcata (analyzeForward analysis)

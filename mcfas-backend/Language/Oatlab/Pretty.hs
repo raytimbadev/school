@@ -75,6 +75,7 @@ ppAlg node = case node of
   StringLiteral str -> K (doubleQuotes (text str))
   NumericLiteral num -> K (double num)
   Identifier name -> K (text name)
+  VarDecl (K ident) -> K ident
 
 -- | Pretty-print a binary operator.
 ppOp :: BinaryOperator -> Doc
@@ -91,6 +92,7 @@ ppOp op = case op of
   Equal -> "=="
   NotEqual -> "!="
   RangeToFrom -> ":"
+  IndexBy -> "@"
 
 -- | Render a pretty-printed document into a string, so that you can do things
 -- with it (like print it or save it to a file).
