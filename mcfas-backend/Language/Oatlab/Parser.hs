@@ -1,7 +1,40 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Language.Oatlab.Parser where
+module Language.Oatlab.Parser
+( -- * Parsers for AST
+  programDecl
+, topLevelDecl
+, statement
+, whileLoop
+, forLoop
+, branch
+, return
+, assignment
+, expressionStmt
+, expression
+, term
+, literal
+, variable
+, varDecl
+, identifier
+  -- * Parsers for AST components
+, numericLiteral
+, stringLiteral
+, comment
+, keyword
+, keyword'
+, symbol
+, symbol'
+, identifier'
+  -- * Types
+, ParsedOatlabAst
+, SrcSpan(..)
+, module Text.Megaparsec.String
+  -- * Misc
+, lexeme
+, sc
+) where
 
 import Data.Annotation
 import Data.HFunctor
@@ -80,17 +113,16 @@ return :: Parser (ParsedOatlabAst 'StatementNode)
 return = do
   (s, expr) <- spanning $ do
     try (keyword' "return")
-    expression
+    expression <* semi
 
   pure $ HFix (IAnn (K s) (Return expr))
 
 assignment :: Parser (ParsedOatlabAst 'StatementNode)
 assignment = do
   (s, (lhs, rhs)) <- spanning $ do
-    lhs <- expression
-    symbol' "="
+    lhs <- try (expression <* equals)
     rhs <- expression
-    symbol' ";"
+    semi
     pure (lhs, rhs)
 
   pure $ HFix (IAnn (K s) (Assignment lhs rhs))
@@ -98,6 +130,7 @@ assignment = do
 expressionStmt :: Parser (ParsedOatlabAst 'StatementNode)
 expressionStmt = do
   expr <- expression
+  semi
   pure $ HFix (IAnn (K (unK (topAnnI expr))) (Expression expr))
 
 expression :: Parser (ParsedOatlabAst 'ExpressionNode)
@@ -113,6 +146,8 @@ expression = makeExprParser term operators where
       ]
     , [ binary Addition "+"
       , binary Subtraction "-"
+      ]
+    , [ binary RangeToFrom ":"
       ]
     , [ binary LessThan "<"
       , binary LessThanEqual "<="
@@ -144,40 +179,26 @@ expression = makeExprParser term operators where
         (K $ joinSpan (unK $ topAnnI e) s)
         (Call e args)
 
-  term :: Parser (ParsedOatlabAst 'ExpressionNode)
-  term = literal <|> variable
+term :: Parser (ParsedOatlabAst 'ExpressionNode)
+term = parens expression <|> literal <|> variable
 
-  literal :: Parser (ParsedOatlabAst 'ExpressionNode)
-  literal
-    = (bro NumericLiteral numericLiteral)
-    <|> (bro StringLiteral stringLiteral) where
-      bro
-        :: (forall f. a -> OatlabAstF f 'ExpressionNode)
-        -> Parser a
-        -> Parser (ParsedOatlabAst 'ExpressionNode)
-      bro ctor p = do
-        (s, x) <- spanning p
-        pure $ HFix (IAnn (K s) (ctor x))
+literal :: Parser (ParsedOatlabAst 'ExpressionNode)
+literal
+  = lexeme
+  $ (bro NumericLiteral numericLiteral)
+  <|> (bro StringLiteral stringLiteral) where
+    bro
+      :: (forall f. a -> OatlabAstF f 'ExpressionNode)
+      -> Parser a
+      -> Parser (ParsedOatlabAst 'ExpressionNode)
+    bro ctor p = do
+      (s, x) <- spanning p
+      pure $ HFix (IAnn (K s) (ctor x))
 
-  numericLiteral :: Parser Double
-  numericLiteral
-    = join $ fmap
-      (
-        maybe (fail "can't parse number") pure
-        . readMaybe
-      )
-      (digits ++! dot ++! digits) where
-        digits = some digitChar
-        pl ++! pr = (++) <$> pl <*> pr
-        dot = string "."
-
-  stringLiteral :: Parser String
-  stringLiteral = try (string "\"") *> manyTill anyChar (string "\"")
-
-  variable :: Parser (ParsedOatlabAst 'ExpressionNode)
-  variable = do
-    name <- identifier
-    pure $ HFix (IAnn (K (unK (topAnnI name))) (Var name))
+variable :: Parser (ParsedOatlabAst 'ExpressionNode)
+variable = do
+  name <- identifier
+  pure $ HFix (IAnn (K (unK (topAnnI name))) (Var name))
 
 varDecl :: Parser (ParsedOatlabAst 'VarDeclNode)
 varDecl = do
@@ -195,6 +216,21 @@ data SrcSpan
     { spanStart :: SourcePos
     , spanEnd :: SourcePos
     }
+
+numericLiteral :: Parser Double
+numericLiteral
+  = join $ fmap
+    (
+      maybe (fail "can't parse number") pure
+      . readMaybe
+    )
+    (digits ++! dot ++! digits) where
+      digits = some digitChar
+      pl ++! pr = (++) <$> pl <*> pr
+      dot = string "."
+
+stringLiteral :: Parser String
+stringLiteral = try (string "\"") *> manyTill anyChar (string "\"")
 
 -- | Runs a parser and also returns the span consumed by the parser.
 spanning :: Parser a -> Parser (SrcSpan, a)
@@ -222,15 +258,7 @@ lexeme = (<* sc)
 
 -- | Space consumer. Eats up as much whitespace and comments as possible.
 sc :: Parser ()
-sc = pure () <* many (choice [ws', comment])
-
--- | Mandatory whitespace.
-ws' :: Parser ()
-ws' = skipSome space
-
--- | Optional whitespace.
-ws :: Parser ()
-ws = skipMany space
+sc = skipMany (choice [() <$ spaceChar, comment])
 
 -- | Comments
 --
@@ -262,9 +290,15 @@ reservedWords =
   , "else"
   ]
 
+-- | Parser that succeeds only if a reserved word is matched.
+someReservedWord :: Parser ()
+someReservedWord = () <$ choice ps where
+  ps = (\s -> string s <* notFollowedBy identTail) <$> reservedWords
+
 identifier' :: Parser String
-identifier' = lexeme p where
-  p = try ((:) <$> identHead <*> many identTail) <* notFollowedBy identTail
+identifier'
+  = notFollowedBy someReservedWord *> lexeme (p <* notFollowedBy identTail) where
+    p = (:) <$> identHead <*> many identTail
 
 identHead :: Parser Char
 identHead = letterChar
@@ -275,5 +309,11 @@ identTail = alphaNumChar
 commaSep :: Parser a -> Parser [a]
 commaSep = (`sepBy` comma)
 
-comma :: Parser String
-comma = symbol ","
+comma :: Parser ()
+comma = () <$ lexeme (string ",")
+
+semi :: Parser ()
+semi = () <$ lexeme (string ";")
+
+equals :: Parser ()
+equals = symbol' "="

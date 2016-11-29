@@ -26,6 +26,7 @@ library
     Data.Annotation
     Data.HFunctor
     Data.Reflection
+    Language.Common.Analysis
     Language.Oatlab.Analysis
     Language.Oatlab.Analysis.ReachingDefinitions
     Language.Oatlab.Analysis.StatementNumbering
