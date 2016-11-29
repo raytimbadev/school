@@ -50,7 +50,7 @@ ppAlg node = case node of
     )
   ForLoop (K ident) (K expr) (map unK -> body) ->
     K (
-      "for" <+> ident <+> "=" <+> expr <+> "{" $+$ nest 4 (joinLines body) $+$ "}"
+      "for" <+> ident <+> "<-" <+> expr <+> "{" $+$ nest 4 (joinLines body) $+$ "}"
     )
   Branch (K expr) (map unK -> body1) body2 ->
     K (
