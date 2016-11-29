@@ -1,0 +1,171 @@
+\documentclass{beamer}
+
+\usepackage[utf8]{inputenc}
+
+\title{McFAS\\functionally analyzing imperative programs}
+\author{Jacob Thomas Errington}
+\institute{McGill University}
+\date{29 November 2016}
+
+\usepackage{tikz}
+\usepackage{listings}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+  \frametitle{The expression problem}
+
+  \pause
+
+  \begin{block}{Object-oriented programming}
+    Models are \emph{horizontally} extensible.
+  \end{block}
+
+  \begin{block}{Functional programming}
+    Models are \emph{vertically} extensible.
+  \end{block}
+
+  \pause
+
+  \begin{block}{Consequences}
+    \begin{description}
+      \item[OOP.] Design patterns.
+      \item[FP.] Advanced techniques.
+    \end{description}
+  \end{block}
+
+\end{frame}
+
+\begin{frame}
+  What if we had analysis framework leveraging FP?
+
+  \pause
+
+  \alert{McFAS}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Outline}
+
+  \begin{itemize}
+    \item Oatlab
+    \item Design of McFAS
+    \item Example analysis
+    \item Related work
+  \end{itemize}
+\end{frame}
+
+\section{Oatlab}
+
+\begin{frame}[fragile]
+  \frametitle{Oatlab language}
+
+  \begin{itemize}
+    \item Very simple imperative language.
+    \item Dynamically typed.
+    \item Looks more like JavaScript than MATLAB.
+  \end{itemize}
+
+  \begin{lstlisting}
+function dispRange(n) {
+  for i <- 1 : n {
+    disp(i);
+  }
+}
+  \end{lstlisting}
+\end{frame}
+
+\section{Design of McFAS}
+
+\begin{frame}
+  \frametitle{Analysis as a datatype}
+
+  Our goal is to represent an analysis succintly in a record.
+
+  \pause
+
+  \begin{description}
+    \item[Approximation:] type parameter.
+    \item[Precise statement:] documentation.
+    \item[Merge operator:] field in the record.
+    \item[Analysis direction:] type index.
+    \item[Dataflow equation:] field in the record.
+    \item[Initial conditions:] precondition \& field in the record.
+  \end{description}
+\end{frame}
+
+\begin{frame}
+  \frametitle{AST representation}
+
+  \pause
+
+  \begin{itemize}
+    \item Strategy used in Goto was a mess.
+    \item Adapt
+      \emph{
+        Generic Programming with Fixed Points for Mutually Recursive Datatypes
+      }.
+      ICFP 2009.
+    \item Building on
+      \emph{
+        Functional Programming with Bananas, Lenses, Envelopes and Barbed Wire
+      }
+  \end{itemize}
+
+  \pause
+
+  \begin{block}{Benefits}
+    \begin{itemize}
+      \item One datatype to rule them all.
+      \item Indexed annotations.
+      \item General recursion schemes.
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Concrete consequences}
+
+  \begin{itemize}
+    \item Specifying AST traversals is straightforward.
+    \item Traversal of an annotated AST is effectively an analysis.
+    \item Idea: store last computed flow sets in the annotation.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Example: reaching definitions}
+\end{frame}
+
+\section{Conclusion}
+
+\begin{frame}
+  \frametitle{Future work}
+
+  \begin{itemize}
+    \item Improve fixed-point solver: better error messages and bug fixes.
+    \item Implement backwards analysis runner.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \begin{block}{Related work}
+    \begin{itemize}
+      \item
+        Many static analysis tools for imperative languages are themselves
+        written in imperative languages, e.g. McSAF, Soot.
+      \item
+        Some formal verification tools for imperative languages are however
+        implemented using functional programming languages, e.g. \emph{Frama-C}
+        is written in OCaml and formally verifies C programs.
+    \end{itemize}
+  \end{block}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Conclusion}
+\end{frame}
+
+\end{document}
