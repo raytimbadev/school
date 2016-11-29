@@ -41,10 +41,6 @@ type family StatementNumbering (node :: AstNode) :: * where
 newtype StatementNumberingP (node :: AstNode)
   = StatementNumberingP { unStatementNumberingP :: StatementNumbering node }
 
--- | Increment the value in the state by one and return the value in the state.
-nextInt :: MonadState Int m => m Int
-nextInt = modify (+1) *> get
-
 -- | Number statements increasingly.
 --
 -- /Monadic higher-order F-algebra/
@@ -62,3 +58,7 @@ numberStatementAlg = reannotateM phi where
     VarDeclNodeS -> pure $ StatementNumberingP ()
     ExpressionNodeS -> pure $ StatementNumberingP ()
     IdentifierNodeS -> pure $ StatementNumberingP ()
+
+-- | Increment the value in the state by one and return the value in the state.
+nextInt :: MonadState Int m => m Int
+nextInt = modify (+1) *> get
