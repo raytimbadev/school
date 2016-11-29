@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE RankNTypes #-}
 
 module Language.Oatlab.Parser where
 
@@ -6,11 +7,12 @@ import Data.Annotation
 import Data.HFunctor
 import Language.Oatlab.Syntax
 
-import Control.Monad ( void )
+import Control.Monad ( join )
 import Prelude hiding ( return )
 import Text.Megaparsec
-import Text.Megaparsex.Expr
+import Text.Megaparsec.Expr
 import Text.Megaparsec.String
+import Text.Read ( readMaybe )
 
 -- | The syntax tree produced by the parser is uniformly annotated by source
 -- spans.
@@ -18,23 +20,22 @@ type ParsedOatlabAst = IAnnFix (K SrcSpan) OatlabAstF
 
 programDecl :: Parser (ParsedOatlabAst 'ProgramDeclNode)
 programDecl = do
-  (span, topLevelDecls) <- spanning (many topLevelDecl)
-  -- pure $ HFix (IAnn (K span) (HFix (ProgramDecl topLevelDecls)))
-  pure $ HFix (IAnn (K span) (ProgramDecl topLevelDecls))
+  (s, topLevelDecls) <- spanning (many topLevelDecl)
+  pure $ HFix (IAnn (K s) (ProgramDecl topLevelDecls))
 
 topLevelDecl :: Parser (ParsedOatlabAst 'TopLevelDeclNode)
 topLevelDecl = choice [functionDecl]
 
 functionDecl :: Parser (ParsedOatlabAst 'TopLevelDeclNode)
 functionDecl = do
-  (fnSpan, (name, params, stmts)) <- spanning $ do
-    try (keyword "function")
+  (s, (name, params, stmts)) <- spanning $ do
+    try (keyword' "function")
     name <- identifier
     params <- parens (commaSep varDecl)
     stmts <- braces (many statement)
     pure (name, params, stmts)
 
-  pure $ HFix (IAnn (K fnSpan) (FunctionDecl name params stmts))
+  pure $ HFix (IAnn (K s) (FunctionDecl name params stmts))
 
 statement :: Parser (ParsedOatlabAst 'StatementNode)
 statement
@@ -42,57 +43,57 @@ statement
 
 whileLoop :: Parser (ParsedOatlabAst 'StatementNode)
 whileLoop = do
-  (span, (expr, stmts)) <- spanning $ do
-    try (keyword "while")
+  (s, (expr, stmts)) <- spanning $ do
+    try (keyword' "while")
     expr <- expression
     stmts <- braces (many statement)
     pure (expr, stmts)
 
-  pure $ HFix (IAnn (K span) (WhileLoop expr stmts))
+  pure $ HFix (IAnn (K s) (WhileLoop expr stmts))
 
 forLoop :: Parser (ParsedOatlabAst 'StatementNode)
 forLoop = do
-  (span, (var, expr, stmts)) <- spanning $ do
-    try (keyword "for")
+  (s, (var, expr, stmts)) <- spanning $ do
+    try (keyword' "for")
     var <- varDecl
-    symbol "<-"
+    symbol' "<-"
     expr <- expression
     stmts <- braces (many statement)
     pure (var, expr, stmts)
 
-  pure $ HFix (IAnn (K span) (ForLoop var expr stmts))
+  pure $ HFix (IAnn (K s) (ForLoop var expr stmts))
 
 branch :: Parser (ParsedOatlabAst 'StatementNode)
 branch = do
-  (span, (expr, thenBody, mElseBody)) <- spanning $ do
-    try (keyword "if")
+  (s, (expr, thenBody, mElseBody)) <- spanning $ do
+    try (keyword' "if")
     expr <- expression
     thenBody <- braces (many statement)
     mElseBody <- optional $ do
-      try (keyword "else")
+      try (keyword' "else")
       braces (many statement)
     pure (expr, thenBody, mElseBody)
 
-  pure $ HFix (IAnn (K span) (Branch expr thenBody mElseBody))
+  pure $ HFix (IAnn (K s) (Branch expr thenBody mElseBody))
 
 return :: Parser (ParsedOatlabAst 'StatementNode)
 return = do
-  (span, expr) <- spanning $ do
-    try (keyword "return")
+  (s, expr) <- spanning $ do
+    try (keyword' "return")
     expression
 
-  pure $ HFix (IAnn (K span) (Return expr))
+  pure $ HFix (IAnn (K s) (Return expr))
 
 assignment :: Parser (ParsedOatlabAst 'StatementNode)
 assignment = do
-  (span, (lhs, rhs)) <- spanning $ do
+  (s, (lhs, rhs)) <- spanning $ do
     lhs <- expression
-    symbol "="
+    symbol' "="
     rhs <- expression
-    symbol ";"
+    symbol' ";"
     pure (lhs, rhs)
 
-  pure $ HFix (IAnn (K span) (Assignment lhs rhs))
+  pure $ HFix (IAnn (K s) (Assignment lhs rhs))
 
 expressionStmt :: Parser (ParsedOatlabAst 'StatementNode)
 expressionStmt = do
@@ -100,17 +101,93 @@ expressionStmt = do
   pure $ HFix (IAnn (K (unK (topAnnI expr))) (Expression expr))
 
 expression :: Parser (ParsedOatlabAst 'ExpressionNode)
-expression = _
+expression = makeExprParser term operators where
+  operators =
+    [ [ call
+      , binary IndexBy "@"
+      ]
+    , [ binary Multiplication "*"
+      , binary Division "*"
+      ]
+    , [ binary Modulo "%"
+      ]
+    , [ binary Addition "+"
+      , binary Subtraction "-"
+      ]
+    , [ binary LessThan "<"
+      , binary LessThanEqual "<="
+      , binary GreaterThan ">"
+      , binary GreaterThanEqual ">="
+      , binary Equal "=="
+      , binary NotEqual "!="
+      ]
+    ]
+
+  binary
+    :: BinaryOperator
+    -> String
+    -> Operator Parser (ParsedOatlabAst 'ExpressionNode)
+  binary op name = InfixL $ do
+    symbol' name
+    pure $ \left right
+      -> HFix $ IAnn
+        (K $ joinSpan (unK $ topAnnI left) (unK $ topAnnI right))
+        (BinaryOperation op left right)
+
+  call :: Operator Parser (ParsedOatlabAst 'ExpressionNode)
+  call = Postfix $ do
+    (s, args) <- spanning $ do
+      between (try $ symbol "(") (symbol ")") (expression `sepBy` comma)
+
+    pure $ \e
+      -> HFix $ IAnn
+        (K $ joinSpan (unK $ topAnnI e) s)
+        (Call e args)
+
+  term :: Parser (ParsedOatlabAst 'ExpressionNode)
+  term = literal <|> variable
+
+  literal :: Parser (ParsedOatlabAst 'ExpressionNode)
+  literal
+    = (bro NumericLiteral numericLiteral)
+    <|> (bro StringLiteral stringLiteral) where
+      bro
+        :: (forall f. a -> OatlabAstF f 'ExpressionNode)
+        -> Parser a
+        -> Parser (ParsedOatlabAst 'ExpressionNode)
+      bro ctor p = do
+        (s, x) <- spanning p
+        pure $ HFix (IAnn (K s) (ctor x))
+
+  numericLiteral :: Parser Double
+  numericLiteral
+    = join $ fmap
+      (
+        maybe (fail "can't parse number") pure
+        . readMaybe
+      )
+      (digits ++! dot ++! digits) where
+        digits = some digitChar
+        pl ++! pr = (++) <$> pl <*> pr
+        dot = string "."
+
+  stringLiteral :: Parser String
+  stringLiteral = try (string "\"") *> manyTill anyChar (string "\"")
+
+  variable :: Parser (ParsedOatlabAst 'ExpressionNode)
+  variable = do
+    name <- identifier
+    pure $ HFix (IAnn (K (unK (topAnnI name))) (Var name))
 
 varDecl :: Parser (ParsedOatlabAst 'VarDeclNode)
 varDecl = do
-  name <- identifier <* ws
+  name <- identifier
   pure $ HFix (IAnn (K (unK (topAnnI name))) (VarDecl name))
 
 identifier :: Parser (ParsedOatlabAst 'IdentifierNode)
 identifier = do
-  (span, ident) <- spanning identifier'
-  pure $ HFix (IAnn (K span) (Identifier ident))
+  (s, ident) <- spanning identifier'
+  pure $ HFix (IAnn (K s) (Identifier ident))
 
 -- | A span of text.
 data SrcSpan
@@ -166,8 +243,14 @@ comment = try (string "/*") *> manyTill anyChar (string "*/") *> pure ()
 keyword :: String -> Parser String
 keyword s = lexeme (try (string s) <* notFollowedBy alphaNumChar)
 
+keyword' :: String -> Parser ()
+keyword' = (() <$) . keyword
+
 symbol :: String -> Parser String
 symbol s = lexeme (try (string s) <* notFollowedBy symbolChar)
+
+symbol' :: String -> Parser ()
+symbol' = (() <$) . symbol
 
 reservedWords :: [String]
 reservedWords =
