@@ -12,17 +12,24 @@ TODO use real chunks of AST instead of strings for representing the definitions.
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE ViewPatterns #-}
 
 module Language.Oatlab.Analysis.ReachingDefinitions
 ( reachingDefinitions
 , initializeReachingDefinitions
 , initializeReachingDefinitionsAlg
+, reachingDefinitionsPpAlg
+, ReachingDefinitionsP(..)
+, ReachingDefinitionsApproxP(..)
+, ReachingDefinitions
+, ReachingDefinitionsApprox
 ) where
 
 import Data.Annotation
@@ -38,6 +45,9 @@ import Control.Monad.State
 import Data.Proxy
 import qualified Data.Map as M
 import qualified Data.Set as S
+import Text.PrettyPrint
+
+import Debug.Trace
 
 -- | Helper for adding a definition to the set of definitions associated with a
 -- given expression.
@@ -148,8 +158,8 @@ initializeReachingDefinitions
   :: forall (m :: * -> *) (a :: AstNode).
     (Monad m, MonadState Int m)
   => OatlabAst a
-  -> MonadH m (OatlabIAnnAst ReachingDefinitionsP) a
-initializeReachingDefinitions = hcata phi where
+  -> m (OatlabIAnnAst ReachingDefinitionsP a)
+initializeReachingDefinitions = unMonadH . hcata phi where
   phi
     :: OatlabAstF (MonadH m (OatlabIAnnAst ReachingDefinitionsP)) b
     -> MonadH m (OatlabIAnnAst ReachingDefinitionsP) b
@@ -176,14 +186,14 @@ reachingDefinitionsDataflow (IAnn a node) approx
       let (ReachingDefinitionsP (ReachingDefinitions {..})) = a
       in case node of
         WhileLoop _ _ -> approx
+        Branch _ _ _ -> approx
+        Return _ -> approx
         ForLoop var _ _
           -> ReachingDefinitionsApproxP $
             addDefinition
               (nameFromVarDecl (stripI var))
               rdStatementNumber
               (unReachingDefinitionsApproxP rdApproximation)
-        Branch _ _ _ -> approx
-        Return _ -> approx
         Assignment lhs _
           | unK (hcata (isLValueAlg . bareI) lhs)
             -> ReachingDefinitionsApproxP $
@@ -254,3 +264,21 @@ reachingDefinitions = Analysis
           }
   , analysisBoundaryApproximation = pure (ReachingDefinitionsApproxP M.empty)
   }
+
+reachingDefinitionsPpAlg
+  :: IAnn ReachingDefinitionsP OatlabAstF (K Doc) :~> K Doc
+reachingDefinitionsPpAlg (IAnn a node) = case collapseIndex node of
+  StatementNodeS -> case a of
+    ReachingDefinitionsP rd -> K $
+      unK (ppAlg node) <+> "/*" <+> ppRd rd <+> "*/"
+  _ -> ppAlg node
+
+ppRd :: ReachingDefinitions 'StatementNode -> Doc
+ppRd ReachingDefinitions {..} = "#" <> ppStmtNum rdStatementNumber <> rest where
+  (ReachingDefinitionsApproxP approx) = rdApproximation
+  defs = S.toList (S.unions (M.elems approx))
+  ppDefs = hcat (punctuate ", " (ppStmtNum <$> defs))
+  rest = if null defs then empty else " :" <+> ppDefs
+
+ppStmtNum :: StatementNumber -> Doc
+ppStmtNum (StatementNumber n) = int n

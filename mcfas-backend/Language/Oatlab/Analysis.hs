@@ -8,6 +8,8 @@ Stability   : experimental
 -}
 
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE LambdaCase #-}
@@ -22,6 +24,7 @@ Stability   : experimental
 module Language.Oatlab.Analysis where
 
 import Control.Monad ( when )
+import Control.Monad.Except ( MonadError(..) )
 import Data.Annotation ( IAnn(..), IAnnFix, topAnnI, mapTopAnnI )
 import Data.HFunctor ( HFix(..), hcata, (:~>) )
 import Language.Common.Analysis ( Analysis(..), Direction(..) )
@@ -85,6 +88,9 @@ class MonadAnalysis m where
   -- | Raises an exception claiming that iterations are exhausted.
   iterationsExhausted :: m a
   -- TODO pass in the problematic tree, for error messages?
+
+instance MonadError () m => MonadAnalysis m where
+  iterationsExhausted = throwError ()
 
 -- | Feed an approximation through a list of statements.
 --

@@ -1,13 +1,19 @@
 {-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE ViewPatterns #-}
 
 module Main where
 
-import Data.Annotation ( bareI )
+import Data.Annotation ( bareI, stripI )
 import Data.HFunctor ( hcata, unK )
+import Language.Oatlab.Analysis
+import Language.Oatlab.Analysis.ReachingDefinitions
+import Language.Oatlab.Analysis.StatementNumbering
 import Language.Oatlab.Pretty ( ppAlg, renderOatlab )
 import Language.Oatlab.Parser
 
 import Control.Monad ( forM_ )
+import Control.Monad.State ( evalState )
+import Control.Monad.Except ( runExcept )
 import Prelude hiding ( return )
 import System.Exit ( exitFailure )
 import System.IO ( hPutStrLn, stderr )
@@ -27,6 +33,17 @@ main = do
       errorPutStrLn "parsing succeeded"
       errorPutStrLn "pretty-print:"
       putStrLn (renderOatlab $ unK $ hcata (ppAlg . bareI) $ ast)
+
+      let initRDAst = evalState (initializeReachingDefinitions . stripI $ ast) 0
+
+      case runForwardOatlabAnalysis reachingDefinitions initRDAst of
+        FR (IMR (runExcept -> foo)) -> case foo of
+          Left () -> do
+            errorPutStrLn "fixed-point solver iterations exhauseted"
+            exitFailure
+          Right ast' -> do
+            errorPutStrLn "analysis completed"
+            putStrLn (renderOatlab $ unK $ hcata reachingDefinitionsPpAlg ast')
 
   errorPutStrLn "exited normally"
 

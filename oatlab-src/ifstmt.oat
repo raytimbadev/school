@@ -1,0 +1,10 @@
+function repeat(n) {
+  x = y;
+  if true {
+    x = y;
+  }
+  else {
+    x = y;
+  }
+  disp(x);
+}

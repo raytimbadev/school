@@ -28,10 +28,7 @@ import Language.Oatlab.Syntax
 import Control.Monad.State
 
 -- | A number assigned to a statement. Used to uniquely identify statements.
-newtype StatementNumber
-  = StatementNumber
-    { unStatementNumber :: Int
-    }
+newtype StatementNumber = StatementNumber { unStatementNumber :: Int }
   deriving (Eq, Ord)
 
 -- | Node annotation index interpretation that annotates 'StatementNode' with
@@ -57,9 +54,7 @@ numberStatementAlg
 numberStatementAlg = reannotateM phi where
   phi
     :: (Monad m, MonadState Int m)
-    => OatlabAstF f a
-    -> p a
-    -> m (StatementNumberingP a)
+    => OatlabAstF f a -> p a -> m (StatementNumberingP a)
   phi node _ = case collapseIndex node of
     StatementNodeS -> StatementNumberingP . StatementNumber <$> nextInt
     ProgramDeclNodeS -> pure $ StatementNumberingP ()

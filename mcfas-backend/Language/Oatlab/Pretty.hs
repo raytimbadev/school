@@ -21,6 +21,7 @@ difficult.
 module Language.Oatlab.Pretty
 ( ppAlg
 , renderOatlab
+, Doc
 ) where
 
 import Data.HFunctor ( K(..), (:~>) )
