@@ -5,9 +5,68 @@
 \date{5 December 2016}
 
 \usepackage[margin=2.0cm]{geometry}
+\usepackage{csquotes}
+
+\newcommand{\codesnip}{\texttt}
 
 \begin{document}
 
 \maketitle
+
+\section{My special topic question}
+
+\begin{enumerate}
+  \item
+    My special topic question is
+    \begin{displayquote}
+      Strictness analysis attempts to determine which parameters a function
+      will always evaluate. How can strictness analysis be used to optimize a
+      function?
+    \end{displayquote}
+
+  \item
+    Haskell is a non-strict language, meaning that expressions are evaluated on
+    a need-to-know basis, and only to the extent that they need to be
+    evaluated. The paper I presented discusses the strategies employed by GHC
+    to efficiently implement lazy evaluation, but even these tricks have
+    overhead. I chose this question because interesting optimization
+    opportunities arise when a function is guaranteed to evaluate one or more
+    of its parameters.
+
+  \item
+    In the presentation, it is seen that all heap objects are uniformly
+    represented as closures. However, entering closures is costly because it
+    involves executing a jump instruction. Sometimes, closures may also consume
+    more space than the data they compute. This is commonly the case for
+    arithmetic: the expression \codesnip{let z = x + y} will be represented as
+    a suspended computation with two pointers to the free variables
+    $x$ and $y$ as well as an additional pointer to the $+$ function. However,
+    if we have an expression such as
+    \codesnip{case z of 0 -> A ; \textunderscore{} -> B}
+    after -- i.e. $z$ is scrutinized -- then the compiler is free
+    to eliminate the suspended computation representing $z$ and instead
+    immediately compute $z$ at the time that the binding is created. This saves
+    space because storing the result of the operation (a mere integer -- $32$
+    or $64$ bits) requires much less space than storing the suspended
+    computation (three pointers, so $3 \times 32$ or $3 \times 64$ bits).
+    Precomputing the value also saves time: immediately executing the code of
+    $+$ is faster than constructing a suspended computation and then entering
+    it later.
+
+    Furthermore, it is seen in the presentation that the STG language supports
+    unboxed values. Whereas boxed values are represented as pointers to
+    heap-allocated objects, unboxed values are instead stack-allocated. By
+    strictness analysis, it can be determined whether the parameters of a
+    function are definitely evaluated, and in those cases, a function accepting
+    boxed values can instead be replaced by a function accepting unboxed
+    values. (There are some additional considerations regarding polymorphism,
+    but this is the correct intuition.) Consequently, its parameters are passed
+    via the stack which is significantly faster than requiring the function to
+    follow pointers into the heap.
+
+    A correct answer to my question would mention the potential space and time
+    savings and justify them with a similar example in which a suspended
+    computation is constructed and immediately destructed.
+\end{enumerate}
 
 \end{document}
