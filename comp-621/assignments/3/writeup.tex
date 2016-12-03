@@ -41,13 +41,13 @@ both branches and use the following merging operation.
     since in C their value is arbitrary.
 
     \begin{description}
-      \item[Point $A$.]
+      \item[Point A.]
         $\{ (x, 3), (y, 1), (i, 6), (j, \top)\}$.
 
-      \item[Point $B$.]
+      \item[Point B.]
         $\{ (x, \top), (y, \top), (j, \top), (i, 6) \}$
 
-      \item[Point $C$.]
+      \item[Point C.]
         $\{ (x, \top), (y, \top), (j, \top), (i, 6) \}$
     \end{description}
 
@@ -72,20 +72,20 @@ both branches and use the following merging operation.
     points using this summary information.
 
     \begin{description}
-      \item[Point $A$.]
+      \item[Point A.]
         $\{ (x, 3), (y, 1), (i, 6), (j, \top) \}$
 
         Since no function calls have been made at this point, the information
         is the same as in the conservative approach.
 
-      \item[Point $B$.]
+      \item[Point B.]
         $\{ (x, T), (y, 1), (i, 6), (j, 5) \}$
 
         Since the call to \codesnip{foo} only writes to the variable $x$, the
         variable $y$ preserves its constant value $5$, allowing us to determine
         that $j$ has a constant value at this program point.
 
-      \item[Point $C$.]
+      \item[Point C.]
         $\{ (x, \top), (y, \top), (j, \top), (i, 6) \}$
 
         Since the call to \codesnip{bar} modifies both global variables, we get
@@ -101,13 +101,13 @@ both branches and use the following merging operation.
     considered assignment into the scope of the function.
 
     \begin{description}
-      \item[Point $A$.]
+      \item[Point A.]
         $\{ (x, 3), (y, 1), (i, 6), (j, \top) \}$
 
         Again since no function calls have been made at this point, the
         information is the same as in the conservative approach.
 
-      \item[Point $B$.]
+      \item[Point B.]
         $\{ (x, 13), (y, 1), (i, 6), (j, 5) \}$
 
         In \codesnip{foo} called at line $8$, we have that the variable $i$
@@ -119,10 +119,10 @@ both branches and use the following merging operation.
         Hence upon return of the call, we have that $x = 13$, but otherwise the
         information is the same as in the summary approach.
 
-      \item[Point $C$.]
+      \item[Point C.]
         $\{ (x, 13), (y, 7), (i, 6), (j, 16) \}$
 
-      \item[Point $D$.] ~
+      \item[Point D.] ~
 
         \begin{description}
           \item[Reached from] $\f{08:main}\to\f{foo}$.
@@ -130,7 +130,7 @@ both branches and use the following merging operation.
             $\{ (x, 13), (y, 1), (u, 12) \}$
         \end{description}
 
-      \item[Point $E$.] ~
+      \item[Point E.] ~
 
         \begin{description}
           \item[Reached from]
