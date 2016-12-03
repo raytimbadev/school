@@ -6,9 +6,15 @@
 
 \usepackage[margin=2.0cm]{geometry}
 \usepackage{csquotes}
+\usepackage{graphicx}
 
 \newcommand{\codesnip}{\texttt}
 \newcommand{\f}{\mathtt}
+
+\usepackage{amsmath,amssymb}
+
+\newcommand{\mayp}{\xrightarrow{\text{?}}}
+\newcommand{\defp}{\rightarrow}
 
 \begin{document}
 
@@ -147,6 +153,47 @@ both branches and use the following merging operation.
     \end{description}
 
 \end{description}
+
+\section{Points-to analysis}
+
+\begin{enumerate}
+  \item A call to \codesnip{foo(1, 2)} will print \codesnip{1 2 8}.
+
+  \item Here are the flow-sensitive points-to sets computed at several program
+    points.
+
+    \begin{description}
+      \item[Point A.] $\{ p \defp x, q \defp z, pp \defp p \}$
+      \item[Point B.] $\{ p \defp y, q \defp z, pp \defp p \}$
+      \item[Point C.]
+        $\{ p \mayp x, p \mayp y, q \defp z, pp \defp p, qq \defp p \}$
+      \item[Point D.]
+        $\{ p \defp z, q \defp z, pp \defp p, qq \defp p \}$
+    \end{description}
+
+  \item At program point $S$, since it is known that $q$ definitely points to
+    $z$, we can replace the indirect write to $z$ with a direct write to $z$,
+    which is faster to execute. (It's often said that indirections are
+    relatively expensive.)
+
+  \item The graph is in figure \ref{fig:points-to}.
+
+  \item We can do the same transformation, since from the graph it is seen that
+    $q$ definitely points to $z$.
+
+  \item In this case flow sensitivity doesn't matter at program point $S$
+    because $q$ definitely points to $z$ regardless. If instead we have
+    \codesnip{*p = 8}, then it matters because $p$ has two possible targets.
+\end{enumerate}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.2\textwidth]{diagram.jpg}
+  \caption{
+    The flow-insensitive points-to diagram for the function \codesnip{foo}.
+  }
+  \label{fig:points-to}
+\end{figure}
 
 \section{Stefan's special topic question}
 
