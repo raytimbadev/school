@@ -1,0 +1,104 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington}
+\title{Functionally analyzing imperative programs}
+\date{
+  Program analysis \& transformations -- final project report\\
+  16 December 2016
+}
+
+\newcommand{\mcfas}{\textsc{McFAS}}
+\newcommand{\mcsaf}{\textsc{McSAF}}
+\newcommand{\matlab}{MATLAB}
+
+\usepackage[margin=2.0cm]{geometry}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+This report is structured in the following way.
+
+\begin{enumerate}
+  \item
+    We look at the framework \mcsaf{} as a source of motivation for our own
+    framework, outlining some strengths and weaknesses of \mcsaf{}.
+
+  \item
+    We give an in-depth examination of the design of \mcfas{}. We assume only a
+    small background in functional programming, so this section goes into
+    significant detail about the various techniques used to implement our
+    framework. Specifically:
+
+    \begin{enumerate}
+      \item
+        We discuss the representation of simple syntax trees as fixed points of
+        functors, and how to add a general annotation scheme to this syntax
+        tree in order to conveniently express both annotated and unannotated
+        syntax trees. We outline a general recursion scheme for functor fixed
+        points.
+
+      \item
+        We look at the shortcomings of the above approach, and show how it can
+        be generalized to apply to more complex syntax trees, such as those of
+        imperative languages. This gives rise to \emph{indexed syntax trees}.
+        represented as fixed points of higher-order functors. We generalize the
+        annotation scheme to apply to higher-order functors, and we extend the
+        general recursion scheme to apply to higher-order functors as well.
+
+      \item
+        We briefly discuss types and kinds, and how modern Haskell allows the
+        programmer to define new kinds. We consider two schemes for reflecting
+        the elements of these kinds into values, so that they can be
+        manipulated on the term level.
+    \end{enumerate}
+
+  \item
+    We give several practical examples of syntax tree traversals.
+
+    \begin{description}
+      \item[Pretty-printing.]
+        The input tree is converted into a human-readable textual
+        representation.
+
+      \item[Symbol table construction.]
+        The input tree is annotated so that each function declaration is
+        annotated with a list of all the symbols declared in the function body.
+        Uses of undeclared symbols are also recorded. The program declaration
+        is annotated with a list of all the functions declared in the program.
+
+      \item[Statement numbering.]
+        The input tree is annotated so that each statement node is numbered
+        with a unique integer.
+    \end{description}
+
+  \item
+    We show how classical dataflow analyses can be implemented with \mcfas, in
+    particular the reaching definitions analysis and the available expressions
+    analysis.
+\end{enumerate}
+
+The specific contributions we make are the following.
+
+\begin{itemize}
+  \item
+    We provide a flexible framework to serve as a starting point for the
+    development of a fully-featured analysis framework for \matlab{}.
+
+  \item
+    We show through the use of examples how to design transformations and
+    analysis using \mcfas{}. We explain how the Haskell type system allows us
+    to enforce both strong and useful invariants regarding the operation of the
+    analysis.
+
+  \item
+    We give a practical use case for several advanced techniques in functional
+    programming.
+\end{itemize}
+
+\bibliographystyle{plain}
+\bibliography{bibliography}
+
+\end{document}
