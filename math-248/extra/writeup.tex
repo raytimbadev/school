@@ -1,0 +1,122 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington}
+\title{Studying}
+\date{}
+
+\renewcommand{\d}{\mathrm{d}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\parens}[1]{\left(#1\right)}
+\newcommand{\abs}[1]{\left|#1\right|}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+
+\DeclareMathOperator{\curl}{\mathrm{curl}}
+
+\begin{document}
+
+\maketitle
+
+\begin{description}
+    \item[Problem 12.]
+        Let $\mathcal{C}$ be the curve of intersection of the cylinder
+        $x^2 + y^2 = 1$ and the surface $z = xy + 1$, oriented counterclockwise
+        around the cylinder. Compute the line integral
+        \begin{equation}
+            \int_{\mathcal{C}} z(x-1) \d y + y(x+1) \d z
+            \label{eq:p12:statement}
+        \end{equation}
+
+        Computing the line integral directly would be problematic, because the
+        naive parameterization gives an integral in terms of the parameter that
+        involves a lot of products of trigonometric functions. Instead, we can
+        use the Kelvin-Stokes theorem to transform this into an integral over a
+        surface bounded by $\mathcal{C}$.
+
+        Since we are working in $\R^3$, there are infinitely many such
+        surfaces. We choose the surface $\mathcal{S}$ identified by the
+        parameterization $F : D \to \R^3$ given by
+        \begin{equation}
+            \parens{
+                \begin{array}{c}
+                    x \\
+                    y
+                \end{array}
+            }
+            \mapsto
+            \parens{
+                \begin{array}{c}
+                    x \\
+                    y \\
+                    xy + 1
+                \end{array}
+            }
+            \label{eq:p12:prmzn}
+        \end{equation}
+        where $D = \{(x, y) : x^2 + y^2 = 1\}$ is the unit disk centered at the
+        origin.
+
+        Let $\alpha = z(x-1)\d y + y(x+1) \d z$. Then the integral in
+        \eqref{eq:p12:statement} over the differential form $\alpha$ is the
+        same as an integral of the associated vector field of $\alpha$
+        \begin{equation*}
+            \int_{\mathcal{C}} \alpha^T \cdot \d l
+        \end{equation*}
+        which we can rewrite using the Kelvin-Stokes theorem as
+        \begin{equation}
+            \int_{\mathcal{S}} \curl{\alpha^T} \cdot n \d \mathcal{S}
+            \label{eq:p12:afterks}
+        \end{equation}
+
+        Compute the curl of the vector field to integrate
+        \begin{equation}
+            \curl{\alpha^T} = \parens{
+                \begin{array}{c}
+                    2\\
+                    y\\
+                    z
+                \end{array}
+            }
+            \label{eq:p12:curlat}
+        \end{equation}
+        and the normal vector of the surface $\mathcal{S}$
+        \begin{equation}
+            n = \partial_x F \times \partial_y F = \abs{
+                \begin{array}{c c c}
+                    e_1 & e_2 & e_3 \\
+                    1   & 0   & y   \\
+                    0   & 1   & x
+                \end{array}
+            }
+            = \parens{
+                \begin{array}{c}
+                    y \\
+                    -x \\
+                    1
+                \end{array}
+            }
+            \label{eq:p12:normal}
+        \end{equation}
+
+        Substituting \eqref{eq:p12:normal} and \eqref{eq:p12:curlat} into
+        \eqref{eq:p12:afterks} gives
+        \begin{equation}
+            \int_{\mathcal{S}} 2y - xy + z \d \mathcal{S}
+            \label{eq:p12:aftersub}
+        \end{equation}
+
+        Finally, we apply the parameterization given in \eqref{eq:p12:prmzn}
+        to give a double integral over the parameter space.
+        \begin{equation*}
+            \int_{-1}^{1} \int_{-\sqrt{1-x^2}}^{\sqrt{1-x^2}} {2y + 1}\,\d y\d x
+            = \int_{-1}^{1} {y^2 + y}\bigg\rvert_{-\sqrt{1-x^2}}^{\sqrt{1-x^2}}
+            = 2 \int_{-1}^{1} \sqrt{1 - x^2} \, \d x
+        \end{equation*}
+        The last expression can be evaluated either by a trigonometric
+        substitution, or by recognizing that this is simply the area of half of
+        the unit disk, which is equal to $\frac{1}{2}\pi$. Hence, the final
+        value for the integral is $\pi$.
+\end{description}
+
+\end{document}
