@@ -17,6 +17,7 @@ annotations and mutual recursion.
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -29,6 +30,7 @@ module Data.HFunctor
   -- ** Higher-order fixed points and folds
 , HFix(..)
 , hcata
+, hcataM
   -- * Important functors
 , K(..)
 , I(..)
@@ -36,6 +38,8 @@ module Data.HFunctor
 , HTraversable(..)
   -- * Higher-order equality
 , HEq(..)
+  -- * Miscellaneous
+, rewrite
 ) where
 
 import Data.Function ( on )
@@ -94,20 +98,30 @@ instance HEq (f :: k -> *) => HEq (Compose Maybe f) where
 -- | Higher-order catamorphism.
 --
 -- Folds a higher-order functor fixpoint into a functor in a bottom-up fashion.
--- The @h f :~> f@ parameter is a higher-order F-algebra.
 hcata
   :: forall (h :: (k -> *) -> k -> *) (f :: k -> *) (a :: k). HFunctor h
   => (forall (b :: k). h f b -> f b)
   -> HFix h a -> f a
 hcata hAlg = hAlg . hfmap (hcata hAlg) . unHFix
 
--- hcataM
---   :: HFunctor h
---   => forall (a :: k).
---     (forall (a :: k). h f a -> m (f a))
---   -> HFix h a
---   -> m (f a)
--- hcataM hAlgM = (>>= hAlgM) . hcata (htraverse (>>= hAlgM))
+-- | Optional tree rewriting strategy.
+--
+-- Allows the programmer to use strategies that can choose to leave a subtree
+-- as-is by returning 'Nothing'. In that case, the input subtree is used.
+rewrite :: (forall (b :: k). h (HFix h) b -> Maybe (h (HFix h) b)) -> h (HFix h) a -> h (HFix h) a
+rewrite phi s = maybe s id (phi s)
+
+-- | Monadic higher-order catamorphism.
+--
+-- Folds a higher-order functor fixpoint into a functor in a bottom-up fashion,
+-- performing side effects top-down, left-to-right.
+hcataM
+  :: forall (h :: (k -> *) -> k -> *) (f :: k -> *) (m :: * -> *) (a :: k).
+    (Monad m, HTraversable h)
+  => (forall (b :: k). h f b -> m (f b))
+  -> HFix h a
+  -> m (f a)
+hcataM hAlgM = (>>= hAlgM) . traverseH (hcataM hAlgM) . unHFix
 
 -- | Constant functor.
 --
@@ -124,7 +138,7 @@ newtype I a = I { unI :: a } deriving Functor
 
 -- | Class of higher-order functors whose side-effects can be sequenced
 -- left-to-right.
-class HTraversable (h :: (k -> *) -> k -> *) where
+class HFunctor h => HTraversable (h :: (k -> *) -> k -> *) where
   -- | If a higher-order functor contains side effects in its recursive
   -- positions, then they can be sequenced left-to-right, hoisting the actions
   -- up.
@@ -132,3 +146,15 @@ class HTraversable (h :: (k -> *) -> k -> *) where
   -- Generalizes
   -- @sequenceA :: (Traversable t, Applicative f) => t (f a) -> f (t a)@.
   sequenceH :: Applicative m => h (Compose m f) a -> m (h f a)
+
+  -- | Transform the functors inside the higher-order functor by performing
+  -- effects. Evaluate the effects from left to right and collect the results.
+  --
+  -- Generalizes
+  -- @traverse :: (Traversable t, Applicative f) => (a -> f b) -> t a -> f (t b)@.
+  traverseH
+    :: Applicative m
+    => (forall (b :: k). f b -> m (g b))
+    -> h f a
+    -> m (h g a)
+  traverseH f = sequenceH . hfmap (Compose . f)
