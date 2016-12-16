@@ -33,6 +33,7 @@ module Language.Oatlab.Analysis.ReachingDefinitions
 ) where
 
 import Data.Annotation
+import Data.Functor.Compose
 import Data.HFunctor
 import Data.Reflection
 import Language.Common.Analysis
@@ -159,11 +160,11 @@ initializeReachingDefinitions
     (Monad m, MonadState Int m)
   => OatlabAst a
   -> m (OatlabIAnnAst ReachingDefinitionsP a)
-initializeReachingDefinitions = unMonadH . hcata phi where
+initializeReachingDefinitions = getCompose . hcata phi where
   phi
-    :: OatlabAstF (MonadH m (OatlabIAnnAst ReachingDefinitionsP)) b
-    -> MonadH m (OatlabIAnnAst ReachingDefinitionsP) b
-  phi = MonadH
+    :: OatlabAstF (Compose m (OatlabIAnnAst ReachingDefinitionsP)) b
+    -> Compose m (OatlabIAnnAst ReachingDefinitionsP) b
+  phi = Compose
     . fmap HFix
     . join
     . fmap (sequenceH . initializeReachingDefinitionsAlg)

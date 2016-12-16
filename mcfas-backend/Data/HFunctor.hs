@@ -34,7 +34,6 @@ module Data.HFunctor
 , I(..)
   -- * Higher-order generic traversals
 , HTraversable(..)
-, MonadH(..)
   -- * Higher-order equality
 , HEq(..)
 ) where
@@ -132,15 +131,4 @@ class HTraversable (h :: (k -> *) -> k -> *) where
   --
   -- Generalizes
   -- @sequenceA :: (Traversable t, Applicative f) => t (f a) -> f (t a)@.
-  sequenceH :: Applicative m => h (MonadH m f) a -> m (h f a)
-
--- | Presents a monadic wrapper in a uniform way on the type-level.
-newtype MonadH
-  (m :: * -> *)
-  (f :: k -> *)
-  (a :: k)
-  = MonadH
-    { unMonadH :: m (f a) }
-
-instance Functor m => HFunctor (MonadH m) where
-  hfmap f (MonadH m) = MonadH (f <$> m)
+  sequenceH :: Applicative m => h (Compose m f) a -> m (h f a)

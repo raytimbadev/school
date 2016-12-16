@@ -377,35 +377,35 @@ type OatlabIAnnAst p = IAnnFix p OatlabAstF
 
 instance HTraversable OatlabAstF where
   sequenceH = \case
-    ProgramDecl (traverse unMonadH -> topLevelDecls)
+    ProgramDecl (traverse getCompose -> topLevelDecls)
       -> ProgramDecl <$> topLevelDecls
-    FunctionDecl (MonadH name) (traverse unMonadH -> vars) (traverse unMonadH -> body)
+    FunctionDecl (Compose name) (traverse getCompose -> vars) (traverse getCompose -> body)
       -> FunctionDecl <$> name <*> vars <*> body
-    WhileLoop (MonadH expr) (traverse unMonadH -> body)
+    WhileLoop (Compose expr) (traverse getCompose -> body)
       -> WhileLoop <$> expr <*> body
-    ForLoop (MonadH var) (MonadH expr) (traverse unMonadH -> body)
+    ForLoop (Compose var) (Compose expr) (traverse getCompose -> body)
       -> ForLoop <$> var <*> expr <*> body
     Branch
-      (MonadH expr)
-      (traverse unMonadH -> thenBody)
-      (traverse (traverse unMonadH) -> elseBody)
+      (Compose expr)
+      (traverse getCompose -> thenBody)
+      (traverse (traverse getCompose) -> elseBody)
       -> Branch <$> expr <*> thenBody <*> elseBody
-    Return (MonadH expr)
+    Return (Compose expr)
       -> Return <$> expr
-    Assignment (MonadH lhs) (MonadH rhs)
+    Assignment (Compose lhs) (Compose rhs)
       -> Assignment <$> lhs <*> rhs
-    Expression (MonadH expr)
+    Expression (Compose expr)
       -> Expression <$> expr
-    Var (MonadH name)
+    Var (Compose name)
       -> Var <$> name
-    BinaryOperation op (MonadH opl) (MonadH opr)
+    BinaryOperation op (Compose opl) (Compose opr)
       -> BinaryOperation <$> pure op <*> opl <*> opr
-    Call (MonadH expr) (traverse unMonadH -> params)
+    Call (Compose expr) (traverse getCompose -> params)
       -> Call <$> expr <*> params
     Identifier name -> pure (Identifier name)
     StringLiteral str -> pure (StringLiteral str)
     NumericLiteral num -> pure (NumericLiteral num)
-    VarDecl (MonadH ident) -> VarDecl <$> ident
+    VarDecl (Compose ident) -> VarDecl <$> ident
 
 -- | A binary operator.
 data BinaryOperator
