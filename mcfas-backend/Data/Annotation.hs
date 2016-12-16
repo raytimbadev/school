@@ -6,9 +6,7 @@ License     : MIT
 Maintainer  : mcfas@mail.jerrington.me
 Stability   : experimental
 
-Polykinded higher-order functors allow you to represent indexed syntax trees.
-Examples of indexed syntax trees include syntax trees with (static) type
-annotations and mutual recursion.
+Uniform and indexed annotations for higher-order functors.
 -}
 
 {-# LANGUAGE KindSignatures #-}
