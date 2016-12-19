@@ -109,12 +109,11 @@ reachingDefinitionsDataflow
   -- ^ Node in the syntax tree
   -> ReachingDefinitionsApprox a -- ^ input flow set
   -> m (ReachingDefinitionsApprox a) -- ^ output flow set
-reachingDefinitionsDataflow (IAnn (StatementNumbering number) node) (ReachingDefinitionsApprox approx)
+reachingDefinitionsDataflow
+  (IAnn (StatementNumbering number) node)
+  (ReachingDefinitionsApprox approx)
   = pure $ ReachingDefinitionsApprox $ case collapseIndex node of
     StatementNodeS -> case node of
-      WhileLoop _ _ -> approx
-      Branch _ _ _ -> approx
-      Return _ -> approx
       ForLoop var _ _
         -> addDefinition
             (nameFromVarDecl (stripI var))
@@ -126,14 +125,8 @@ reachingDefinitionsDataflow (IAnn (StatementNumbering number) node) (ReachingDef
               (renderOatlab (unK $ hcata (ppAlg . bareI) lhs))
               (S.singleton number)
               approx
-      Assignment _ _ -> approx
-        -- assignment to things that are not lvalues is technically an error
-      Expression _ -> approx
-    ProgramDeclNodeS -> approx
-    TopLevelDeclNodeS -> approx
-    VarDeclNodeS -> approx
-    ExpressionNodeS -> approx
-    IdentifierNodeS -> approx
+      _ -> approx
+    _ -> approx
 
 -- | The reaching definitions analysis.
 reachingDefinitions
