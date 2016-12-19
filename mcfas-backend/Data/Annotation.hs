@@ -31,6 +31,7 @@ module Data.Annotation
 , mapTopAnnI
   -- ** Combinators
 , reannotate
+, reannotateTree
 , reannotateM
 ) where
 
@@ -123,6 +124,14 @@ reannotate
   :: forall (h :: (k -> *) -> k -> *) (p :: k -> *) (q :: k -> *) (f :: k -> *).
     (forall (a :: k). h f a -> p a -> q a) -> IAnn p h f :~> IAnn q h f
 reannotate f (IAnn a node) = IAnn (f node a) node
+
+-- | Rewrite the annotations on a whole tree.
+reannotateTree
+  :: HFunctor h
+  => (forall b. h (HFix (IAnn q h)) b -> p b -> q b)
+  -> IAnnFix p h a
+  -> IAnnFix q h a
+reannotateTree f = hcata (HFix . reannotate f)
 
 -- | Combinator for rewriting annotations monadically.
 --

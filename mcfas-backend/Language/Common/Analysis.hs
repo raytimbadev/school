@@ -29,9 +29,23 @@ documentation.
 module Language.Common.Analysis
 ( Direction(..)
 , Analysis(..)
+, AnalysisAnnotation(..)
+, DataflowEquation
+, MergeEquation
 ) where
 
+import Data.HFunctor
 import Data.Reflection ( ReflectS )
+
+data AnalysisAnnotation (approx :: k -> *) (inner :: k -> *) (a :: k)
+  = AnalysisAnnotation
+    { analysisIterations :: !Int
+    , analysisApproximation :: approx a
+    , analysisAnnotation :: inner a
+    }
+
+instance HFunctor (AnalysisAnnotation approx) where
+  hfmap f a = a { analysisAnnotation = f (analysisAnnotation a) }
 
 -- | An analysis over some language is a collection of functions parametrized
 -- by the configuration of the language's AST.
@@ -46,59 +60,45 @@ import Data.Reflection ( ReflectS )
 --
 -- * @h@ - the AST to analyze
 -- * @f@ - the result of the analysis, indexed by the type of the node; usually
---   this is another syntax tree, whose annotations have been transformed by
---   the analysis.
--- * @p@ - the annotations on the AST, indexed by the type of the node
+--   this is another syntax tree, whose annotations are of the same /type/, but
+--   have been transformed by the analysis
 -- * @approx@ - the approximation used in this analysis
--- * @iterNode@ - the index of AST nodes that contain iteration counts; this is
 --   generally the index of statements or other looping constructs
 -- * @m@ - an arbitrary monad to perform the analysis in; many of the
 --   operations of the analysis are required to operate in this monad, so that
 --   the programmer can store global state for the analysis or throw
---   exceptions.
+--   exceptions. For example, analysis runners use a monadic effect to indicate
+--   fixpoint solution failure.
 -- * @dir@ - the direction of the analysis (phantom type)
 data Analysis
-  (h :: (k -> *) -> k -> *)
-  (f :: k -> *)
-  (p :: k -> *)
+  (ast :: k -> *) -- how are syntax trees represented in the dataflow equation
   (approx :: k -> *)
-  (iterNode :: k)
   (boundaryNode :: k)
-  (m :: * -> *)
   (dir :: Direction)
+  (m :: * -> *)
   = Analysis
-    { analysisMerge
-      :: forall a. ReflectS a => approx a -> approx a -> m (approx a)
+    { analysisMerge :: MergeEquation approx m
       -- ^ How are approximations merged?
-    , analysisDataflow
-      :: forall a. ReflectS a => h f a -> approx a -> m (approx a)
+    , analysisDataflow :: DataflowEquation approx m ast
       -- ^ How do we compute a new approximation for a node in the syntax tree,
       -- given some existing approximation?
     , analysisApproximationEq
       :: forall a. ReflectS a => approx a -> approx a -> Bool
       -- ^ How do we decide equality of approximations?
-    , analysisUpdateApproximation
-      :: forall a. ReflectS a => approx a -> p a -> m (p a)
-      -- ^ How do we store an approximation inside an annotation?
-    , analysisGetApproximation
-      :: forall a. ReflectS a => p a -> approx a
-      -- ^ How do we retrieve an approximation from an annotation?
-    , analysisUpdateIterations
-      :: (Int -> Int) -> p iterNode -> m (p iterNode)
-      -- ^ How do we update the count of remaining iterations in an iteration
-      -- node's annotation?
-    , analysisGetIterations
-      :: p iterNode -> Int
-      -- ^ How do we retrieve the remaining count of iterations from an
-      -- iteration node's annotation?
     , analysisBoundaryApproximation
       :: m (approx boundaryNode)
       -- ^ What is the initial approximation at a boundary? (e.g. the start of
       -- the function)
-
-    -- , analysisInitialApproximation :: m approx
+    -- , analysisInitialApproximation
+    --   :: forall a. ast a -> m (approx a)
     -- -- ^ What is the initial approximation for an arbitrary statement?
     }
+
+type DataflowEquation approx m ast
+  = forall node. ReflectS node => ast node -> approx node -> m (approx node)
+
+type MergeEquation approx m
+  = forall node. ReflectS node => approx node -> approx node -> m (approx node)
 
 -- | The direction of an analysis.
 --

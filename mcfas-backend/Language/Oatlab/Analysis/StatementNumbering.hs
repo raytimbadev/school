@@ -17,8 +17,8 @@ Stability   : experimental
 
 module Language.Oatlab.Analysis.StatementNumbering
 ( StatementNumber(..)
-, StatementNumbering
-, StatementNumberingP(..)
+, StatementNumbering'
+, StatementNumbering(..)
 , numberStatementAlg
 ) where
 
@@ -29,35 +29,35 @@ import Control.Monad.State
 
 -- | A number assigned to a statement. Used to uniquely identify statements.
 newtype StatementNumber = StatementNumber { unStatementNumber :: Int }
-  deriving (Eq, Ord)
+  deriving (Eq, Ord, Show)
 
 -- | Node annotation index interpretation that annotates 'StatementNode' with
 -- 'StatementNumber' and all other indices with the trivial annotation @()@.
-type family StatementNumbering (node :: AstNode) :: * where
-  StatementNumbering 'StatementNode = StatementNumber
-  StatementNumbering _ = ()
+type family StatementNumbering' (node :: AstNode) :: * where
+  StatementNumbering' 'StatementNode = StatementNumber
+  StatementNumbering' _ = ()
 
 -- | Newtype that simulates the action of the 'StatementNumbering' type family.
-newtype StatementNumberingP (node :: AstNode)
-  = StatementNumberingP { unStatementNumberingP :: StatementNumbering node }
+newtype StatementNumbering (node :: AstNode)
+  = StatementNumbering { unStatementNumbering :: StatementNumbering' node }
 
 -- | Number statements increasingly.
 --
 -- /Monadic higher-order F-algebra/
 numberStatementAlg
   :: (Monad m, MonadState Int m)
-  => IAnn p OatlabAstF f a -> m (IAnn StatementNumberingP OatlabAstF f a)
+  => IAnn p OatlabAstF f a -> m (IAnn StatementNumbering OatlabAstF f a)
 numberStatementAlg = reannotateM phi where
   phi
     :: (Monad m, MonadState Int m)
-    => OatlabAstF f a -> p a -> m (StatementNumberingP a)
+    => OatlabAstF f a -> p a -> m (StatementNumbering a)
   phi node _ = case collapseIndex node of
-    StatementNodeS -> StatementNumberingP . StatementNumber <$> nextInt
-    ProgramDeclNodeS -> pure $ StatementNumberingP ()
-    TopLevelDeclNodeS -> pure $ StatementNumberingP ()
-    VarDeclNodeS -> pure $ StatementNumberingP ()
-    ExpressionNodeS -> pure $ StatementNumberingP ()
-    IdentifierNodeS -> pure $ StatementNumberingP ()
+    StatementNodeS -> StatementNumbering . StatementNumber <$> nextInt
+    ProgramDeclNodeS -> pure $ StatementNumbering ()
+    TopLevelDeclNodeS -> pure $ StatementNumbering ()
+    VarDeclNodeS -> pure $ StatementNumbering ()
+    ExpressionNodeS -> pure $ StatementNumbering ()
+    IdentifierNodeS -> pure $ StatementNumbering ()
 
 -- | Increment the value in the state by one and return the value in the state.
 nextInt :: MonadState Int m => m Int

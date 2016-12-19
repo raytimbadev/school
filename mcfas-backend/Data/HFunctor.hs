@@ -34,6 +34,9 @@ module Data.HFunctor
   -- * Important functors
 , K(..)
 , I(..)
+, HSum(..)
+, HProduct(..)
+, HCompose(..)
   -- * Higher-order generic traversals
 , HTraversable(..)
   -- * Higher-order equality
@@ -135,6 +138,30 @@ newtype K x (a :: k) = K { unK :: x } deriving Functor
 --
 -- The @fmap@ implementation simply applies the function to the boxed value.
 newtype I a = I { unI :: a } deriving Functor
+
+data HProduct h1 h2 f a
+  = P
+    { left :: h1 f a
+    , right :: h2 f a
+    }
+
+instance (HFunctor h1, HFunctor h2) => HFunctor (HProduct h1 h2) where
+  hfmap phi (P l r) = P (hfmap phi l) (hfmap phi r)
+
+data HSum h1 h2 f a = L (h1 f a) | R (h2 f a)
+
+instance (HFunctor h1, HFunctor h2) => HFunctor (HSum h1 h2) where
+  hfmap phi s = case s of
+    L h -> L (hfmap phi h)
+    R h -> R (hfmap phi h)
+
+newtype HCompose h1 h2 f a
+  = HC
+    { hc :: h1 (h2 f) a
+    }
+
+instance (HFunctor h1, HFunctor h2) => HFunctor (HCompose h1 h2) where
+  hfmap phi (HC h) = HC $ hfmap (hfmap phi) h
 
 -- | Class of higher-order functors whose side-effects can be sequenced
 -- left-to-right.

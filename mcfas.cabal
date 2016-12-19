@@ -33,6 +33,7 @@ library
     Language.Oatlab.Example
     Language.Oatlab.Parser
     Language.Oatlab.Pretty
+    Language.Oatlab.SymbolTable
     Language.Oatlab.Syntax
   -- other-modules:       
   -- other-extensions:    
