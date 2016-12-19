@@ -3,102 +3,1137 @@
 \author{Jacob Thomas Errington}
 \title{Functionally analyzing imperative programs}
 \date{
-  Program analysis \& transformations -- final project report\\
+  Program analysis \& transformations \\ Final report -- project \#7\\
   16 December 2016
+}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{listings}
+\usepackage{hyperref}
+\bibliographystyle{plain}
+\lstset{
+    basicstyle=\footnotesize,
+    language=Haskell,
+    captionpos=b,
 }
 
 \newcommand{\mcfas}{\textsc{McFAS}}
 \newcommand{\mcsaf}{\textsc{McSAF}}
 \newcommand{\matlab}{MATLAB}
-
-\usepackage[margin=2.0cm]{geometry}
+\newcommand{\oatlab}{\textsc{Oatlab}}
+\newcommand{\code}{\texttt}
+\renewcommand{\th}{\textsuperscript{th}}
 
 \begin{document}
 
 \maketitle
 
-\section{Introduction}
+The static analysis and transformation of programs has been essential to the
+success of high-level languages ever since their inception in the middle of the
+20\th{} century. In recent years, a lot of attention has been given to dynamic
+languages like \matlab. These languages are generally understood as being more
+difficult to analyze than languages such as Java or Haskell due to their
+dynamic nature and sometimes surprising semantics. However, dynamic
+languages are typically designed with ease of use instead of performance or
+correctness in mind. This strongly motivates the development of powerful
+static analyses and transformations for them: if we can design optimizations
+and useful static tools for these languages, then we obtain a language that
+combines ease of use with performance and static guarantees of correctness.
+
+Generally, a static analysis framework for a programming language is written in
+that language. This intuitively makes sense: those who create the framework are
+usually quite well versed in the semantics and features of the language being
+analyzed. It should then come as no surprise that they choose to write the
+framework in that language.
+
+However, as we will argue, it conceptually makes a lot of sense to design an
+analysis framework in a functional programming language.
+In this report, we will expose the framework \mcfas{} written in Haskell to
+analyze imperative languages. For exposition purposes, we designed a simple
+imperative language \oatlab{} with some \matlab-like features. All our code is
+available on GitHub\footnotemark.
+\footnotetext{\url{https://github.com/tsani/mcfas}}
 
 This report is structured in the following way.
 
 \begin{enumerate}
-  \item
-    We look at the framework \mcsaf{} as a source of motivation for our own
-    framework, outlining some strengths and weaknesses of \mcsaf{}.
+    \item
+        We give some broad reasons to choose a functional programming language
+        in modern software engineering followed by a discussion the expression
+        problem and the notion of horizontal are vertical extensibility of
+        language models. We mention some work related to ours.
 
-  \item
-    We give an in-depth examination of the design of \mcfas{}. We assume only a
-    small background in functional programming, so this section goes into
-    significant detail about the various techniques used to implement our
-    framework. Specifically:
+    \item
+        We give an in-depth examination of the design of \mcfas{}. We assume
+        only a small background in functional programming, so this section goes
+        into significant detail about the key techniques used to implement our
+        framework.
 
-    \begin{enumerate}
-      \item
-        We discuss the representation of simple syntax trees as fixed points of
-        functors, and how to add a general annotation scheme to this syntax
-        tree in order to conveniently express both annotated and unannotated
-        syntax trees. We outline a general recursion scheme for functor fixed
-        points.
+        \begin{enumerate}
+            \item
+                We discuss the representation of simple syntax trees as fixed
+                points of functors, and how to add a general annotation scheme
+                to this syntax tree in order to conveniently express both
+                annotated and unannotated syntax trees. We outline a general
+                recursion scheme for functor fixed points.
 
-      \item
-        We look at the shortcomings of the above approach, and show how it can
-        be generalized to apply to more complex syntax trees, such as those of
-        imperative languages. This gives rise to \emph{indexed syntax trees}.
-        represented as fixed points of higher-order functors. We generalize the
-        annotation scheme to apply to higher-order functors, and we extend the
-        general recursion scheme to apply to higher-order functors as well.
+            \item
+                We look at the shortcomings of the above approach, and show how
+                it can be generalized to apply to more complex syntax trees,
+                such as those of imperative languages. This gives rise to
+                \emph{indexed syntax trees}.  represented as fixed points of
+                higher-order functors. We generalize the annotation scheme to
+                apply to higher-order functors, and we extend the general
+                recursion scheme to apply to higher-order functors as well.
+        \end{enumerate}
 
-      \item
-        We briefly discuss types and kinds, and how modern Haskell allows the
-        programmer to define new kinds. We consider two schemes for reflecting
-        the elements of these kinds into values, so that they can be
-        manipulated on the term level.
-    \end{enumerate}
+        We show how analyses are represented in \mcfas{} and we give an
+        overview of the operation of the forward analysis runner that is
+        implemented.
 
-  \item
-    We give several practical examples of syntax tree traversals.
+    \item
+        We give several practical examples of syntax tree traversals in \mcfas.
 
-    \begin{description}
-      \item[Pretty-printing.]
-        The input tree is converted into a human-readable textual
-        representation.
+        \begin{description}
+            \item[Pretty-printing.]
+                The input tree is converted into a human-readable textual
+                representation.
 
-      \item[Symbol table construction.]
-        The input tree is annotated so that each function declaration is
-        annotated with a list of all the symbols declared in the function body.
-        Uses of undeclared symbols are also recorded. The program declaration
-        is annotated with a list of all the functions declared in the program.
+            \item[Statement numbering.]
+                The input tree is annotated so that each statement node is
+                numbered with a unique integer.
+        \end{description}
 
-      \item[Statement numbering.]
-        The input tree is annotated so that each statement node is numbered
-        with a unique integer.
-    \end{description}
-
-  \item
-    We show how classical dataflow analyses can be implemented with \mcfas, in
-    particular the reaching definitions analysis and the available expressions
-    analysis.
+    \item
+        We show how classical dataflow analyses can be implemented with \mcfas,
+        in particular the reaching definitions analysis.
 \end{enumerate}
 
 The specific contributions we make are the following.
 
 \begin{itemize}
-  \item
-    We provide a flexible framework to serve as a starting point for the
-    development of a fully-featured analysis framework for \matlab{}.
+    \item
+        We provide a flexible framework to serve as a starting point for the
+        development of a fully-featured analysis framework for \matlab{}.
 
-  \item
-    We show through the use of examples how to design transformations and
-    analysis using \mcfas{}. We explain how the Haskell type system allows us
-    to enforce both strong and useful invariants regarding the operation of the
-    analysis.
+    \item
+        We show through the use of examples how to design transformations and
+        analyses using \mcfas{}. We explain how the Haskell type system allows
+        us to enforce both strong and useful invariants regarding the operation
+        of the analysis.
 
-  \item
-    We give a practical use case for several advanced techniques in functional
-    programming.
+    \item
+        We give a practical use case for several advanced techniques in
+        functional programming.
 \end{itemize}
 
-\bibliographystyle{plain}
+\section{Introduction} \label{sec:intro}
+
+Object-oriented programming is the paradigm of choice for many projects.
+Languages in this paradigm are generally backed by large corporations, such as
+Microsoft and Oracle (the .NET framework and Java come to mind), and as such
+attract many developers seeking lucrative careers. However, it is not the only
+paradigm available for the development of software. Functional programming is
+increasingly becoming popular for a number of compelling reasons.
+
+\begin{itemize}
+    \item
+        As multicore processors are ubiquitous, concurrent programming is a
+        paramount strategy for harnessing the full strength of modern machines.
+        In purely functional programming languages, data races are essentially
+        impossible to produce, thanks to immutable data and pure functions.
+
+    \item
+        Thanks to powerful type systems offered by modern purely functional
+        languages, many useful invariants can be checked statically by the
+        compiler. Dependently-typed languages take this even further, by
+        offering a first-order logic as a programming language: a compiler for
+        a dependently-typed language can guarantee that the arguments to a
+        \code{printf} function match its format string, or that a list is
+        nonempty. Some functional languages are slowly incorporating features
+        from dependently-typed languages. Consequently, myriad errors which
+        manifest otherwise only at runtime can be eliminated at compile-time.
+
+    \item
+        By using concepts borrowed from mathematics, functional programming
+        languages offer new insights into both classic problems and new
+        problems.  Specifically, many generalizations of common programming
+        patterns have been developed in functional programming languages, which
+        results in improved code readability and reuse.
+\end{itemize}
+
+Furthermore, functional languages excel when used to implement models that are
+\emph{vertically extensible}. To expand on the notion of the direction of
+extensibility, we will look into a classic problem that has plagued language
+designers in one way or another for the past 20 years.
+
+\subsection{The expression problem}
+
+The expression problem\cite{expression-problem} arises when modelling
+languages. It relates to the host language's capacity for \emph{expressivity}.
+Neither the object-oriented paradigm nor the functional paradigm fully address
+the problem: neither one is perfectly expressive. In fact, each paradigm offers
+orthogonal benefits when confronted with the expression problem.
+
+As a simple example, consider the typical example of different types of shapes.
+We would like to compute their area. In Haskell, one might write the code in
+listing \ref{lst:shapes-area-hs}, and in Java, one might write the code in
+listing \ref{lst:shapes-area-java}.
+
+\begin{lstlisting}[
+  language=Haskell,
+  caption={Shapes and area in Haskell.},
+  label={lst:shapes-area-hs}
+]
+data Shape
+  = Circle { radius :: Double }
+  | Square { side :: Double }
+
+area :: Shape -> Double
+area s = case s of
+  Circle { radius = r } -> pi * r * r
+  Square { side = c } -> c * c
+\end{lstlisting}
+
+\begin{lstlisting}[
+  language=Java,
+  caption={Shapes and area in Java.},
+  label={lst:shapes-area-java}
+]
+interface Shape {
+  double getArea();
+}
+
+final class Square implements Shape {
+  private final double side;
+
+  public Square(final double side) {
+    this.side = side;
+  }
+
+  public double getArea() {
+    return side * side;
+  }
+}
+
+final class Circle implements Shape {
+  private final double radius;
+
+  public Circle(final double radius) {
+    this.radius = radius;
+  }
+
+  public double getArea() {
+    return Math.PI * radius * radius;
+  }
+}
+\end{lstlisting}
+
+The expression problem hits us when we want to \emph{extend} this model in some
+way. There are essentially two directions in which it can be extended.
+\begin{description}
+  \item[Horizontally.] We may want to add new types of shapes, which extends
+    the \emph{breadth} of our model.
+  \item[Vertically.] We may want to add new operations to our shapes, which
+    extends the \emph{depth} of our model.
+\end{description}
+
+Object-oriented programming makes it easy to extend the model horizontally. To
+add a triangle shape, it suffices to create a new class \code{Triangle}
+implementing the \code{Shape} interface. However, adding a new operation --
+say \texttt{perimeter} to the \code{Shape} interface, i.e. vertically
+extending the model -- means rewriting every implementation of the interface to
+ensure that it implements this new method.
+
+Conversely, functional programming makes it difficult to extend the model
+horizontally. Adding a \code{Triangle} constructor to the \code{Shape}
+datatype will require rewriting every case analysis on the \code{Shape}
+type to account for the new constructor. However, adding a new operation is
+trivial: it suffices to write a new function, e.g.
+\code{perimeter :: Shape -> Double}.
+
+When analyzing and transforming programs, we deal not in \code{Shape}s and
+\code{area}s but in abstract syntax trees and use-def chains. However, the
+essential idea is the there: conceptually, the breadth of the model is
+determined by the language we are modelling, and the depth of the model is
+determined by the kinds of analyses and transformations we would like to
+perform. Hence, we argue that a functional programming language is in some way
+intrinsically more well suited to the development of an analysis framework.
+
+\subsection{Related work}
+
+In the object-oriented framework \mcsaf\cite{mcsaf}, rather than require each
+node in the abstract syntax tree to implement the methods necessary for the
+computation of some analysis, (which would be complete untenable,) the code for
+each individual analysis is abstracted out into a separate class. However, the
+logic of an analysis is fundamentally recursive, as the analysis must traverse
+the syntax tree of the program being analyzed. This recursive operation of
+analyzing different node cases is captured by the \emph{visitor pattern}, in
+which each case is identified with a method that is called when that ase is
+reached.
+
+Hence in \mcsaf{} each analysis is a visitor. If the analysis requires state --
+practically all interesting analyses do, especially in considering the
+formulation of analyses in terms of in-sets and out-sets computed by dataflow
+equations -- then the state can be held in the visitor object, and shared
+between all case analyses. Certain common analysis patterns such as forward
+analyses and backward analyses are given builtin helper classes which
+implement the least fixed-point solution algorithm.
+
+\section{Design of \mcfas{}} \label{sec:design}
+
+To understand the design of \mcfas, we will examine a number of approaches to
+the problem of representing syntax trees in Haskell. The key insight in the
+design of \mcfas{} is that it is the representation we choose for the syntax
+tree of the target language that makes writing analyses and transformations
+much simpler.
+
+\subsection{Fixed points of functors} \label{sec:fix}
+
+First consider a simple syntax tree for arithmetic expressions as in listing
+\ref{lst:expression}. The function \code{eval :: Ast -> Int} evaluates the
+expression represented by the tree.
+
+\begin{lstlisting}[
+    caption={
+        A syntax tree for simple arithmetic expressions and an evaluator for
+        them.
+    },
+    label=lst:expression
+]
+data Expr = Add Expr Expr | Mul Expr Expr | Const Int
+
+eval :: Expr -> Int
+eval (Add e1 e2) = eval e1 + eval e2
+eval (Mul e1 e2) = eval e1 * eval e2
+eval (Const n) = n
+\end{lstlisting}
+
+If we want to write additional functions to process values of type \code{Expr},
+they will have a similar recursive form: such functions apply themselves to
+each subtree, and then perform some combining operation on the transformed
+subtrees. This form of recursion is called \emph{bottom-up} recursion (or
+\emph{a fold}), since the leaves of the tree are processed first.
+
+However, straightforward representation of the syntax tree has a shortcoming
+when writing folds. The programmer must explicitly write the recursive calls to
+transform the subtrees. This is boilerplate code, and in principle could be
+eliminated by introducing a higher-order function. This higher-order function
+would take as a parameter a function that performs the combining operation on
+each level \emph{once the subtrees have been processed}. In other words, the
+higher-order function would operate in the following way: it will tunnel down
+to the leaves of the tree, apply its argument there, then move up a level and
+apply its argument there, and so on. Hence, the recursive operation of a
+function such as \code{eval} has been completely abstracted out to the
+higher-order function; a new \code{eval} function could then perform
+\emph{only} evaluation, presupposing that the subtrees have been evaluated.
+
+Concretely, to make this happen, we need a way to represent a syntax tree that
+has been partially evaluated. Let's introduce a new type \code{ExprP} to do
+just that in listing \ref{lst:partialeval}. We will also introduce a
+definition: functions like \code{eval} but that take partially evaluated
+syntax trees as input to perform the ``combining operation'' are called
+\emph{algebras}.
+
+\begin{lstlisting}[
+    caption={
+        A representation of a partially evaluated syntax tree. In particular,
+        everywhere where there was a recursive position in \code{Expr}, we now
+        have the type variable \code{r} representing the type of the result of
+        evaluating the subtree that was there in the original syntax tree. The
+        type synonym \code{ExprAlgebra} encodes our definition of an algebra.
+        We say that the function \code{evalP} is an algebra on \code{ExprP}.
+    },
+    label=lst:partialeval
+]
+data ExprP r = AddP r r | MulP r r | ConstP Int
+type ExprAlgebra r = ExprP r -> r
+
+evalP :: ExprP Int -> Int
+evalP (AddP n1 n2) = n1 + n2
+evalP (MulP n1 n2) = n1 * n2
+evalP (Const n) = n
+\end{lstlisting}
+
+Now we are ready to write a higher-order function taking as input an algebra on
+\code{ExprP} and a value of type \code{Expr} and producing as output a value of
+whatever type the algebra produces. This function is implemented in
+\ref{lst:foldexpr}
+
+\begin{lstlisting}[
+    caption={
+        A higher-order function that performs bottom-up recursion on a syntax
+        tree.
+    },
+    label=lst:foldexpr
+]
+foldExpr :: ExprAlgebra r -> Expr -> r
+foldExpr alg e = case e of
+  Add e1 e2 -> alg (AddP (foldExpr alg e1) (foldExpr alg e2))
+  Mul e1 e2 -> alg (MulP (foldExpr alg e1) (foldExpr alg e2))
+  Const n -> alg (ConstP n)
+\end{lstlisting}
+
+If we expand the type synonym \code{ExprAlgebra r} to \code{ExprP r -> r} in
+the type of \code{foldExpr}, then the type of \code{foldExpr} becomes
+\code{(ExprP r -> r) -> (Expr -> r)}. (Arrows associate to the right, so the
+rightmost set of parentheses are optional.) This type gives an interesting
+intuition for what \code{foldExpr} does: it can be thought of as promoting a
+function that operates only \emph{locally}, on partially evaluated subtrees, to
+a function that operates \emph{globally}, over a whole tree.
+
+At this point you may ask yourself, \emph{are the savings worth it?} We were
+able to abstract out the explicit recursion from \code{eval}, but we needed to
+introduce a new datatype \code{ExprP} and write an additional function
+\code{foldExpr}. If it is necessary both to write two datatypes instead of just
+one and to write an additional function to perform the recursion, then it may
+not be worth it. Luckily, neither the additional datatype nor the function need
+to be written manually.
+
+Notice that \code{ExprP} has essentially the same constructors as \code{Expr}.
+It turns out that for any recursive datatype, its associated datatype
+representing a partial evaluation will have the same overall ``shape''. This
+suggests that it might be possible to represent both syntax trees and partially
+evaluated syntax trees in a uniform way. Consider the syntax tree
+\code{Add (Const 3) (Const 5) :: Expr}. We could equivalently write this as a
+``partially-evaluated'' syntax tree like so:
+\code{AddP (ConstP 3) (ConstP 5) :: ExprP (ExprP a)}. Notice the type parameter
+\code{a} in the alternative representation: this occurs because the
+\code{ConstP} constructor does not make use of the type parameter \code{r};
+hence this type parameter is arbitrary. In general, we will have that a syntax
+tree with $n$ levels will have, in its alternative representation in terms of
+partially evaluated trees, a type with $n$ nested occurrences of \code{ExprP}.
+Consequently, if we can represent arbitrarily nested syntax trees with an
+invariant type, then we can uniformly represent ``pure'' syntax trees as well
+as partially evaluated ones.
+
+The trick is informally called ``tying the recursive knot'' in the literature.
+Formally, a type-level fixed point of \code{ExprP} is taken. We implement this
+fixed point in listing \ref{lst:exprfix}
+
+\begin{lstlisting}[
+    caption={
+        The fixed point of \code{ExprP}.  We rewrite \code{foldExpr} to use
+        \code{ExprFix}.
+        A \code{newtype} definition differs from a \code{data} definition in
+        that it may have only one constructor and this constructor must have
+        exactly one field. Furthermore, a \code{newtype} definition does not
+        introduce an additional layer of laziness. By these restrictions, the
+        compiler systematically eliminates newtypes during compilation: at
+        runtime their representation is exactly the same as that of the type of
+        their one field.
+    },
+    label=lst:exprfix
+]
+newtype Fix f = Fix (f (Fix f))
+type ExprFix = Fix ExprP
+
+foldExprP :: ExprAlgebra r -> ExprFix -> r
+foldExprP alg (Fix e) = alg (case e of
+  AddP e1 e2 -> AddP (foldExprP alg e1) (foldExprP alg e2)
+  MulP e1 e2 -> MulP (foldExprP alg e1) (foldExprP alg e2)
+  ConstP n -> ConstP n)
+\end{lstlisting}
+
+Intuitively, what the fixed point does is plug every recursive position in
+\code{ExprP} with the operator. It's subtrees all the way down. Whereas
+\code{foldExpr} factored out the explicit recursion from functions that take
+apart syntax trees, \code{ExprFix} factors out the explicit recursion from the
+data type itself. We leave it as an exercise to write an isomorphism between
+\code{ExprFix} and \code{Expr}.
+
+The next step in our quest to fully abstract syntax trees is to recognize that
+\code{foldExprP} applies the function \code{foldExprP alg} to each subtree and
+repackages them into the same constructor before passing that data to the
+function \code{alg} supplied by the user. This notion of uniformly applying to
+function to each element in a structure and repackaging the structure without
+changing its shape is captured by the \code{Functor} type class in Haskell. For
+example, the well known \code{map :: (a -> b) -> [a] -> [b]} function witnesses
+that lists are functors, by \emph{lifting} an operation on elements into an
+operation on a whole list. Similarly, we implement a function that lifts an
+operation on subtrees into an operation on a node of a syntax tree in listing
+\ref{lst:exprpfunctor}. Using the functor instance, we can further simplify and
+generalize the implementation of \code{foldExprP}.
+
+\begin{lstlisting}[
+    caption={
+        The functor instance is extremely systematic to write. In fact, there
+        is at most one correct way to write a functor instance for a data type
+        that admits one, and GHC can write them automatically with the
+        \code{DeriveFunctor} language extension. We say that \code{ExprP} is
+        the \emph{pattern functor} of \code{Expr}. As for the \code{cata}
+        function, it may not be immediately recognizable as such, but it is
+        none other than \code{foldExprP} generalized. Once fmap is used to
+        replace the explicit application of \code{foldExprP alg} to each of the
+        subtrees, there remains nothing specific to \code{ExprP} in the
+        implementation, so we are free to generalize \code{ExprP} in the type
+        signature to any type \code{f} that is an instance of the
+        \code{Functor} type class, i.e. admitting an \code{fmap}
+        implementation. The name ``cata'' is short for ``catamorphism'', which
+        is the formal name in the literature for the higher-order function that
+        promotes algebras into bottom-up recursive functions over functor fixed
+        points.
+    },
+    label=lst:exprpfunctor
+]
+instance Functor ExprP where
+  fmap f e = case e of
+    AddP e1 e2 -> AddP (f e1) (f e2)
+    MulP e1 e2 -> MulP (f e1) (f e2)
+    ConstP n -> ConstP n
+
+cata :: Functor f => (f r -> r) -> Fix f -> r
+cata alg (Fix e) = alg (fmap (cata alg) e)
+\end{lstlisting}
+
+Thus we arrive a fully general procedure for building and taking apart
+recursive datatypes.
+
+\begin{enumerate}
+    \item
+        Express recursive data types not with explicit recursive positions, but
+        instead as a \emph{pattern functor} leaving \emph{holes} in it for the
+        recursive positions. This allows recursive positions to be abstracted
+        over, and to hold intermediate results during folding.
+
+    \item
+        Express recursive functions not with explicit recursion, but instead as
+        an \emph{algebra} on the pattern functor. The higher-order function
+        \code{cata} can then be used to transform the algebra into a bona fide
+        recursive function over an entire syntax tree represented as a fixed
+        point of the pattern functor.
+\end{enumerate}
+
+This representation has a number of practical corollaries, thanks to the
+relatively well understood theory of functors. For example, since the
+composition of functors is itself a functor, we can compose the pair functor
+with the pattern functor of the syntax tree to obtain \emph{annotated syntax
+trees} in listing \ref{lst:simpleannotations}.
+
+\begin{lstlisting}[
+    caption={
+        Annotated syntax trees are obtained as a simple transformation of the
+        pattern functor for a syntax tree. Taking the fixed point of
+        \code{Annotated ann f}, for some type \code{ann}, then produces an
+        annotated syntax tree. The type \code{Ann} is isomorphic to
+        \code{Annotated}, but is easier to work with in practice, because it
+        inlines the \code{Pair} (by virtue of having two fields) and the
+        \code{Compose} (by taking both \code{f} and \code{a} as parameters).
+    },
+    label=lst:simpleannotations
+]
+data Pair a b = Pair a b deriving Functor
+newtype Compose f g a = Compose (f (g a)) deriving Functor
+type Annotated ann f = Compose (Pair ann) f
+
+data Ann ann f a = Ann ann (f a) deriving Functor
+\end{lstlisting}
+
+There exists an algebra on functors themselves, which allows for the
+construction of more complex functors from basic ones.
+
+\begin{itemize}
+    \item
+        The \emph{sum} of two functors represents alternation, much like we say
+        that a ``sum type'' is one with multiple constructors, each of which
+        representing a case that must be matched when analyzing the datatype.
+        The sum of two functors is itself a functor, and its \code{fmap}
+        implementation analyzes the sum to dispatch to the \code{fmap}
+        of the underlying functor in use.
+
+        \code{data Sum f g a = L (f a) | R (g a) deriving Functor}
+
+    \item
+        The \emph{product} of functors corresponds to a functor with multiple
+        fields. It is itself also a functor. Its \code{fmap} implementation in
+        turn uses the \code{fmap} implementations of its underlying functors in
+        both fields.
+
+        \code{data Product f g a = P (f a) (g a) deriving Functor}
+
+    \item
+        The \emph{constant functor} is not an operation on functors, but is
+        instead a rather important basic functor. It simply ignores its type
+        argument, so consequently its \code{fmap} implementation ignores the
+        function to map. Since the type variable \code{a} is unused in the
+        right-hand side, it is arbitrary, so repackaging the constant value
+        adjusts the type to suit the return type of \code{fmap}.
+
+        \code{data Const x a = K x deriving Functor}
+
+    \item
+        The \emph{identity functor} is another basic functor that just acts as
+        a ``box'' around a single value.
+
+        \code{data Id a = I a deriving Functor}
+\end{itemize}
+
+It turns out that the pattern functor of any simple syntax tree can be
+represented by sums and products of functors, with constant functors at the
+leaves and identity functors in the open positions. For example, \code{ExprP}
+is isomorphic to \code{type ExprP' = Sum (Sum (Product Id Id) (Product Id Id))
+(Const Int))}.  This idea is further explored in\cite{datatypes-a-la-carte} to
+build a generic programming framework.
+
+Using a fixed point of a functor seems like a very appealing way to represent a
+syntax tree. We used this approach in\cite{Goto}, but found it quite
+disappointing when having to deal with ``real-life'' syntax, such as that of
+GoLite. In essence, the problem arises when \emph{families of recursive
+datatypes} are involved. In the next subsection, we will explore this problem
+in more detail and show a solution to it.
+
+\subsection{Fixed points of higher-order functors} \label{sec:hfix}
+
+In GoLite (and in most other imperative languages) there is a distinction
+between \emph{statements} and \emph{expressions}, and statements may contain
+expressions. Consider the trivial imperative language in listing \ref{lst:imp}
+with three kinds of statements -- assignment, print, and while loops -- and
+expressions as before but extended with variables.
+
+\begin{lstlisting}[
+    caption={
+        A trivial imperative language with statements and expressions,
+        represented using explicit recursion.
+    },
+    label=lst:imp
+]
+data Stmt = Print Expr | Assign String Expr | While Expr [Stmt]
+data Expr = Add Expr Expr | Mul Expr Expr | Const Int | Var String
+\end{lstlisting}
+
+First, we can represent expressions with their pattern functor by introducing a
+type variable \code{e}. However, this type variable will need to propagate to
+the type of \code{Stmt} as well. Then, we can represent statements with their
+pattern functor as well, by introducing a second type variable. This is shown
+in listing \ref{lst:imp2}.
+
+\begin{lstlisting}[
+    caption={
+        The pattern functor for the trivial language.
+    },
+    label=lst:imp2
+]
+data StmtP s e = Print e | Assign String e | While e [s e] deriving Functor
+data ExprP e = Add e e | Mul e e | Const Int | Var String deriving Functor
+
+type Expr = Fix ExprP
+
+newtype Fix2' (f :: (* -> *) -> * -> *) (a :: *)
+  = Fix2' (f (Fix2' f) a)
+
+type Stmt' = Fix2' StmtP
+
+type Stmt = Stmt' (Fix ExprP)
+\end{lstlisting}
+
+We cannot take a plain fixed point of \code{StmtP}, as it is a functor in
+\code{e}, not in \code{s}. In fact, the kind of \code{StmtP} and its type
+variable\code{s} is \code{(* -> *) -> (* -> *)}. (Whereas types classify
+values, \emph{kinds} classify types. The kind \code{*} is the kind of the types
+inhabited by values, like \code{Int} and \code{String}. Type constructors such
+as \code{Maybe} have kinds like \code{* -> *} meaning that they take a type to
+produce another type.) All functors have the kind \code{* -> *}, so we can
+think of \code{StmtP} as a \emph{functor between functors}. Things become still
+more complicated when there is \emph{mutual recursion}, if for instance
+\code{Expr} contained a field of type \code{Stmt}.
+
+In any case, this exposition is meant foremost to illustrate that the regular
+fixed point developed in section \ref{sec:fix} is not sufficient when these
+more complex datatypes are involved. Essentially, the problem arises when there
+are multiple datatypes. In principle, we could join all the constructors into
+one datatype, at the cost of type safety, as in listing \ref{lst:badctors}.
+
+\begin{lstlisting}[
+    caption={
+        All the constructors of \code{StmtP} and \code{ExprP} are joined into
+        one datatype \code{ProgramP}. This datatype is unsafe in the sense that
+        it blurs the line between statements and expressions.
+    },
+    label=lst:badctors
+]
+data ProgramP p
+  = Print p | Assign String p | While p [p]
+  | Add p p | Mul p p | Const Int | Var String
+
+type Program = Fix ProgramP
+\end{lstlisting}
+
+We can recover type safety by \emph{tagging} the recursive positions with an
+\emph{index} that restricts the possile constructors that can be used in that
+position. The \code{DataKinds} extension in GHC allows the programmer to define
+custom \emph{kinds}. These may be fairly complex, but the kind \code{AstNode}
+we define in listing \ref{lst:goodctors} consists only of two types to indicate
+``expression'' or ``statement''. Essentially, we have promoted a few constants
+to the type level. These types are called \emph{indices} in the literature. To
+make use of these indices in a datatype definition, we must use a so-called
+\emph{generalized algebraic datatype} (GADT) definition. In the GADT form of a
+datatype definition, the types of all the constructors are given explicitly.
+Listing \ref{lst:goodctors} also shows the definition of \code{ProgramP}
+rewritten in the GADT form, as well as the definition a new type
+\code{ProgramI} that uses indices from \code{AstNode} to recover type-safety.
+
+\begin{lstlisting}[
+    caption={
+        The \code{AstNode} kind is used to write a GADT version of
+        \code{ProgramP}. This version is type-safe thanks to the incides:
+        expression and statements cannot be used interchangeably, yet all the
+        constructors reside within the same datatype. (Syntax quirk: in
+        Haskell, promoted values must be prefixed by an apostrophe.)
+    },
+    label=lst:goodctors
+]
+data ProgramP :: * -> * where
+  Print :: p -> ProgramP p
+  Assign :: String -> p -> ProgramP p
+  While :: p -> [p] -> ProgramP p
+  Add :: p -> p -> ProgramP p
+  Mul :: p -> p -> ProgramP p
+  Const :: Int -> ProgramP p
+  Var :: String -> ProgramP p
+
+data AstNode = ExprNode | StmtNode
+
+data ProgramI :: AstNode -> * where
+  Print :: ProgramI 'ExprNode -> ProgramI 'StmtNode
+  Assign :: String -> ProgramI 'ExprNode -> ProgramI 'StmtNode
+  While :: ProgramI 'ExprNode -> [ProgramI 'StmtNode] -> ProgramI 'StmtNode
+  Add :: ProgramI 'ExprNode -> ProgramI 'ExprNode -> ProgramI 'ExprNode
+  Mul :: ProgramI 'ExprNode -> ProgramI 'ExprNode -> ProgramI 'ExprNode
+  Const :: Int -> ProgramI 'ExprNode
+  Var :: String -> ProgramI 'ExprNode
+\end{lstlisting}
+
+Notice that \code{ProgramI} contains explicit recursion. As in the case of
+simple datatypes, we replace each occurrence of explicit recursion with a type
+variable, in listing \ref{lst:programpfunctor}. Notice that the kind of
+\code{ProgramF} is \code{(AstNode -> *) -> (AstNode -> *)}. This can be thought
+of as a functor not between types, but between \emph{type constructors} of the
+form \code{AstNode -> *}. This is formalized by a new type class
+\code{HFunctor} that we introduce. Whereas functors admit an operation
+\code{fmap} that lifts a function on the constituents of the functor into a
+function on the whole functor in a way that preserves the shape of the functor,
+higher-order functors admit an operation \code{hfmap} that lifts a function on
+the constituents of the higher-order functor into a function on the whole
+higher-order functor. But the constituents of a higher-order functor are
+themselves functors; a function between \emph{functors} is called a
+\emph{natural transformation}.
+
+\begin{lstlisting}[
+    caption={
+        The pattern functor of \code{ProgramI}, the definition of the type
+        class of higher-order functors, and a proof that \code{ProgramF} is a
+        higher-order functor. Notice that the instance declaration of
+        \code{HFunctor} for \code{ProgramF} is strikingly similar to a regular
+        \code{Functor} instance, for example for \code{ExprP} seen in listing
+        \ref{lst:exprpfunctor}.
+    },
+    label=lst:programpfunctor
+]
+data ProgramF :: (AstNode -> *) -> AstNode -> * where
+  Print :: p 'ExprNode -> ProgramF p 'StmtNode
+  Assign :: String -> p 'ExprNode -> ProgramF p 'StmtNode
+  While :: p 'ExprNode -> [p 'StmtNode] -> ProgramF p 'StmtNode
+  Add :: p 'ExprNode -> p 'ExprNode -> ProgramF p 'ExprNode
+  Mul :: p 'ExprNode -> p 'ExprNode -> ProgramF p 'ExprNode
+  Const :: Int -> ProgramF p 'ExprNode
+  Var :: String -> ProgramF p 'ExprNode
+
+class HFunctor h where
+  hfmap :: (forall a. f a -> g a) -> h f a -> h g a
+
+instance HFunctor ProgramF where
+  hfmap phi e = case e of
+    Print expr -> Print (phi expr)
+    Assign s expr -> Assign s (phi expr)
+    While expr stmts -> While (phi expr) (fmap phi stmts)
+    Add l r -> Add (phi l) (phi r)
+    Mul l r -> Mul (phi l) (phi r)
+    Const n -> Const n
+    Var s -> Var s
+\end{lstlisting}
+
+An important property of natural transformations is that they must operate
+independently of the type of elements inside the functor. This is enforced by
+the \code{forall a} in the first parameter of \code{hfmap}, which requires that
+the function passed as the first argument be polymorphic in \code{a}.
+
+Next, it suffices to generalize \code{Fix} into \code{HFix}, on higher-order
+functors, and to generalize the higher-order function \code{cata} into
+\code{hcata}. This is seen in listing \ref{lst:hfixhcata}.
+
+\begin{lstlisting}[
+    caption={
+        Generalizations of \code{cata} and \code{Fix} to higher-order functors.
+        Once again, there is a striking resemblance between the implementation
+        of \code{hcata} and \code{cata}, in listing \ref{lst:exprpfunctor}.
+    },
+    label=lst:hfixhcata
+]
+newtype HFix h a = HFix (h (HFix h) a)
+
+hcata :: HFunctor h => (forall a. h f a -> f a) -> HFix h a -> f a
+hcata halg (HFix h) = halg (hfmap (hcata halg) h)
+\end{lstlisting}
+
+An interesting consequence of the type parameter \code{a} is that we can use it
+to express a type-level dependency between the parameter \code{a} and the
+output type of the higher-order algebra of type \code{h f a -> f a}.
+Specifically, by using the \code{TypeFamilies} language extension in GHC, we
+can write type-level functions. Such a function can \emph{interpret} the index
+\code{a} into a concrete type, of kind \code{*}. Hence, the output type of the
+algebra we write can be made to depend on the index, which is discovered by
+pattern matching. A concrete example is given in appendix
+\ref{sec:interpreter}, where we implement an interpreter for \code{ProgramF}.
+The key insight is that when interpreting an expression, the output type of the
+algebra is \code{Env -> Either String Int}; but when interpreting a statement,
+the output type of the algebra is \code{Env -> IO (Maybe Env)}. For
+expressions, the evaluation can fail with an error message if there are unbound
+variables, or it can produce an integer result. On the other hand for
+statements, the type of a function that executes the statement in a given
+environment. In order to perform side effect such as printing to the standard
+output, we use the \code{IO} type. Furthermore, the execution of statements can
+modify the environment, so we return a new environment with any adjustments
+made to it.  The \code{Maybe} is used to indicate failure to execute the
+statement. This can occur specifically if the evaluation of any expressions in
+the statement fails.  The interpreter then prints the error message from the
+evaluator to standard output. To execute multiple statements, it suffices to
+execute the first, check whether it succeeded, and feed the output environment
+into the next statement; else, then the execution failed, so subsequent
+statements are not executed.  This in turn executes an entire program.
+
+As one would expect, the sum, product, and composition of higher-order functors
+also yields a higher-order functor. This has been exploited to build a generic
+programming framework for mutually recursive datatypes\cite{multirec}.
+
+As in section \ref{sec:fix}, we can define a general type for annotations. Just
+as the result type of the algebras in this setting can be made to depend on the
+index, the annotations can also be made to depend on the index. Listing
+\ref{lst:iann} shows the definition of general indexed annotations.
+
+\begin{lstlisting}[
+    caption={
+        General indexed annotations. By supplying a type-level function for the
+        parameter \code{ann}, the programmer can ensure via the type system
+        that, say, statements are annotated with \code{String}s and expressions
+        are annotated with \code{Int}s. The variable \code{k} in the kind
+        signatures of the type parameters of \code{IAnn} is a \emph{polymorphic
+        kind}, just like polymorphic types for functions. This is essential as
+        it allows the programmer to use custom kinds such as \code{AstNode}
+        here.
+    },
+    label=lst:iann
+]
+data IAnn (ann :: k -> *) (h :: (k -> *) -> k -> *) (f :: k -> *) (i :: k)
+  = IAnn (ann i) (h f i)
+
+instance HFunctor => HFunctor (IAnn ann h) where
+  hfmap phi (IAnn a h) = (IAnn a (hfmap phi h))
+\end{lstlisting}
+
+\subsection{Representation and execution of analyses in \mcfas{}}
+\label{sec:analysis-representation}
+
+To define an analysis, a certain number of questions regarding it must be
+answered. Most importantly, the \emph{dataflow equations}, the \emph{merge
+operation}, and the \emph{initial conditions} of the analysis must be decided.
+In \mcfas{} these decisions are recorded in an \emph{analysis record}. Analysis
+records may then be executed on a syntax tree using an appropriate
+\emph{analysis runner}. So far, we have implemented an analysis runner for
+forward analyses on \oatlab{} syntax trees.
+
+Listing \ref{lst:analysisrecord} shows the general definition of analysis
+records as it appears in \mcfas.
+
+\begin{lstlisting}[
+    caption={
+        The general definition of an analysis record. Notice that it is in no
+        way specific to the abstract syntax tree of \oatlab{}; instead it is
+        parameterized over the syntax tree, by the \code{ast} type parameter.
+        A monad is thrown into the mix to allow state to be shared between
+        invocations of the dataflow equation or merge operator by the analysis
+        runner. The \code{ReflectS} type class is used to reflect the index
+        \code{node} from the type level to the value level so that it may be
+        matched on. Without this, it would not be to possible to implement
+        the merge operator or equality operator.
+    },
+    label=lst:analysisrecord
+]
+data Analysis
+  (ast :: k -> *)
+  (approx :: k -> *)
+  (boundaryNode :: k)
+  (dir :: Direction)
+  (m :: * -> *)
+  = Analysis
+    { analysisMerge :: MergeEquation approx m
+    , analysisDataflow :: DataflowEquation approx m ast
+    , analysisApproximationEq
+      :: forall a. ReflectS a => approx a -> approx a -> Bool
+    , analysisBoundaryApproximation
+      :: m (approx boundaryNode)
+    }
+
+type DataflowEquation approx m ast
+  = forall node. ReflectS node => ast node -> approx node -> m (approx node)
+
+type MergeEquation approx m
+  = forall node. ReflectS node => approx node -> approx node -> m (approx node)
+
+data Direction = Forward | Backward
+\end{lstlisting}
+
+The analysis runner we have implemented has the type
+\begin{verbatim}
+runForwardOatlabAnalysis
+  :: forall (m :: * -> *)
+    (approx :: AstNode -> *)
+    (ann :: AstNode -> *)
+    (node :: AstNode).
+    (Monad m, MonadAnalysis m)
+  => Analysis
+    (IAnn ann OatlabAstF (OatlabIAnnAst ann))
+    approx
+    'StatementNode
+    'Forward
+    m
+  -> OatlabIAnnAst (AnalysisAnnotation approx ann) node
+  -> StatementFlowResult m approx ann node
+\end{verbatim}
+meaning that it can execute forward analysis records using any type of
+approximation in any type of monad\footnotemark.
+\footnotetext{
+    The monad must be an instance of the \code{MonadAnalysis} type class. This
+    type class requires that the monad support throwing an exception indicating
+    that the fixed-point solver failed to find a fixed point after its
+    configured maximum number of iterations.
+}
+
+The dataflow equations implemented in the analysis record must accept syntax
+trees indexed-annotated by the annotation type \code{ann}. The syntax tree
+processed by the runner must however be annotated by \code{AnalysisAnnotation
+approx ann}. This difference arises due to the fact that the analysis needs to
+store the last-computed out-sets somewhere, and what better place is there
+to store these flow sets than in annotations on the nodes? Additionally, the
+analysis runner needs to keep track of how many iterations of the fixed point
+solver have been executed, so that it can determine when to abort. We implement
+a combinator \code{prepareAnalysisAlg} to facilitate writing transformations
+from syntax trees annotated with just \code{ann} into syntax trees annotated
+with \code{AnalysisAnnotation approx ann} as required by the runner.
+
+That leaves only the mysterious \code{StatementFlowResult m approx ann node}
+type to explain. This type wraps a type family that interprets the \code{node}
+index to give a function type when analyzing statements and otherwise gives a
+plain type. This is necessary for the essentially the same reason that we use
+function types in the example interpreter in appendix \ref{sec:interpreter}: at
+the point when each individual statement is processed by the catamorphism, we
+do not know what the in-set is. By using a function type, we can delegate to
+the nodes that contain statements the task of supplying the in-set. These nodes
+are \code{if}-statements, loops, and function declarations.
+
+Finally, the fixed-point solver is implemented in the runner at the point where
+it processes function declarations. We implement the solver by analyzing the
+function body a second time and comparing the list of out-sets produced by the
+second run with the list of out-sets produced by the first run. If they differ,
+then the runner decrements the count of remaining iterations in the function
+nodes's annotation and recurses. If the count hits zero, then an exception is
+raised via a monadic action provided by the \code{MonadAnalysis} type class.
+
+\section{Using \mcfas{}} \label{sec:using-mcfas}
+
+Now that a sufficient background in the internals of \mcfas{} is established,
+we can see how some practical traversals are implemented in \mcfas. From this
+point on, we work with the \oatlab{} language, whose syntax tree definition is
+given in appendix \ref{sec:oatlab-syntax}.
+
+\begin{description}
+    \item[Pretty-printing.]
+        In this transformation, the syntax tree is converted into a textual
+        representation. We use the \code{pretty-print} library to help with the
+        formatting of the text. Of note is that the result type of the pretty
+        printing algebra uses a constant functor. Intuitively, this is because
+        no matter what kind of node in the syntax tree we are processing, we
+        will turn it into text. In general, when expressing transformations
+        that are invariant with regard to the type of node, constant functors
+        are used.
+
+        We will not give the full code of the transformation, and instead we
+        refer the reader to our code online\footnotemark. However, to give an
+        idea of how the pretty-printer works, we show the case for
+        \code{if}-statements in listing \ref{lst:ifstmtpp}.
+        \footnotetext{\url{https://github.com/tsani/mcfas/blob/master/mcfas-backend/Language/Oatlab/Pretty.hs\#L39}}
+
+        \lstinputlisting[
+            caption={
+                The case in the \oatlab{} pretty-printer for
+                \code{if}-statements. This case is the most complex, since the
+                bodies of both branches are given as lists of statements. These
+                have been processed by the catamorphism into lists of constant
+                functors containing \code{Doc} values, which is a type of text.
+                These lists must each be joined into a \code{Doc}, with
+                one element in the list per line. The next difficulty arises
+                because the \code{else}-clause is optional, so we must emit an
+                \code{else} only if there is an \code{else} branch present. The
+                operators \code{<+>} and \code{\$+\$} are provided by the
+                \code{pretty-print} library and respectively mean ``join with
+                a space'' and ``join with a line break''.
+            },
+            label=lst:ifstmtpp
+        ]{ifstmtpp.hs}
+
+    \item[Statement numbering.]
+        This transformation presents two important differences with the
+        pretty-printing transformation. First, it annotates the syntax tree
+        with indexed annotations. Second, it preserves state throughout the
+        traversal to hold the counter.
+
+        Listing \ref{lst:statementnumberann} shows the necessary definitions to
+        define an indexed annotation, and listing \ref{lst:monadicstate} shows
+        the algebra that implements the traversal. We use a state monad holding
+        an integer to represent the counter.
+
+        \lstinputlisting[
+            label=lst:statementnumberann,
+            caption={
+                The necessary definitions to set up an indexed annotation in
+                which statements are numbered with \code{StatementNumber}s
+                (which are simply integers) and all other nodes are trivially
+                annotated, with \code{()}. The \code{type family} declaration
+                defines the type-level function. A trivial \code{newtype}
+                wrapping the type family is necessary because type families may
+                not appear partially applied.
+            }
+        ]{statementnumberann.hs}
+
+        \lstinputlisting[
+            label=lst:monadicstate,
+            caption={
+                The algebra for annotating the syntax tree is very simple
+                thanks to the \code{reannotateM} and \code{collapseIndex}
+                combinators implemented in \mcfas. The former takes as input a
+                function that describes a transformation to perform on the
+                annotations in the tree and produces an algebra that rebuilds
+                the tree with this transformation applied to the annotations.
+                The latter combinator reduces the amount of pattern matching
+                necessary when analyzing the syntax tree. It does so by sending
+                each constructor that produces nodes of a given index to
+                another indexed type in which each index has only a single
+                constructor. Hence, when writing a transformation that treats
+                all nodes of a certain index the same way, only one pattern is
+                needed.
+            }
+        ]{numberstatementalg.hs}
+\end{description}
+
+\subsection{Reaching definitions}
+
+As a last example, we will show how a naive reaching definitions analysis is
+implemented in \mcfas{}. To do so, we follow the three essential steps of
+Laurie's six steps methodology.
+
+\begin{description}
+    \item[Approximation domain.]
+        We define an indexed annotation using a type family and a newtype
+        wrapper, as in the statement numbering traversal.
+
+        \lstinputlisting[
+            label=lst:reachingdefsapprox,
+            caption={
+                To represent the set of definitions that reach a given one, we
+                use a map that associates representations of definitions to the
+                set of statement numbers that create those definitions.
+            }
+        ]{reachingdefsapprox.hs}
+
+    \item[Merge operation.]
+        This is the union operation, since the reaching definitions is a
+        \emph{may} analysis. Since we use a map associating strings to sets, we
+        union the maps, and in case of conflict in the keys, we combine the
+        values by a union as well.
+
+        \lstinputlisting[
+            label=lst:reachingdefsmerge,
+            caption={
+                The merge operation for the reaching definitions analysis is
+                union. Due to our representation as a map to sets, we must
+                perform a sort of nested union. We make use of the
+                \code{ReflectS} type class's \code{reflectS} function to demote
+                the index \code{node} from the type level to the value level.
+                Then, we can match on the index and treat the different cases
+                of annotations to merge. Most annotations are simply \code{()}
+                and no merging is required. We must however consider all the
+                cases even though most of them are the same in order to satisfy
+                the compiler.
+            }
+        ]{reachingdefsmerge.hs}
+
+    \item[Dataflow equations.]
+        This analysis considers assignments and \code{for}-loops as
+        definitions. Assignments are checked that they are lvalues.
+
+        \lstinputlisting[
+            label=lst:reachingdefsdataflow,
+            caption={
+                The dataflow equations for the naive reaching definitions
+                analysis. By using wildcard matches, we can easily express the
+                fact that most statements just pass along their in-set as their
+                out-set.
+            }
+        ]{reachingdefsdataflow.hs}
+
+    \item[Initial conditions.]
+        To set up the initial conditions, two things must be done. First, we
+        must write a computation that is used to calculate the in-set for the
+        first statement. Second, we must write an initialization function that
+        is compatible with the combinator \code{prepareAnalysisAlg} mentioned
+        in section \ref{sec:analysis-representation}.
+
+        We will not give the full code of these since they are quite simple.
+        The first simply returns an empty map. The second uses
+        \code{collapseIndex} on the syntax tree node to return an empty map for
+        statements and \code{()} for everything else.
+\end{description}
+
+\section{Conclusion}
+
+This completes our presentation of the \mcfas{} framework. This project
+explores an interesting point in the design space of static analysis frameworks
+by applying a number of advanced functional programming techniques to the
+developement of an analysis framework imperative programs. We have shown that
+the syntax trees of imperative languages, albeit complex, can be concisely
+represented as the fixed point of a higher-order \emph{pattern functor}. These
+fixed points can be processed by \emph{catamorphisms} which promote
+\emph{algebras} into bottom-up recursive functions. A general annotation scheme
+is presented. Both the result type of algebras on these functors and the
+annotations can be made to depend on the node index by using \emph{type
+families}. Analyses are represented by a record containing answers to the
+questions elicited by the six steps methodology. These \emph{analysis records}
+can then be executed on appropriately prepared syntax trees by an
+\emph{analysis runner}. We have implemented an analysis runner for forward
+analyses as well as a number of other transformations on syntax trees using the
+\mcfas. In doing so, a variety of useful \emph{combinators} were developed, for
+instance to facilitate preparing syntax trees for analysis and to rewrite the
+annotations in a tree.
+
+Of course, the \oatlab{} language currently analyzed by \mcfas{} is a toy. Much
+more work would be needed develop a framework for analyzing a production
+language such as \matlab, but such work would be more appropriately the subject
+of a master's thesis.
+
+\appendix
+
+\newpage
+\section{Interpreter for \code{ProgramF} using a higher-order algebra}
+\label{sec:interpreter}
+
+\lstinputlisting[numbers=left]{interpreter.hs}
+
+\newpage
+\section{The syntax of \oatlab{}}
+\label{sec:oatlab-syntax}
+
+\lstinputlisting[numbers=left]{oatlab.hs}
+
+\newpage
 \bibliography{bibliography}
 
 \end{document}
