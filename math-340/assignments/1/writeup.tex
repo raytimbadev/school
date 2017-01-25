@@ -1,0 +1,125 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington}
+\title{Assignment \#1\\Discrete structures 2 -- MATH 340}
+\date{27 January 2017}
+
+\usepackage{amsthm,amsmath,amssymb}
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{tikz}
+
+\usetikzlibrary{graphs}
+
+\newcommand{\questionname}{\textit}
+
+\newcommand{\match}[2]{B_#1 &\mapsto G_#2}
+\newcommand{\preference}[4]{P_#1 &: P_#2 > P_#3 > P_#4}
+
+\tikzset{
+    roommates/.style={row sep=2em, column sep=2em}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{enumerate}
+    \item
+        \questionname{Stable matching algorithm.}
+
+        Applying the Boy Proposal Algorithm with the given preference lists
+        gives the following matching.
+
+        \begin{align*}
+            \match{1}{4} \\
+            \match{2}{1} \\
+            \match{3}{2} \\
+            \match{4}{5} \\
+            \match{5}{3}
+        \end{align*}
+
+        Other stable matchings do exist. For instance, applying the Girl
+        Proposal Algorithm gives the following matching that is different.
+
+        \begin{align*}
+            \match{1}{4} \\
+            \match{2}{3} \\
+            \match{3}{2} \\
+            \match{4}{5} \\
+            \match{5}{1}
+        \end{align*}
+
+    \item
+        \questionname{Stable roommates.}
+
+        Consider the following preference list.
+        \begin{align*}
+            \preference{1}{3}{2}{4} \\
+            \preference{2}{4}{3}{1} \\
+            \preference{3}{2}{4}{1} \\
+            \preference{4}{3}{2}{1}
+        \end{align*}
+
+        There does not exist a stable matching for this preference list in a
+        roommate-pairing situation. To show this, we will see that every
+        matching on this graph is not stable. The number of matchings is only
+        three, so this is straightforward. Figure \ref{fig:unstable} shows the
+        three matchings and describes their instability.
+
+        \newcommand{\matrixcontent}{
+            \node (1) [] {$P_1$} ; \& \node (2) [] {$P_2$} ; \\
+            \node (3) [] {$P_3$} ; \& \node (4) [] {$P_4$} ; \\
+        }
+
+        \begin{figure}[ht]
+            \centering
+            \begin{tabular}{c c}
+                \begin{tikzpicture}[ampersand replacement=\&]
+                    \matrix[roommates] {
+                        \matrixcontent
+                    } ;
+                    \graph {
+                        (1) -- (2) ;
+                        (3) -- (4) ;
+                    } ;
+                \end{tikzpicture}
+                &
+                \begin{tikzpicture}[ampersand replacement=\&]
+                    \matrix[roommates] {
+                        \matrixcontent
+                    } ;
+                    \graph {
+                        (1) -- (4) ;
+                        (3) -- (2) ;
+                    } ;
+                \end{tikzpicture}
+                \\
+                \begin{tikzpicture}[ampersand replacement=\&]
+                    \matrix[roommates] {
+                        \matrixcontent
+                    } ;
+                    \graph {
+                        (1) -- (3) ;
+                        (2) -- (4) ;
+                    } ;
+                \end{tikzpicture}
+                &
+            \end{tabular}
+            \caption{
+                The three matchings that are possible on the given set of nodes.
+                Conceptually, what happens in this preference setup is that
+                ``nobody like $P_1$'', so whoever is paired with $P_1$ will
+                happily trade them away. In the top-right case, $P_2$ prefers
+                $P_3$ to $P_1$ and $P_3$ prefers $P_2$ to $P_4$, so they swap,
+                giving the matching in the top-left corner. In this case, $P_2$
+                prefers $P_4$ to $P_3$ and $P_4$ prefers $P_2$ to $P_1$, so
+                they swap, giving the bottom matching. In this case, $P_4$
+                prefers $P_3$ to $P_2$ and $P_3$ prefers $P_4$ to $P_1$, so
+                they swap, returning us to the matching in the top-left corner.
+            }
+            \label{fig:unstable}
+        \end{figure}
+
+\end{enumerate}
+
+\end{document}
