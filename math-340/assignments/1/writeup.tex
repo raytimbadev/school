@@ -8,6 +8,8 @@
 \usepackage[margin=2.0cm]{geometry}
 \usepackage{tikz}
 
+\newtheorem{proposition}{Proposition}
+
 \usetikzlibrary{graphs}
 
 \newcommand{\questionname}{\textit}
@@ -15,8 +17,17 @@
 \newcommand{\match}[2]{B_#1 &\mapsto G_#2}
 \newcommand{\preference}[4]{P_#1 &: P_#2 > P_#3 > P_#4}
 
+\newcommand{\nest}[2][c]{
+    \begin{tabular}[#1]{@{}c@{}}
+        #2
+    \end{tabular}
+}
+
+\newcommand{\fin}{\mathbf}
+
 \tikzset{
-    roommates/.style={row sep=2em, column sep=2em}
+    roommates/.style={row sep=2em, column sep=2em},
+    market/.style={row sep=0.5em, column sep=2em}
 }
 
 \begin{document}
@@ -73,7 +84,7 @@
 
         \begin{figure}[ht]
             \centering
-            \begin{tabular}{c c}
+            \begin{tabular}{c c c}
                 \begin{tikzpicture}[ampersand replacement=\&]
                     \matrix[roommates] {
                         \matrixcontent
@@ -93,7 +104,7 @@
                         (3) -- (2) ;
                     } ;
                 \end{tikzpicture}
-                \\
+                &
                 \begin{tikzpicture}[ampersand replacement=\&]
                     \matrix[roommates] {
                         \matrixcontent
@@ -103,21 +114,183 @@
                         (2) -- (4) ;
                     } ;
                 \end{tikzpicture}
-                &
             \end{tabular}
             \caption{
                 The three matchings that are possible on the given set of nodes.
                 Conceptually, what happens in this preference setup is that
-                ``nobody like $P_1$'', so whoever is paired with $P_1$ will
-                happily trade them away. In the top-right case, $P_2$ prefers
+                ``nobody likes $P_1$'', so whoever is paired with $P_1$ will
+                happily trade them away. In the left case, $P_2$ prefers
                 $P_3$ to $P_1$ and $P_3$ prefers $P_2$ to $P_4$, so they swap,
-                giving the matching in the top-left corner. In this case, $P_2$
+                giving the matching in the center. In this case, $P_2$
                 prefers $P_4$ to $P_3$ and $P_4$ prefers $P_2$ to $P_1$, so
-                they swap, giving the bottom matching. In this case, $P_4$
+                they swap, giving the right case. In this case, $P_4$
                 prefers $P_3$ to $P_2$ and $P_3$ prefers $P_4$ to $P_1$, so
-                they swap, returning us to the matching in the top-left corner.
+                they swap, returning us to the matching in the left.
             }
             \label{fig:unstable}
+        \end{figure}
+
+    \item
+        \questionname{Edge coloring.} --
+
+    \item
+        \questionname{Counting matchings.}
+
+        \begin{proposition}
+            For any graph $G$ with bipartition $(A, B)$ such that
+            $A = \{a_1, \ldots, a_n\}$ and $B = \{b_1, \ldots, b_{n+1}\}$ with
+            $a_i$ adjacent to $b_1, \ldots, b_{i+1}$ for $i = 1, \ldots, n$,
+            there are exactly $2^n$ matchings on $G$ covering $A$.
+        \end{proposition}
+
+        \begin{proof}
+            First notice that $A$ is simply a finite set on $n$ elements, which
+            we will denote by $\fin{n}$. Then, a matching on $G$ covering $A$
+            is simply an injective function $f : \fin{n} \to \fin{n+1}$. (To
+            each item in $A$, we associate an item in $B$ such that no two
+            elements of $A$ are mapped to the same item in $B$.) We can
+            count the number of such functions easily by induction on $n$.
+
+            First, consider the case $n = 0$. Notice that the domain is then
+            empty.
+            There exists only the empty set as a mapping from the empty domain.
+            The empty map is vacuously injective.
+            Hence, there are $2^0$ injective maps from $\fin{0}$ to $\fin{1}$.
+
+            Next in the step case, suppose there are $2^k$ injective mappings
+            from $\fin{k}$ to $\fin{k+1}$. We wish to show that there are
+            $2^{k+1}$ injective functions from $\fin{k+1}$ to $\fin{k+2}$.
+
+            Take an arbitrary injective mapping
+            $f : \fin{k} \to \fin{k+1}$.
+            Next, we define the map $g : \fin{k+1} \to \fin{k+2}$ by the
+            following rule.
+            \begin{equation*}
+                a \mapsto \begin{cases}
+                    f(a) &\quad\text{if } a < k + 1 \\
+                    b    &\quad\text{if } a = k + 1
+                \end{cases}
+            \end{equation*}
+            There are exactly two choices for the value $b$ that is the image
+            of $k + 1$ under $f$. The first choice is the unique element in
+            $\fin{k+1}$ that is not the image of anything in $\fin{k}$ under
+            $f$. (This element exists and is unique by the pigeonhole
+            principle.)
+            The alternative choice for $b$ is simply $k+1$.
+            Any other value we could choose for $b$ would be in the image of
+            $f$, consequently making $g$ not injective.
+
+            Since there are $2^k$ choices for the function $f$ and two ways to
+            construct $g$ given $f$, there are $2^{k+1}$ injective maps from
+            $\fin{k+1}$ to $\fin{k+2}$.
+
+            Hence by induction, for any $n$, the number of injective functions
+            from $\fin{n}$ to $\fin{n+1}$ is $2^n$. By the correspondence
+            between matchings covering $A$ on bipartite graphs of the form of
+            $G$ and injective functions on finite sets, there are $2^n$
+            matchings covering $A$ on $G$.
+        \end{proof}
+
+    \item
+        \questionname{K\"onig's Theorem.} --
+
+    \item
+        \questionname{Matching markets.}
+
+        Consider the following market with buyers $(A,B,C,D)$ and sellers
+        $(X,Y,Z,W)$ with the following valuations.
+
+        \begin{center}
+            \begin{tabular}{c | c c c c}
+                ~ & X & Y & Z & W \\ \hline
+                A & 6 & 4 & 6 & 6 \\
+                B & 6 & 5 & 7 & 2 \\
+                C & 4 & 1 & 7 & 5 \\
+                D & 3 & 1 & 6 & 3
+            \end{tabular}
+        \end{center}
+
+        Figure $\ref{fig:market}$ shows an algorithmically generated sequence
+        of pricings for the sellers and the graphs that these pricings give
+        rise to according to buyer satisfaction.
+
+        \newcommand{\marketmatrix}{
+            \matrix[market]{
+                \node (A) {$A$} ; \& \node (X) {$X$} ; \\
+                \node (B) {$B$} ; \& \node (Y) {$Y$} ; \\
+                \node (C) {$C$} ; \& \node (Z) {$Z$} ; \\
+                \node (D) {$D$} ; \& \node (W) {$W$} ; \\
+            }
+        }
+
+        \newcommand{\marketgraph}[1]{
+            \begin{tikzpicture}[ampersand replacement=\&]
+                \marketmatrix ;
+                \graph[use existing nodes, right anchor=west, left anchor=east]{
+                    #1
+                } ;
+            \end{tikzpicture}
+        }
+
+        \newcommand{\marketcell}[4]{
+            \nest{
+                $p_#1 = #2$ \\
+                $N(S_#1) = #3$ \\
+                \marketgraph{
+                    #4
+                }
+            }
+        }
+
+        \newcommand{\marketcellok}[3]{
+            \nest{
+                $p_#1 = #2$ \\
+                \marketgraph{
+                    #3
+                }
+            }
+        }
+
+        \begin{figure}[ht]
+            \centering
+            \begin{tabular}{c c c c}
+                \marketcell{1}{ (0, 0, 0, 0) }{ \{Z\} }{
+                    A -- { X, Z, W } ;
+                    B -- Z ;
+                    C -- Z ;
+                    D -- Z ;
+                }
+                &
+                \marketcell{2}{ (0 ,0 ,1 , 0) }{ \{X, Z\} }{
+                    A -- { X, W } ;
+                    B -- { X, Z } ;
+                    C -- { Z } ;
+                    D -- { Z } ;
+                }
+                &
+                \marketcell{3}{ (1, 0, 2, 0) }{ \{Z, W\} }{
+                    A -- W ;
+                    B -- { X, Y, Z } ;
+                    C -- { Z, W } ;
+                    D -- Z ;
+                }
+                &
+                \marketcellok{4}{ (1, 0, 3, 1) }{
+                    A -- { X, W } ;
+                    B -- { X, Y } ;
+                    C -- { Z, W } ;
+                    D -- Z ;
+                }
+            \end{tabular}
+            \caption{
+                The pricings produced according to the buyer satisfaction
+                algorithm. Recall that each graph has an edge between a buyer
+                and a seller if the trade represented by the edge maximizes
+                buyer satisfaction. The set $N(S_i)$ is the constricting set
+                at stage $i$ of the algorithm. In the final stage, a perfect
+                matching exists.
+            }
+            \label{fig:market}
         \end{figure}
 
 \end{enumerate}
