@@ -1,0 +1,199 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington\\(260636023)}
+\date{2 February 2017}
+\title{Assignment \#1 \\ Probability -- MATH 323}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{tikz}
+
+\usetikzlibrary{graphs}
+
+\newtheorem{proposition}{Proposition}
+\let\P\undefined
+\DeclareMathOperator{\P}{\mathbb{P}}
+
+\newcommand{\half}{\frac{1}{2}}
+\newcommand{\parens}[1]{\left(#1\right)}
+
+\newcommand{\questionname}{\textit}
+\newcommand{\intersn}{\cap}
+
+\begin{document}
+
+\maketitle
+
+\begin{enumerate}
+    \item
+        Three boys $B_{1,2,3}$ and three girls $G_{1,2,3}$ line up in a random
+        order for a photograph.
+
+        \begin{proposition}
+            The probability that the three girls stand next to each other is
+            $0.2$.
+        \end{proposition}
+
+        \begin{proof}
+            The sample space under consideration is the set of permutations on
+            six distinct items, which has cardinality $|S| = 6!$. The event $E$
+            whose cardinality we seek to measure is ``three girls
+            stand next to each other''. The key insight is that this event can
+            be broken into four disjoint events that describe the ordering of
+            the items. Figure \ref{fig:lineups} shows these events pictorially.
+
+            \begin{figure}[ht]
+                \centering
+                \newcommand{\lineup}[6]{
+                    \node (#1) {$#1$} ;
+                    \&
+                    \node (#2) {$#2$} ;
+                    \&
+                    \node (#3) {$#3$} ;
+                    \&
+                    \node (#4) {$#4$} ;
+                    \&
+                    \node (#5) {$#5$} ;
+                    \&
+                    \node (#6) {$#6$} ;
+                    \\
+                }
+                \begin{tikzpicture}[ampersand replacement=\&]
+                    \matrix[column sep=0.25em, row sep=1em]{
+                        \lineup{G}{G}{G}{B}{B}{B}
+                        \lineup{B}{G}{G}{G}{B}{B}
+                        \lineup{B}{B}{G}{G}{G}{B}
+                        \lineup{B}{B}{B}{G}{G}{G}
+                    } ;
+                \end{tikzpicture}
+                \caption{
+                    The different ways the people can line up. To find the size of
+                    the overall event we wish to measure, it suffices to count the
+                    number of ways that this diagram can be labelled with
+                    subscripts $1$, $2$ and $3$.
+                }
+                \label{fig:lineups}
+            \end{figure}
+
+            As mentioned in the figure caption, it suffices to find out how
+            many ways the subscripts can be written into each line of the
+            diagram. In each line of the diagram, notice that this is the same
+            as asking ``how many ways can be boys the arranged in this line?''
+            and ``how many ways can the girls be arranged in this line?'' The
+            answer to both these questions is $3!$. Performing both of these
+            processes together in a line means multiplying, so for a fixed
+            \emph{unlabelled} arrangement of boys and girls, the number of ways
+            to assign the subscripts is $(3!)^2$.
+
+            Since there are four fixed unlabelled arrangements of boys and
+            girls that comprise the overall event, we multiply this count by
+            four to arrive at $|E| = 4(3!)^2$. Finally, we compute the
+            probability of the event.
+
+            \begin{equation*}
+                \P(E) = \frac{|E|}{|S|} = \frac{4(3!)^2}{6!} = 0.2
+            \end{equation*}
+        \end{proof}
+
+        \begin{proposition}
+            The probability that the boys and girls alternate is $0.1$.
+        \end{proposition}
+
+        \begin{proof}
+            We reuse the fact from the previous proof that given a fixed
+            unlabelled arrangement of boys and girls, the number of ways that
+            labels may be assigned to it is $(3!)^2$. There are two possible
+            alternation schemes: one begins with a boy and the other begins
+            with a girl. Hence, we compute the probability of the event ``the
+            boys and girls alternate''.
+
+            \begin{equation*}
+                \P(E) = \frac{|E|}{|S|} = \frac{2(3!)^2}{6!} = 0.1
+            \end{equation*}
+        \end{proof}
+
+    \item
+        \questionname{Sampling with and without replacement.}
+
+        \begin{proposition}
+            Suppose $10$ cards are drawn with replacement from a standard deck.
+            The probability that cards of both colors are selected is
+            $\frac{511}{512}$.
+        \end{proposition}
+
+        \begin{proof}
+            Notice that when sampling with replacement, the fact that we have
+            drawn, say, a red card does not affect in any way whether we may
+            draw another red card, unlike when sampling without replacement.
+            (In the latter case after drawing one red card, the odds of drawing
+            another one go down, as the supply of red cards has become
+            smaller.)
+            In other words, if ten items are sampled with replacement, then
+            each of the ten samples is \emph{independent}.
+
+            To approach this problem, we will compute the probability of
+            drawing all cards of the same color, and then taking the
+            complement.
+            The probability of drawing a red card is $\half$, so the
+            probability of drawing ten red cards is $\left(\half\right)^{10}$.
+            Likewise for black cards. Hence, the probability of drawing all red
+            or all black cards is the sum of these probabilities, since these
+            events are disjoint.
+
+            Finally, we compute the probability of drawing ten cards of both
+            colors by noticing that it is the complement of drawing ten cards
+            of the same color.
+
+            \begin{equation*}
+                \P(E) = 1 - 2 \parens{\half}^{10} = \frac{511}{512} \sim 0.998
+            \end{equation*}
+        \end{proof}
+
+        \begin{proposition}
+            Suppose 10 cards are drawn without replacement from a standard
+            deck. The probability that cards of both colors are selected is X.
+        \end{proposition}
+
+        \begin{proof}
+            We approach the scenario without replacement similarly by finding
+            the probability that all cards drawn have the same color and taking
+            the complement. The difference here is that after drawing, say, a
+            red card, the probability of drawing another red card is smaller.
+
+            The probability of first drawing a red card is $\frac{26}{52}$, and
+            then drawing another one is $\frac{25}{51}$, and so one for a
+            product of ten factors. We compute the probability of drawing a red
+            card.
+
+            \begin{equation*}
+                \P(\text{Red}) = \prod_{i=0}^9 \frac{26 - i}{52 - i}
+                = \frac{4}{21}
+            \end{equation*}
+
+            By symmetry, we have the same probability for drawing ten black
+            cards. Finally, we compute the probability of drawing cards of
+            different colors.
+
+            \begin{equation*}
+                \P{(\text{Red or Black})} = 1 - \frac{8}{21} = \frac{13}{21}
+            \end{equation*}
+        \end{proof}
+
+    \item
+        Two cards are drawn from a deck. Let $A$ be the event that the first is
+        a diamond. Let $B$ be the event that the second is a diamond.
+
+        If we just consider the second card, leaving the first card unknown,
+        then the probability $\P{(B)} = \frac{1}{4}$. The probability that the
+        first card is a diamond is the same: $\P{(A)} = \frac{1}{4}$.
+
+        The probability of drawing two diamonds is
+        \begin{equation*}
+            \P{(A \intersn B)} = \frac{13}{52} \frac{12}{51} = \frac{1}{17}
+            \neq
+            \frac{1}{16} = \P(A) \P(B)
+        \end{equation*}
+        This shows that the events $A$ and $B$ are not independent.
+\end{enumerate}
+
+\end{document}
