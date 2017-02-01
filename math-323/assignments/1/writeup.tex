@@ -19,6 +19,9 @@
 
 \newcommand{\questionname}{\textit}
 \newcommand{\intersn}{\cap}
+\newcommand{\union}{\cup}
+\DeclareMathOperator{\trueOp}{true}
+\newcommand{\true}{\trueOp{}}
 
 \begin{document}
 
@@ -194,6 +197,54 @@
             \frac{1}{16} = \P(A) \P(B)
         \end{equation*}
         This shows that the events $A$ and $B$ are not independent.
+
+    \item
+        In a town, $40\%$ of the population has HIV. An HIV test comes back
+        positive for a person with the disease with probability $0.9$; it comes
+        back negative for a person without the disease with probability $0.95$.
+
+        \begin{proposition}
+            Suppose a person is chosen uniformly at random in this population
+            and that their HIV test comes back positive. Then, that person has
+            HIV with probability X.
+        \end{proposition}
+
+        \begin{proof}
+            Let $H$ be the event of ``one having HIV'' and
+            $T$ be the event of ``testing positive for HIV''.
+            Then note the probabilities
+            \begin{align*}
+                \P(H) &= 0.4 \\
+                \P(T|H) &= 0.9 \\
+                \P(T|H^c) &= 0.05
+            \end{align*}
+
+            Using Bayes's theorem, we find that
+            \begin{equation}
+                \label{eq:afterbayes}
+                \P(H|T) = \frac{\P(T|H) P(H)}{\P(T)}
+            \end{equation}
+
+            The quantities in the numerator are known, so it suffices to
+            compute $\P(T)$. Notice that
+            $\P(T) = \P(T \intersn (H \union H^c))$
+            since $H$ and $H^c$ are mutually exclusive and
+            obviously $\P(H \union H^c) = 1$. Hence by the law of conditional
+            probability,
+            \begin{align*}
+                P(T)
+                &= P(T \intersn (H \union H^c))
+                = P(T \intersn H) + P(T \intersn H^c)
+                = P(T | H) P(H) + P(T | H^c) P(H^c) \\
+                &= (0.9) (0.4) + (0.05) (0.6)
+                = \frac{39}{100}
+            \end{align*}
+
+            Substituting this result into \eqref{eq:afterbayes} gives
+            \begin{equation*}
+                \P(H|T) = \frac{(0.9) (0.4)}{0.39} = \frac{12}{13} \sim 0.92
+            \end{equation*}
+        \end{proof}
 \end{enumerate}
 
 \end{document}
