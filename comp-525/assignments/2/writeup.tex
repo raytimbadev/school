@@ -8,6 +8,51 @@
 \usepackage{tikz}
 \usepackage{amsmath,amsthm,amssymb}
 
+\renewcommand{\thesection}{Question \arabic{section}}
+
+\newcommand{\Z}{\mathbb{Z}}
+
 \begin{document}
+
+\maketitle
+
+\section{Formalizing linear-time properties}
+
+We consider the set of atomic propositions $AP = \{x = 0, x > 1\}$ and a
+nonterminating sequential program $P$ that manipulates $x$. We formalize the
+following informal linear-time properties. Let $\Sigma = 2^{AP}$.
+
+\begin{enumerate}
+        \renewcommand{\labelenumi}{(\alph{enumi})}
+        \setcounter{enumi}{4}
+    \item ``$x$ exceeds one only finitely many times''
+
+        This is formalized by the $\omega$-regular language
+        $\Sigma^* (\Sigma \setminus \{ \{x>1\} \})$.
+        (We do not exclude $\{x>1, x=0\}$ since it is impossible anyway.)
+
+    \item ``$x$ exceeds one infinitely often''
+
+        We use the $\omega$-regular language
+        $\Sigma^* (\Sigma^* \{x>1\})^\omega$.
+
+    \item ``the value of $x$ alternates between zero and two''
+
+        There is no way to determine using only the given atomic propositions
+        that $x$ has the value two. We make the following assumption:
+        $x \in \Z_3$. Hence $x > 1 \iff x = 2$.
+
+        Then, we use the $\omega$-regular language
+        $(\{x=0\}\{x>1\})^\omega + (\{x>1\}\{x=0\})^\omega$.
+
+    \item ``true''
+
+        To construct a family of sets of atomic propositions that is always
+        satisfied, it suffices to take the whole set, and subtract the
+        impossible case $\{x=0, x>1\}$.
+
+        This gives the $\omega$-regular language
+        $(\Sigma \setminus \{x=0, x>1\})^\omega$.
+\end{enumerate}
 
 \end{document}
