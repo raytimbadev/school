@@ -8,15 +8,22 @@
 \usepackage{tikz}
 \usepackage{amsmath,amsthm,amssymb}
 
-\renewcommand{\thesection}{Question \arabic{section}}
+\newtheorem{prop}{Proposition}
+
+\renewcommand{\thesection}{Q\arabic{section}}
 
 \newcommand{\Z}{\mathbb{Z}}
+\newcommand{\union}{\cup}
+\newcommand{\intersn}{\cap}
+\newcommand{\up}{\uparrow}
+\DeclareMathOperator{\Pref}{Pref}
+\DeclareMathOperator{\FairPaths}{FairPaths}
 
 \begin{document}
 
 \maketitle
 
-\section{Formalizing linear-time properties}
+\section{(\# 3.5) Formalizing linear-time properties}
 
 We consider the set of atomic propositions $AP = \{x = 0, x > 1\}$ and a
 nonterminating sequential program $P$ that manipulates $x$. We formalize the
@@ -27,13 +34,13 @@ following informal linear-time properties. Let $\Sigma = 2^{AP}$.
         \setcounter{enumi}{4}
     \item ``$x$ exceeds one only finitely many times''
 
-        This is formalized by the $\omega$-regular language
+        This is formalized by the $\omega$-regular expression
         $\Sigma^* (\Sigma \setminus \{ \{x>1\} \})$.
         (We do not exclude $\{x>1, x=0\}$ since it is impossible anyway.)
 
     \item ``$x$ exceeds one infinitely often''
 
-        We use the $\omega$-regular language
+        We use the $\omega$-regular expression
         $\Sigma^* (\Sigma^* \{x>1\})^\omega$.
 
     \item ``the value of $x$ alternates between zero and two''
@@ -42,7 +49,7 @@ following informal linear-time properties. Let $\Sigma = 2^{AP}$.
         that $x$ has the value two. We make the following assumption:
         $x \in \Z_3$. Hence $x > 1 \iff x = 2$.
 
-        Then, we use the $\omega$-regular language
+        Then, we use the $\omega$-regular expression
         $(\{x=0\}\{x>1\})^\omega + (\{x>1\}\{x=0\})^\omega$.
 
     \item ``true''
@@ -51,8 +58,146 @@ following informal linear-time properties. Let $\Sigma = 2^{AP}$.
         satisfied, it suffices to take the whole set, and subtract the
         impossible case $\{x=0, x>1\}$.
 
-        This gives the $\omega$-regular language
+        This gives the $\omega$-regular expression
         $(\Sigma \setminus \{x=0, x>1\})^\omega$.
 \end{enumerate}
+
+\section{(\# 3.6) Classifying linear-time properties}
+
+\begin{enumerate}
+        \renewcommand{\labelenumi}{(\alph{enumi})}
+    \item ``$A$ should never occur''
+
+        This can be formalized by the $\omega$-regular expression
+        \begin{equation*}
+            P = (\Sigma \setminus \{ \{A\}, \{A, B\} \})^\omega
+        \end{equation*}
+
+        This is an invariant, since there exists a formula $\phi = \neg A$ such
+        that
+        \begin{equation*}
+            P = \left\{
+                S_0 S_1 S_2 \ldots \in \Sigma^\omega
+                | \forall j \geq 0 : A_j \models \phi
+            \right\}
+        \end{equation*}
+
+    \item ``$A$ should occur exactly once''
+
+        Let $Q = \Sigma \setminus \{ \{A\}, \{A, B\} \}$. Then, this property
+        can be formalized by the $\omega$-regular expression
+        \begin{equation*}
+            P = Q^* \{A\} Q^\omega
+        \end{equation*}
+
+        This is not an invariant, because intuitively there's nothing we can
+        say about the states individually that lets us know whether the
+        property is satisfied or not. This is not a safety property either.
+        Suppose we have an arbitrary run $\sigma \notin P$. Notice that the
+        string $\{B\}^\omega$ is a possible choice for $\sigma$. However, any
+        finite prefix of this string has as a possible extension the string
+        containing exactly one ``letter'' that is a set containing $A$. This is
+        not a liveness property either. Suppose we have an arbitrary
+        $\hat \sigma \in \Sigma^*$. A possible choice for this $\hat \sigma$
+        may have more than one letter containing $A$. Hence it is not the case
+        that an arbitrary finite word can be extended to an infinite run
+        satisfying the property.
+
+    \item ``$A$ and $B$ alternate infinitely often''
+
+        For any index $i$ at which $A$ is true, there exists an index
+        $i^\prime \geq i$ such that $B$ is true, and vice versa.
+        Let $\bar A = \{ \{A\}, \{A, B\} \}$
+        and $\bar B = \{ \{B\}, \{A, B\} \}$.
+        Then, we formalize the property with the $\omega$-regular expression
+        \begin{equation*}
+            P = \Sigma^* (\bar A \Sigma^* \bar B \Sigma^*)^\omega
+        \end{equation*}
+
+        This is a liveness property. Take an arbitrary $\hat \sigma \in
+        \Sigma^*$. Then it can clearly be extended to a $\sigma \in P$.
+
+    \item ``$A$ should eventually be followed by $B$''
+
+        We understand this as a somewhat weaker version of the previous
+        property. We adopt the notation introduced in the previous exercise,
+        and
+        let $\hat A = \{ \emptyset, \{A\} \}$
+        and $\hat B = \{ \emptyset, \{B\} \}$.
+        We formalize this with the
+        $\omega$-regular expression
+        \begin{equation*}
+            P
+            = (\hat B)^\omega
+            + \Sigma^* (\bar A (\Sigma^* \{A, B\})^* \Sigma^* \{B\})^\omega
+        \end{equation*}
+
+        This expression encodes the notion that if a letter involving $A$ is
+        encountered, that at some point later in the string, a letter involving
+        $B$ is found. This is tricky because the letter $\{A, B\}$ can serve
+        both to terminate a forwards search for a $B$ and to``kick off''
+        another search for $B$.
+\end{enumerate}
+
+\section{(\# 3.11) Closure properties of liveness and safety properties}
+
+\begin{prop}
+    Let $P$ and $P^\prime$ be liveness properties over $AP$. Then,
+    \begin{enumerate}
+        \item $P \union P^\prime$ is a liveness property.
+        \item $P \intersn P^\prime$ is not, in general, a liveness property.
+    \end{enumerate}
+\end{prop}
+
+\begin{proof}
+    We show each statement separately.
+
+    \begin{enumerate}
+        \item
+            Take arbitrary $\hat \sigma \in \Sigma^*$. Since $P$ is a liveness
+            property, then $\hat \sigma \up \intersn P \neq \emptyset$.
+            Likewise, $\hat \sigma \up \intersn P^\prime \neq \emptyset$.
+            Observe
+            \begin{align*}
+                \hat \sigma \up \intersn (P \union P^\prime)
+                = (\hat \sigma \up \intersn P)
+                \union (\hat \sigma \up \intersn P^\prime)
+                \neq \emptyset
+            \end{align*}
+            Hence, an arbitrary finite word can be extended into a run that
+            satisfies $P$ or $P^\prime$, so
+            $\hat \sigma \in \Pref(P \union P^\prime)$ which establishes that
+            $\Pref(P \union P^\prime) = \Sigma^*$ and that $P \union P^\prime$
+            is a liveness property.
+
+        \item
+            Consider that
+            $P = \Sigma^* \{B\}^\omega$ and
+            $P^\prime = \Sigma^* \{A\{^\omega\}$ are liveness properties.
+            Notice that $P \intersn P^\prime = \emptyset$,
+            so $\Pref(P \intersn P^\prime) = \emptyset \neq \Sigma^*$, which
+            establishes that $P \intersn P^\prime$ is not a liveness property.
+    \end{enumerate}
+\end{proof}
+
+\section{(\#3.17) Satisfaction under fairness assumptions}
+
+\begin{prop}
+    The trasition system $TS$ does not satisfy the (informally stated) property
+    ``eventually $a$'' under the fairness assumptions $\mathcal{F}$.
+\end{prop}
+
+\begin{proof}
+    Consider the execution
+    \begin{equation*}
+        \rho = (s_3 \beta s_4 \alpha s_5 \alpha s_4 \beta s_6 \beta)^\omega
+    \end{equation*}
+    This execution satisfies the required fairness conditions, namely if
+    the action $X$ is enabled infinitely often, then that action is taken
+    infinitely often, where $X = \alpha, \beta$. This means that $\rho$ is a
+    fair path. However, this run never reaches the state $s_1$ in which the
+    desired atomic proposition $a$ is true. Hence, the system does not satisfy
+    the property ``eventually $a$'', since it might ``never $a$''.
+\end{proof}
 
 \end{document}
