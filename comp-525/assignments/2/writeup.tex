@@ -211,10 +211,69 @@ following informal linear-time properties. Let $\Sigma = 2^{AP}$.
         \item
             Consider that
             $P = \Sigma^* \{B\}^\omega$ and
-            $P^\prime = \Sigma^* \{A\{^\omega\}$ are liveness properties.
+            $P^\prime = \Sigma^* \{A\}^\omega$ are liveness properties.
             Notice that $P \intersn P^\prime = \emptyset$,
             so $\Pref(P \intersn P^\prime) = \emptyset \neq \Sigma^*$, which
             establishes that $P \intersn P^\prime$ is not a liveness property.
+    \end{enumerate}
+\end{proof}
+
+\begin{prop}
+    Let $P$ and $P^\prime$ be safety properties over $AP$. Then,
+    \begin{enumerate}
+        \item $P \union P^\prime$ is a safety property.
+        \item $P \intersn P^\prime$ is a safety property.
+    \end{enumerate}
+\end{prop}
+
+\begin{proof}
+    We show each statement separately.
+
+    \begin{enumerate}
+        \item
+            Take arbitrary $\sigma \notin P \union P^\prime$. Hence,
+            $\sigma \notin P$ and $\sigma \notin P^\prime$. Since these are
+            safety properties, there exist $\hat \sigma_P < \sigma$ and
+            $\hat \sigma_{P^\prime} < \sigma$. Let $\hat \sigma$ be a
+            string among these two with maximal length, and note that it is a
+            bad prefix for both $P$ and $P^\prime$.
+            \begin{equation*}
+                \hat \sigma \up \intersn (P \union P^\prime)
+                = \hat \sigma \up \intersn P
+                \union \hat \sigma \up \intersn P^\prime
+                = \emptyset \union \emptyset
+                = \emptyset
+            \end{equation*}
+
+            This establishes that for any trace violating $P \union P^\prime$,
+            we can find a bad prefix, so $P \union P^\prime$ is a safety
+            property.
+
+        \item
+            Take arbitrary $\sigma \notin P \intersn P^\prime$.
+            Hence, $\sigma \notin P$ or $\sigma \notin P^\prime$.
+            \begin{description}
+                \item[Case] $\sigma \notin P$.
+
+                    Since $P$ is a safety property, we obtain
+                    $\hat \sigma < \sigma$ such that
+                    $\hat \sigma \up \intersn P = \emptyset$.
+                    Hence,
+                    \begin{equation*}
+                        \hat \sigma \up \intersn (P \intersn P^\prime)
+                        = (\hat \sigma \up \intersn P) \intersn P^\prime
+                        = \emptyset \intersn P^\prime
+                        = \emptyset
+                    \end{equation*}
+
+                \item[Case] $\sigma \notin P^\prime$. The same argument
+                    applies, only with our attention focussed on $P^\prime$
+                    instead.
+            \end{description}
+
+            This establishes that for any trace violating
+            $P \intersn P^\prime$, we can find a bad prefix, so
+            $P \intersn P^\prime$ is a safety property.
     \end{enumerate}
 \end{proof}
 
