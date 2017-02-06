@@ -460,11 +460,14 @@ system TS is given in figure \ref{fig:product}.
                 \node (start) {} ;
                     & \node [state] (s1q0) {\state{s_1}{q_0}} ;
                     & \\
-                & \node [state] (s2q0) {\state{s_2}{q_0}} ; & \\
+                & \node [state] (s2q0) {\state{s_2}{q_0}} ;
+                    & \node [state] (s1q2) {\state{s_1}{q_2}} ; \\
                 & \node [state] (s3q1) {\state{s_3}{q_1}} ; & \\
                 \node [state] (s3q2) {\state{s_3}{q_2}} ;
-                    & & \node [state] (s4q1) {\state{s_4}{q_1}} ; \\
-                & \node [state] (s4q2) {\state{s_4}{q_2}} ; & \\
+                    & & \node [state] (s4q2) {\state{s_4}{q_2}} ; \\
+                & \node [state] (s4q1) {\state{s_4}{q_1}} ; & \\
+                & \node [state] (s1q1) {\state{s_1}{q_1}} ; & \\
+                & \node [state] (s2q3) {\state{s_2}{q_3}} ; & \\
             } ;
 
             \graph [ use existing nodes, ] {
@@ -474,11 +477,19 @@ system TS is given in figure \ref{fig:product}.
                 s2q0 ->[edge label=$\gamma$]
                 s3q1 ->[edge label=$\alpha$, loop left]
                 s3q1 ->[edge label=$\gamma$, near start, swap]
-                s4q2 ->[edge label=$\gamma$]
+                s4q2 ->[edge label=$\gamma$, near start]
                 s3q2 ->[edge label=$\alpha$, loop left]
                 s3q2 ->[edge label=$\gamma$, near start]
-                s4q1 ->[edge label=$\gamma$]
-                s3q1
+                s4q1 ->[edge label=$\gamma$, near start, swap]
+                s3q1 ;
+
+                s4q1 ->[edge label=$\beta$]
+                s1q1 ->[edge label=$\alpha$]
+                s2q3 ;
+
+                s4q2 ->[edge label=$\beta$]
+                s1q2 ->[edge label=$\alpha$]
+                s2q0 ;
             } ;
         \end{tikzpicture}
     \end{center}
