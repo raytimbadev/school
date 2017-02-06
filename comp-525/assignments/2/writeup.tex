@@ -152,29 +152,43 @@ following informal linear-time properties. Let $\Sigma = 2^{AP}$.
             P = \Sigma^* (\bar A \Sigma^* \bar B \Sigma^*)^\omega
         \end{equation*}
 
-        This is a liveness property. Take an arbitrary $\hat \sigma \in
-        \Sigma^*$. Then it can clearly be extended to a $\sigma \in P$.
+        This is a liveness property.
+        Take an arbitrary $\hat \sigma \in \Sigma^*$.
+        Then it can clearly be extended to a $\sigma \in P$.
 
     \item ``$A$ should eventually be followed by $B$''
 
         We understand this as a somewhat weaker version of the previous
         property. We adopt the notation introduced in the previous exercise,
-        and
+        and additionally
         let $\hat A = \{ \emptyset, \{A\} \}$
         and $\hat B = \{ \emptyset, \{B\} \}$.
         We formalize this with the
         $\omega$-regular expression
-        \begin{equation*}
+        \begin{equation}
+            \label{eq:trickysafeprop}
             P
             = (\hat B)^\omega
             + \Sigma^* (\bar A (\Sigma^* \{A, B\})^* \Sigma^* \{B\})^\omega
-        \end{equation*}
+        \end{equation}
 
         This expression encodes the notion that if a letter involving $A$ is
-        encountered, that at some point later in the string, a letter involving
+        encountered, then at some point later in the string, a letter involving
         $B$ is found. This is tricky because the letter $\{A, B\}$ can serve
         both to terminate a forwards search for a $B$ and to``kick off''
         another search for $B$.
+
+        This property is not a safety property. To see this, consider the
+        string $\sigma = \{A\}^\omega$. Clearly this string does not satisfy
+        the property. Consider an arbitrary finite prefix
+        $\hat \sigma < \sigma$. By appending an infinite string of $\{B\}$ to
+        this prefix, we obtain a string satisfying $P$, which contradicts the
+        definition of a safety property.
+
+        This property is however a liveness property. Given an arbitrary finite
+        string $\hat \sigma \in \Sigma^*$, we can complete it to a string
+        satisfying $P$ by following the second branch of the alternation in
+        \eqref{eq:trickysafeprop}.
 \end{enumerate}
 
 \section{(\# 3.11) Closure properties of liveness and safety properties}
