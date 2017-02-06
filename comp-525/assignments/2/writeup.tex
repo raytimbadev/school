@@ -46,7 +46,7 @@ following informal linear-time properties. Let $\Sigma = 2^{AP}$.
     \item ``$x$ exceeds one only finitely many times''
 
         This is formalized by the $\omega$-regular expression
-        $P = \Sigma^* (\Sigma \setminus \{ \{x>1\} \})$.
+        $P = \Sigma^* (\Sigma \setminus \{ \{x>1\} \})^\omega$.
         (We do not exclude $\{x>1, x=0\}$ since it is impossible anyway.)
 
         This property is \emph{not} a satefy property. To show this we find a
@@ -74,8 +74,13 @@ following informal linear-time properties. Let $\Sigma = 2^{AP}$.
         that $x$ has the value two. We make the following assumption:
         $x \in \Z_3$. Hence $x > 1 \iff x = 2$.
 
-        Then, we use the $\omega$-regular expression
-        $P = (\{x=0\}\{x>1\})^\omega + (\{x>1\}\{x=0\})^\omega$.
+        With that in mind, we can formalize this as the $\omega$-regular
+        expression
+        $
+        P
+        = (\Sigma^*\{x=0\}\Sigma^*\{x>1\})^\omega
+        + (\Sigma^*\{x>1\}\Sigma^*\{x=0\})^\omega
+        $
 
         This is a safety property. Take arbitrary $\sigma \notin P$. By
         definition, there must be some point -- say, at the
