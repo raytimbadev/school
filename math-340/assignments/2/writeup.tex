@@ -1,13 +1,118 @@
-\documentclass[11pt,letterpaper]{article}
+\documentclass[12pt,letterpaper]{article}
 
 \author{Jacob Thomas Errington}
 \date{15 February 2017}
 \title{Assignment \#2\\Discrete structures 2 -- MATH 340}
 
 \usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+
+\renewcommand{\thesection}{Question \arabic{section}}
+\newcommand{\question}{\section}
+
+\newtheorem{prop}{Proposition}
+\DeclareMathOperator{\degOp}{deg}
+\newcommand{\parens}[1]{\left(#1\right)}
+\renewcommand{\deg}[1]{\degOp{\parens{#1}}}
+\DeclareMathOperator{\chromOp}{\chi}
+\newcommand{\chrom}[1]{\chromOp{\parens{#1}}}
+\newcommand{\half}{\frac{1}{2}}
 
 \begin{document}
 
 \maketitle
+
+\question{Euler's formula}
+
+\begin{prop}
+    Suppose $G$ is a planar graph such that every vertex in $G$ has degree at
+    least five, and at least one vertex in $G$ has degree eight.
+    Then, $G$ has at least 15 vertices.
+\end{prop}
+
+\begin{proof}
+    Let $n = |V(G)|$ and $e = |E(G)|$.
+    From Euler's formula we have the upper bound on the number of edges
+    \begin{equation}
+        \label{eq:euler-lower-bound}
+        3n - 6 \geq e
+    \end{equation}
+    From the assumptions, we know that every vertex has degree at least five,
+    so by the handshaking lemma
+    \begin{equation}
+        \label{eq:handshake-lower-bound}
+        \sum_{v \in V(G)} \deg{v} = 2 e \geq 5 n
+    \end{equation}
+    However, we also know that at least one vertex has degree eight, so the
+    lower bound in \eqref{eq:handshake-lower-bound} on the edges can be bumped
+    up by three, giving
+    \begin{equation}
+        \label{eq:shake-better-lower-bound}
+        2 e \geq 5 n + 3
+    \end{equation}
+    We combine the bounds in \eqref{eq:shake-better-lower-bound} and
+    \eqref{eq:euler-lower-bound} by transitivity to obtain
+    \begin{equation*}
+        2(3n - 6) \geq 5n + 3
+    \end{equation*}
+    Some algebraic manipulation gives the desired bound $n \geq 15$.
+\end{proof}
+
+\begin{prop}
+    Suppose $G$ is a triangulation of the plane. Then, the number of faces of
+    $G$ is even.
+\end{prop}
+
+\begin{proof}
+    Since every face in a triangulation is bounded by exactly three edges, we
+    get the following relation between the number of faces and the number of
+    edges.
+    \begin{equation*}
+        \label{eq:tri-face-edge-rel}
+        2 |E| = 3 |F|
+    \end{equation*}
+    Using this relation, we can eliminate $E$ in Euler's formula to get.
+    \begin{equation*}
+        |V| - \frac{3}{2} |F| + |F| = 2
+    \end{equation*}
+    Algebraic manipulation gives $|F| = 2|V| - 4$, which is even for any size
+    of $V$.
+\end{proof}
+
+\question{Coloring planar graphs}
+
+\begin{prop}
+    Suppose that a planar graph $G = (V, E)$ has no $K_3$ subgraph.
+    Then, $\chrom{G} \leq 4$.
+\end{prop}
+
+\begin{proof}
+    Not having a $K_3$ subgraph means that the graph contains no triangles, or
+    cycles of length three. Hence, every face in $G$ is bounded by at least $4$
+    edges.
+
+    Suppose that every face in $G$ were bounded by \emph{exactly} four edges.
+    Then $4|F| = 2|E|$.
+    Substituting into Euler's formula gives $|V| - |E| + \half |E| = 2$, which
+    can be rewritten as $2|V| - 4 = |E|$. However, our graph does not have each
+    face bounded by \emph{exactly} four edges, but rather by \emph{at least}
+    four edges, which gives us an upper bound on the number of edges.
+    \begin{equation}
+        \label{eq:edge-upper-bound}
+        2|V| - 4 \geq |E|
+    \end{equation}
+
+    Combining this bound with the handshaking lemma gives
+    \begin{equation}
+        \label{eq:bounded-handshake}
+        \sum_{v \in V} \deg{v} = 2 |E| \leq 4 |V| - 8 < 4 |V|
+    \end{equation}
+
+    This shows that the average degree is less strictly less than $4$, so there
+    must be an edge with degree at most $3$.
+
+    This shows that $G$ is $3$-degenerate.
+    Thus by a theorem, $\chrom{G} \leq 4$.
+\end{proof}
 
 \end{document}
