@@ -6,9 +6,16 @@
 
 \usepackage[margin=2.0cm]{geometry}
 \usepackage{amsmath,amssymb,amsthm}
+\usepackage{tikz}
+
+\usetikzlibrary{graphs}
+
+%%%%% Set up sections to be questions
 
 \renewcommand{\thesection}{Question \arabic{section}}
 \newcommand{\question}{\section}
+
+%%%%% Set up math notations
 
 \newtheorem{prop}{Proposition}
 \DeclareMathOperator{\degOp}{deg}
@@ -114,5 +121,55 @@
     This shows that $G$ is $3$-degenerate.
     Thus by a theorem, $\chrom{G} \leq 4$.
 \end{proof}
+
+The following proposition is \emph{false.}
+
+\begin{prop}
+    If a planar graph has no $K_4$ subgraph, then $\chrom{G} \leq 3$.
+\end{prop}
+
+To see that the proposition is false, consider the graph in figure
+\ref{fig:counterexample}. Since the bottom vertices are a triangle, they each
+receive different colors. Then, the middle two vertices each belong to separate
+triangles, and are assigned different colors. Finally, the top vertex must be
+assigned a color different from the middle two, and the bottom center vertex.
+This is the fourth color.
+
+\tikzset{
+    mynode/.style={
+        inner sep=0,
+        draw,
+        circle,
+        fill=black!15,
+        minimum width=1em,
+    },
+}
+
+\newcommand{\mknode}[1]{\node[mynode] (#1) {} ;}
+
+\begin{figure}[ht]
+    \begin{center}
+        \begin{tikzpicture}
+            \matrix[row sep=1em, column sep=1em]{
+                          &           & \mknode A &           &           \\
+                          & \mknode B &           & \mknode C &           \\
+                \mknode D &           & \mknode E &           & \mknode F \\
+            } ;
+
+            \graph[use existing nodes]{
+                A -- B -- D -- E -- F -- C -- A -- E;
+                E -- B ;
+                E -- C ;
+                D --[bend right=30] F;
+            } ;
+        \end{tikzpicture}
+    \end{center}
+    \caption{
+        A counterexample showing that a graph having no $K_4$ subgraph cannot
+        in general be $3$-colored. The graph shown above has chromatic number
+        $4$.
+    }
+    \label{fig:counterexample}
+\end{figure}
 
 \end{document}
