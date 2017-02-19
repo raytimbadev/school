@@ -420,20 +420,17 @@ Here are translations of some properties into LTL formulas.
 \question{Satisfaction of CTL formulas}
 
 \begin{enumerate}
-    \item $TS \nmodels \forall (a \until b) \lor \exists \step (\forall \always b)$
+    \item $TS \models \forall (a \until b) \lor \exists \step (\forall \always b)$
 
-        To see this, look at $s_3$. It is not the case that for all paths
-        starting at this state, that we have $a \until b$; look at
-        $s_3 s_0 s_4^\omega$. It is also not the case that there exists a path
-        starting at this state such that one step away, we have along any path
-        from that point that $b$ is always true. If we step from $s_3$ to
-        $s_0$, then every path leaving from $s_0$ will not have $b$ always true
-        since $b$ is not true in $s_0$. If we step from $s_3$ to $s_3$, then
-        not every path path leaving from $s_3$ has $b$ always true, since we
-        can go to $s_0$ from $s_3$.
+        To see this, first look at $s_3$. Every string starting here trivially
+        satisfies $a \until b$ since $b$ is true in the first state.
+        Second, look at $s_0$. There exists a path such that if we take one
+        step along it, we discover that $b$ is always true: this is the path
+        that begins by transitioning to $s_4$. Hence, each initial state of
+        $TS$ satisfies $\Phi_1$.
 
         \begin{equation*}
-            \sat{\Phi_1} = \{ s_0, s_4, s_1, s_2 \}
+            \sat{\Phi_1} = \{ s_0, s_1, s_2, s_3, s_4 \}
         \end{equation*}
 
     \item $TS \nmodels \forall \always \forall (a \until b)$
