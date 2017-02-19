@@ -28,6 +28,8 @@
 \newcommand{\nquadequiv}{\quad \not \equiv \quad}
 \DeclareMathOperator{\Sat}{Sat}
 \newcommand{\sat}[1]{\Sat{\parens{#1}}}
+\DeclareMathOperator{\Odd}{odd}
+\newcommand{\odd}[1]{\Odd{\parens{#1}}}
 
 \begin{document}
 
@@ -497,6 +499,48 @@ Here are translations of some properties into LTL formulas.
             $s \models \forall \always a$. Then just take an arbitrary path
             from this state, and it will be a witness of $\exists \always a$.
         \end{proof}
+\end{enumerate}
+
+\question{$\mu$-LTL}
+
+\begin{enumerate}
+    \item There is no problem at all, because the least fixed point operator
+        $\mu$ is defined in terms of the greatest fixed point operator $\nu$.
+        Observe the equivalence
+        \begin{align*}
+            \neg \always \neg \varphi
+            = \neg \nu X . \neg \varphi \land \step X
+            = \neg \nu X . \neg \varphi \land \neg \step \neg X
+            = \neg \nu X . \neg (\varphi \lor \step \neg X)
+            = \mu X . \varphi \lor \step X
+        \end{align*}
+        since $\mu X . \psi(X) \equiv \neg \nu X . \neg \psi (\neg X)$.
+
+    \item $\nu X . p \land \step \step X$
+
+    \item If we used the least fixed point operator $\mu$ instead, we would
+        find that the empty set is a fixed point. To see this, we consider the
+        Kleene fixed point theorem which gives an algorithm for computing the
+        least fixed point by iterating the application of a monotone function
+        to the least element of the lattice. The least element of the lattice
+        in this case is $\emptyset$.
+        The monotone function is $f(S) = p \land \step \step S$.
+        But then, notice that $f(\emptyset) = \emptyset$, as there are no
+        states such that taking two steps away we find that we are in no
+        state!
+
+    \item The formula
+        $
+        \phi =
+        p
+        \land
+        \always (p \implies \step \neg p)
+        \land
+        \always (\neg p \implies \step p)
+        $
+        does not express $\odd{p}$ because it enforces a strict alternation.
+        Whereas $\odd{p}$ should be satisfied by $p^\omega$, this string does
+        not satisfy $\phi$.
 \end{enumerate}
 
 \end{document}
