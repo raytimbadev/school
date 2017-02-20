@@ -20,6 +20,8 @@
 \newcommand{\step}{\bigcirc}
 \DeclareMathOperator{\untilOp}{\mathtt{U}}
 \newcommand{\until}{\untilOp{}}
+\DeclareMathOperator{\wuntilOp}{\mathtt{W}}
+\newcommand{\wuntil}{\wuntilOp{}}
 \newcommand{\Land}{\bigwedge}
 \newcommand{\parens}[1]{\left(#1\right)}
 
@@ -196,15 +198,7 @@ Here are translations of some properties into LTL formulas.
         and does not stop on the way there.''
 
         \begin{equation*}
-            \always\parens{
-                r_3 \implies \parens{
-                    \parens{
-                        \Land_{i \neq 3} \neg e_i
-                    }
-                    \until
-                    e_3
-                }
-            }
+            \always\parens{r_3 \implies \step e_3}
         \end{equation*}
 \end{enumerate}
 
@@ -445,8 +439,90 @@ Here are translations of some properties into LTL formulas.
         in this path.
 
         \begin{equation*}
-            \sat{\Phi_2} = \{ s_4 \}
+            \sat{\Phi_2} = \{ s_1, s_2, s_4 \}
         \end{equation*}
+
+    \item $
+        TS \models
+        a \land b
+        \implies
+        \exists \always \exists \step \forall \parens{b \wuntil a}
+        $
+
+        \begin{proof}
+            To see that the transition system satisfies this formula, it
+            suffices to notice that because of the implication, the only state
+            that \emph{might not} satisfy the formula is $s_2$, which is not an
+            initial state. In other words, since the premise of the implication
+            is not satisfied anywhere but in $s_2$, it follows that the initial
+            states satisfy the implication trivially.
+
+            Next, to see that $s_2$ \emph{does not} satisfy the formula, we
+            must see that the conclusion of the implication does not hold, i.e.
+            that it's negation is true. Formally, we must check that
+            \begin{equation*}
+                s_2 \models
+                \forall \eventually \forall \step \exists \parens{
+                    \neg\parens{b \until a}
+                    \land
+                    \eventually \neg a
+                }
+            \end{equation*}
+
+            First, there is a unique path leaving $s_2$, so the outermost
+            universal quantifier has no effect. Thus, we must see that we
+            eventually reach a state $s$ where if we take one step in any
+            direction, there exists a path such that neither $b \until a$ is
+            true nor $\always a$ is true.
+
+            Take $s = s_3$. Taking one step in any direction can bring is to
+            two places.
+            \begin{description}
+                \item[Case] we step to $s_0$.
+
+                    Take the path $s_0 s_4^\omega$.
+
+                    This path satisfies:
+                    \begin{enumerate}
+                        \item $\eventually \neg a$, since we have $\neg a$ in
+                            the first state; and
+                        \item $\neg\parens{b \until a}$, since we never reach a
+                            state with $a$ true.
+                    \end{enumerate}
+
+                \item[Case] we step to $s_3$.
+
+                    Take the path $s_3 s_0 s_4^\omega$. The same argument
+                    applies in this path, since we never have $a$ true.
+            \end{description}
+        \end{proof}
+
+        The satisfaction set of this formula for this transition system is
+        \begin{equation*}
+            \sat{\Phi_3} = \{ s_0, s_4, s_1, s_3 \}
+        \end{equation*}
+
+    \item $
+        TS \models
+        \forall \always \exists \eventually \parens{
+            \Phi_3
+            % a \land b \implies \exists \always \exists \step \forall \parens{
+            %     b \wuntil a
+            % }
+        }
+        $
+
+        We can identify the formula $\Phi_3$ with its satisfaction set. Then we
+        can read the prefix $\forall \always \exists \eventually S$ as ``it is
+        inevitable that one of the states in $S$ is reachable''. Of course,
+        this is trivially true of every state in $S$, so we need to look only
+        at $s_2$, which is not in $S$.
+
+        But then, in $s_2$, there is a unique exiting path, along which we
+        immediately go to $s_3$, it is in in fact inevitable that a state in
+        $S$ is reachable.
+
+        Hence, $\sat{\Phi_4} = \top$.
 \end{enumerate}
 
 \question{Consequences of CTL state formula satisfaction}
