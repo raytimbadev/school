@@ -69,12 +69,25 @@ variable representing Jim's winnings.
         \end{equation}
 
     \item
-        To find the expectation, we can introduce a random variable $Y$ to
-        denote the number of games that need to be played before Jim wins. This
-        variable follows a geometric distribution.
-        Then, let $f(x) = \frac{100}{x}$. This means we can rephrase the random
-        variable $X = f \compose Y$.
+        Using the formula for the expectation, we find that
+        \begin{align*}
+            \E{X} &= \sum_{n=1}^\infty {\frac{100}{n} (1-p)^{n-1} p}
+        \end{align*}
 
+        We know that
+        \begin{align*}
+            \log{(1-x)} = - \sum_{n=1}^\infty {\frac{x^n}{n}}
+        \end{align*}
+        so by substituting $1-p$ for $x$ and some algebraic manipulations, we
+        get that
+        \begin{align*}
+            \frac{-100 p \log{(p)}}{1-p}
+            &= 100 p \sum_{n=1}^\infty {
+                \frac{(1-p)^{n-1}}{n}
+            } \\
+            &= \E{X}
+        \end{align*}
+        is the expected value of Jim's winnings.
 \end{enumerate}
 
 \question{Checking machines for malfunctions}
@@ -106,6 +119,141 @@ variable representing Jim's winnings.
                 (1 - p^m p^{m-1}(1-p)) \\
             &= \parens{p^m p^{m-1} (1-p)}^{k-1} (1 - p^m p^{m-1}(1-p))
         \end{align*}
+
+    \item
+        To compute the probability that the first defective machine be found in
+        the fourth hour, we compute the probability of finding $30$
+        non-defective machines and multiply by the probability of finding that
+        one out of ten machines is defective.
+        \begin{align*}
+            \P{\text{first defective machine is found in hour four}} =\\
+            \P{\text{30 non defective machines are found}} \times
+            \P{\text{nonzero defective machines out of ten}} = \\
+            \compl{P_M}^{30} \times \parens{
+                1 - \compl{P_M}^{10}
+            }
+        \end{align*}
+        where as before $\compl{P_M} = 1 - p^m \times p^{m-1}(1-p)$ is the
+        probability of a single machine malfunctioning.
 \end{enumerate}
 
+\question{Tossing coins}
+
+We toss a fair coin $n$ times; the sample space $S$ is hence an $n$-tuple of
+boolean (heads or tails) values.
+
+The random variable $X$ is defined by
+\begin{equation*}
+    X(s) = \begin{cases}
+        2^{n+1} &\text{if $s = T^n$} \\
+        2^i &\text{where $i$ is the position of the first heads in $s$}
+    \end{cases}
+\end{equation*}
+
+\begin{enumerate}
+    \item
+        To compute the probability mass function of $X$, we look at each value
+        that $X$ can take on, and see how many different values in the sample
+        space take us there. By definition, only one value in the sample space
+        gives $2^{n+1}$, so
+        \begin{equation*}
+            \P{X = 2^{n+1}} = \frac{1}{2^n}
+        \end{equation*}
+
+        The other values in the image of $X$, however, generally have
+        non-singleton preimages. For example, if we have $X = 2^1$, then that
+        means we have $s[1] = H$, but all other $s[i]$ are arbitrary; there are
+        $2^{19}$ different ways they could be.
+
+        In general, if we have that $X = 2^i$, then there are $2^{n-i}$
+        $n$-tuples that produce this outcome for the random variable. (Remark
+        that this works for the edge case $i = 20$; there is exactly one way to
+        achieve this outcome.)
+        Because each of these values in the sample space is equally likely, we
+        can use the law of large numbers to compute the probability.
+        \begin{equation*}
+            \P{X = 2^i} = \frac{2^{n-i}}{2^n} - \frac{1}{2^i}
+        \end{equation*}
+
+    \item We add up add the product of the value of random variable with its
+        probability for each value.
+        \begin{equation*}
+            \E{X}
+            = 2^{n+1} \times \frac{1}{2^n}
+            + \sum_{i=1}^n {2^i \times \frac{1}{2^i}} = 2 + n
+        \end{equation*}
+\end{enumerate}
+
+\question{Big box}
+
+\begin{enumerate}
+    \item
+        If we just look at $X_i$ and $X_j$ where $i \neq j$, then the
+        probability that $X_i = X_j$ is $\frac{1}{n}$.
+        Conversely, the probability that they are not equal is $\frac{n-1}{n}$.
+        Hence, the probability that $X_i \neq X_j$ for all $j < i$ is
+
+        $\parens{\frac{n-1}{n}}^{i-1}$.
+
+    \item
+        Define $1_i$ as an indicator variable that takes on value $1$ when item
+        $i$ appears in the selection, and $0$ if it doesn't.
+
+        Then, notice
+        \begin{equation*}
+            \E{1_i}
+            = 1 \times \P{1_i = 1} + 0 \times \P{1_i = 0}
+            = \P{1_i = 1}
+            = 1 - \P{1_i = 0}
+        \end{equation*}
+        but $\P{1_i = 0}$ is the probability that item $i$ is \emph{not}
+        picked, i.e. that $X_j \neq i$ for all $j$.
+        \begin{equation*}
+            \P{1_i = 0} = \parens{
+                \frac{n - 1}{n}
+            }^n
+        \end{equation*}
+        Hence, $\E{1_i} = 1 - \parens{\frac{n-1}{n}}^n$
+
+        Next, to find the expectation of the number of different labels that
+        are found in the selection, it suffices to notice that
+        $D_n = \sum_{i=1}^n 1_i$ and to use the linearity of expectation.
+        \begin{equation*}
+            \E{D_n}
+            = \E{\sum_{i=1}^n 1_i}
+            = \sum_{i=1}^n \E{1_i}
+            = \sum_{i=1}^n {1 - \parens{\frac{n-1}{n}}^n}
+            = n - \frac{(n-1)^n}{n^{n-1}}
+        \end{equation*}
+
+        Finally, we consider the limit
+        \begin{equation}
+            \label{eq:bleh}
+            \lim_{n\to\infty} \left[
+                {\frac{\E{D_n}}{n}}
+                = {\frac{n - \frac{(n-1)^n}{n^{n-1}}}{n}}
+                = 1 - \frac{(n-1)^n}{n^n}
+                = 1 - \parens{1 - \frac{1}{n}}^n
+            \right]
+            = 1 - \lim_{n\to\infty} \parens{1 - \frac{1}{n}}^n
+        \end{equation}
+        To find this new limit, let $y = \parens{1 - \frac{1}{x}}^x$, so
+        $\ln y = x \ln {1 - \frac{1}{x}}$. We consider the limit of $\ln y$,
+        which is an indeterminate form. An application of L'H\^opital's rule
+        gives
+        \begin{equation*}
+            \lim_{x\to\infty} {\ln y}
+            = \lim_{x\to\infty} {x \ln {1 - \frac{1}{x}}}
+            = \lim_{x\to\infty} {
+                \frac{\frac{x}{x-1} \parens{0 - \frac{-1}{x^2}}}{
+                    \frac{-1}{x^2}
+                }
+            }
+            = \lim_{x\to\infty} {- \frac{x}{x-1}} = -1
+        \end{equation*}
+        Hence, $\lim_{x\to\infty} \parens{1 - \frac{1}{x}}^x = e^{-1}$.
+
+        This gives the fully simplied expression $1 - e^{-1}$ for
+        \eqref{eq:bleh}, as required.
+\end{enumerate}
 \end{document}
