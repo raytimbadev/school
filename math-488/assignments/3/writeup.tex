@@ -1,0 +1,262 @@
+\documentclass[11pt,letterpaper]{article}
+
+%%%%% METADATA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\author{Jacob Thomas Errington}
+\title{Assignment \#3 \\ Honours set theory -- MATH 488}
+\date{7 March 2017}
+
+%%%%% MATH %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{amsmath,amssymb,amsthm}
+
+% For double brackets
+\usepackage{stmaryrd}
+
+\newcommand{\interp}[1]{\left\llbracket #1 \right\rrbracket}
+
+\newtheorem{prop}{Proposition}
+
+\newcommand{\parens}[1]{\left(#1\right)}
+\newcommand{\Union}{\bigcup}
+
+\newcommand{\N}{\mathbb{N}}
+
+% Some sets
+\newcommand{\V}{\mathrm{V}}
+\newcommand{\WF}{\mathrm{WF}}
+\renewcommand{\L}{\mathrm{L}}
+\newcommand{\Ord}{\mathbf{Ord}}
+\DeclareMathOperator{\SeqOp}{Seq}
+\newcommand{\Seq}[1]{\SeqOp{\parens{#1}}}
+\DeclareMathOperator{\PowersetOp}{\mathcal{P}}
+\newcommand{\Powerset}[1]{\PowersetOp{\parens{#1}}}
+\DeclareMathOperator{\DefOp}{Def}
+\newcommand{\Def}[1]{\DefOp{\parens{#1}}}
+
+%%%%% FORMATTING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[margin=2.0cm]{geometry}
+
+\renewcommand{\thesection}{Question \#\arabic{section}}
+\newcommand{\question}{\section}
+
+% ordinary phi sucks.
+\renewcommand{\phi}{\varphi}
+
+%%%%% DOCUMENT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\maketitle
+
+\question{Club sets and $L$-structures}
+
+\begin{prop}
+    Let $\kappa$ be an uncountable regular cardinal and let $L$ be a countable
+    language. Suppose $\parens{M_\alpha : \alpha < \kappa)}$ is an increasing
+    and continuous sequence of $L$-structures.
+    Let $M = \Union_{\alpha < \kappa}$.
+    Then
+    \begin{equation*}
+        S = \{ \alpha \in \kappa : M_\alpha \prec M \}
+    \end{equation*}
+    is a club set.
+\end{prop}
+
+\begin{proof}
+    First we show closure. Take arbitrary $A \subseteq S$ and let
+    $\gamma = \lim A$. We want to show that $\gamma \in S$. Since $\kappa$ is
+    regular, we can deduce that $\gamma < \kappa$. We need to see that
+    $M_\gamma \prec M$. We apply the Tarski-Vaught Test. Take an arbitrary
+    $L$-formula $\phi$ and suppose that there exists an $a \in M$ such that
+    $M \models \phi(a)$. Since $\phi$ uses finitely many parameters from
+    $M_\gamma$, we can find a $\beta < \gamma$ such that $\beta \in S$ and each
+    parameter in $\phi$ is in is in $M_\beta$. Now since $M_\beta \prec M$,
+    there is some $b \in M_\beta$ such that $M \models \phi(b)$. But
+    $M_\beta \subseteq M_\gamma$, so $b \in M_\gamma$. Hence the Tarski-Vaught
+    criterion is satisfied, so $M_\gamma \prec M$. Hence $\gamma \in S$. Since
+    $\gamma$ is an arbitrary limit, this shows that $S$ is closed under taking
+    limits.
+
+    Next we show unboundedness. Take arbitrary $\alpha \in S$. Construct a
+    sequence $(A_\gamma : \gamma < \kappa)$ with $A_0 = \alpha$, and whenever
+    $\phi(\bar x, x)$ is an $L$-formula such that
+    $M \models \exists x : \phi(\bar a, x)$,
+    then there exists $a \in M_{i + 1}$
+    such that $M \models \phi(\bar a , a)$.
+    At limit stages, take the union of preceding $A_i$.
+    By construction, this satisfies the Tarski-Vaught criterion.
+    Now notice that we perform choice countably many times, once for each
+    formula, so we aren't ``growing'' the model too much.
+    Next notice that we perform this countable choosing
+    for every $\alpha < \kappa$.
+    Hence, $\lambda = \lim A_\gamma > \alpha$ and still in $S$.
+\end{proof}
+
+\question{Coding formulas in HF}
+
+We establish a coding of formulas. Intuitively this is straightforward because
+formulas are finite objects. We assign natural number tags to each kind of
+object in a formula, and build up a nested tuple structure for the formula.
+
+\begin{description}
+    \item[Constant] $\phi = ``c''$ for a constant $c$ is coded by $(0, c)$;
+
+    \item[Free variable] $\phi = ``x''$ for a variable $x$ is coded by $(1, n)$
+        where $n$ is a natural number associated with $``x''$;
+
+        Let $v : \mathrm{Var} \to \N$ denote the injection from variable names
+        to natural numbers.
+
+    \item[Connectives] $\phi = ``\psi_1 \land \psi_2''$
+        is coded by $(2, \interp{\psi_1}, \interp{\psi_2})$, and other
+        connectives use other tags, e.g. $\interp{\lor} = 3$.
+
+    \item[Equality] $\phi = ``\psi_1 = \psi_2''$
+        is coded by $(6, \interp{\psi_1}, \interp{\psi_2})$.
+
+    \item[Membership] $\phi = ``\psi_1 \in \psi_2''$
+        is coded by $(7, \interp{\psi_1}, \interp{\psi_2})$.
+
+    \item[Quantifiers] ~
+
+        $\phi = ``\exists x \in z : \psi''$
+            is coded by $(8, v(x), v(z), \interp{\psi})$.
+
+        $\phi = ``\exists x : \psi''$
+            is coded by $(9, v(x), \interp{\psi})$.
+
+        The universal quantifier uses tags $10$ and $11$.
+\end{description}
+
+This recursively defines the operator $\interp{\cdot}$ mapping formulas to
+elements of HF, since tuples are in HF. Then, to say ``$\phi$ is a formula'' in
+the language of set theory, we write $``\exists z : \interp{\phi} = z''$, i.e.
+that $\phi$ has such a construction sequence. This is $\Sigma_1$ and hence
+$\Delta_1$ because these construction sequences are unique.
+
+For satisfaction, we just look at the semantics to construct a formula in set
+theory corresponding to the meaning of $``x \models \phi(y)''$. Equality,
+membership, logical connectives, and constants can be ported over wholesale,
+and all unbounded quantifiers present in $\phi$ are converted to bounded
+quantifiers over $x$. This results in a $\Delta_0$ formula.
+
+\question{The language of set theory}
+
+\begin{enumerate}
+    \item $``\V = \WF''$
+
+        To state this in the language of set theory, we will construct $\V$ and
+        $\WF$ using existential quantification, and then state that they are
+        equal.
+
+        Let $\Seq{n}$ mean ``is a sequence of length $n$''.
+
+        \begin{enumerate}
+            \item Constructing $\V$. First we will see how to say
+                $``x \in \V_\alpha''$, with $x$ and $\alpha$ being free
+                variables.
+
+                \begin{align*}
+                    & \alpha \in \Ord \implies \\
+                    & \exists s :
+                        s \in \Seq{\alpha + 1} \\
+                    & \land s(0) = \emptyset \\
+                    & \land
+                    \parens{
+                        \forall \lambda :
+                        (
+                            \lambda \in \alpha
+                            \land
+                            \lambda \text{ is a limit }
+                        )
+                        \implies
+                        s(\lambda) = \Union_{\beta < \lambda} s(\beta)
+                    } \\
+                    & \land
+                    \parens{
+                        \forall \beta :
+                        \beta + 1 \leq \alpha
+                        \implies
+                        s(\beta + 1) = \Powerset{s(\beta)}
+                    } \\
+                    & \land
+                    x \in s(\alpha)
+                \end{align*}
+
+                Then, we can construct $\V$ by taking a union over ordinals.
+
+                \begin{equation*}
+                    \forall x :
+                    (\exists \alpha : x \in \V_\alpha)
+                    \iff
+                    x \in \V
+                \end{equation*}
+
+            \item Next, constructing $\WF$. This is very similar, since
+                $x \in \WF$ is defined by the formula
+                $\exists \alpha : \alpha \in \Ord \land x \in \V_\alpha$. Hence
+                we can repeat the same construction for $\V_\alpha$ to build
+                $\WF$ by
+                \begin{align*}
+                    \forall x :
+                    (\exists \alpha : x \in \V_\alpha)
+                    \iff
+                    x \in \WF
+                \end{align*}
+
+        \end{enumerate}
+
+        But these constructions work out to the same formulas! So to write
+        $\V = \WF$ in the language of set theory is simply to write that any
+        set whose members belong to a level of the von~Neumann hierarchy is
+        equal to itself.
+
+        \begin{equation*}
+            \forall A :
+            \parens{
+                \forall x : x \in A
+                \iff
+                \parens{
+                    \exists \alpha :
+                    \alpha \in \Ord
+                    \land
+                    x \in \V_\alpha
+                }
+            }
+            \implies
+            A = A
+        \end{equation*}
+
+        But all things are equal to themselves by reflexivity, so the left-hand
+        side of the implication doesn't really do anything.
+
+    \item $``\V = \L''$
+
+        We can reuse the same construction for $\V$, but now we must construct
+        $L$. The construction is essentially the same, but when looking at the
+        successor stage in the construction, rather than use the powerset, we
+        use $\Def{s(\beta), s(\beta)}$, which we know has a (at most
+        $\Delta_1$) formula in the language of set theory.
+
+        Therefore, we some defining formula $\phi(A)$ for $\V$ and a defining
+        formula $\psi(B)$ for $\L$. (Specifically, if we have $\phi(A)$, for
+        some $A$ then $A$ \emph{is} $\V$.) So to write $\V = \L$, we can simply
+        write
+        \begin{equation*}
+            \forall A :
+            \forall B :
+            \phi(A)
+            \implies
+            \psi(B)
+            \implies
+            A = B
+        \end{equation*}
+        to say that ``anything that is $\V$ is equal to anything that is $\L$''
+        but of course there is just one such thing of each kind, so this means
+        $``\V = \L''$.
+
+\end{enumerate}
+
+\end{document}
