@@ -1,0 +1,97 @@
+\documentclass[letterpaper,11pt]{article}
+
+\author{Jacob Thomas Errington}
+\title{Assignment \#3\\Discrete structures 2 -- MATH 340}
+\date{8 March 2017}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+
+\newtheorem{prop}{Proposition}
+\DeclareMathOperator{\Prob}{P}
+\renewcommand{\P}[1]{\Prob{\parens{#1}}}
+\DeclareMathOperator{\prob}{p}
+\newcommand{\p}[2][]{%
+    \def\temp{#2}
+    \ifx\temp\empty
+        \prob{\parens{#2}}
+    \else
+        \prob_{#1}{\parens{#2}}
+    \fi
+}
+\DeclareMathOperator{\Expect}{\mathbb{E}}
+\newcommand{\E}[1]{\Expect{\left[#1\right]}}
+\DeclareMathOperator{\Var}{\mathbb{V}}
+\newcommand{\V}[1]{\Var{\parens{#1}}}
+
+\newcommand{\parens}[1]{\left(#1\right)}
+\newcommand{\Union}{\bigcup}
+\newcommand{\union}{\cup}
+\newcommand{\Intersn}{\bigcap}
+\newcommand{\intersn}{\cap}
+\newcommand{\symdiff}{\,\Delta\,}
+\newcommand{\fact}{!\,}
+\newcommand{\given}{\;\vert\;}
+\newcommand{\compl}{^c}
+\newcommand{\inv}{^{-1}}
+\newcommand{\compose}{\circ}
+
+\renewcommand{\thesection}{Question \arabic{section}}
+\newcommand{\question}{\section}
+
+\begin{document}
+
+\maketitle
+
+\question{Bayes's Theorem}
+
+\begin{enumerate}
+    \item
+        This problem can be solved straighforwardly without Bayes's theorem
+        by enumerating the sample space, $S = \{GG, BG, GB, BB\}$, where $BG$
+        for instance denotes the outcome that the first child is male and the
+        second is female. As we know that one child is male, this restricts the
+        sample space to $S^\prime = \{BG, GB, BB\}$. In this space, the event
+        $E = \text{``having one boy and one girl''}$ is true for both the $BG$
+        and $GB$ outcomes.
+        Hence, $\P{E} = \frac{2}{3}$.
+
+    \item
+        Let $Y$ denote the number of heads and $X$ denote the face value of the
+        die. We wish to find $\P{X = 6 \given X = Y}$, so we apply Bayes's
+        theorem.
+        \begin{equation}
+            \label{eq:bleh}
+            \P{X = 6 \given X = Y} = \frac{
+                \P{Y = X \given X = 6} \P{Y = X}
+            }{
+                \P{X = 6}
+            }
+        \end{equation}
+
+        First, we know that $\P{Y = X \given X = 6}$ is simply the probability
+        of getting heads six times $\P{Y = 6} = \frac{1}{2^6}$.
+
+        Second, $\P{X = 6} = \frac{1}{6}$ is the probability of rolling a six.
+
+        Finally, we find $\P{Y = X}$ by using the Law of Total Probability, as
+        the different values of $X$ partition the space.
+        \begin{equation*}
+            \P{Y = X} = \sum_{i = 1}^6 {
+                \P{Y = X \given X = i}
+            }
+            =
+            \sum_{i=1}^6 {
+                \frac{1}{2^i}
+            }
+            = \frac{63}{64}
+        \end{equation*}
+
+        Substituting into \eqref{eq:bleh} gives
+        \begin{equation*}
+            \P{X = 6 \given X = Y}
+            = \frac{189}{2048} \sim 9.23
+        \end{equation*}
+\end{enumerate}
+
+\end{document}
