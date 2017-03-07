@@ -1,0 +1,70 @@
+\documentclass[11pt,letterpaper]{article}
+
+\author{Jacob Thomas Errington}
+\title{Assignment \#4\\Honours set theory -- MATH 488}
+\date{10 March 2017}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+
+\newtheorem{prop}{Proposition}
+
+\newcommand{\inv}{^{-1}}
+\newcommand{\Union}{\bigcup}
+\newcommand{\Intersn}{\bigcap}
+\newcommand{\parens}[1]{\left(#1\right)}
+\newcommand{\compl}{\overline}
+\newcommand{\intersn}{\cap}
+
+\begin{document}
+
+\begin{prop}
+    Let $X$ be a set, $C$ a compact Hausdorff space, and $f : X \to C$ a
+    function. SUppose $p$ is an ultrafilter on $X$. Then, there exists a unique
+    point $z \in C$ such that for every neighbourhood $U$ of $z$ we have
+    \begin{equation*}
+        \{ x \in X : f (x) \in U \} \in p
+    \end{equation*}
+\end{prop}
+
+\begin{proof}
+    Suppose not. Then for all $z \in C$, there is a neighbourhood $U_z$ of $z$
+    such that $\{ x \in X : f(x) \in U_z \} \notin p$.
+
+    The collection of all such $U_z$ forms a cover of $C$. Hence there exists
+    finite $Z_0 \subseteq C$ such that $\{U_z\}_{z \in Z_0}$ is a subcover of
+    $C$. Let $A_z = f\inv (U_z)$. Then,
+    \begin{equation*}
+        \Union_{z \in Z_0} A_z
+        = \Union_{z \in Z_0} f\inv (U_z)
+        = f\inv \parens{ \Union_{z \in Z_0} U_z }
+        = f\inv (C)
+        = X
+    \end{equation*}
+    which shows that $X$ can be finitely partitioned. We take the complement of
+    both sides. Since each piece of the partition is not in the ultrafilter,
+    each piece's complement is. Hence, the intersection of all the complements,
+    which is finite, is also in the ultrafilter, but this is empty set.
+    \begin{align*}
+        \compl{ \Union_{z \in Z_0} A_z }
+        = \Intersn_{z \in Z_0} \compl{A_z}
+        = \compl{X}
+        = \emptyset
+        \in p
+    \end{align*}
+
+    This is a contradiction.
+
+    Next, we look at uniqueness. Suppose $z_1, z_2 \in C$ are such that
+    $z_1 \neq z_2$. Since $C$ is Hausdorff, we have disjoint neighbourhoods
+    $U_{z_1} \ni z_1$ and $U_{z_2} \ni z_2$. By definition of the limit,
+    \begin{equation*}
+        f\inv (U_{z_1}) \intersn f\inv (U_{z_2}
+        = f\inv (U_{z_1} \intersn U_{z_2})
+        = \emptyset
+        \in p
+    \end{equation*}
+    which is a contradiction.
+\end{proof}
+
+\end{document}
