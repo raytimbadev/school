@@ -247,4 +247,136 @@ rolls,
 Note that the sum begins at two in order to discount the first roll, which
 produces no winnings.
 
+\question{Markov inequality}
+
+\begin{prop}
+    Let $X$ be a random variable taking only non-negative values and let
+    $c \in \R$ be a positive constant.
+\end{prop}
+
+\begin{proof}
+    Let $I_E$ denote an indicator random variable for an event $E$, taking the
+    value $1$ when $E$ occurs and $0$ otherwise.
+    Hence, if $X < c$, then $I_{X \geq c} = 0$;
+    if $X \geq c$, then $I_{X \geq c} = 1$.
+    Therefore,
+    \begin{equation}
+        \label{eq:indicate-c}
+        c I_{X \geq c} \leq X
+    \end{equation}
+
+    In general, $A < B \implies \E{A} < \E{B}$, i.e. expectation is monotonic.
+    Taking expectation on both sides in \label{eq:indicate-c} gives
+    \begin{equation}
+        \label{eq:expect-c}
+        \E{c I_{X \geq c}} \leq \E{X}
+    \end{equation}
+    We use the linearity of expectation to change the left-hand side from an
+    expectation to a probability.
+    \begin{equation*}
+        c \E{I_{X \geq c}}
+        = c \parens{
+            1 \times \P{X \geq c}
+            + 
+            0 \times \P{X < c}
+        }
+        = c \P{X \geq c}
+    \end{equation*}
+
+    Substituting this into \eqref{eq:expect-c} and dividing across by $c$,
+    since it is positive, gives the desired statement.
+\end{proof}
+
+\question{Binomial distribution}
+
+The Stanley Cup winner is determined in the final series between two teams. The
+first team to win four games wins the Cup. Suppose that the Montreal Canadiens
+advance to the final series, have a probability $0.6$ of winning each game, and
+that the game results are independent of each other.
+
+We wish to find the probability that the canadiens win the Stanley Cup. First,
+we will see how many games need to be played to determine the winner of the
+Cup.
+
+\begin{prop}
+    Seven games are required to determine the winner.
+\end{prop}
+
+\begin{proof}
+    When a team wins a game, the other team loses a game. Hence when team $A$
+    has won $n$ games out of $m$, the opposing team $B$ must have won $m - n$
+    games. We want to find a value of $m$ so that either $m - n \geq 4$ or
+    $n \geq 4$.
+    First, to see that eight games is too many, just notice that if one team
+    wins four games, the other team has also won four games, but this is a
+    contradiction as then two teams would win the cup.
+    Next, if fewer than seven games are played, then it is possible to
+    distribute the wins so that neither team has won a total of four times,
+    leaving the winner of the cup undetermined.
+    Hence, exactly seven games are required to determine the winner.
+\end{proof}
+
+Hence, once seven games have been played, a winner is determined. No eighth
+game ever need be played.
+
+Winning the Cup means winning the first four games; or losing one of the first
+four, but winning the fifth; or losing two of the first fifth, but winning the
+sixth; or losing three of the first sixth, but winning the seventh. Recall that
+by the proposition, if four of the (first) seven games are lost, then the other
+team wins the Cup. This is a binomial distribution.
+
+\begin{equation*}
+    \P{\text{Canadiens win}}
+    = p^4
+    + {5 \choose 4} p^4 (1-p)
+    + {6 \choose 4} p^4 (1-p)^2
+    + {7 \choose 4} p^4 (1-p)^3
+    = \frac{15471}{15625}
+    = 0.990144
+\end{equation*}
+
+\question{Geometric distribution}
+
+Suppose we run repeated independent Bernoulli trials with success probability
+$p$ until we obtain a success. Let $X$ denote the number of trials needed
+before we obtain a success.
+
+We want to find $\P{X = k}$, i.e. the probability that $k$ trials are needed
+before encountering the first successful one. This means that $k$ trials were
+unsuccessful and that the $k+1$\textsuperscript{th} one is successful. Since
+the trials are independent, we can simply multiply (or rather exponentiate) the
+probabilities. Hence,
+\begin{equation*}
+    \P{X = k} = (1-p)^k p
+\end{equation*}
+
+\begin{prop}
+    The expectation on the number of trials before one is successful is
+    \begin{equation*}
+        \E{X} = \frac{1}{p}
+    \end{equation*}
+\end{prop}
+
+\begin{proof}
+    The proof boils down to using the definition of expectation, and playing
+    with the series.
+
+    \begin{align*}
+        \E{X}
+        &= \sum_{k=0}^\infty {
+            (1 - p)^k p k
+        } \\
+        &= p (1-p) \sum_{k=0}^\infty {
+            (1-p)^{k-1} k
+        } \\
+        &= p (1-p) \dd{p} \parens{
+            - \sum_{k=0}^\infty {
+                (1-p)^k
+            }
+        } \\
+        &= p (1-p) \dd{p}\parens{-\frac{1}{p}} \\
+        &= \frac{1}{p}
+    \end{align*}
+\end{proof}
+
 \end{document}
