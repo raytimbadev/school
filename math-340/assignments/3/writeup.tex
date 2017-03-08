@@ -23,6 +23,10 @@
 \newcommand{\E}[1]{\Expect{\left[#1\right]}}
 \DeclareMathOperator{\Var}{\mathbb{V}}
 \newcommand{\V}[1]{\Var{\parens{#1}}}
+\DeclareMathOperator{\BinOp}{Bin}
+\newcommand{\Bin}[1]{\BinOp{\parens{#1}}}
+
+\newcommand{\R}{\mathbb{R}}
 
 \newcommand{\parens}[1]{\left(#1\right)}
 \newcommand{\Union}{\bigcup}
@@ -38,6 +42,8 @@
 
 \renewcommand{\thesection}{Question \arabic{section}}
 \newcommand{\question}{\section}
+
+\newcommand{\dd}[1]{\frac{\mathrm{d}}{\operatorname{d} #1}}
 
 \begin{document}
 
@@ -115,7 +121,7 @@
         the complement is the probability of testing positive when using the
         drug, i.e. $\P{T \given D} = 1 - \P{\neg T \given D} = 0.9$.
 
-        All that remains to find is $\P{T}$. $\{D, \neg D\}$ partition the
+        All that remains to find is $\P{T}$. $\{D, \neg D\}$ partitions the
         space, so we apply the Law of Total Probability to obtain
         \begin{equation*}
             \P{T} = \P{T \given D} \P{D} + \P{T \given \neg D} \P{\neg D}
@@ -190,14 +196,14 @@ Hence, it does not matter whether we switch doors.
 \question{Linearity of expectation}
 
 Denote by $W_i$ the expected winnings of roll $i$.
-Denote by $R_i$ the face value of roll $i$.
 Then the overall winnings from playing the game is $\sum_{i=1}^n W_i$.
 Note that on the first roll, the winnings are zero because there is no previous
 roll, so the overall winnings can be expressed as $\sum_{i=2}^n W_i$.
 
 We would like to find $\P{W_i = 1}$ when $i > 1$.
 Semantically, this probability is the same as the probability of the previous
-roll's face value differing by one from the current roll's face value,
+roll's face value differing by one from the current roll's face value.
+Denote by $R_i$ the face value of roll $i$. Then,
 \begin{equation*}
     \P{R_i - R_{i-1} = 1 \lor R_{i-1} - R_i = 1}
     = \P{R_i - R_{i-1} = 1} + \P{R_{i-1} - R_i = 1}
@@ -237,5 +243,8 @@ rolls,
 \begin{equation*}
     \E{\sum_{i=2}^n W_i} = \sum_{i=2}^n \E{W_i} = (n-1)\frac{19}{36}
 \end{equation*}
+
+Note that the sum begins at two in order to discount the first roll, which
+produces no winnings.
 
 \end{document}
