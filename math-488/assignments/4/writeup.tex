@@ -18,6 +18,20 @@
 \DeclareMathOperator{\closureOp}{Cl}
 \newcommand{\closure}[1]{\closureOp{\parens{#1}}}
 \newcommand{\embedsto}{\hookrightarrow}
+\newcommand{\compose}{\circ}
+
+\usepackage{scalerel,stackengine}
+\stackMath
+\newcommand\reallywidehat[1]{%
+\savestack{\tmpbox}{\stretchto{%
+  \scaleto{%
+    \scalerel*[\widthof{\ensuremath{#1}}]{\kern-.6pt\bigwedge\kern-.6pt}%
+    {\rule[-\textheight/2]{1ex}{\textheight}}%WIDTH-LIMITED BIG WEDGE
+  }{\textheight}%
+}{0.5ex}}%
+\stackon[1pt]{#1}{\tmpbox}%
+}
+\parskip 1ex
 
 \begin{document}
 
@@ -102,6 +116,49 @@
         \in p
     \end{equation*}
     which is a contradiction.
+\end{proof}
+
+\begin{prop}
+    Suppose $X$ is a set and $C$ is a compact Hausdorff space.
+    Let $f : X \to C$ be a function. Then $f$ has a unique continuous extension
+    $\beta f : \beta X \to C$.
+\end{prop}
+
+\begin{proof}
+    Define $\beta f (p) = \lim_p f$. To see that this is an extension, look at
+    $g = \beta f \compose u$ where $u : X \to \beta X$ is the principal
+    ultrafilter map. We would like that $z = g(a) = f(a)$ for all $a$.
+    Since $g(a)$ is a limit, we have that for every neighbourhood $U$ of
+    $g(a)$,
+    \begin{equation*}
+        \{x \in X : f(x) \in U \} \in \{ A \subseteq X : a \in A \}
+    \end{equation*}
+    In particular, this must hold for the neighbourhood $U = \{g(a)\}$.
+    But then we have
+    \begin{equation*}
+        \{x \in X : f(x) \in \{g(a)\}\} \in \{A \subseteq X : a \in A \}
+    \end{equation*}
+    So there is a subset of $X$ which is mapped to $g(a)$ by $f$. But this
+    subset of $X$ must contain $a$. Hence, $f(a) = g(a)$.
+
+    Next, let us see that $\beta f$ is continuous.
+    Consider an arbitrary open set $W \subseteq C$.
+    It will suffice to check that for any $p \in \beta f\inv (W)$ there exists a
+    subset $A \subseteq X$ such that
+    $p \in \hat A$ and $f(\hat A) \subseteq W$.
+    For any $A$ and ultrafilter $q \in \hat A$ we have that
+    $\beta f (q) \in \reallywidehat {f(A)}$.
+    Since $C$ is compact and Hausdorff, we can find an open set $V \subseteq C$
+    such that $\closure{V} \subseteq W$
+\end{proof}
+
+\begin{prop}
+    Suppose $(S, \cdot)$ is a semigroup. Then, $(\beta S, \cdot)$ is a left
+    topological semigroup.
+\end{prop}
+
+\begin{proof}
+    First, we check the associativityo.
 \end{proof}
 
 \end{document}
