@@ -174,8 +174,13 @@
     Since $Z \intersn A = \emptyset$, the preimages under $f$ must also have
     empty intersection, so $\emptyset \in p$, which is a contradiction.
 
-    Next, take arbitrary $p \in {f^*}\inv (A)$.
-    TODO.
+    The reverse direction is simpler.
+    Take arbitrary $p \in {f^*}\inv (A)$, so $z = \lim_p f \in A$.
+    We want to show that $p \in A^\prime = \reallywidehat{f\inv(A)}$.
+    Since $z$ is a limit over the ultrafilter $p$, we have for any
+    neighbourhood $U_z \ni z$ that $f\inv(U_z) \in p$,
+    i.e. $p \in \reallywidehat{f\inv(U_z)}$.
+    Since $A$ is an open neighbourhood of $z$, we're done.
 \end{proof}
 
 \begin{prop}
