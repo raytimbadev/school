@@ -310,24 +310,22 @@ of $r_p(s) = L_s(p)$.
     Since $S$ is cancellative, its left product maps are injective,
     so all the preimages $l_s\inv(\{t\})$ have at most one element.
 
-    Suppose there are two distinct nonempty such preimages. Then they are both
-    in $q$, so their (empty) intersection is in $q$. This is a contradiction.
-    Hence, there is at most one nonempty preimage.
+    Now we look more closely at
+    $B = \setof{s \in S : l_s\inv(\{t\}) \in q}$.
+    Of course, this set must be nonempty, else the empty set would belong to
+    $p$.
+    Suppose two arbitrary elements in $B$, say $s_1$ and $s_2$.
+    Then we have $S_1 = l_{s_1}\inv(\{t\}) \in q$
+    and $S_2 = l_{s_2}\inv(\{t\}) \in q$.
+    Hence, $\emptyset \neq S_1 \intersn S_2 \in q$.
+    Let $s \in S_1 \intersn S_2$. Then $s_1 \cdot s = t$ and $s_2 \cdot s = t$,
+    so $s_1 = s_2$ by the cancellation property of $S$.
+    Hence $B = \{t_p\}$ is a singleton, and $t_p$ is a generator for $p$.
 
-    Suppose there are no nonempty such preimages,
-    i.e. for each $s \in S: l_s\inv(\{t\}) = \emptyset$.
-    In other words, there is no pair of elements in $S$ whose product gives
-    $t$.
-    But then $\setof{ s \in S : l_s\inv(\{t\}) \in q } = \emptyset \in p$,
-    which is a contradiction.
+    Let $s$ now be the unique element of $B$.
+    Then $\{t_q\} = l_s\inv(A) \in q$ is a singleton as well,
+    and is a generator for $q$.
 
-    Hence, there is a unique $s \in S$ such that $B = l_s\inv(\{t\})$ is
-    nonempty, in particular a singleton.
-    Let $l \in B$ be the unique element of $B$.
-
-    If $\{l\} \in q$, then $l = t_q$ is the generator for $q$.
-
-    If $\{l\} \notin q$, then its complement is in $q$, as $q$ is an
-    ultrafilter.
+    Hence, $p$ and $q$ are principal ultrafilters.
 \end{proof}
 \end{document}
