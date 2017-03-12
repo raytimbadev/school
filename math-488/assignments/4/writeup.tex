@@ -19,6 +19,7 @@
 \newcommand{\closure}[1]{\closureOp{\parens{#1}}}
 \newcommand{\embedsto}{\hookrightarrow}
 \newcommand{\compose}{\circ}
+\newcommand{\setof}[1]{\left\{#1\right\}}
 
 \usepackage{scalerel,stackengine}
 \stackMath
@@ -32,6 +33,8 @@
 \stackon[1pt]{#1}{\tmpbox}%
 }
 \parskip 1ex
+
+\newcommand{\cechstone}{\v{C}ech-Stone}
 
 \begin{document}
 
@@ -70,6 +73,7 @@
 \end{proof}
 
 \begin{prop}
+    \label{prop:compact-hausdorff-continuous-extension}
     Let $X$ be a set, $C$ a compact Hausdorff space, and $f : X \to C$ a
     function. Suppose $p$ is an ultrafilter on $X$. Then, there exists a unique
     point $z \in C$ such that for every neighbourhood $U$ of $z$ we have
@@ -141,15 +145,37 @@
     So there is a subset of $X$ which is mapped to $g(a)$ by $f$. But this
     subset of $X$ must contain $a$. Hence, $f(a) = g(a)$.
 
-    Next, let us see that $\beta f$ is continuous.
-    Consider an arbitrary open set $W \subseteq C$.
-    It will suffice to check that for any $p \in \beta f\inv (W)$ there exists a
-    subset $A \subseteq X$ such that
-    $p \in \hat A$ and $f(\hat A) \subseteq W$.
-    For any $A$ and ultrafilter $q \in \hat A$ we have that
-    $\beta f (q) \in \reallywidehat {f(A)}$.
-    Since $C$ is compact and Hausdorff, we can find an open set $V \subseteq C$
-    such that $\closure{V} \subseteq W$
+    For simplicity, we assume that $C$ is zero-dimensional, so it has a basis
+    consisting of clopen sets. To show that $\beta f$ is continuous, it
+    suffices to verify that the preimage of any basic open set is open.
+    Let $A \subseteq C$ be a basic open set,
+    $f^* = \beta f$, and
+    $A^\prime = \reallywidehat{f\inv(A)}$.
+
+    We claim that $A^\prime = {f^*}\inv (A)$.
+
+    First, take arbitrary $p \in A^\prime$, so $f\inv(A) \in p$.
+    We want to show that
+    \begin{equation*}
+        p \in {f^*}\inv(A)
+        = \setof{
+            q \in \beta X :
+            f^*(q) = \lim_q f \in A
+        }
+    \end{equation*}
+    i.e. that $z = \lim_p f \in A$.
+    Suppose not, so $z \notin A$. Since $C$ is compact Hausdorff, it is
+    regular. Then as $A$ is closed, we can find open sets $A^* \supseteq A$ and
+    $Z \ni z$ such that $Z \intersn A^* = \emptyset$.
+    Notice that since $A$ is also open, we can identify $A^*$ and $A$.
+    Since $z$ is a limit over an ultrafilter, we have that the preimage of the
+    neighbourhood $Z \ni z$ belongs to $p$.
+    We also have that $f\inv(A) \in p$, so $f\inv(Z) \intersn f\inv(A) \in p$.
+    Since $Z \intersn A = \emptyset$, the preimages under $f$ must also have
+    empty intersection, so $\emptyset \in p$, which is a contradiction.
+
+    Next, take arbitrary $p \in {f^*}\inv (A)$.
+    TODO.
 \end{proof}
 
 \begin{prop}
@@ -158,7 +184,145 @@
 \end{prop}
 
 \begin{proof}
-    First, we check the associativityo.
+    We need to verify two properties.
+
+    \begin{description}
+        \item[Associativity.]
+            Take arbitrary $p, q, r \in \beta S$.
+            We want to see that for any $A \subseteq S$,
+            \begin{align*}
+                A \in p \cdot (q \cdot r)
+                & \iff
+                \setof{
+                    s \in S :
+                    l_s\inv (A) \in q \cdot r
+                }
+                \in p \\
+                & \iff
+                \setof{
+                    s \in S :
+                    \setof{
+                        s^\prime \in S :
+                        l_{s^\prime}\inv ( l_s\inv (A) )
+                        \in r
+                    }
+                    \in q
+                }
+                \in p \\
+                & \iff
+                \setof{
+                    s \in S :
+                    \setof{
+                        s^\prime \in S :
+                        l_s\inv ( l_{s^\prime}\inv (A) )
+                        \in r
+                    }
+                    \in q
+                }
+                \in p \\
+                & \iff
+                \setof{
+                    s \in S :
+                    l_s\inv \parens{
+                        \setof{
+                            s^\prime \in S :
+                            l_{s^\prime} (A)
+                            \in r
+                        }
+                    }
+                    \in q
+                }
+                \in p \\
+                & \iff
+                \setof{
+                    s \in S :
+                    l_s\inv (A) \in r
+                }
+                \in p \cdot q \\
+                & \iff
+                A \in (p \cdot q) \cdot r
+            \end{align*}
+
+        \item[Continuity.]
+            We want to check that for any $s \in S$, the left multiplication
+            map $L_s : \beta S \to \beta S$ is continuous.
+
+            In general, for any $f : X \to Y$, we can obtain a continuous
+            extension to $\beta f : \beta X \to \beta Y$. First, by
+            postcomposing with the principal ultrafilter map, the codomain
+            becomes a compact Hausdorff space. Then, we can apply proposition
+            \ref{prop:compact-hausdorff-continuous-extension} to continuously
+            extend the domain of the map to $\beta X$.
+
+            Recall that $L_s = \beta l_s$, so it is continuous.
+    \end{description}
 \end{proof}
 
+Recall that the right multiplication map
+$R_p = \beta r_p : \beta S \to \beta S$ is defined as the continuous extension
+of $r_p(s) = L_s(p)$.
+
+\begin{prop}
+    For any $p, q \in \beta S$, we have that $p \cdot q = R_q (p)$
+\end{prop}
+
+\begin{proof}
+    asdf
+\end{proof}
+
+\begin{prop}
+    If $S$ is a cancellative semigroup,
+    then for any $p, q \in \beta S$,
+    if $p \cdot q \in S$, then $p \in u(S)$ and $q \in u(S)$,
+    where $u : S \to \beta S$ is the principal ultrafilter map.
+\end{prop}
+
+\begin{proof}
+    Take arbitrary $p, q \in \beta S$ and suppose that $p \cdot q \in u(S)$.
+    Hence we have $t \in S$ such that $p \cdot q = u(t)$ is the principal
+    ultrafilter generated by $t$,
+    i.e. $p \cdot q = \setof{A \subseteq S : t \in A}$.
+    We want to show that $p \in u(S)$ and that $q \in u(S)$,
+    i.e. that there are $p = u(t_p)$ and that $q = u(t_q)$
+    for some $t_p, t_q \in S$.
+
+    By definition of the product of ultrafilters in the \cechstone{}
+    compactification, we have
+    \begin{equation*}
+        p \cdot q = \setof{
+            A \subseteq S :
+            \setof{
+                s \in S :
+                l_s\inv(A) \in q
+            }
+            \in p
+        }
+    \end{equation*}
+
+    Since $p \cdot q$ is principal, $t \in A$ for each $A \in p \cdot q$.
+    Hence, $\setof{s \in S : l_s\inv(\{t\}) \in q} \in p$.
+
+    Since $S$ is cancellative, its left product maps are injective,
+    so all the preimages $l_s\inv(\{t\})$ have at most one element.
+
+    Suppose there are two distinct nonempty such preimages. Then they are both
+    in $q$, so their (empty) intersection is in $q$. This is a contradiction.
+    Hence, there is at most one nonempty preimage.
+
+    Suppose there are no nonempty such preimages,
+    i.e. for each $s \in S: l_s\inv(\{t\}) = \emptyset$.
+    In other words, there is no pair of elements in $S$ whose product gives
+    $t$.
+    But then $\setof{ s \in S : l_s\inv(\{t\}) \in q } = \emptyset \in p$,
+    which is a contradiction.
+
+    Hence, there is a unique $s \in S$ such that $B = l_s\inv(\{t\})$ is
+    nonempty, in particular a singleton.
+    Let $l \in B$ be the unique element of $B$.
+
+    If $\{l\} \in q$, then $l = t_q$ is the generator for $q$.
+
+    If $\{l\} \notin q$, then its complement is in $q$, as $q$ is an
+    ultrafilter.
+\end{proof}
 \end{document}
