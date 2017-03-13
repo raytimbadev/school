@@ -134,17 +134,16 @@
     ultrafilter map. We would like that $z = g(a) = f(a)$ for all $a$.
     Since $g(a)$ is a limit, we have that for every neighbourhood $U$ of
     $g(a)$,
-    \begin{equation*}
-        \{x \in X : f(x) \in U \} \in \{ A \subseteq X : a \in A \}
-    \end{equation*}
-    In particular, this must hold for the neighbourhood $U = \{g(a)\}$.
-    But then we have
-    \begin{equation*}
-        \{x \in X : f(x) \in \{g(a)\}\} \in \{A \subseteq X : a \in A \}
-    \end{equation*}
-    So there is a subset of $X$ which is mapped to $g(a)$ by $f$. But this
-    subset of $X$ must contain $a$. Hence, $f(a) = g(a)$.
+    \begin{align*}
+        \{x \in X : f(x) \in U \} &\in \{ A \subseteq X : a \in A \} \\
+        a &\in f\inv(U) \\
+        f(a) &\in U
+    \end{align*}
+    We have thus that $f(a)$ is in every neighbourhood of $z$.
+    Suppose $f(a) \neq z$. Then by the Hausdorffness of $C$, we can separate
+    $f(a)$ and $z$ by neighbourhoods, which is a contradiction.
 
+    Next, we want to see that $\beta f$ is continuous.
     For simplicity, we assume that $C$ is zero-dimensional, so it has a basis
     consisting of clopen sets. To show that $\beta f$ is continuous, it
     suffices to verify that the preimage of any basic open set is open.
@@ -259,7 +258,8 @@
             \ref{prop:compact-hausdorff-continuous-extension} to continuously
             extend the domain of the map to $\beta X$.
 
-            Recall that $L_s = \beta l_s$, so it is continuous.
+            Recall that $L_s = u \circ \beta l_s$, where $u : S \to \beta S$ is
+            the principal ultrafilter map, so it is continuous.
     \end{description}
 \end{proof}
 
@@ -272,7 +272,47 @@ of $r_p(s) = L_s(p)$.
 \end{prop}
 
 \begin{proof}
-    asdf
+    Take arbitrary $A \in p \cdot q$,
+    so $\setof{s \in S : l_s\inv(A) \in q} \in p$.
+    We want to show that $A \in R_q (p)$.
+
+    Let $z = R_q (p) = \lim_p r_q$.
+    By the definition of the limit over an ultrafilter, we have for every
+    neighbourhood $U_z \ni z$ that
+    \begin{align*}
+        r_q\inv (U_z) &\in p \\
+        \setof{s \in S : r_q(s) \in U_z} &\in p \\
+        \setof{s \in S : L_s(q) \in U_z} &\in p \\
+        \setof{s \in S : u(\lim_q l_s) \in U_z} &\in p
+    \end{align*}
+    where $u : S \to \beta S$ is the principal ultrafilter map.
+    Notice that $y = \lim_q l_s$ means that for every neighbourhood
+    $U_y \ni y$, we have $l_s\inv (U_y) \in q$.
+
+    Suppose $A \notin z$, so $z \notin \hat A$.
+    By regularity, we can find $Z \ni z$ such that
+    $Z \intersn \hat A = \emptyset$.
+    Instantiating $Z = U_z$, we have
+    \begin{align*}
+        \setof{s \in S : u(\lim_q l_s) \in Z} &\in p \\
+        \setof{
+            s \in S :
+            \exists y \in S \; . \;
+            \parens{
+                \forall U_y \ni y \; . \;
+                l_s\inv(U_y) \in q
+            }
+            \land
+            \setof{
+                B \subseteq S :
+                y \in B
+            }
+            \in Z
+        }
+        &\in p
+    \end{align*}
+
+    From here I'm not sure how to proceed.
 \end{proof}
 
 \begin{prop}
