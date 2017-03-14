@@ -12,6 +12,15 @@
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{hyperref}
 \usepackage{environ}
+\usepackage{tikz}
+
+%%%%% TIKZ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usetikzlibrary{graphs,arrows}
+\tikzset{
+    shorten >=1pt,
+    >=stealth',
+}
 
 %%%%% THEOREM-LIKE ENVIRONMENTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -64,6 +73,8 @@
 
 % Misc math operators
 \newcommand{\parens}[1]{\left(#1\right)}
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand{\setof}[1]{\left\{#1\right\}}
 \newcommand{\Union}{\bigcup}
 \newcommand{\union}{\cup}
 \newcommand{\Intersn}{\bigcap}
@@ -73,6 +84,7 @@
 \newcommand{\given}{\;\vert\;}
 \newcommand{\compl}{^c}
 \newcommand{\inv}{^{-1}}
+\newcommand{\preimage}[1]{^{-1}\parens{\setof{#1}}}
 \newcommand{\compose}{\circ}
 
 % Sets of numbers
@@ -95,6 +107,9 @@
 \newcommand{\E}[1]{\Expect{\left[#1\right]}}
 \DeclareMathOperator{\Var}{\mathbb{V}}
 \newcommand{\V}[1]{\Var{\parens{#1}}}
+
+% Absolutely misc
+\renewcommand{\th}{\textsuperscript{th}}
 
 \begin{document}
 
@@ -361,7 +376,7 @@ $$
     then no others can get off there. Hence, each time someone gets off, a
     restriction occurs.
     \begin{equation*}
-        |E| = P_4^10 = 10 \times 9 \times 8 \times 7
+        |E| = P_4^{10} = 10 \times 9 \times 8 \times 7
     \end{equation*}
 
     The probability of this event is
@@ -430,6 +445,25 @@ $$
     \end{equation*}
 \end{thm}
 
+\begin{rem}
+    The Law of Excluded Middle (equation \ref{eq:excluded-middle}) is a special
+    case of the Law of Total Probability (Theorem \ref{thm:total-probability}.)
+    obtained by partitioning over $B$ and its complement $B^c$.
+\end{rem}
+
+\begin{proof}
+    Note that $\setof{B, B^c}$ forms a partition of the sample space. Hence by
+    applying the Law of Total Probability and the definition of conditional
+    probability, we get
+    \begin{align*}
+        \P{A}
+        &= \P{A \given B} \P{B} + \P{A \given B^c} \P{B^c} \\
+        &= \frac{\P{A \intersn B}}{\P{B}} \P{B}
+            + \frac{\P{A \intersn B^c}}{\P{B^c}} \P{B^c} \\
+        &= \P{A \intersn B} + \P{A \intersn B^c}
+    \end{align*}
+\end{proof}
+
 \begin{eg}
     \label{eg:marys-urns}
     Mary is given two urns. The first urn contains five red balls and three
@@ -490,7 +524,7 @@ $$
     variable.
 \end{defn}
 
-\begin{defn}
+\begin{defn}{(Discrete random variable.)}
     If the image $X(S)$ of a random variable $X : S \to \R^d$ is countable, the
     variable is said to be \emph{discrete}.
 \end{defn}
@@ -519,7 +553,7 @@ $$
     write $\P{X = x}$ to mean $\P{\{\omega \in S : X(\omega) = x\}}$.
 \end{rem}
 
-\begin{defn}
+\begin{defn}{(Probability distribution.)}
     If $X : S \to \R^d$ is a discrete random variable defined on a sample space
     $S$ with associated probability $\Prob$ and we enumerate the image of $X$
     by $x_1, x_2, \ldots$, then the \emph{probability distribution} of $X$ is
@@ -528,7 +562,30 @@ $$
         \label{eq:probability-distribution}
         x_i \mapsto \P{X = x_i}
     \end{equation}
-    for $i = 1,2,\ldots$.
+    for $i \in \N$.
+
+    Intuitively, a probability distribution is an explicit characterization
+    of the likelihood of each potential value of a random variable.
+
+    The following diagram illustrates the relationship between the random
+    variable $X$, the probability $\Prob$, and the probability distribution $p$
+    of $X$.
+
+    \begin{center}
+        \begin{tikzpicture}
+            \matrix[column sep=1cm, row sep=1cm]{
+                \node (S) {$S$} ; & \node (Rd) {$R^d$} ; \\
+                                  & \node (R) {$[0, 1]$} ; \\
+            } ;
+            \graph[use existing nodes]{
+                S ->[edge label={$X$}]
+                Rd ->[edge label={$\prob$}]
+                R ;
+                S ->[edge label={$\Prob$}, swap]
+                R ;
+            } ;
+        \end{tikzpicture}
+    \end{center}
 \end{defn}
 
 \begin{eg}
@@ -650,17 +707,20 @@ $$
 \subsection{Functions of random variables}
 
 \begin{defn}
+    \label{def:function-rv}
     If $X : S \to \R^m$ is a random variable and $g : \R^m \to \R^n$ is a
-    function, then $Y = g \compose X$ is an $\R^n$-valued random variable.
+    function, then $Y = g \compose X$, often written $Y = g(X)$, is an
+    $\R^n$-valued random variable.
 \end{defn}
 
 \begin{rem}
-    If the possible values of $X : S \to \R^m$ are enumerated $x_1, \ldots$ and
-    $\p[X]{x_i}$, $i = 1,2,\ldots$ is the distribution of $X$, then the
-    distribution of $Y = g \compose X : S \to \R^n$ can be computed by
+    If the possible values of $X : S \to \R^m$ are enumerated
+    $\setof{x_1, x_2, \ldots}$ and $\p[X]{x_i}$, $i = 1,2,\ldots$ is the
+    distribution of $X$, then the distribution of
+    $Y = g \compose X : S \to \R^n$ can be computed by
     \begin{enumerate}
         \item
-            Enumerating the image of $Y$ by $y_1, y_2, \ldots$.
+            Enumerating the image of $Y$ by $\setof{y_1, y_2, \ldots}$.
 
         \item
             For each $j$, find the preimage of $y_j$ under $g$ to recover
@@ -671,12 +731,59 @@ $$
 
         \item
             The distribution of $Y$ is given by
-            \begin{equation*}
-                \p[Y]{y_j} = \sum_{x \in E_j} {\p[X]{x}}
-            \end{equation*}
+            \begin{align}
+                \p[Y]{y_j} &= \sum_{x \in E_j} {\p[X]{x}} \notag \\
+                \p[Y]{y_j} &= \sum_{x \in g\preimage{y_j}} {\p[X]{x}}
+                \label{eq:pmf-of-composite-rv}
+            \end{align}
             for $j = 1,2,\ldots$.
     \end{enumerate}
 \end{rem}
+
+\begin{eg}{(Square of a variable.)}
+    Consider the sample space of outcomes of two dice rolls, so
+    $S = \setof{(x, y) : x \in \setof{1,\ldots,6}, y \in \setof{1,\ldots,6}}$.
+    We have a random variable $X$ that sums the pair and subtracts seven.
+    \begin{equation*}
+        X(x, y) = x + y - 7
+    \end{equation*}
+    Notice that the image $X(S) = \setof{-5,\ldots,5}$.
+    Consider the function $g : \R \to \R$ such that $x \mapsto x^2$.
+    Let $Y : S \to \R$ be a random variable such that $Y = g(X)$.
+    Find the probability distribution of $Y$ (i.e. of $X^2$).
+\end{eg}
+
+\begin{solution}
+    First, we look at the image of $Y$.
+    It is the set of squares of the numbers $\setof{0,\ldots,5}$,
+    i.e.  $\setof{0, 1, 4, 9, 16, 25}$.
+    Notice that the preimage of each singleton has exactly two elements, except
+    in the case of $0$. Then, we apply \eqref{eq:pmf-of-composite-rv} on each
+    preimage to find the probability distribution of the transformed random
+    variable.
+
+    \begin{center}
+        \begin{tabular}{c c c}
+            $y \in Y(S)$ & $g\preimage{y}$ & $\p[Y]{y}$\\ \hline
+            $0$          & $\setof{0}$     & $6/36$ \\
+            $1$          & $\setof{-1,1}$  & $10/36$ \\
+            $4$          & $\setof{-2,2}$  & $8/36$ \\
+            $9$          & $\setof{-3,3}$  & $6/36$ \\
+            $16$         & $\setof{-4,4}$  & $4/36$ \\
+            $25$         & $\setof{-5,5}$  & $2/36$
+        \end{tabular}
+    \end{center}
+
+    To see that indeed $\p[Y]{1} = \frac{10}{36}$ for instance,
+    notice that $\p[X]{-1} = \frac{5}{36}$, as $X = -1$ occurs when we roll a
+    sum of $6$.
+    Such a sum being rolled can occur in $5$ ways,
+    as $\abs{\setof{(6 - i, i) : i \in \setof{1, \ldots, 5}}} = 5$,
+    and there are a total of $36$ possible rolls of two dice.
+    A symmetrical applies to rolling a sum of $8$, which in turn produces the
+    value of the random variable $X = 1$.
+    Hence $\p[Y]{1} = \p[X]{-1} + \p[X]{1} = \frac{5}{36} + \frac{5}{36}$.
+\end{solution}
 
 \subsection{Expectation of a random variable}
 
@@ -756,12 +863,142 @@ $$
     the constant value itself.
 \end{proof}
 
-\begin{rem}
-    Linearity of expectation extends to infinite sums, provided each random
-    variable appearing as a term in the sum is nonnegative.
+\begin{thm}{(Expectation of a function of a discrete random variable.)}
+    \label{thm:expectation-function-rv}
+    Suppose $X : S \to A \subseteq \R^m$ is a random variable with probability
+    distribution $\prob_X : A \to [0,1]$.
+    Let $f : A \to B \subseteq \R^n$ be a function transforming the of the
+    random variable $X$ into the variable $Y = f(X)$.
+    (See definition \ref{def:function-rv}.)
+    The expectation $\E{f(X)}$ is found by
+    \begin{equation}
+        \label{eq:expectation-function-rv}
+        \E{Y}
+        = \E{f(X)}
+        = \sum_{x \in X} {
+            f(x) \p[X]{x}
+        }
+    \end{equation}
+\end{thm}
+
+\begin{eg}
+    Let $X$ be the number of times heads appears when a (possibly unfair) coin
+    is tossed $n$ times. Suppose that the probability of landing heads in a
+    single toss is $p$. Find $\E{X}$.
+\end{eg}
+
+\begin{solution}
+    Notice that the sample space consists of $n$-tuples, each component of
+    which being boolean.
+    Let $X_i = 1_{A_i}$ be an indicator random variable, taking the value $1$
+    when $s \in S$ is such that $s \in A_i$, where $A_i$ denotes the event that
+    the $i$\th{} component of the tuple is $H$, i.e. the $i$\th{} toss comes up
+    heads.
+    Notice that the expectation of an individual toss degenerates into a
+    probability
     \begin{equation*}
-        \E{\sum_{i} X_i} = \sum_{i} \E{X_i}
+        \E{X_i}
+        = \sum_{s \in S} {
+            X_i(s) \p[X_i]{s}
+        }
+        = 1 \times p + 0 \times (1-p)
+        = p
     \end{equation*}
+    We can do this simplification of the sum because the random variable only
+    looks at the $i$\th{} component of the component $s$. This component is
+    either heads with probability $p$ or tails with probability $1 - p$.
+
+    But then, the total number of heads is exactly $X = \sum_i^n X_i$, so by
+    linearity of expectation, we have
+    \begin{equation*}
+        \E{X} = \sum_i^n { \E{X_i} } = np
+    \end{equation*}
+\end{solution}
+
+\begin{thm}{(Expectation of a series.)}
+    \label{thm:expectation-series}
+    If each $X_i$ is a nonnegative real-valued random variable defined on the
+    same sample space, then
+    \begin{equation}
+        \label{eq:expectation-series}
+        \E{\sum_{i=0}^\infty {X_i}} = \sum_{i=0}^\infty {\E{X_i}}
+    \end{equation}
+\end{thm}
+
+\begin{eg}
+    If $X$ is a real-valued discrete random variable taking values in
+    $\N = \setof{0, 1, 2, \ldots}$, then
+    \begin{equation*}
+        \E{X} = \sum_{k=1}^\infty \P{X \geq k}
+    \end{equation*}
+\end{eg}
+
+\begin{solution}
+    \newcommand{\Xgeq}[1]{\ensuremath \setof{X \geq #1}}
+    \newcommand{\indicator}[1]{\ensuremath 1_{\Xgeq{#1}}}
+    Notice that we can rewrite $X$ as a sum of indicator random variables.
+    \begin{align*}
+        X
+        &= \indicator{1} + \indicator{2} + \cdots \\
+        &= \sum_{i=1}^\infty { \indicator{i} }
+    \end{align*}
+    Notice that for an individual variable $\indicator{k}$ we have
+    \begin{align*}
+        \E{\indicator{k}}
+        &= 0 \times \p[\indicator{k}]{0}
+            + 1 \times \p[\indicator{k}]{1} \\
+        &= \p[\indicator{k}]{1} \\
+        &= \P{\Xgeq{k}}
+    \end{align*}
+    Each variable is nonnegative, so we apply the linearity of expectation.
+    \begin{equation*}
+        \E{X}
+        = \sum_{k=1}^\infty {
+            \E{\indicator{k}}
+        }
+        = \sum_{k=1}^\infty {
+            \P{\Xgeq{k}}
+        }
+    \end{equation*}
+    as required.
+\end{solution}
+
+\subsection{Variance of a random variable}
+
+\begin{defn}{(Variance.)}
+    \label{def:variance}
+    Suppose $X : S \to \R$ is a real-valued random variable such that
+    $\E{X^2} < \infty$.
+    Then, the \emph{variance} of $X$ is
+    \begin{equation}
+        \label{eq:variance}
+        \V{X} = \E{\parens{X - \E{X}}^2}
+    \end{equation}
+\end{defn}
+
+\begin{defn}{(Standard deviation.)}
+    \label{def:stdev}
+    The \emph{standard deviation} $\sigma_X$ of a random variable
+    $X : S \to \R$ is defined
+    \begin{equation}
+        \label{eq:stdev}
+        \sigma_X = \sqrt{\V{X}}
+    \end{equation}
+\end{defn}
+
+\begin{rem}
+    By definition, the square of the standard deviation is the variance, so we
+    often write $\sigma_X^2$ for $\sqrt{\V{X}}$.
 \end{rem}
+
+\begin{thm}
+    For any random variable $X : S \to \R$,
+    \begin{equation*}
+        \V{X} = \E{X^2} - \E{X}^2
+    \end{equation*}
+\end{thm}
+
+\begin{proof}
+\end{proof}
 
 \end{document}
