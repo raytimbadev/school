@@ -86,6 +86,14 @@
 \newcommand{\inv}{^{-1}}
 \newcommand{\preimage}[1]{^{-1}\parens{\setof{#1}}}
 \newcommand{\compose}{\circ}
+\newcommand{\range}[2][1]{%
+    \setof{#1,\ldots,#2}
+}
+\newcommand{\infsum}{\sum^\infty}
+\renewcommand{\d}[2][]{%
+    \ensuremath
+    \frac{\mathrm{d}#1}{\mathrm{d}#2}
+}
 
 % Sets of numbers
 \newcommand{\R}{\mathbb{R}}
@@ -108,12 +116,112 @@
 \DeclareMathOperator{\Var}{\mathbb{V}}
 \newcommand{\V}[1]{\Var{\parens{#1}}}
 
+% Distributions
+\DeclareMathOperator{\BinOp}{Bin}
+\newcommand{\Bin}[1]{ \BinOp\parens{#1} }
+
 % Absolutely misc
 \renewcommand{\th}{\textsuperscript{th}}
 
 \begin{document}
 
 \maketitle
+
+\section{Miscellaneous analysis and combinatorics facts}
+
+\begin{thm}{(Binomial expansion.)}
+    \label{thm:binomial-expansion}
+    For $x, y \in \R$ and any $n \in \N$
+    \begin{equation}
+        \label{eq:binomial-expansion}
+        (x + y)^n = \sum_{k=0}^n {
+            {n \choose k} x^k y^{n -k}
+        }
+    \end{equation}
+\end{thm}
+
+\begin{thm}{(Exponential series.)}
+    \label{thm:exponential-series}
+    For $x \in \R$,
+    \begin{equation}
+        \label{eq:series-ex}
+        e^x = \infsum_{n=0} {
+            \frac{x^n}{n\fact}
+        }
+    \end{equation}
+\end{thm}
+
+\begin{thm}{(Geometric series.)}
+    \label{thm:geometric-series}
+    For $x \in (-1, 1)$,
+    \begin{equation}
+        \label{eq:geometric-series}
+        \frac{1}{1 - x} = \infsum_{n=0} { x^n }
+    \end{equation}
+\end{thm}
+
+\begin{rem}
+    \label{rem:differentiate-geometric-series}
+    Both sides of \eqref{eq:geometric-series} may be differentiated to obtain
+    other useful equalities involving series, e.g.
+    \begin{equation*}
+        \d{x}\parens{ \frac{1}{1-x} }
+        =
+        \parens{1-x}^{-2}
+        =
+        \infsum_{n=1} { n x^{n-1} }
+    \end{equation*}
+\end{rem}
+
+\begin{thm}{(Negative binomial series.)}
+    \label{thm:negative-binomial-series}
+    For $n > 0$ and $x \in (-1, 1)$,
+    \begin{equation}
+        \label{eq:negative-binomial-series}
+        (1+x)^{-n} = \infsum_{k=0} {
+            {{n + k - 1} \choose k} (-1)^k x^k
+        }
+    \end{equation}
+\end{thm}
+
+\begin{defn}{(Limit definition of $e$.)}
+    \label{def:limit-e}
+    Suppose $\lim_{n\to\infty} x_n = x$. Then,
+    \begin{equation}
+        \label{eq:limit-e}
+        \lim_{n\to\infty} {
+            \parens{
+                1 + \frac{x_n}{n}
+            }^n
+        }
+        =
+        e^x
+    \end{equation}
+\end{defn}
+
+\begin{rem}
+    If we use a constant sequence $(x_n)_{n\in\N}$, such that $x_n = \lambda$,
+    in definition \ref{def:limit-e}, then
+    \begin{equation*}
+        \lim_{n\to\infty} {
+            \parens{
+                1 + \frac{\lambda}{n}
+            }^n
+        }
+        =
+        e^x
+    \end{equation*}
+\end{rem}
+
+\begin{rem}{($e^x$ grows really fast.)}
+    For any $a \in R$,
+    \begin{equation*}
+        \lim_{x\to\infty} {
+            \frac{x^a}{e^x}
+        }
+        = 0
+    \end{equation*}
+\end{rem}
 
 \section{Experiments, sample space, events, and probability}
 
@@ -646,7 +754,7 @@ $$
 \begin{solution}
     Possible values of $X$ are
     \begin{equation*}
-        (i, j) \in \{(i, j) : i \in \{0, 1\} \land j \in \{1,\ldots,6\}\}
+        (i, j) \in \{(i, j) : i \in \{0, 1\} \land j \in \range{6} \}
     \end{equation*}
     For any such $(i, j)$,
     \begin{equation*}
@@ -742,12 +850,12 @@ $$
 
 \begin{eg}{(Square of a variable.)}
     Consider the sample space of outcomes of two dice rolls, so
-    $S = \setof{(x, y) : x \in \setof{1,\ldots,6}, y \in \setof{1,\ldots,6}}$.
+    $S = \setof{(x, y) : x \in \range{6}, y \in \range{6}}$.
     We have a random variable $X$ that sums the pair and subtracts seven.
     \begin{equation*}
         X(x, y) = x + y - 7
     \end{equation*}
-    Notice that the image $X(S) = \setof{-5,\ldots,5}$.
+    Notice that the image $X(S) = \range[-5]{5}$.
     Consider the function $g : \R \to \R$ such that $x \mapsto x^2$.
     Let $Y : S \to \R$ be a random variable such that $Y = g(X)$.
     Find the probability distribution of $Y$ (i.e. of $X^2$).
@@ -755,7 +863,7 @@ $$
 
 \begin{solution}
     First, we look at the image of $Y$.
-    It is the set of squares of the numbers $\setof{0,\ldots,5}$,
+    It is the set of squares of the numbers $\range[0]{5}$,
     i.e.  $\setof{0, 1, 4, 9, 16, 25}$.
     Notice that the preimage of each singleton has exactly two elements, except
     in the case of $0$. Then, we apply \eqref{eq:pmf-of-composite-rv} on each
@@ -778,7 +886,7 @@ $$
     notice that $\p[X]{-1} = \frac{5}{36}$, as $X = -1$ occurs when we roll a
     sum of $6$.
     Such a sum being rolled can occur in $5$ ways,
-    as $\abs{\setof{(6 - i, i) : i \in \setof{1, \ldots, 5}}} = 5$,
+    as $\abs{\setof{(6 - i, i) : i \in \range{5}}} = 5$,
     and there are a total of $36$ possible rolls of two dice.
     A symmetrical applies to rolling a sum of $8$, which in turn produces the
     value of the random variable $X = 1$.
@@ -841,7 +949,7 @@ $$
 
 \begin{thm}{(Linearity of expectation.)}
     Suppose $X$ is an $\R^m$-valued discrete random variable
-    and $g_i : \R^m \to \R^n$ for $i = 1,\ldots,k$. Then,
+    and $g_i : \R^m \to \R^n$ for $i \in \range{k}$. Then,
     \begin{equation*}
         \E{g_1(X) + \cdots + g_k(X)}
         = \E{g_1(X)} + \cdots + \E{g_k(X)}
@@ -992,6 +1100,7 @@ $$
 \end{rem}
 
 \begin{thm}
+    \label{thm:alternative-variance}
     For any random variable $X : S \to \R$,
     \begin{equation*}
         \V{X} = \E{X^2} - \E{X}^2
