@@ -1393,4 +1393,70 @@ ways to do this is
     \end{align*}
 \end{proof}
 
+\begin{eg}{(\#3.58 in the textbook.)}
+    Let $X$ denote the number of defectives among four items selected from a
+    large bin that is known to contain $10\%$ defective items.
+    Suppose that the repair cost for the defectives is $C = 3X^2 + X + 2$.
+    Find $\E{C}$.
+\end{eg}
+
+\begin{solution}
+    We can think of the selection of $4$ items as an experiment consisting of
+    four independent trials in which the probability of ``success'', i.e. the
+    item being defective, is $0.1$. Hence, $X \sim \Bin{n;p}$ where $n = 4$ and
+    $p = 0.1$.
+    %
+    \begin{align*}
+        \E{C}
+        &= \E{3 X^2 + X + 2} \\
+        &= 3 \E{X^2} + \E{X} + 2 \\
+        &= 3 \parens{\V{X} - \E{X}^2} + \E{X} + 2 \\
+        &= 3 \parens{np(1-p) - n^2 p^2} + \E{X} + 2 \\
+        &= 3 \parens{np - np^2 - n^2 p^2} + np + 2 \\
+        &= 3
+    \end{align*}
+\end{solution}
+
+\begin{eg}
+    A system consists of $n$ components, each of which operates correctly with
+    probability $p$. The components operate independently. The system operates
+    effectively if at least half of its components are operating correctly.
+    For what values of $p$ is a $5$-component system more likely to function
+    correctly than a $3$-component system.
+\end{eg}
+
+\begin{solution}
+    Denote by $X_5$ the random variable representing the number of working
+    components in a $5$-component system and by $X_3$ the random variable
+    representing the number of working components in a $3$-component system.
+
+    First, we write out the probability of a $5$-component system functioning,
+    denoted $P_5$. Note that such a system works if $3$, $4$, or all $5$
+    components are working correctly.
+    %
+    \begin{equation*}
+        P_5
+        = \P{X_5 \geq 2.5}
+        = \p[X_5]{3} + \p[X_5]{4} + \p[X_5]{5}
+        = {5 \choose 3} p^3 (1-p)^2
+            + {5 \choose 4} p^4 (1-p)^1
+            + {5 \choose 5} p^5 (1-p)^0
+    \end{equation*}
+
+    Second, we write out the probability of a $3$-component system functioning,
+    denote $P_3$. In this case, the system works if either $2$ or all $3$
+    components are working correctly.
+    %
+    \begin{equation*}
+        P_3
+        = \P{X_3 \geq 1.5}
+        = \p[X_3]{2} + \p[X_3]{3}
+        = {3 \choose 2} p^2 (1-p)^1 + {3 \choose 3} p^3 (1-p)^0
+    \end{equation*}
+
+    Then, we assert $P_5 > P_3$ and follow a chain of if-and-only-ifs
+    consisting of tedious algebraic manipulations and inequality tricks to
+    compute a bound on $p$, specifically $p > \frac{1}{2}$.
+\end{solution}
+
 \end{document}
