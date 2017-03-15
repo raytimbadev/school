@@ -430,7 +430,9 @@ perform in $n \times m$ ways.
 
 The multiplication rule extends inductively. It can also be used to see how
 many ways there are of ordering $n$ items; this is
-$n! = 1 \times 2 \times \cdots \times n$.
+\begin{equation*}
+    $n! = 1 \times 2 \times \cdots \times n$.
+\end{equation*}
 
 \subsection{Permutation rule}
 \label{sec:permutation-rule}
@@ -438,9 +440,10 @@ $n! = 1 \times 2 \times \cdots \times n$.
 Suppose we have $n$ distinct objects and $r$ distinct boxes into which we would
 like to fit them. Each box may hold exactly one object, and $r \leq n$. Then,
 the number of ways of filling up the boxes is
-$$
-P_r^n = \frac{n!}{(n-r)!}
-$$
+\begin{equation}
+    \label{eq:permutation-rule}
+    P_r^n = \frac{n!}{(n-r)!}
+\end{equation}
 
 \subsection{Selection rule}
 \label{sec:selection-rule}
@@ -448,9 +451,10 @@ $$
 Suppose we want to select $r$ objects from a set of $n$ objects, where
 $r \leq n$. The order of the selection doesn't matter. The number of ways to do
 this is
-$$
-C_r^n = {n \choose r} = \frac{n\fact}{(n-r)\fact r\fact}
-$$
+\begin{equation}
+    \label{eq:selection-rule}
+    C_r^n = {n \choose r} = \frac{n\fact}{(n-r)\fact r\fact}
+\end{equation}
 
 Why is this? First apply the permutation rule. The number we get will be too
 big, as we are counting each selection $r!$ times, one for each possible
@@ -463,9 +467,11 @@ double-counting.
 Suppose we want to partition a set $S$ such that $|S| = n$ into $k$ groups,
 with sizes $n_1, \ldots, n_k$ such that $\sum_{i=1}^k n_i = n$. The number of
 ways to do this is
-$$
-{n \choose n_1 \, \cdots \, n_k} = \frac{n\fact}{n_1\fact \cdots n_k\fact}
-$$
+\begin{equation}
+    \label{eq:partition-rule}
+    {n \choose n_1 \, \cdots \, n_k}
+    = \frac{n\fact}{n_1\fact \cdots n_k\fact}
+\end{equation}
 
 \begin{eg}
     Four people get into an elevator, and each of them can get off at one of
