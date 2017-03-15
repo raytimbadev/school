@@ -1114,6 +1114,123 @@ ways to do this is
 \end{thm}
 
 \begin{proof}
+    \begin{align*}
+        \V{X}
+        &= \E{\parens{X - \E{X}}^2} \\
+        &= \E{X^2 - 2 \cdot X \cdot \E{X} + \E{X}^2} \\
+        &= \E{X^2} - 2 \E{X} \E{X} + \E{X}^2 \\
+        &= \E{X^2} - \E{X}^2
+    \end{align*}
 \end{proof}
+
+\begin{thm}{(Properties of variance.)}
+    \label{thm:variance-properties}
+    Suppose $X : S \to \R$ is a real-valued random variable. Then,
+    \begin{enumerate}
+        \item
+            Suppose $a, b \in \R$. Then
+            \begin{equation}
+                \label{eq:variance-linearity}
+                \V{a X + b} = a^2 \V{X}
+            \end{equation}
+    \end{enumerate}
+\end{thm}
+
+\begin{proof}
+    \begin{enumerate}
+        \item
+            Let $Y = a X + b$ be a derived real-valued random variable.
+            Then, $\E{Y} = a \E{X} + b$ and
+            \begin{equation*}
+                Y - \E{Y} = a(X - \E{X})
+            \end{equation*}
+            Hence,
+            \begin{align*}
+                \V{Y}
+                &= \E{\parens{a\parens{X - \E{X}}}^2} \\
+                &= a^2 \E{\parens{X - \E{X}}^2} \\
+                &= a^2 \V{X}
+            \end{align*}
+    \end{enumerate}
+\end{proof}
+
+\begin{rem}
+    In theorem \ref{thm:variance-properties},
+    an intuitive notion is captured by \eqref{eq:variance-linearity}:
+    uniformly \emph{shifting} a random variable (adding a constant) does
+    not affect the variance, which can be thought of as a measure of how
+    dispersed they are.
+\end{rem}
+
+\begin{eg}
+    Suppose $X : S \to N = \range{n}$ is a discrete random variable
+    with uniform probability distribution,
+    i.e. $\p[X](i) = \frac{1}{n}$ for all $i \in N$.
+    Find $\E{X}$ and $\sigma_X$.
+\end{eg}
+
+\begin{solution}
+    Using definition \ref{def:expectation}, we compute $\E{X}$ and $\E{X^2}$.
+    \begin{equation}
+        \label{eq:expectation-discrete-uniform}
+        \E{X}
+        = \sum_{i = 1}^n {i \frac{1}{n}} = \frac{1}{n} \frac{n(n+1)}{2}
+        = \frac{n+1}{2}
+    \end{equation}
+
+    Note that $\E{X}^2 = \frac{n^2}{4} + n + 1$.
+
+    Next we compute $\E{X^2}$ in order to compute $\V{X}$.
+    \begin{equation*}
+        \E{X^2}
+        = \sum_{i = 1}^n {i^2 \frac{1}{n}}
+        = \frac{1}{n} \frac{n(n+1)(2n+1)}{6}
+        = \frac{(n+1)(2n+1)}{6}
+    \end{equation*}
+    \newcommand{\expectXsq}{\ensuremath \frac{(n+1)(2n+1)}{6}}
+
+    Using theorem \ref{thm:alternative-variance}, we compute the variance
+    \begin{align*}
+        \V{X}
+        &= \E{X^2} - \E{X}^2 \\
+        &= \frac{(n+1)(2n+1)}{6} - \frac{\parens{n+1}^2}{4} \\
+        &= \frac{n+1}{12}\parens{
+            2(2n + 1) - 3(n + 1)
+        } \\
+        &= \frac{n+1}{12}\parens{
+            4n + 1 -3n - 3
+        } \\
+        &= \frac{n+1}{12}\parens{
+            n - 1
+        } \\
+        &= \frac{n^2 - 1}{12}
+    \end{align*}
+    Then the standard deviation is the square root of this quantity.
+    \begin{equation}
+        \label{eq:variance-discrete-uniform}
+        \sigma_X = \sqrt{
+            \frac{n^2 - 1}{12}
+        }
+    \end{equation}
+\end{solution}
+
+\begin{rem}
+    Applying \eqref{eq:expectation-discrete-uniform} and
+    \eqref{eq:variance-discrete-uniform} we can easily find the expectation and
+    standard deviation, respectively, of $X : S \to \range{6}$ representing the
+    upper face of a roll of a fair die.
+    (So $S = \range{6}$ as well and $X$ is the identity.)
+    \begin{align*}
+        \E{X}
+        &= \frac{6 + 1}{2} = \frac{7}{2} \\
+        %
+        \sigma_X
+        &= \sqrt{
+            \frac{6^2 - 1}{12}
+        }
+        = \sqrt{ \frac{35}{12} }
+    \end{align*}
+\end{rem}
+
 
 \end{document}
