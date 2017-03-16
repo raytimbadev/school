@@ -1,4 +1,4 @@
-\documentclass[11pt,letterpaper]{article}
+\documentclass[11pt]{article}
 
 %%%%% DOCUMENT METADATA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -8,7 +8,7 @@
 
 %%%%% PACKAGES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\usepackage[margin=2.0cm]{geometry}
+\usepackage{geometry}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{hyperref}
 \usepackage{environ}
@@ -53,21 +53,13 @@
 }
 \makeatother
 
-% Memorized equation
-% \NewEnviron{memequation}[1]{
-%     \begin{equation}
-%         \label{eq:#1}
-%         \BODY
-%     \end{equation}
-% 
-%     \expandafter\let\csname RecallBody#1\endcsname\BODY
-%     \expandafter\gdef\csname Recall#1\endcsname{%
-%         \begin{equation*}
-%             \csname RecallBody#1\endcsname
-%             \tag{recall \ref{eq:#1}}
-%         \end{equation*}
-%     }
-% }
+%%%%% GENERAL FORMATTING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Page size and margins
+\geometry{
+    letterpaper,
+    margin=2.0cm,
+}
 
 %%%%% MATHEMATICAL SHORTHANDS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -79,7 +71,7 @@
 \newcommand{\union}{\cup}
 \newcommand{\Intersn}{\bigcap}
 \newcommand{\intersn}{\cap}
-\newcommand{\symdiff}{\,\Delta\,}
+\newcommand{\symdiff}{\mathbin{\Delta}}
 \newcommand{\fact}{!\,}
 \newcommand{\given}{\;\vert\;}
 \newcommand{\compl}{^c}
