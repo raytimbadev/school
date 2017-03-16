@@ -13,6 +13,7 @@
 \usepackage{hyperref}
 \usepackage{environ}
 \usepackage{tikz}
+\usepackage{textcomp}
 
 %%%%% TIKZ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -111,6 +112,8 @@
 % Distributions
 \DeclareMathOperator{\BinOp}{Bin}
 \newcommand{\Bin}[1]{ \BinOp\parens{#1} }
+\DeclareMathOperator{\PoiOp}{Poi}
+\newcommand{\Poi}[1]{ \PoiOp\parens{#1} }
 
 % Absolutely misc
 \renewcommand{\th}{\textsuperscript{th}}
@@ -1450,5 +1453,194 @@ ways to do this is
     consisting of tedious algebraic manipulations and inequality tricks to
     compute a bound on $p$, specifically $p > \frac{1}{2}$.
 \end{solution}
+
+\subsection{The Poisson distribution}
+
+\begin{defn}
+    \label{def:poisson-distribution}
+    A random variable $X : S \to \N$ is said to follow a Poisson distribution
+    if its probability distribution $\p[X]{k} = \P{X = k}$ is given by
+    \begin{equation}
+        \label{eq:poisson-distribution}
+        e^{-\lambda}
+        \frac{\lambda^k}{k\fact}
+    \end{equation}
+\end{defn}
+
+\begin{rem}{(Interpretation of the Poisson distribution.)}
+    \label{rem:poisson-interpretation}
+    The Poisson distribution can be understood as obtained by a limiting
+    process on a binomial distribution. When the number of trials in a binomial
+    distribution becomes large and the probability of success is small, then a
+    binomially distributed such variable can be approximated by a
+    Poisson-distributed variable.
+
+    In that case, the parameter $\lambda$ of the Poisson distribution is
+    $\lambda = np$, the expectation of the corresponding binomially distributed
+    variable.
+\end{rem}
+
+\begin{eg}
+    Suppose that the probability of hooking a fish in each attempt is $0.04$.
+    Let $X$ denote the number of fish caught after $50$ attempts.
+    Then $X$ intuitively follows a binomial distribution,
+    $X \sim \Bin{50;0.04}$.
+    However, since $0.04$ is small and $50$ is large, we compute
+    $\lambda = \E{X} = np = 2$, and $\Poi{2} \approx \Bin{50;0.04}$.
+\end{eg}
+
+\begin{thm}
+    \label{thm:poisson}
+    Let $(X_n)_{n\in\N}$ be a sequence of binomially distributed random
+    variables such that for each $n \in \N$ we have
+    %
+    \begin{equation*}
+        X_n \sim \Bin{n;p_n}
+    \end{equation*}
+    %
+    Suppose that ${n p_n} \to \lambda$ as $n \to \infty$ for a finite positive
+    constant $\lambda \in (0, \infty)$.
+    Then there exists a Poisson-distributed random variable
+    $Y \sim \Poi{\lambda}$ such that for all $k \in \N$,
+    %
+    \begin{equation*}
+        \lim_{n\to\infty} { \p[X_n]{k} }
+        =
+        \p[Y]{k}
+        =
+        e^{-\lambda}
+        \frac{\lambda^k}{k\fact}
+    \end{equation*}
+\end{thm}
+
+\begin{proof}
+    We will first perform some algebraic manipulations to put the expression
+    into a convenient form for taking the limit as $n \to \infty$.
+    Then we will take the limit of the resulting product factor by factor.
+    A detailed explanation of the manipulations and limiting process is given
+    below.
+
+    \begin{align*}
+        \p[X_n]{k}
+        &= {n \choose k}
+            \times
+            p_n^k
+            \times
+            (1 - p_n)^{n - k}
+            \tag{A} \label{eq:poisson-step-1} \\
+        &= \frac{n\fact}{(n-k)\fact k\fact}
+            \times
+            p_n^k
+            \times
+            (1 - p_n)^{n - k}
+            \tag{B} \label{eq:poisson-step-2} \\
+        &= \frac{n(n-1) \cdot\cdots\cdot (n-k+1)}{k\fact}
+            \times
+            p_n^k
+            \times
+            (1 - p_n)^n
+            \times
+            (1 - p_n)^{-k}
+            \tag{C} \label{eq:poisson-step-3} \\
+        &= \frac{1}{k\fact}
+            \times
+            \frac{n(n-1) \cdot\cdots\cdot (n-k+1)}{n^k}
+            \times
+            (n p_n)^k
+            \times
+            \parens{1 - \frac{n p_n}{n}}^n
+            \times
+            (1 - p_n)^{-k}
+            \tag{D} \label{eq:poisson-step-4} \\
+        &\to \frac{1}{k\fact}
+            \times
+            1
+            \times
+            \lambda^k
+            \times
+            e^{-\lambda}
+            \times
+            1
+            \quad
+            \text{as $n \to \infty$}
+            \tag{E} \label{eq:poisson-step-5}
+    \end{align*}
+    %
+    \begin{description}
+            \newcommand{\stepAB}[2]{%
+                \eqref{eq:poisson-step-#1}%
+                \textrightarrow%
+                \eqref{eq:poisson-step-#2}%
+                .
+            }
+        \item[\stepAB{1}{2}]
+            Unfold the definition of ${n \choose k}$.
+            %
+        \item[\stepAB{2}{3}]
+            Unfold the factorials and cancel.
+            Separate the exponent $n-k$ into a product.
+            %
+        \item[\stepAB{3}{4}]
+            Multiply by $1 = \parens{\frac{n}{n}}^k$.
+            %
+            Move $k\fact$ into its own factor.
+            %
+            Multiply also the $p_n$ term by $1 = \frac{n}{n}$ in the factor
+            $(1 - p_n)^n$.
+            This will allow us to apply the limit definition of $e$.
+            (See definition \ref{def:limit-e}.)
+            %
+            Notice that now we have $n p_n$, which tends to $\lambda$ appearing
+            in the product.
+            Notice also that $\frac{n(n-1) \cdot\cdots\cdot (n-k+1)}{n^k}$ has
+            degree $k$ in the numerator, and that the coefficient of the $n^k$
+            term will be $1$.
+            This is essential for the next step.
+            %
+        \item[\stepAB{4}{5}]
+            We finally take the limit as $n \to \infty$, by taking the limit of
+            each factor independently.
+            Since they all converge on their own, the product of the sequences
+            converges to the product of the limits.
+
+            \begin{enumerate}
+                \item
+                    This factor is constant with respect to $n$, so it
+                    converges to itself.
+                    %
+                \item
+                    This factor converges to $1$, by the method of leading
+                    coefficients, since the degree of the numerator matches the
+                    degree of the denominator, and both leading coefficients
+                    are $1$.
+                    %
+                \item
+                    This factor converges to $\lambda^k$ since we have by
+                    assumption that $n p_n \to \lambda$, and taking a constant
+                    exponent does not affect convergence.
+                    %
+                \item
+                    This factor converges to $e^{-\lambda}$ by the limit
+                    definition of $e$.
+                \item
+                    This last factor converges to $1$ since we have by
+                    assumption that $n p_n \to \lambda$. Intuitively, dividing
+                    by $n$ tells us that $p_n \to 0$.
+            \end{enumerate}
+    \end{description}
+\end{proof}
+
+\begin{thm}{(Expectation and variance of a Poisson-distributed variable.)}
+    \label{thm:poisson-expectation-variance}
+    Suppose $X \sim \Poi{\lambda}$.
+    Then, $\E{X} = \lambda$ and $\V{X} = \lambda$.
+\end{thm}
+
+\begin{proof}
+    Omitted. (See pages $13$ and $14$ of the lecture notes from 2 February.)
+\end{proof}
+
+The lecture notes from 7 February contain three examples of the Poisson
+distribtuion.
 
 \end{document}
