@@ -31,3 +31,6 @@
 [submodule "comp-621/project/code"]
 	path = comp-621/project/code
 	url = git@github.com:tsani/mcfas.git
+[submodule "comp-525/project"]
+	path = comp-525/project
+	url = git@github.com:tortoise.git
