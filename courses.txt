@@ -15,42 +15,37 @@ If I do majors math cs:
         math 236 - algebra 2 (W15) !
         math 315 - ordinary differential equations (F15) !
         math 318 - mathematical logic (F14) !
-        math 242 - analysis 1 (F16)
-        math 317 - numerical analysis (F16)
-        math 323 - probability (W17)
-        math 340 - discrete structures 2 (W16) !
+        math 242 - analysis 1 (F16) !
+        math 317 - numerical analysis (F17)
+        math 323 - probability (W17) !
+        math 340 - discrete structures 2 (W17) !
 
     complementary courses (18 credits ~ 6 courses):
 
         3 math courses:
 
-            math 370 - honours algebra 3 (F16)
-            math 371 - honours algebra 4 (W17)
-            + 1 more (ideally: math 430 - mathematical finance)
+            math 248 - honours advanced calculus (F16) ! (does this count?)
+            math 370 - honours algebra 3 (F17)
+            math 488 - set theory (W17) !
 
         3 computer science courses:
 
-            comp 512 - distributed systems (F15) !
-            comp 520 - compiler design (W16) !
-            comp 527 - logic and commputation (W16) !
+            comp 512 - distributed systems (F15) ! (4)
+            comp 520 - compiler design (W16) ! (4)
+
+            remains one more credit; intro to C++?
 
     electives (18 credits ~ 6 courses):
 
         6 courses:
 
-            hgen 396 - human genetics research project (W15) !
-            comp 531 - advanced theory of computation (W16) !
-            comp 523 - language based security (W17) ?
-            - introductory latin (F17 - W18) ?
+            hgen 396 - human genetics research project (W15) ! (3)
+            comp 531 - advanced theory of computation (W16) ! (3)
+            comp 621 - program analysis and transformation (F16) (4)
+            comp 527 - logic and commputation (W16) ! (3)
+            comp 525 - formal verification (W17) ! (3)
 
-            + 2 more
-
-    Conclusion:
-
-        I won't have to take honours analysis 2 or honours advanced calculus.
-
-        I can take regular numerical analysis in F16 instead of honours
-        numerical analysis in W16.
+            remains 2 credits
 
     Overall:
 
@@ -102,21 +97,14 @@ If I do majors math cs:
         Winter 17:
 
             math 323 - probability (required)
-            number theory (math complementary)
-            comp 525 - formal verification
-
-            9 credits
+            math 340 - discrete structures 2 (required)
+            comp 525 - formal verification (elective)
+            math 488 - set theory (math complementary)
 
         Fall 17:
 
-            math 350 - graph theory (required)
-            algebra 3 (math complementary)
-            +1 elective
-
-            9 credits
-
-        Winter 18:
-
-            +3 electives
-
-            9 credits
+            math 370 - honours algebra 3 (math complementary)
+            math 317 - numerical analysis (required)
+            one 3-credit comp course:
+                one credit will count towards comp complementary
+                two credits will count towards elective
