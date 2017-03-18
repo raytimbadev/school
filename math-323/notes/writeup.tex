@@ -29,6 +29,7 @@
 \newtheorem{thm}{Theorem}
 \newtheorem{prop}{Proposition}
 \newtheorem{lem}{Lemma}
+\newtheorem{cor}{Corollary}
 
 % Definitions and examples use the "definition style", where the text is
 % written in roman and not in italic.
@@ -53,6 +54,12 @@
     \renewcommand{\qedsymbol}{\oldqedsymbol}
 }
 \makeatother
+
+\newcommand{\omittedproof}{%
+    \begin{proof}
+        Omitted.
+    \end{proof}
+}
 
 %%%%% GENERAL FORMATTING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -83,14 +90,29 @@
     \setof{#1,\ldots,#2}
 }
 \newcommand{\infsum}{\sum^\infty}
-\renewcommand{\d}[2][]{%
+\renewcommand{\d}{\mathrm{d}}
+\newcommand{\intd}{\;\d}
+\newcommand{\deriv}[2][]{%
     \ensuremath
-    \frac{\mathrm{d}#1}{\mathrm{d}#2}
+    \frac{\d #1}{\d #2}
 }
+\newcommand{\upto}{\mathbin{\uparrow}}
+\newcommand{\fromleft}{^-}
+\newcommand{\infinfint}{%
+    \ensuremath \int_{-\infty}^{\infty}
+}
+\newcommand{\intfrominf}{%
+    \ensuremath \int_{-\infty}
+}
+\newcommand{\inttoinf}{%
+    \ensuremath \int^{\infty}
+}
+
 
 % Sets of numbers
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\N}{\mathbb{N}}
+\newcommand{\unit}{[0,1]}
 
 % Probabilistic operators
 \DeclareMathOperator{\Prob}{P}
@@ -117,6 +139,14 @@
 
 % Absolutely misc
 \renewcommand{\th}{\textsuperscript{th}}
+\newcommand{\cdf}{cumulative distribution function}
+\newcommand{\pmf}{probability mass function}
+\newcommand{\pdf}{probability density function}
+\newcommand{\mgf}{moment generating function}
+\newcommand{\Cdf}{Cumulative distribution function}
+\newcommand{\Pmf}{Probability mass function}
+\newcommand{\Pdf}{Probability density function}
+\newcommand{\Mgf}{Moment generating function}
 
 \begin{document}
 
@@ -160,7 +190,7 @@
     Both sides of \eqref{eq:geometric-series} may be differentiated to obtain
     other useful equalities involving series, e.g.
     \begin{equation*}
-        \d{x}\parens{ \frac{1}{1-x} }
+        \deriv{x}\parens{ \frac{1}{1-x} }
         =
         \parens{1-x}^{-2}
         =
@@ -1228,7 +1258,9 @@ ways to do this is
     \end{align*}
 \end{rem}
 
-\subsection{The binomial distribution}
+\section{Major discrete probability distributions}
+
+\subsection{Binomial distribution}
 
 \begin{defn}{(Binomial distribution.)}
     \label{def:binomial-distribution}
@@ -1454,7 +1486,7 @@ ways to do this is
     compute a bound on $p$, specifically $p > \frac{1}{2}$.
 \end{solution}
 
-\subsection{The Poisson distribution}
+\subsection{Poisson distribution}
 
 \begin{defn}
     \label{def:poisson-distribution}
@@ -1642,5 +1674,33 @@ ways to do this is
 
 The lecture notes from 7 February contain three examples of the Poisson
 distribtuion.
+
+\subsection{Geometric distribution}
+
+Notes of 7 February.
+
+\subsection{Negative binomial distribution}
+
+Notes of 9 February.
+
+\subsection{Hypergeometric distribution}
+
+Notes of 9 February.
+
+\subsection{Moments and moment-generating functions}
+
+Notes of 14 February.
+
+\subsection{Markov's inequality}
+
+Notes of 14 February.
+
+\subsection{Chebyshev's inequality}
+
+Notes of 21 February.
+
+\subsection{Chernoff bounds}
+
+Notes of 21 February.
 
 \end{document}
