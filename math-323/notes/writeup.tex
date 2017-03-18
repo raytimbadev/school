@@ -1926,7 +1926,7 @@ the major discrete probability distributions.
     %
     \begin{equation}
         \label{thm:prob-interval}
-        \P{x \in [a, b]}
+        \P{X \in [a, b]}
         = \int_a^b { f(u) \intd u }
     \end{equation}
 \end{thm}
@@ -1940,9 +1940,9 @@ the major discrete probability distributions.
     The closedness of the intervals has no effect on the probability.
     One way to see this is
     \begin{equation*}
-        \P{x \in [a, b]}
-        = \P{x = a} + \P{x \in (a, b]}
-        = \P{x \in (a, b]}
+        \P{X \in [a, b]}
+        = \P{X = a} + \P{X \in (a, b]}
+        = \P{X \in (a, b]}
     \end{equation*}
     which follows from \eqref{eq:point-probability-of-cts-rv-is-zero}.
     %
@@ -1953,13 +1953,13 @@ the major discrete probability distributions.
 \begin{rem}{(Function of a random variable.)}
     \label{eq:function-of-cts-rv}
     Let $X : S \to \R$ be a real-valued random variable with density
-    $f : \R \to [0, \infty)$ and $g : \R \to \R$.
-    Let $Y = g \circ X$, i.e. $Y = g(X)$.
+    $f : \R \to [0, \infty)$.
+    Suppose $g : \R \to \R$ and let $Y = g \circ X$, i.e. $Y = g(X)$.
     Then the \cdf{} of $Y$ is
     %
     \begin{equation}
         \label{eq:function-of-cts-rv}
-        F_Y
+        F_Y (y)
         = \P{Y \leq y}
         = \P{g(X) \leq y}
         = \P{X \in g\inv(-\infty, y]}
