@@ -1971,4 +1971,23 @@ the major discrete probability distributions.
 
 Notes of 23 February has an example. (Pages 3 to 5.)
 
+\subsection{Expectation of a continuous random variable}
+
+\begin{defn}
+    \label{def:expectation-cts}
+    Let $X$ be a real-valued random variable with density
+    $f : \R \to [0, \infty)$.
+    Suppose one of
+    $\inttoinf_0 x f(x) \intd x$ or $\intfrominf^0 \abs{x} f(x) \intd x$
+    converges to a finite value.
+    Then, the \emph{expectation} of $X$ is
+    \begin{equation}
+        \label{eq:expectation-cts}
+        \E{X} = \infinfint x f(x) \intd x
+    \end{equation}
+
+    If neither improper integral converges, then we say that the expectation of
+    $X$, $\E{X}$, does not exist.
+\end{defn}
+
 \end{document}
