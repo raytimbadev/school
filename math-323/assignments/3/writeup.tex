@@ -1,0 +1,203 @@
+\documentclass[11pt]{article}
+
+%%%%% DOCUMENT METADATA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\author{Jacob Thomas Errington}
+\title{Assignment \#3\\Probability -- MATH 323}
+\date{}
+
+%%%%% PACKAGES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{hyperref}
+\usepackage{environ}
+\usepackage{tikz}
+\usepackage{textcomp}
+\usepackage{cancel}
+
+%%%%% TIKZ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usetikzlibrary{graphs,arrows}
+\tikzset{
+    shorten >=1pt,
+    >=stealth',
+}
+
+%%%%% THEOREM-LIKE ENVIRONMENTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Actual theorem-like things
+\newtheorem{thm}{Theorem}
+\newtheorem{prop}{Proposition}
+\newtheorem{lem}{Lemma}
+
+% Definitions and examples use the "definition style", where the text is
+% written in roman and not in italic.
+\theoremstyle{definition}
+\newtheorem{defn}{Definition}[section]
+\newtheorem{eg}{Example}
+
+% Remarks use the remark style, where the word "remark" is shown in a less
+% invasive way.
+\theoremstyle{remark}
+\newtheorem{rem}{Remark}[section]
+
+% Solutions to exercises
+\makeatletter
+\newenvironment{solution}{
+    \let\oldqedsymbol=\qedsymbol%
+    \def\@addpunct##1{}%
+    \renewcommand{\qedsymbol}{$\blacktriangleleft$}%
+    \begin{proof}[\textit Solution.]
+}{
+    \end{proof}%
+    \renewcommand{\qedsymbol}{\oldqedsymbol}
+}
+\makeatother
+
+%%%%% GENERAL FORMATTING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Page size and margins
+\geometry{
+    letterpaper,
+    margin=2.0cm,
+}
+
+\renewcommand{\thesection}{Question \arabic{section}}
+\newcommand{\question}{\section}
+
+%%%%% MATHEMATICAL SHORTHANDS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Misc math operators
+\newcommand{\parens}[1]{\left(#1\right)}
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand{\setof}[1]{\left\{#1\right\}}
+\newcommand{\Union}{\bigcup}
+\newcommand{\union}{\cup}
+\newcommand{\Intersn}{\bigcap}
+\newcommand{\intersn}{\cap}
+\newcommand{\symdiff}{\mathbin{\Delta}}
+\newcommand{\fact}{!\,}
+\newcommand{\given}{\;\vert\;}
+\newcommand{\compl}{^c}
+\newcommand{\inv}{^{-1}}
+\newcommand{\preimage}[1]{^{-1}\parens{\setof{#1}}}
+\newcommand{\compose}{\circ}
+\newcommand{\range}[2][1]{%
+    \setof{#1,\ldots,#2}
+}
+\newcommand{\infsum}{\sum^\infty}
+\renewcommand{\d}{\mathrm{d}}
+\newcommand{\deriv}[2][]{%
+    \ensuremath
+    \frac{\d #1}{\d #2}
+}
+
+% Integrals
+\newcommand{\intd}{\;\d}
+\newcommand{\infinfint}{%
+    \ensuremath \int_{-\infty}^{\infty}
+}
+\newcommand{\intfrominf}{%
+    \ensuremath \int_{-\infty}
+}
+\newcommand{\inttoinf}{%
+    \ensuremath \int^{\infty}
+}
+\newcommand{\evaluated}[2]{
+    \Big\vert_{#1}^{#2}
+}
+
+% Sets of numbers
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+
+% Probabilistic operators
+\DeclareMathOperator{\Prob}{P}
+\renewcommand{\P}[1]{\Prob{\parens{#1}}}
+\DeclareMathOperator{\prob}{p}
+\newcommand{\p}[2][]{%
+    \def\temp{#2}
+    \ifx\temp\empty
+        \prob{\parens{#2}}
+    \else
+        \prob_{#1}{\parens{#2}}
+    \fi
+}
+\DeclareMathOperator{\Expect}{\mathbb{E}}
+\newcommand{\E}[1]{\Expect{\left[#1\right]}}
+\DeclareMathOperator{\Var}{\mathbb{V}}
+\newcommand{\V}[1]{\Var{\parens{#1}}}
+
+% Distributions
+\DeclareMathOperator{\BinOp}{Bin}
+\newcommand{\Bin}[1]{ \BinOp\parens{#1} }
+\DeclareMathOperator{\PoiOp}{Poi}
+\newcommand{\Poi}[1]{ \PoiOp\parens{#1} }
+
+% Absolutely misc
+\renewcommand{\th}{\textsuperscript{th}}
+\newcommand{\cdf}{cumulative distribution function}
+\newcommand{\pmf}{probability mass function}
+\newcommand{\pdf}{probability density function}
+\newcommand{\mgf}{moment generating function}
+\newcommand{\Cdf}{Cumulative distribution function}
+\newcommand{\Pmf}{Probability mass function}
+\newcommand{\Pdf}{Probability density function}
+\newcommand{\Mgf}{Moment generating function}
+
+\begin{document}
+
+\maketitle
+
+\question{Rubik's cubes}
+
+Let $L$ be the random variable denoting the length of a side of the cube.
+Let $f_L(x) = 2x$ be the density of $L$.
+Then define $g : \R \to \R$ by $x \mapsto x^3$.
+Denote the random variable representing the volume of the cube by $L^3 = g(L)$.
+We compute the \cdf{} of $L^3$ by integrating.
+%
+\begin{equation*}
+    F_{L^3}(y)
+    = \P{L \in g\inv(-\infty, y]}
+    = \P{L \in (-\infty, \sqrt[3]{y})}
+    = \P{L \in (-\infty, 0)} + \P{L \in (0, \sqrt[3]{y})}
+    = \cdots
+\end{equation*}
+%
+Note that the first term in the last expression is zero, since on that
+interval, the density $f_L$ is undefined, and hence has value zero by
+convention.
+%
+\begin{equation*}
+    \cdots
+    = \int_0^{\sqrt[3]{y}} f_L (u) \intd u
+    = \int_0^{\sqrt[3]{y}} 2u \intd u
+    = u^2 \evaluated{0}{\sqrt[3]{y}}
+    = y^{\frac{2}{3}}
+\end{equation*}
+
+Then we can compute the density $f_{L^3}$ by differentiating.
+%
+\begin{equation*}
+    f_{L^3}(y) = \parens{y^{\frac{2}{3}}}^\prime = \frac{2}{3 \sqrt[3]{y}}
+\end{equation*}
+%
+Note that this density is defined on the same interval as $f_L$.
+% TODO Why exactly?
+
+Finally, we can compute the expectation $\mu = \E{L^3}$ by integrating.
+%
+\begin{equation*}
+    \mu
+    = \infinfint u f_{L^3} (u) \intd u 
+    = \cancelto{0}{\intfrominf^0 u 0 \intd u}
+    + \int_0^1 u \frac{2}{3 \sqrt[3]{u}}
+    + \cancelto{0}{\inttoinf_1 0 \intd u}
+    = \frac{2}{\cancel 3} \cdot \frac{\cancel 3}{5}
+        u^{\frac{5}{3}} \evaluated{0}{1}
+    = \frac{2}{5}
+\end{equation*}
+
+\end{document}
