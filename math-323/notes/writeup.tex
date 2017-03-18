@@ -1703,4 +1703,272 @@ Notes of 21 February.
 
 Notes of 21 February.
 
+\section{Real-valued random variables}
+
+\subsection{Cumulative distribution functions}
+
+\begin{defn}{(Cumulative distribution function.)}
+    \label{def:cdf}
+    Let $Y$ be a real-valued random variable.
+    The function $F_y : \R \to [0, 1]$ defined by
+    %
+    \begin{equation}
+        \label{eq:cdf}
+        y \mapsto \P{Y \leq y}
+    \end{equation}
+    %
+    is called the \emph{cumulative distribution function} of $Y$.
+\end{defn}
+
+\begin{rem}
+    If $Y$ is a discrete random variable with image $\{y_1, \ldots\}$,
+    then
+    %
+    \begin{equation*}
+        F_Y(y)
+        = \P{Y \leq y}
+        = \sum_{j : y_j < y} {
+            \P{Y = y_j}
+        }
+    \end{equation*}
+\end{rem}
+
+Notes of 21 February have derivations of cumulative distribution functions for
+the major discrete probability distributions.
+
+\begin{thm}{(Properties of a \cdf.)}
+    \label{thm:cdf-properties}
+    Suppose $F : \R \to \unit$ is the \cdf{} of a real-valued random variable.
+    Then,
+    \begin{enumerate}
+        \item
+            The function $F$ is everywhere non-decreasing,
+            i.e. for any $x, y \in \R$, we have
+            %
+            \begin{equation*}
+                x \leq y \implies F(x) \leq F(y)
+            \end{equation*}
+            %
+        \item
+            The function value $F(x) \to 1$ as $x \to \infty$.
+            %
+        \item
+            The function value $F(x) \to 0$ as $x \to -\infty$.
+            %
+        \item
+            The function $F$ is right-continuous, i.e.
+            for any non-increasing sequence $(y_n)_{n\in\N}$,
+            where $y_n \geq y_{n+1}$, such that $y_n \to y$ as $n \to \infty$,
+            we have
+            \begin{equation}
+                \label{eq:cdf-is-right-continuous}
+                \lim_{n\to\infty} F(y_n) = F(y)
+            \end{equation}
+            %
+    \end{enumerate}
+\end{thm}
+
+\begin{proof}
+    See notes of 21 February.
+\end{proof}
+
+\begin{thm}{(Converse of theorem \ref{thm:cdf-properties}.)}
+    \label{thm:cdf-properties-converse}
+    Suppose $F : \R \to \unit$ satisfies the properties listed in theorem
+    \ref{thm:cdf-properties}. Then there exists a real-valued random variable
+    $X$ on some sample space such that $F$ is the \cdf{} of $X$.
+\end{thm}
+
+\omittedproof
+
+\begin{defn}{(Left accumulation.)}
+    \label{def:left-acc}
+    For $x \in \R$, let
+    %
+    \begin{equation}
+        \label{eq:left-acc}
+        F_X (x\fromleft) = \lim_{y \upto x} {
+            F_X (y)
+        }
+    \end{equation}
+    %
+    This captures the notion of the value of the \cdf{} just before a
+    particular point is reached.
+\end{defn}
+
+\begin{thm}{(Characterization of the left accumulation.)}
+    \label{thm:characterization-left-acc}
+    Let $X$ be a random variable and $F_X$ be its \cdf.
+    Then,
+    %
+    \begin{equation}
+        \label{eq:left-acc-strict-inequality}
+        F_X(x\fromleft) = \P{X < x}
+    \end{equation}
+\end{thm}
+
+\begin{proof}
+    Replicate the arguments used in the proof of theorem
+    \ref{thm:cdf-properties}.
+\end{proof}
+
+\begin{cor}
+    In particular, we have
+    \begin{equation}
+        \label{eq:left-acc-equality}
+        \P{X = x} = F_X (x) - F_X(x\fromleft)
+    \end{equation}
+\end{cor}
+
+\begin{proof}
+    We can characterize equality as a conjunction of a non-strict inequality
+    and the negation of strict inequality. We know how to find these
+    separately.
+    %
+    \begin{equation*}
+        \P{X = x}
+        = \P{X \leq x \land \neg \parens{X < x}}
+        - \P{X \leq x} - \P{X < x}
+        = F_X(x) - F_X(x\fromleft)
+    \end{equation*}
+\end{proof}
+
+\begin{rem}
+    The \cdf{} of a (nontrivial) discrete random variable has jumps.
+\end{rem}
+
+\subsection{Continuous random variables}
+
+\begin{defn}{(Continuous random variable.)}
+    A real-valued random variable $Y$ is said to be \emph{continuous} if its
+    \cdf{} $F_Y$ is a continuous function.
+\end{defn}
+
+\begin{rem}
+    The \cdf{} of a continuous random variable, itself being a continous
+    function, does not have any jumps.
+    %
+    In particular, if $Y$ is a continuous random variable and $F_Y$ is its
+    \cdf, then by continuity
+    %
+    \begin{align}
+        \P{Y = y}
+        &= \P{Y \leq y} - \P{Y < y} \notag \\
+        &= F_Y(y) - F_Y(y\fromleft) \notag \\
+        &= F_Y(y) - F_Y(y) \notag \\
+        &= 0
+        \label{eq:point-probability-of-cts-rv-is-zero}
+    \end{align}
+\end{rem}
+
+\begin{defn}{(\Pdf.)}
+    \label{def:pdf}
+    A function $f : \R \to [0, \infty)$ is called a \emph{\pdf{}} if
+    \begin{equation}
+        \label{eq:pdf}
+        \infinfint{
+            f(x) \intd x
+        }
+        = 1
+    \end{equation}
+\end{defn}
+
+\begin{defn}{(\Pdf{} of a random variable.)}
+    \label{def:pdf-of-rv}
+    A real-valued continuous random varible $X$ has \pdf{}
+    $f_X : \R \to [0, \infty)$
+    if for any $x \in \R$,
+    %
+    \begin{equation}
+        \label{eq:pdf-of-rv}
+        F_X(x) = \P{X \leq x} = \intfrominf^x {
+            f_X(u) \intd u
+        }
+    \end{equation}
+    %
+    Note that not all real-valued contininuous random variables have densities!
+    The defining integral in \eqref{eq:pdf-of-rv} is improper, and hence may
+    fail to converge to a finite quantity.
+\end{defn}
+
+\begin{rem}
+    \label{rem:pdf-of-rv-deriv}
+    The Fundamental Theorem of Calculus can be used to see from definition
+    \ref{def:pdf-of-rv} that equivalently,
+    %
+    \begin{equation}
+        \label{eq:pdf-of-rv-deriv}
+        \deriv{x} F_X (x) = f_X(x)
+    \end{equation}
+    %
+    for any $x \in \R$ that is a point of continuity of $f_X$.
+\end{rem}
+
+\begin{rem}
+    \label{rem:calculation-of-pdf}
+    If a random variable $X$ has a \pdf, then it can be calculated by
+    \begin{enumerate}
+        \item
+            setting $f_X (x) = F^\prime_X(x)$
+            for every $x \in \R$ such that $f_X$ is continuous at $x$;
+            and
+        \item
+            setting $f_X (x) = 0$ for every other $x$,
+            where $f_X$ is not continuous at $x$.
+    \end{enumerate}
+\end{rem}
+
+\begin{thm}{(Probability over an interval.)}
+    \label{thm:prob-interval}
+    Suppose that $X$ is a real-valued random variable with density
+    $f : \R \to [0, \infty)$.
+    Then for any $a, b \in \R$ such that $a \leq b$,
+    %
+    \begin{equation}
+        \label{thm:prob-interval}
+        \P{x \in [a, b]}
+        = \int_a^b { f(u) \intd u }
+    \end{equation}
+\end{thm}
+
+\begin{proof}
+    The proof is obvious and just follows from the definitions.
+    See the notes of 23 February for a complete proof.
+\end{proof}
+
+\begin{rem}
+    The closedness of the intervals has no effect on the probability.
+    One way to see this is
+    \begin{equation*}
+        \P{x \in [a, b]}
+        = \P{x = a} + \P{x \in (a, b]}
+        = \P{x \in (a, b]}
+    \end{equation*}
+    which follows from \eqref{eq:point-probability-of-cts-rv-is-zero}.
+    %
+    This corresponds with the calculus fact that points are \emph{negligeable}
+    sets, and hence do not contribute to the integral.
+\end{rem}
+
+\begin{rem}{(Function of a random variable.)}
+    \label{eq:function-of-cts-rv}
+    Let $X : S \to \R$ be a real-valued random variable with density
+    $f : \R \to [0, \infty)$ and $g : \R \to \R$.
+    Let $Y = g \circ X$, i.e. $Y = g(X)$.
+    Then the \cdf{} of $Y$ is
+    %
+    \begin{equation}
+        \label{eq:function-of-cts-rv}
+        F_Y
+        = \P{Y \leq y}
+        = \P{g(X) \leq y}
+        = \P{X \in g\inv(-\infty, y]}
+    \end{equation}
+    %
+    The \pdf{} of $Y$ can be found by differentiating $F_Y$.
+    (See remark \ref{rem:pdf-of-rv-deriv}.)
+\end{rem}
+
+Notes of 23 February has an example. (Pages 3 to 5.)
+
 \end{document}
