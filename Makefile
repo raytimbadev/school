@@ -1,5 +1,6 @@
 .PHONY: all
 all:
+	stow -t $(HOME) jakemath
 	make -C math-254
 	make -C math-248
 	make -C math-323
