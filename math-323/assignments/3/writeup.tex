@@ -4,7 +4,7 @@
 
 \author{Jacob Thomas Errington}
 \title{Assignment \#3\\Probability -- MATH 323}
-\date{}
+\date{19 March 2017}
 
 %%%%% PACKAGES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -15,6 +15,7 @@
 \usepackage{tikz}
 \usepackage{textcomp}
 \usepackage{cancel}
+\usepackage{mathtools}
 
 %%%%% TIKZ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -70,7 +71,9 @@
 
 % Misc math operators
 \newcommand{\parens}[1]{\left(#1\right)}
-\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand{\bracks}[1]{\left[#1\right]}
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
 \newcommand{\setof}[1]{\left\{#1\right\}}
 \newcommand{\Union}{\bigcup}
 \newcommand{\union}{\cup}
@@ -152,52 +155,292 @@
 
 \question{Rubik's cubes}
 
-Let $L$ be the random variable denoting the length of a side of the cube.
-Let $f_L(x) = 2x$ be the density of $L$.
-Then define $g : \R \to \R$ by $x \mapsto x^3$.
-Denote the random variable representing the volume of the cube by $L^3 = g(L)$.
-We compute the \cdf{} of $L^3$ by integrating.
-%
+\begin{description}
+    \item[Mean and variance of the volume.]
+        Let $L$ be the random variable denoting the length of a side of the
+        cube.
+        Let $f_L(x) = 2x$ be the density of $L$.
+        Then define $g : \R \to \R$ by $x \mapsto x^3$.
+        Denote the random variable representing the volume of the cube by
+        $L^3 = g(L)$.
+        We compute the \cdf{} of $L^3$ by integrating.
+        %
+        \begin{equation*}
+            F_{L^3}(y)
+            = \P{L \in g\inv(-\infty, y]}
+            = \P{L \in (-\infty, \sqrt[3]{y})}
+            = \P{L \in (-\infty, 0)} + \P{L \in (0, \sqrt[3]{y})}
+            = \cdots
+        \end{equation*}
+        %
+        Note that the first term in the last expression is zero, since on that
+        interval, the density $f_L$ is undefined, and hence has value zero by
+        convention.
+        %
+        \begin{equation*}
+            \cdots
+            = \int_0^{\sqrt[3]{y}} f_L (u) \intd u
+            = \int_0^{\sqrt[3]{y}} 2u \intd u
+            = u^2 \evaluated{0}{\sqrt[3]{y}}
+            = y^{\frac{2}{3}}
+        \end{equation*}
+
+        Then we can compute the density $f_{L^3}$ by differentiating.
+        %
+        \begin{equation*}
+            f_{L^3}(y) = \parens{y^{\frac{2}{3}}}^\prime = \frac{2}{3 \sqrt[3]{y}}
+        \end{equation*}
+        %
+        Note that this density is defined on the same interval as $f_L$.
+        % TODO Why exactly?
+
+        Finally, we can compute the expectation $\mu = \E{L^3}$ by integrating.
+        %
+        \begin{equation*}
+            \mu
+            = \infinfint u f_{L^3} (u) \intd u 
+            = \cancelto{0}{\intfrominf^0 u 0 \intd u}
+            + \int_0^1 u \frac{2}{3 \sqrt[3]{u}}
+            + \cancelto{0}{\inttoinf_1 0 \intd u}
+            = \frac{2}{\cancel 3} \cdot \frac{\cancel 3}{5}
+                u^{\frac{5}{3}} \evaluated{0}{1}
+            = \frac{2}{5}
+        \end{equation*}
+
+        Next, we want to compute the standard deviation of the volume of the
+        cube, so we will compute the variance by integrating.
+        %
+        \begin{align*}
+            \V{L^3}
+            = \E{(L^3)^2} - \frac{4}{25}
+            = \int_0^1 x^6 2x \intd x - \frac{4}{25}
+            = \frac{2}{8} x^8 \evaluated{0}{1} - \frac{4}{25}
+            = \frac{9}{100}
+        \end{align*}
+        %
+        So the standard deviation is
+        %
+        \begin{equation*}
+            \sigma
+            = \sqrt{\V{L^3}}
+            = \sqrt{\frac{9}{100}}
+            = \frac{3}{10}
+        \end{equation*}
+        %
+    \item[Number of defective cubes.]
+        Denote the probability of a cube being defective by $p$.
+        %
+        First, let $q = 1 - p$ be the probability of a cube being \emph{not}
+        defective.
+        We compute this probability by integrating.
+        %
+        \newcommand{\lo}{\frac{1}{10}}
+        \newcommand{\hi}{\frac{7}{10}}
+        \newcommand{\theint}{\int_\lo^\hi}
+        \renewcommand{\c}{\cancel}
+        %
+        \begin{align*}
+            %
+            q
+            &= \P{L^3 \in (\mu - \sigma, \mu + \sigma)}
+                = \int_{\mu-\sigma}^{\mu+\sigma} f_{L^3} (x) \intd x \\
+            &= \theint \frac{2}{3 \sqrt[3]{x}} \intd x
+                = \frac{\c 2}{\c 3} \cdot \frac{\c 3}{\c 2} x^{\frac{2}{3}}
+                    \evaluated{\lo}{\hi} \\
+            &= \sqrt[3]{\frac{49}{100}} - \frac{1}{\sqrt[3]{100}} \\
+            &\approx 0.573
+        \end{align*}
+        %
+        Then we compute the probability of a cube indeed being defective.
+        %
+        \begin{equation*}
+            p
+            = 1 - \sqrt[3]{\frac{49}{100}} + \frac{1}{\sqrt[3]{100}}
+            \approx 0.427
+        \end{equation*}
+        %
+        Next, denote by $B$ the random variable representing the number of
+        defective cubes produced in one day.
+        Assuming that cubes are produced independently,
+        we have that $B \sim \Bin{1000;p}$ so
+        \begin{equation*}
+            \E{B} = 1000p \approx 427
+        \end{equation*}
+\end{description}
+
+\question{Symmetric distribution}
+
+Let $X$ be a real-valued random variable and let $f$ be its density.
+Suppose that there exists $\mu \in \R$ such that for any $x \in \R$ we have
+\begin{equation}
+    \label{eq:mu}
+    f(\mu + x) = f(\mu - x)
+\end{equation}
+
+\begin{prop}
+    The variables $\mu - X$ and $X - \mu$ have the same distribution.
+\end{prop}
+
+\begin{proof}
+    Define $g_r(x) = x - \mu$ and $g_l(y) = \mu - y$.
+    Then, take arbitrary $y \in \R$.
+    %
+    \begin{align*}
+        F_{\mu - X}(y)
+        &= F_{g_l(X)}(y) \\
+        &= \P{g_l(X) \leq y}
+            = \P{X \in g_l\inv(-\infty, y]}
+            = \P{X \in [\mu - y, \infty)}
+        \\
+        &= \inttoinf_{\mu - y} f(x) \intd x \\
+        &= - \int_y^{-\infty} f(\mu - u) \intd u \\
+        &= \intfrominf^y f(\mu + u) \intd u \\
+        &= \intfrominf^{y - \mu} f(v) \intd v \\
+        &= \P{X \in (-\infty, y - \mu])} \\
+        &= \P{X \in g_r\inv(-\infty, y])} \\
+        &= \P{X - \mu \leq y} \\
+        &= F_{X - \mu} (y)
+    \end{align*}
+    %
+    Since $y$ is arbitrary, we have that the functions
+    $F_{\mu - X} = F_{X - \mu}$ are equal.
+\end{proof}
+
+Suppose that for all $\alpha > 0$,
+we have $\infinfint \abs{x}^\alpha f(x) \intd x < \infty$.
+
+\begin{prop}
+    The expectation of $X$ is $\mu$.
+\end{prop}
+
+\begin{proof}
+    We use the definition of expectation.
+    %
+    \begin{align*}
+        \E{X}
+        &= \infinfint x f(x) \intd x \\
+        &= \infinfint (\mu + x - \mu) f(x) \intd x \\
+        &= \infinfint \mu f(x) \intd x
+            + \infinfint (x - \mu) f(x) \intd x \\
+        &= \mu + \infinfint (x - \mu) f(u) \intd x \\
+    \end{align*}
+    %
+    Now it suffices to show that the last integral is zero.
+    %
+    \begin{align*}
+        \infinfint (x - \mu) f(x) \intd x
+        &= \underset{
+            \text{let $z = -u$}
+        }{
+            \intfrominf^0 u f(\mu + u) \intd u
+        }
+            + \inttoinf_0 u f(\mu + u) \intd u
+        \\
+        &= - \int_\infty^0 (-z) f(\mu - z) \intd z
+            + \inttoinf_0 u f(\mu + u) \intd u
+        \tag{A} \label{eq:z} \\
+        &= - \inttoinf_0 z f(\mu + z) \intd z
+            + \inttoinf_0 u f(\mu + u) \intd u
+        \\
+        &= 0
+    \end{align*}
+\end{proof}
+
+Note that this proof demonstrates that $(x - \mu)f(x)$ is an odd function.
+
+\begin{prop}
+    The odd moments of $X$ are zero, i.e.
+    \begin{equation*}
+        \E{\parens{X - \mu}^{2n + 1}} = 0
+    \end{equation*}
+    for any $n \in \N$.
+\end{prop}
+
+\begin{proof}
+    The case for $n = 0$ is covered in the previous proof.
+    The demonstration in the previous proof that $(x - \mu) f(x)$ is odd
+    applies equally in this case, with one caveat.
+    In \eqref{eq:z} we will have the factor $(-z)^{2n+1}$ instead of simply
+    $(-z)$.
+    The power being odd will ensure that the two minus signs cancel, leaving
+    one minus sign at the end when the integration limits are flipped.
+    This causes the split integrals to cancel to zero, as required.
+\end{proof}
+
+\question{Real-valued random variables}
+
+\begin{prop}
+    Suppose $F$ is the \cdf{} of a real-valued random variable $X$.
+    Suppose furthermore that $F$ is strictly increasing.
+    Then the distribution of $Y = F(X)$ is the uniform distribution.
+\end{prop}
+
+\begin{proof}
+    Let $F_Y$ be the \cdf{} of $Y$.
+    Note that since $F$ is strictly increasing and continuous, it is injective.
+    Hence it has an inverse on its image.
+    %
+    \begin{equation*}
+        F_Y(y)
+        = \P{Y \leq y}
+        = \P{F(X) \leq y}
+        = \P{X \leq F\inv(y)}
+        = F(F\inv(y))
+        = y
+    \end{equation*}
+    %
+    This is exactly the \cdf{} of the uniform distribution.
+\end{proof}
+
+Suppose $X$ has density $f$ and \cdf{} $F$.
+Let $Y = \floor*{X}$.
+Then for the distribution of $Y$ we have that
 \begin{equation*}
-    F_{L^3}(y)
-    = \P{L \in g\inv(-\infty, y]}
-    = \P{L \in (-\infty, \sqrt[3]{y})}
-    = \P{L \in (-\infty, 0)} + \P{L \in (0, \sqrt[3]{y})}
-    = \cdots
-\end{equation*}
-%
-Note that the first term in the last expression is zero, since on that
-interval, the density $f_L$ is undefined, and hence has value zero by
-convention.
-%
-\begin{equation*}
-    \cdots
-    = \int_0^{\sqrt[3]{y}} f_L (u) \intd u
-    = \int_0^{\sqrt[3]{y}} 2u \intd u
-    = u^2 \evaluated{0}{\sqrt[3]{y}}
-    = y^{\frac{2}{3}}
+    \P{Y = n}
+    = \P{n \leq X < n+1}
+    = \P{n \in [n, n+1)}
+    = \int_n^{n+1} { f(x) \intd x }
+    = F(n+1) - F(n)
 \end{equation*}
 
-Then we can compute the density $f_{L^3}$ by differentiating.
-%
-\begin{equation*}
-    f_{L^3}(y) = \parens{y^{\frac{2}{3}}}^\prime = \frac{2}{3 \sqrt[3]{y}}
-\end{equation*}
-%
-Note that this density is defined on the same interval as $f_L$.
-% TODO Why exactly?
+\question{Bounding powers of random variables}
 
-Finally, we can compute the expectation $\mu = \E{L^3}$ by integrating.
-%
-\begin{equation*}
-    \mu
-    = \infinfint u f_{L^3} (u) \intd u 
-    = \cancelto{0}{\intfrominf^0 u 0 \intd u}
-    + \int_0^1 u \frac{2}{3 \sqrt[3]{u}}
-    + \cancelto{0}{\inttoinf_1 0 \intd u}
-    = \frac{2}{\cancel 3} \cdot \frac{\cancel 3}{5}
-        u^{\frac{5}{3}} \evaluated{0}{1}
-    = \frac{2}{5}
-\end{equation*}
+\begin{prop}
+    Suppose $X$ is a nonnegative random variable that is either discrete or has
+    a density. Suppose that there exists $c \geq 0$ such that
+    $\E{X^n} \leq c^n$ for all $n \geq 1$.
+    Then $\P{X > c + \epsilon} = 0$ for any $\epsilon > 0$.
+\end{prop}
+
+\begin{proof}
+    Note that $\P{X > c + \epsilon} = \P{X - c > \epsilon}$.
+    Then apply Markov's inequality.
+    %
+    \begin{align*}
+        \P{X - c > \epsilon}
+        &\leq \frac{\E{X - c}}{\epsilon} \\
+        &= \frac{\infinfint (x - c) f(x) \intd x}{\epsilon} \\
+        &= \frac{
+            \infinfint x f(x) \intd x
+            -
+            c \cancelto{1}{\infinfint f(x) \intd x}
+        }{
+            \epsilon
+        } \\
+        &= \frac{ \infinfint x f(x) \intd x - c }{ \epsilon } \\
+        &\leq \frac{c - c}{\epsilon} \\
+        &= 0
+    \end{align*}
+
+    For a discrete variable, the same argument applies simply by switching
+    integrals for sums over the whole sample space.
+\end{proof}
+
+Notice that the complement of the event $X > c + \epsilon$ is simply
+$X \leq c + \epsilon$.
+Hence, one might expect that $\P{X \leq c + \epsilon} = 1$.
+However this bound is a bit too loose, since $X$ cannot exceed $c$ as shown
+above.
+Hence we get the desired fact that $\P{X \leq c} = 1$.
 
 \end{document}
