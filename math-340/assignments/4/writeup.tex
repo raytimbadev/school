@@ -1,0 +1,109 @@
+\documentclass[11pt]{article}
+
+\author{Jacob Thomas Errington}
+\title{Assignment \#4\\Discrete structures 2-- MATH 340}
+\date{22 March 2017}
+
+\usepackage[geometry,questions]{jakemath}
+
+\begin{document}
+
+\maketitle
+
+\question{Birthday paradox}
+
+We are interested in the event ``there exists a pair of people with the same
+birthday''.
+To make things simpler, we look at the complement ``no two people have the same
+birthday''.
+Then, we cook up the following process, by numbering the $n$ people
+$\range{n}$.
+%
+\begin{enumerate}
+    \item
+        Look at person one. Any birthday will do since nobody else has been
+        chosen yet, so the probability of not having a common birthday with a
+        previously chosen person is $\frac{d}{d}$ where $d$ is the number of
+        days in the year.
+        %
+    \item
+        Look at person two. The probability that they do not share a birthday
+        with person one is $\frac{d-1}{d}$.
+        %
+    \item Look at person $k$. The probability that they do not share a birthday
+        with any of the $k-1$ previous people is $\frac{d-(k-1)}{d}$.
+\end{enumerate}
+%
+The probabiity that all these events occur at once is given by the product, so
+we have that the probability that no two people out of $n$ share a birthday
+among $d$ days is
+%
+\begin{equation*}
+    p
+    = \overbrace{
+        \frac{d}{d} \times
+        \frac{d-1}{d} \times
+        \cdots \times
+        \frac{d-n+1}{d}
+    }^{\text{$n$ factors in total}}
+    = \parens{1 - \frac{1}{d}}
+        \times \cdots
+        \times \parens{1 - \frac{1}{n-1}}
+\end{equation*}
+%
+We take a logarithm on both sides to turn the product into a sum.
+%
+\begin{equation*}
+    \ln p
+    = \sum_{k=1}^{n-1} {
+        \ln{\parens{1 - \frac{k}{d}}}
+    }
+    = \cdots
+\end{equation*}
+%
+and use the fact that $\ln{1 + x} \approx x$ for small values of $x$ to
+eliminate the logarithms on the right-hand side
+%
+\begin{equation*}
+    \cdots
+    = \sum_{k=1}^{n-1} {
+        \frac{-k}{d}
+    }
+    = \frac{-1}{d} \sum_{k=1}^{n-1} k
+    = \frac{-n(n-1)}{2d}
+\end{equation*}
+%
+This gives a quadratic equation for $n$,
+%
+\begin{equation*}
+    0 = \frac{1}{2d} n^2 + \frac{1}{2d} n - \ln p
+\end{equation*}
+%
+Solving for $n$, we get
+%
+\begin{equation*}
+    n
+    = \frac{
+        \frac{1}{2d}
+        \pm
+        \sqrt{
+            \frac{1}{4d^2} - 4 \cdot \frac{1}{2d} \cdot \ln p
+        }
+    }{
+        2 \cdot \frac{1}{2d}
+    }
+\end{equation*}
+%
+We are given that $d = 365$ and $1 - p = \frac{999}{1000}$, so we substitute to
+find that
+%
+\begin{equation*}
+    n = 71.54
+\end{equation*}
+%
+Computing the probability backwards from $n = 71$, we find that the probability
+that a collision occurs is indeed above $\frac{999}{1000}$. However, we also
+tried $70$ and $69$, and found that $70$ is the least $n$ that gives a
+sufficient probability.
+
+\end{document}
