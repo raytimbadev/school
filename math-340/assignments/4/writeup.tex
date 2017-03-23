@@ -397,4 +397,73 @@ not already contain a ball of that color; else, the ball is discarded.
     \end{equation*}
 \end{proof}
 
+\question{Chernoff bound}
+
+\begin{prop}
+    The following variant of the Chernoff bound holds.
+
+    \begin{equation*}
+        \P{X \leq (1 - \delta)\mu}
+        \leq
+        \parens{
+            \frac{
+                e^{-\delta}
+            }{
+                (1 - \delta)^{1 - \delta}
+            }
+        }^\mu
+        \leq
+        e^{-\frac{\mu \delta^2}{2}}
+    \end{equation*}
+\end{prop}
+
+\begin{proof}
+    To see the first inequality, we make a symmetry argument.
+    Consider the variables $X^\prime_i$ obtained by reflecting $X_i$ across
+    $1/2$.
+    %
+    Then we have a new expectation $\mu^\prime$ for these variables, which
+    coincides with what we get if we reflect $\mu$ across $1/2$.
+    %
+    It is clear that the probability of deviation \emph{above} the mean by
+    $\delta$ in this new setting is the same as the probability of deviation
+    \emph{below} the mean by $\delta$ in the old setting.
+
+    Next, for the second inequality, observe, the following sequence of logical
+    equivalences.
+    %
+    \begin{align*}
+        \parens{
+            \frac{e^{-\delta}}{(1-\delta)^{1-\delta}}
+        }^{\cancel{\mu}}
+        &\leq
+        e^{- \frac{\cancel{\mu} \delta^2}{2}}
+        %
+        \\
+        \ln{\frac{e^{-\delta}}{(1-\delta)^{1-\delta}}}
+        &\leq
+        -\frac{\delta^2}{2}
+        %
+        \\
+        -\delta - (1-\delta) \ln{\parens{1-\delta}}
+        &\leq
+        -\frac{\delta^2}{2}
+        %
+        \\
+        \ln{\parens{1 - \delta}}
+        &\leq
+        \frac{\frac{\delta^2}{2} - \delta}{1 - \delta}
+        %
+        \\
+        - \delta - \frac{1}{2} \delta^2 - \frac{1}{3} \delta^3 - \cdots
+        &\leq
+        \frac{\delta(\delta - 2)}{2(1 - \delta)}
+        \leq - \delta
+    \end{align*}
+    %
+    In particular, we use the Taylor expansion of the logarithm, and note that
+    $\frac{\delta - 2}{2} \leq \delta - 1$, since $0 < \delta < 1$ by
+    assumption.
+\end{proof}
+
 \end{document}
