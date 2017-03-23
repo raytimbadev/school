@@ -107,6 +107,97 @@ that a collision occurs is indeed above $\frac{999}{1000}$. However, we also
 tried $70$ and $69$, and found that $70$ is the least $n$ that gives a
 sufficient probability.
 
+\question{Quicksort}
+
+Suppose $(x_1,\ldots,x_n)$ is a permuatation of $\range{n}$ chosen uniformly at
+random.
+
+\begin{prop}
+    The probability that numbers $i$ and $j$ are compared,
+    where $1 \leq j \leq j \leq n$,
+    is
+    \begin{equation*}
+        \P{\text{$i$ is compared with $j$}} = \frac{2}{i - j + 1}
+    \end{equation*}
+\end{prop}
+
+\begin{proof}
+    There are two equivalent ways of thinking about this.
+    The first is that we have a shuffled list, and pick the leftmost element as
+    the pivot always.
+    The second is that the list is already sorted, and we pick a random element
+    as the pivot.
+    This second interpretation is more convenient for our analysis.
+
+    The numbers $i$ and $j$ will be compared only when they appear in the same
+    sublist and one or the other is chosen as a pivot.
+    Therefore if a pivot between $i$ and $j$ is ever chosen, then $i$ and $j$
+    can never be compared.
+    Notice that if $k$ is chosen as a pivot such that $k < i$ or $k > j$,
+    then $i$ and $j$ are binned into the same group; the sublist $\range[i]{j}$
+    is unaffected.
+
+    Hence we arrive at our intuition for this problem: we think of it as a
+    game. We pick an item at random in the list. If it is between $i$ and $j$,
+    then we lose. If we pick $i$ or $j$, then we win. If we pick a number
+    strictly below $i$ or strictly above $j$, then we get to pick again in the
+    sublist made by dropping the elements up to $k$ or from $k$ onwards,
+    respectively.
+
+    The crux of this game is that the rule by which more choices are made does
+    not affect the probability of winning or losing. Hence, we can assume
+    without loss of generality that the game ends in the current turn.
+    This means that we are looking at the sublist $\range[i]{j}$.
+    But in this sublist, the probability of winning is exactly
+    $\frac{2}{j - i + 1}$,
+    as required.
+\end{proof}
+
+\begin{prop}
+    The expected number of comparisons in randomized quicksort is
+    %
+    \begin{equation*}
+        \E{X} = 2 \sum_{k=1}^{n-1} { \frac{n-k}{k+1} }
+    \end{equation*}
+\end{prop}
+
+\begin{proof}
+    Let $X_{ij}$ be an indicator random variable for the event
+    ``$i$ is compared with $j$''.
+    Hence, $\E{X_{ij}} = \P{X_{ij}} = \frac{2}{i - j + 1}$.
+    By linearity of expectation, we find
+    \begin{equation*}
+        \E{X} = \sum_{i=1}^n \sum_{j=1}^n \frac{2}{i - j + 1}
+    \end{equation*}
+
+    To see how this sum can be simplified, it is illuminating to look at the
+    following table for $n = 5$.
+
+    \begin{center}
+        \begin{tabular}{c | c c c c c}
+            $j\backslash i$ & $1$ & $2$ & $3$ & $4$ & $5$ \\ \hline
+            $1$ & & & & & \\
+            $2$ & $2/2$ & & & & \\
+            $3$ & $2/3$ & $2/2$ & & & \\
+            $4$ & $2/4$ & $2/3$ & $2/2$ & & \\
+            $5$ & $2/5$ & $2/4$ & $2/3$ & $2/2$ & \\
+        \end{tabular}
+    \end{center}
+
+    By grouping the diagonals, we find
+    %
+    \begin{equation*}
+        \E{X}
+        = \sum_{k=2}^n {
+            (n-k+1) \cdot \frac{2}{k}
+        }
+        = 2 \sum_{k=1}^n {
+            \frac{n-k}{k+1}
+        }
+    \end{equation*}
+    %
+    as required.
+\end{proof}
 
 \question{Balls and bins 1}
 
@@ -177,6 +268,133 @@ sufficient probability.
     %
     which is better than the trivial upper bound, for large values of $n$
     (greater than $5$ or $6$).
+\end{proof}
+
+\question{Balls and bins 2}
+
+Let there be $n$ different colors and $n$ balls of each color, for a total of
+$n^2$ balls. The balls are distributed among $n$ boxes by selecting a box
+uniformly at random for each ball, and placing it in the box if the box does
+not already contain a ball of that color; else, the ball is discarded.
+
+\begin{prop}
+    Let $A_{ij}$ denote the event that box $i$ contains a ball of color $j$.
+    For arbitrary $i$ and $j$, we have
+    %
+    \begin{equation*}
+        \P{A_{ij}} = 1 - \parens{1 - \frac{1}{n}}^n
+    \end{equation*}
+\end{prop}
+
+\begin{proof}
+    Take an arbitrary box $i$ and an arbitrary color $j$.
+    Consider the complementary event, that box $i$ contains no ball of color
+    $j$. This means that whenever a ball of color $j$ was picked up, it was a
+    box other that box $i$ that was chosen randomly. The probability of
+    choosing a box other than box $i$ is $\frac{n - 1}{n} = 1 - \frac{1}{n}$.
+    Hence, the probability that box $i$ contains \emph{no} ball of color $j$ is
+    %
+    \begin{equation*}
+        \P{\neg A_{ij}} = \parens{1 - \frac{1}{n}}^n
+    \end{equation*}
+    %
+    as there are $n$ balls of color $j$.
+    Therefore the probability that box $i$ contains a ball of color $j$ is
+    %
+    \begin{equation*}
+        \P{A_{ij}} = 1 - \parens{1 - \frac{1}{n}}^n
+    \end{equation*}
+\end{proof}
+
+\begin{prop}
+    Let $X$ be the number of balls that are thrown away.
+    Then,
+    %
+    \begin{equation*}
+        \E{X} = n^2 \parens{1 - \frac{1}{n}}^n
+    \end{equation*}
+\end{prop}
+
+\begin{proof}
+    Look at an arbitrary box $i$. We know that the probability of a ball of
+    some color $j$ being in this box is
+    $\P{A_{ij}} = 1 - \parens{1 - \frac{1}{n}}^n$.
+    %
+    If we think of each of ``being in the box'' for a certain color as a
+    Bernoulli trial, then the number of balls in a given box is binomially
+    distributed, with probability $p = \P{A_{ij}}$ and count $n$.
+    %
+    Denote by $B_i$ the number of balls in box $i$, so
+    %
+    \begin{equation*}
+        \E{B_i} = n \parens{1 - \parens{1 - \frac{1}{n}}^n}
+    \end{equation*}
+    %
+    But then the expected number of balls across all bins, by the linearity of
+    expectation, is
+    %
+    \begin{equation*}
+        \E{B}
+        = \sum_i B_i
+        = n^2 \parens{1 - \parens{1 - \frac{1}{n}}^n}
+    \end{equation*}
+    %
+    So the expected number of balls that are discarded is the complement.
+    %
+    \begin{equation*}
+        \E{X}
+        = n^2 \parens{1 - \parens{1 - \parens{1 - \frac{1}{n}}^n}}
+        = n^2 \parens{1 - \frac{1}{n}}^n
+    \end{equation*}
+\end{proof}
+
+\begin{prop}
+    With high probability, no box contains more than
+
+    \begin{equation*}
+        b = n \parens{ 1 - \parens{ 1 - \frac{1}{n} }^n } + 2 \sqrt{ n \ln n }
+    \end{equation*}
+\end{prop}
+
+\begin{proof}
+    We apply the Chernoff bound for some box, to see an upper bound on the
+    probability that the number of balls in that box exceeds the desired bound.
+    In that case, we have $\mu = n \parens{1 - \parens{1 - \frac{1}{n}}^n}$
+    and $\delta = 2 \sqrt{n \ln n}$.
+    %
+    \begin{align*}
+        \P{B_i \geq (1 + \delta) \mu} &\leq e^{-\frac{1}{3} \mu \delta^2} \\
+        \P{B_i \geq n \parens{1 - \parens{1 - \frac{1}{n}}^n} + 2 \sqrt{n \ln n}}
+        &\leq e^{
+            -\frac{1}{3}
+            n \parens{1 - \parens{1 - \frac{1}{n}}^n}
+            4 n \ln n
+        }
+        = n^{
+            -\frac{4}{3} n^2 \parens{1 - \parens{1 - \frac{1}{n}}^n}
+        }
+    \end{align*}
+    %
+    This is a fairly small quantity, even for modest values of $n$.
+    For instance, when $n=4$ we are at a probability on the order of $10^{-9}$.
+
+    However, this is an upper bound on the probability that given box exceeds
+    our bound $b$.
+    %
+    We use the union bound to find an upper bound on the probability that
+    \emph{any} box exceeds $b$ in ball count. This merely adds a factor of $n$,
+    which is negligeable.
+    %
+    Then, we can translate this upper bound on the probability that any box
+    exceeds $b$ into a lower bound on the probability that no box exceeds $b$
+    by taking the complement.
+    Let $A$ denote the event that no box exceeds $b$ in ball count.
+    The bound we find on the probability of $A$ is
+    \begin{equation*}
+        \P{A} \geq 1 - n^{
+            1 - \frac{4}{3} n^2 \parens{1 - \parens{1 - \frac{1}{n}}^n}
+        }
+    \end{equation*}
 \end{proof}
 
 \end{document}
