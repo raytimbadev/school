@@ -20,7 +20,7 @@
     \begin{equation}
         \label{eq:binomial-expansion}
         (x + y)^n = \sum_{k=0}^n {
-            {n \choose k} x^k y^{n -k}
+            \binom{n}{k} x^k y^{n -k}
         }
     \end{equation}
 \end{thm}
@@ -64,7 +64,7 @@
     \begin{equation}
         \label{eq:negative-binomial-series}
         (1+x)^{-n} = \infsum_{k=0} {
-            {{n + k - 1} \choose k} (-1)^k x^k
+            \binom{n + k - 1}{k} (-1)^k x^k
         }
     \end{equation}
 \end{thm}
@@ -338,7 +338,7 @@ $r \leq n$. The order of the selection doesn't matter. The number of ways to do
 this is
 \begin{equation}
     \label{eq:selection-rule}
-    C_r^n = {n \choose r} = \frac{n\fact}{(n-r)\fact r\fact}
+    C_r^n = \binom{n}{r} = \frac{n\fact}{(n-r)\fact r\fact}
 \end{equation}
 
 Why is this? First apply the permutation rule. The number we get will be too
@@ -354,7 +354,7 @@ with sizes $n_1, \ldots, n_k$ such that $\sum_{i=1}^k n_i = n$. The number of
 ways to do this is
 \begin{equation}
     \label{eq:partition-rule}
-    {n \choose n_1 \, \cdots \, n_k}
+    \binom{n}{n_1 \, \cdots \, n_k}
     = \frac{n\fact}{n_1\fact \cdots n_k\fact}
 \end{equation}
 
@@ -397,12 +397,12 @@ ways to do this is
 
 \begin{solution}
     The sample space is the set of all $5$-card hands, i.e. unordered choices
-    of $5$ elements from a $52$-element set. Hence, $|S| = {52 \choose 5}$.
+    of $5$ elements from a $52$-element set. Hence, $|S| = \binom{52}{5}$.
 
     Next, the event can be described by a sequence of choices. First, choose
     the denominations, which must be different. Second, choose the suits.
     \begin{equation*}
-        |E| = (13 \times 12) \times \parens{{4 \choose 3} \times {4 \choose 2}}
+        |E| = (13 \times 12) \times \parens{\binom{4}{3} \times \binom{4}{2}}
     \end{equation*}
 
     The probability is therefore
@@ -410,9 +410,9 @@ ways to do this is
         \P{E}
         = \frac{|E|}{|S|}
         = \frac{
-            (13 \times 12) \times \parens{{4 \choose 3} \times {4 \choose 2}}
+            (13 \times 12) \times \parens{\binom{4}{3} \times \binom{4}{2}}
         }{
-            {52 \choose 5}
+            \binom{52}{5}
         }
     \end{equation*}
 \end{solution}
@@ -1132,7 +1132,7 @@ ways to do this is
         \label{eq:binomial-distribution}
         \p[X]{k}
         = \P{X = k}
-        = {n \choose k} p^k (1-p)^{n-k}
+        = \binom{n}{k} p^k (1-p)^{n-k}
     \end{equation}
     for $k \in \range[0]{n}$.
 \end{defn}
@@ -1146,7 +1146,7 @@ ways to do this is
     the probability that $X = k$, we must have $k$ successes (hence the $p^k$
     factor) and $n-k$ failures (hence the $(1-p)^{n-k}$ factor).
     These successes and failures may occur in any order, so we multiply by
-    ${n \choose k}$ to correct for this.
+    $\binom{n}{k}$ to correct for this.
 \end{rem}
 
 \begin{eg}
@@ -1232,7 +1232,7 @@ ways to do this is
     \begin{align*}
         \E{X(X-1)}
         &= \sum_{k=0}^n {
-            k(k-1) {n \choose k} p^k (1-p)^{n-k}
+            k(k-1) \binom{n}{k} p^k (1-p)^{n-k}
         } \\
         %
         &= \sum_{k=2}^n {
@@ -1253,7 +1253,7 @@ ways to do this is
         } \\
         %
         &= n(n-1) p^2 \sum_{k=2}^n {
-            {{n-2} \choose {k-2}} p^{k-2} (1-p)^{n-k}
+            \binom{n-2}{k-2} p^{k-2} (1-p)^{n-k}
         } \\
         %
         &= n(n-1) p^2 (p + (1-p))^{n-2} \\
@@ -1325,9 +1325,9 @@ ways to do this is
         P_5
         = \P{X_5 \geq 2.5}
         = \p[X_5]{3} + \p[X_5]{4} + \p[X_5]{5}
-        = {5 \choose 3} p^3 (1-p)^2
-            + {5 \choose 4} p^4 (1-p)^1
-            + {5 \choose 5} p^5 (1-p)^0
+        = \binom{5}{3} p^3 (1-p)^2
+            + \binom{5}{4} p^4 (1-p)^1
+            + \binom{5}{5} p^5 (1-p)^0
     \end{equation*}
 
     Second, we write out the probability of a $3$-component system functioning,
@@ -1338,7 +1338,7 @@ ways to do this is
         P_3
         = \P{X_3 \geq 1.5}
         = \p[X_3]{2} + \p[X_3]{3}
-        = {3 \choose 2} p^2 (1-p)^1 + {3 \choose 3} p^3 (1-p)^0
+        = \binom{3}{2} p^2 (1-p)^1 + \binom{3}{3} p^3 (1-p)^0
     \end{equation*}
 
     Then, we assert $P_5 > P_3$ and follow a chain of if-and-only-ifs
@@ -1414,7 +1414,7 @@ ways to do this is
 
     \begin{align*}
         \p[X_n]{k}
-        &= {n \choose k}
+        &= \binom{n}{k}
             \times
             p_n^k
             \times
@@ -1466,7 +1466,7 @@ ways to do this is
                 .
             }
         \item[\stepAB{1}{2}]
-            Unfold the definition of ${n \choose k}$.
+            Unfold the definition of $\binom{n}{k}$.
             %
         \item[\stepAB{2}{3}]
             Unfold the factorials and cancel.
