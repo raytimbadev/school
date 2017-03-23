@@ -64,7 +64,6 @@
 \newtheorem{rem}{Remark}% [section] % don't want grouping by sections
 
 % Solutions to exercises
-%\makeatletter
 \newenvironment{solution}{
     \let\oldqedsymbol=\qedsymbol%
     \def\@addpunct##1{}%
@@ -74,7 +73,6 @@
     \end{proof}%
     \renewcommand{\qedsymbol}{\oldqedsymbol}
 }
-%\makeatother
 
 \newcommand{\omittedproof}{%
     \begin{proof}
