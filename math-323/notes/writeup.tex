@@ -1911,4 +1911,429 @@ Notes of 23 February has an example. (Pages 3 to 5.)
     \end{equation}
 \end{defn}
 
+\subsection{Uniform distribution}
+
+\begin{defn}{(Uniform distribution.)}
+    \label{def:uniform}
+    Let $\theta_1 < \theta_2$. A random variable $X$ is said to follow a
+    \emph{uniform distribution} on the interval $[\theta_1, \theta_2]$, denoted
+    $X \sim \Unif{\theta_1;\theta_2}$, if the density of $X$ is given by
+    %
+    \begin{equation*}
+        \label{eq:uniform}
+        f(x) = \begin{cases}
+            \frac{1}{\theta_2 - \theta_1}
+                &\quad\text{if } x \in [\theta_1,\theta_2] \\
+            0
+                &\quad\text{otherwise}
+        \end{cases}
+    \end{equation*}
+\end{defn}
+
+\begin{rem}{(\Cdf{} of the uniform distribution.)}
+    \label{rem:cdf-uniform}
+    By piecewise integration we find the \cdf{} of $X \sim \Unif{t_1, t_2}$.
+    %
+    \begin{equation*}
+        \label{eq:cdf-uniform}
+        F_X(x) = \begin{cases}
+            0
+                &\quad\text{if } x < t_1 \\
+            %
+            \frac{x-t_1}{t_2 - t_1}
+                &\quad\text{if } t_1 \leq x < t_2 \\
+            %
+            1
+                &\quad\text{if } x \geq t_2
+        \end{cases}
+    \end{equation*}
+\end{rem}
+
+\begin{thm}
+    \label{thm:properties-uniform}
+    %
+    \begin{enumerate}
+        \item
+            If $X \sim \Unif{0;1}$,
+            then for all $a \in \R$ and $b > 0$ we have
+            %
+            \begin{equation*}
+                Y = a + bX \sim \Unif{a;a+b}
+            \end{equation*}
+            %
+        \item
+            If $X \sim \Unif{\theta_1; \theta_2}$ and $\theta_1 < \theta_2$,
+            then for any $\theta_3$ and $\theta_4$ in the interval
+            $[\theta_1,\theta_2]$ such that $\theta_3 < \theta_4$,
+            the random variable $Z$ whose distribution is given by
+            \begin{equation*}
+                \P{Z \leq z} = \P{X \leq z \given X \in [\theta_3, \theta_4]}
+            \end{equation*}
+            is uniformly distributed over $[\theta_3, \theta_4]$,
+            i.e. $Z \sim \Unif{\theta_3; \theta_4}$.
+    \end{enumerate}
+\end{thm}
+
+\begin{thm}{(Expectation and variance of the uniform distribution.)}
+    Suppose $X \sim \Unif{\theta_1;\theta_2}$.
+    %
+    \begin{enumerate}
+        \item
+            The expectation of $X$ is
+            %
+            $\E{X} = \frac{\theta_1 + \theta_2}{2}$
+            %
+        \item
+            The variance of $X$ is
+            %
+            $\V{X} = \frac{(\theta_2 - \theta_1)^2}{12}$
+            %
+        \item
+            The \mgf{} of $X$ is
+            %
+            \begin{equation*}
+                m_X(t) = \begin{cases}
+                    \frac{
+                        e^{t \theta_2} - e^{t \theta_1}
+                    }{
+                        t(\theta_2 - \theta_1)
+                    }
+                        &\quad\text{if } t \neq 0 \\
+                    %
+                    1
+                        &\quad\text{if } t = 0
+                \end{cases}
+            \end{equation*}
+    \end{enumerate}
+\end{thm}
+
+\begin{proof}
+    The proof is fairly straightforward due to the simplicity of the
+    distribution. Just use the definitions.
+    %
+    For a complete proof, see the notes of 7 March, page 2.
+\end{proof}
+
+\subsection{Normal distribution}
+\label{sec:normal-distribution}
+
+\begin{defn}{(Normal distribution.)}
+    \label{def:normal-distribution}
+    %
+    Suppose $\mu \in \R$ and $\sigma > 0$.
+    A random variable $X$ follows a \emph{normal distribution} with parameters
+    $\mu$ and $\sigma^2$,
+    denoted $X \sim \Normal{\mu;\sigma^2}$,
+    if the function
+    %
+    \begin{equation}
+        \label{eq:normal-density}
+        f_{\mu,\sigma^2} (x)
+        =
+        \frac{1}{\sigma \sqrt{2 \pi}}
+        e^{
+            -\frac{\parens{x - \mu}^2}{2 \sigma^2}
+        }
+    \end{equation}
+    %
+    is the density of $X$.
+\end{defn}
+
+\begin{lem}
+    \label{lem:normal-is-legit}
+    The following integral converges.
+    %
+    \begin{equation*}
+        \inttoinf_0 { e^{-\frac{x^2}{2}} \intd x }
+        = \sqrt{\frac{\pi}{2}}
+    \end{equation*}
+\end{lem}
+
+\begin{proof}
+    The proof of this lemma and of the following theorem are in the notes of 7
+    March, page 5.
+\end{proof}
+
+\begin{thm}
+    \label{thm:normal-is-legit}
+    The function $f$ shown in definition \ref{def:normal-distribution} is a
+    bona fide density,
+    i.e.
+    %
+    \begin{equation}
+        \label{eq:normal-is-legit}
+        %
+        \infinfint f_{\mu,\sigma^2} (x) \intd x = 1
+    \end{equation}
+\end{thm}
+
+\begin{defn}{(Standard normal density.)}
+    \label{def:standard-normal}
+    %
+    The function $\phi : \R \to \R$ given by
+    %
+    \begin{equation}
+        \label{eq:standard-normal}
+        %
+        \phi(x) = \frac{1}{\sqrt{2 \pi}} e^{-\frac{x^2}{2}}
+    \end{equation}
+    %
+    is the \emph{standard normal density} function.
+    %
+    It is the density of a random variable $X \sim \Normal{0;1}$ normally
+    distributed with mean $0$ and variance (and hence standard deviation) $1$.
+\end{defn}
+
+\begin{rem}
+    \label{rem:cdf-of-standard-normal}
+    %
+    The \cdf{} of a standard-normal distributed variable is given by
+    %
+    \begin{equation}
+        \label{eq:cdf-of-standard-normal}
+        %
+        \Phi(x) = \intfrominf^x \phi(u) \intd u
+    \end{equation}
+
+    There is no closed-form expression for $\Phi(\cdot)$ in general.
+    Only approximate values may be computed.
+\end{rem}
+
+\begin{thm}
+    \label{thm:std-normal-to-normal}
+    %
+    Let $X \sim \StdNormal$.
+    Then for any $\mu \in \R$ and $\sigma > 0$, we have
+    %
+    \begin{equation}
+        \label{eq:std-normal-to-normal-1}
+        %
+        \mu + \sigma X \sim \Normal{\mu;\sigma^2}
+    \end{equation}
+\end{thm}
+
+\begin{proof}
+    Essentially, just fiddle with the integrals.
+    Complete proof is in the notes of 7 March, page 9.
+\end{proof}
+
+\begin{thm}{(Expectation, variance, and \mgf{}.)}
+    Suppose $X \sim \Normal{\mu,\sigma^2}$.
+    %
+    \begin{enumerate}
+        \item
+            The expectation of $X$ is
+            \begin{equation*}
+                \E{X} = \mu
+            \end{equation*}
+
+        \item
+            The variance of $X$ is
+            \begin{equation*}
+                \V{X} = \sigma^2
+            \end{equation*}
+
+        \item
+            The \mgf{} of $X$ is
+            \begin{equation*}
+                m_X(t) = e^{\mu t + \frac{\sigma^2 t^2}{2}}
+            \end{equation*}
+    \end{enumerate}
+\end{thm}
+
+\begin{proof}
+    Using theorem \ref{thm:std-normal-to-normal}, transform the general
+    normally distributed variable $X$ into a standard-normal variable $Y$. Use
+    linearity of expectation.
+    Then to see that that the expectation of the standard normally distributed
+    variable $Y$ is $\mu_Y = 0$, notice that the integral is an odd function.
+    (More precisely you can split the integral and zero and do a
+    $u$-substitution to see that the halves cancel out.)
+
+    For the variance, use theorem \ref{thm:variance-properties} to see that
+    $\V{X} = \sigma^2 \V{Y}$. Now show that $\V{Y} = 1$ by using
+    $\V{Y} = \E{Y^2} - \E{Y}^2$. To see that $\E{Y^2} = 1$ use the \mgf{}.
+
+    For the \mgf{}, see the notes of 7 March, page 12.
+\end{proof}
+
+\begin{defn}
+    \label{def:quantile}
+    Let $Y$ be a real-valued random variable with \cdf{} $F$
+    and $p \in (0, 1)$.
+    The $p$\th{} quantile of $Y$, denoted $Q_p$ is
+    \begin{equation}
+        \label{eq:quantile}
+        Q_p = \min \setof{ y : F(y) \geq p }
+    \end{equation}
+\end{defn}
+
+\begin{rem}{(Properties of quantiles.)}
+    \begin{enumerate}
+        \item
+            In general, $F(Q_p) \geq p$.
+
+        \item
+            If $F$ is continuous, i.e. $Y$ is a continuous random variable,
+            then $F(Q_p) = p$.
+    \end{enumerate}
+\end{rem}
+
+The notes of 7 March, pages 13 to 15 contain some examples.
+
+\subsection{Gamma distribution}
+
+\begin{defn}{(Gamma function.)}
+    \label{def:gamma-function}
+    %
+    The \emph{gamma function} $\Gamma : (0, \infty) \to \R$ is defined by
+    %
+    \begin{equation}
+        \label{eq:gamma-function}
+        \Gamma(\alpha) = \inttoinf_0 x^{\alpha - 1} e^{-x} \intd x
+    \end{equation}
+    %
+\end{defn}
+
+This integral is finite for every $\alpha > 0$.
+The gamma function generalized the factorial function, as illustrated in the
+following theorem.
+
+\begin{thm}{(Properties of the gamma function.)}
+    \label{thm:gamma-properties}
+
+    \begin{enumerate}
+        \item
+            For any $\alpha > 0$,
+            %
+            \begin{equation*}
+                \Gamma(\alpha + 1) = \alpha \Gamma (\alpha)
+            \end{equation*}
+
+        \item
+            The gamma function extends the factorial function from the natural
+            numbers to the positive reals.
+            %
+            \begin{equation*}
+                \Gamma(n+1) = n\fact
+            \end{equation*}
+
+        \item
+            Particular value of the gamma function.
+            %
+            \begin{equation*}
+                \Gamma\parens{\frac{1}{2}} = \sqrt{\pi}
+            \end{equation*}
+    \end{enumerate}
+\end{thm}
+
+\begin{proof}
+    See the notes of 7 March, page 17.
+\end{proof}
+
+\begin{defn}{(Gamma distribution.)}
+    \label{def:gamma-distribution}
+    %
+    A real-valued random variable $Y$
+    is said to follow a \emph{gamma distribution}
+    with \emph{shape parameter} $\alpha > 0$
+    and \emph{scale parameter} $\beta > 0$
+    if
+    %
+    \begin{equation}
+        \label{eq:gamma-distribution}
+        %
+        f(y) = \begin{cases}
+            \frac{
+                y^{\alpha - 1} e^{-\frac{y}{\beta}}
+            }{
+                \beta^\alpha \Gamma(\alpha)
+            }
+                &\quad\text{if } y \geq 0
+            \\
+            0
+                &\quad\text{if } y < 0
+        \end{cases}
+    \end{equation}
+\end{defn}
+
+\begin{rem}
+    There is no closed-form expression for the \cdf{}
+    %
+    \begin{equation*}
+        F(x)
+        = \int_0^x \frac{
+            y^{\alpha - 1} e^{-\frac{y}{\beta}}
+        }{
+            \beta^\alpha \Gamma(\alpha)
+        }
+        \intd x
+    \end{equation*}
+\end{rem}
+
+\begin{thm}
+    If $Y \sim \GammaD{\alpha;\beta}$,
+    then $X = \frac{Y}{\beta} \sim \GammaD{\alpha;1}$.
+\end{thm}
+
+\begin{proof}
+    See the notes of 9 March, page 2.
+\end{proof}
+
+\begin{thm}{(Expectation, variance, and \mgf{}.)}
+    Suppose $Y \sim \GammaD{\alpha;\beta}$.
+    %
+    \begin{enumerate}
+        \item
+            The expectation of $Y$ is
+            %
+            \begin{equation*}
+                \E{Y} = \alpha \beta
+            \end{equation*}
+            %
+        \item
+            The variance of $Y$ is
+            %
+            \begin{equation*}
+                \V{Y} = \alpha \beta^2
+            \end{equation*}
+            %
+        \item
+            The \mgf{} of $Y$ is
+            %
+            \begin{equation*}
+                m_Y(t) = (1 - \beta t)^{-\alpha}
+            \end{equation*}
+            %
+            if $t < \frac{1}{\beta}$.
+            Otherwise, if $t \geq \frac{1}{\beta}$,
+            then the expectation $\E{e^{ty}}$ becomes unbounded.
+    \end{enumerate}
+\end{thm}
+
+\begin{proof}
+    See the notes of 9 March, page 3.
+\end{proof}
+
+\subsection{Special cases of the gamma distribution}
+
+\begin{defn}{(Exponential distribution.)}
+    The \emph{exponential distribution} with scale parameter $\beta > 0$,
+    denoted $\Exp{\beta}$,
+    is the probability distribution of a variable with distribution
+    $\GammaD{1, \beta}$.
+
+    An exponentially distributed variable has the density
+    %
+    \begin{equation*}
+        f(x) = \begin{cases}
+            \frac{1}{\beta} e^{-\frac{x}{\beta}}
+                &\quad\text{if } x \geq 0
+            \\
+            0
+                &\quad\text{if } x < 0
+        \end{cases}
+    \end{equation*}
+\end{defn}
+
 \end{document}
