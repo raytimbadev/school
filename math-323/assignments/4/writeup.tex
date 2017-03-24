@@ -1,0 +1,265 @@
+\documentclass[11pt]{article}
+
+\author{Jacob Thomas Errington}
+\title{Assignment \#4\\Probability -- MATH 323}
+\date{24 March 2017}
+
+\usepackage[questions,geometry]{jakemath}
+
+\begin{document}
+
+\maketitle
+
+\question{Expectations}
+
+\begin{prop}
+    Suppose $Z \sim \StdNormal$.
+    Then, $\E{\abs{X}} = \sqrt{\frac{2}{\pi}}$.
+\end{prop}
+
+\begin{proof}
+    \begin{align*}
+        \E{\abs{X}}
+        &= \infinfint {
+            \abs{x} \frac{1}{\sqrt{2 \pi}} e^{- \frac{x^2}{2}} \intd x
+        } \\
+        &= - \intfrominf^0 \frac{x}{\sqrt{2 \pi}} e^{-\frac{x^2}{2}} \intd x
+            + \inttoinf_0 \frac{x}{\sqrt{2 \pi}} e^{-\frac{x^2}{2}} \intd x \\
+        &= \inttoinf_0 \frac{u}{\sqrt{2\pi}} e^{-\frac{u^2}{2}} \intd u
+            + \inttoinf_0 \frac{x}{\sqrt{2 \pi}} e^{-\frac{x^2}{2}} \intd x \\
+        &= \sqrt{\frac{2}{\pi}} \inttoinf_0 x e^{-\frac{x^2}{2}} \intd x \\
+        &= \sqrt{\frac{2}{\pi}} \int_0^{-\infty} - e^u \intd u \\
+        &= \sqrt{\frac{2}{\pi}} \intfrominf^0 e^u \intd u \\
+        &= \sqrt{\frac{2}{\pi}} \lim_{t\to -\infty} \parens{e^0 - e^t} \\
+        &= \sqrt{\frac{2}{\pi}}
+    \end{align*}
+\end{proof}
+
+\begin{prop}
+    Let $\alpha, \beta > 0$ and $\theta > -\alpha$.
+    Suppose $X \sim \GammaD{\alpha;\beta}$.
+    Then
+    \begin{equation*}
+        \E{X^\theta}
+        = \beta^{\theta - 1}
+            \frac{\Gamma(\theta + \alpha)}{\Gamma{\alpha}}
+    \end{equation*}
+\end{prop}
+
+\begin{proof}
+    We just use the definition of expectation.
+    To compute the integral we use a change of variables $x = \beta u$.
+    Then we manipulate the integral to replace it with the gamma function.
+
+    \begin{align*}
+        \E{X^\theta}
+        &= \inttoinf_0 {
+            x^\theta
+            \frac{
+                x^{\alpha - 1} e^{-\frac{x}{\beta}}
+            }{
+                \beta^\alpha \Gamma(\alpha)
+            }
+        }
+        \intd x
+        \\
+        &= \inttoinf_0 {
+            \frac{
+                x^{\theta + \alpha - 1} e^{-\frac{x}{\beta}}
+            }{
+                \beta^\alpha \Gamma(\alpha)
+            }
+        }
+        \intd x
+        \\
+        &= \inttoinf_0 {
+            \frac{
+                \beta \beta^{\theta + \cancel{\alpha} - 1}
+                u^{\theta + \alpha - 1}
+                e^{-u}
+            }{
+                \cancel{\beta^\alpha} \Gamma(\alpha)
+            }
+        }
+        \intd u
+        \\
+        &= \frac{\beta^\theta}{\Gamma(\alpha)}
+        \inttoinf_0{
+            u^{\theta + \alpha - 1} e^{-u}
+        }
+        \intd u
+        \\
+        &= \beta^\theta \frac{\Gamma(1 + \alpha)}{\Gamma(\alpha)}
+    \end{align*}
+
+    As a sanity check, notice that if $\theta = 1$, we recover the usual
+    expectation, as
+    \begin{equation*}
+        \beta^1 \frac{\Gamma(1 + \alpha)}{\Gamma(\alpha)}
+        =
+        \beta \alpha
+    \end{equation*}
+\end{proof}
+
+\question{Normal distribution}
+
+\begin{prop}
+    The density function of a normally distributed random variable
+    $X \sim \Normal{\mu;\sigma^2}$ is symmetric about the line $x = \mu$.
+\end{prop}
+
+\begin{proof}
+    Let $f$ be the density of $X$. Our proof essentially just uses the symmetry
+    of the squaring function about $x = 0$.
+    %
+    \newcommand{\bleh}[1]{
+        \frac{1}{\sigma\sqrt{2\pi}}
+        e^{-\frac{#1}{2\sigma^2}}
+    }
+    %
+    \begin{align*}
+        f(\mu - x)
+        &= \bleh{\parens{(\mu - x) - \mu}^2} \\
+        &= \bleh{x^2} \\
+        &= \bleh{\parens{(\mu + x) - \mu}^2} \\
+        &= f(\mu + x)
+    \end{align*}
+\end{proof}
+
+\begin{prop}
+    The following holds for a normally distributed variable
+    $X \sim \Normal{\mu;\sigma^2}$.
+    %
+    \begin{equation*}
+        \E{(X-\mu)^{2n}}
+        =
+        \sigma^{2n} \frac{2 n \fact}{2^n n \fact}
+    \end{equation*}
+\end{prop}
+
+\begin{proof}
+    %
+    \newcommand{\bleh}[1][1]{\frac{#1}{\sigma\sqrt{2\pi}}}
+    %
+    First observe that
+    %
+    \begin{align*}
+        \E{(x-\mu)^{2n}}
+        &= \bleh \infinfint (x - \mu)^{2n} e^{-\frac{(x-\mu)^2}{2\sigma^2}} \intd x \\
+        &= \bleh \infinfint u^{2n} e^{-\frac{u^2}{2\sigma^2}} \intd u \\
+        &= \bleh[2] \inttoinf_0 u^{2n} e^{-\frac{u^2}{2\sigma^2}} \intd u \\
+    \end{align*}
+    %
+    Let $I = \inttoinf_0 x^{2n} e^{-\frac{x^2}{2\sigma^2}} \intd x$.
+    %
+    We can simplify $I$ further by making a change of variables
+    $u = \frac{x}{\sigma}$
+    %
+    \begin{equation*}
+        I = \sigma^{2n+1} \inttoinf_0 x^{2n} e^{-\frac{x^2}{2}} \intd x
+    \end{equation*}
+    %
+    (We keep the variable name $x$ despite making the change of variables!)
+    %
+    Let $J_n = \inttoinf_0 x^{2n} e^{-\frac{x^2}{2}} \intd x$,
+    so $I = \sigma^{2n+1} J_n$.
+
+    Next, we apply integration by parts to the integral J
+    with $u = x^{2n - 1}$ so $\intd u = (2n - 1)x^{2n - 2}$
+    and with $\intd v = x e^{-\frac{x^2}{2}} \intd x$
+    so $v = - e^{-\frac{x^2}{2}}$.
+    %
+    \begin{align*}
+        J_n
+        &= \lim_{t\to\infty} \bracks{
+            - e^{-\frac{t^2}{2}}
+            t^{2n - 1}
+            - \parens{
+                - e^{-\frac{0^2}{2}}
+                0^{2n - 1}
+            }
+        }
+        \cancel{-} \inttoinf_0 {
+            \cancel{-} e^{-\frac{x^2}{2}} (2n - 1) x^{2n - 2} \intd x
+        } \\
+        &= (2n - 1) \inttoinf_0 { x^{2n-2} e^{-\frac{x^2}{2}} \intd x } \\
+        &= (2n - 1) J_{n-1}
+            = \frac{(2n) (2n - 1)}{2n} J_{n-1}
+    \end{align*}
+
+    Since $J_0 = \sqrt{\frac{\pi}{2}}$,
+    --
+    this was shown in class as a step in the proof that the integral of the
+    density of a normally distributed variable over the whole $\R$ is one
+    --
+    \newcommand{\jn}{\frac{\sqrt{\pi}(2n)\fact}{2^n (n\fact) \sqrt{2}}}
+    we have the closed form $J_n = \jn$.
+
+    Substituting back, we have $I = \sigma^{2n+1} \jn$
+    and
+    %
+    \begin{equation*}
+        \E{(X-\mu)^{2n}}
+        = \bleh[2] I
+        = \sigma^{2n+1} \bleh[2] \jn
+        = \sigma^{2n} \frac{2n\fact}{2^n n\fact}
+    \end{equation*}
+    %
+    as required.
+\end{proof}
+
+\question{Uniform distribution}
+
+Suppose for $n \geq 1$ we have a discrete random variable $X_n$ with \pmf{}
+%
+\begin{equation*}
+    \P{X_n = \frac{k}{n}} = \frac{1}{n}
+\end{equation*}
+%
+for $k \in \range{n}$.
+
+We wish to find the \cdf{} of $X_n$.
+
+Let $p_k = \P{X_n \leq \frac{k}{n}}$.
+Notice that if $k \in \range{n}$, then
+%
+\begin{equation}
+    \label{eq:bleh}
+    %
+    p_k
+    = \sum_{i=1}^k \P{X_n = \frac{k}{n}}
+    = \frac{k}{n}
+\end{equation}
+%
+so the difficulty lies in analyzing values of $k$ not in this set.
+
+\begin{itemize}
+    \item
+        For $k < 1$, we have $p_k = 0$.
+        %
+    \item
+        For $k > n$, we have $p_k = 1$.
+        %
+    \item
+        For $k \in [1, n] \setminus \range{n}$,
+        we have $p_k = p_{\floor{k}}$
+        which is well-defined in \eqref{eq:bleh}.
+\end{itemize}
+
+This analysis covers all the cases, and establishes what the \cdf{} of $X_n$
+is.
+
+\begin{prop}
+    The limiting \cdf{} of $X_n$, as $n \to \infty$, is the \cdf{} of a
+    uniformly distributed random variable $U \sim \Unif{0;1}$.
+
+    Formally,
+    %
+    \begin{equation*}
+        \lim_{n\to\infty} \P{X_n \leq u} = \P{U \leq u}
+    \end{equation*}
+    %
+    for any $u \in \R$.
+\end{prop}
+
+\end{document}
