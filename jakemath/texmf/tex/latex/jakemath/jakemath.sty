@@ -9,6 +9,8 @@
 \RequirePackage{environ}
 \RequirePackage{tikz}
 \RequirePackage{textcomp}
+\RequirePackage{cancel}
+\RequirePackage{mathtools}
 
 %%%%%%%%%%% OPTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -84,6 +86,7 @@
 
 % Misc math operators
 \newcommand{\parens}[1]{\left(#1\right)}
+\newcommand{\bracks}[1]{\left[#1\right]}
 \newcommand{\abs}[1]{\left\lvert#1\right\rvert}
 \newcommand{\setof}[1]{\left\{#1\right\}}
 \newcommand{\Union}{\bigcup}
@@ -118,7 +121,7 @@
 \newcommand{\inttoinf}{%
     \ensuremath \int^{\infty}
 }
-
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
 
 % Sets of numbers
 \newcommand{\R}{\mathbb{R}}
@@ -153,6 +156,14 @@
 \newcommand{\Geo}[1]{ \GeoOp\parens{#1} }
 \DeclareMathOperator{\UnifOp}{Unif}
 \newcommand{\Unif}[1]{ \UnifOp\parens{#1} }
+\DeclareMathOperator{\NormalOp}{\mathcal{N}}
+\newcommand{\Normal}[1]{ \NormalOp\parens{#1} }
+\newcommand{\StdNormal}{\Normal{0;1}}
+\DeclareMathOperator{\GammaOp}{Gamma}
+\newcommand{\GammaD}[1]{ \GammaOp\parens{#1} }
+\DeclareMathOperator{\ExpOp}{Exp}
+\newcommand{\Exp}[1]{ \ExpOp\parens{#1} }
+\newcommand{\ChiSq}{\Chi^2}
 
 % Absolutely misc
 \renewcommand{\th}{\textsuperscript{th}}
