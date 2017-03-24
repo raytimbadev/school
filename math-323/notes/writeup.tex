@@ -1541,7 +1541,51 @@ Notes of 7 February.
 
 \subsection{Negative binomial distribution}
 
-Notes of 9 February.
+The negative binomial distribution is a generalization of the \emph{geometric}
+distribution.
+
+\begin{defn}{(Negative binomial distribution.)}
+    \label{def:negative-binomial}
+    A random variable $Y$ follows a \emph{negative binomial distribution} with
+    parameters $r$ and $p$, where $r \in \N^*$ and $p \in (0, 1]$ if its \pmf{}
+    is given by
+    \begin{equation*}
+        \label{eq:negative-binomial}
+        \p[Y]{k} = \binom{k-1}{r-1} p^r (1-p)^{k-r}
+    \end{equation*}
+    for $k \in \setof{r, r+1, \ldots}$.
+\end{defn}
+
+We can see that \eqref{eq:negative-binomial} indeed defines a \pmf{} by summing
+over $k$ from $r$ to infinity. This series is a negative binomial series, which
+converges, by theorem \ref{thm:negative-binomial-series}, to $1$.
+
+\begin{rem}{(Interpretation of the negative binomial distribution.)}
+    \label{rem:negative-binomial-interpretation}
+    We have the same setup as the geometric distribution:
+    there is an infinite sequence of independent and identical Bernoulli
+    trials with success probability $p$.
+
+    If the variable $Y$ indicates which trial the $r$\th{} success occurs in,
+    then $Y \sim \NBin{r; p}$.
+\end{rem}
+
+\begin{rem}{(Generalization of the geometric distribution.)}
+    If we take $r = 1$, then $\NBin{r;p} \sim \Geo{p}$.
+\end{rem}
+
+\begin{thm}
+    If $Y \sim \NBin{r;p}$, then
+    %
+    \begin{enumerate}
+        \item $\E{Y} = \frac{r}{p}$
+        \item $\V{Y} = \frac{r(1-p)}{p^2}$
+    \end{enumerate}
+\end{thm}
+
+\begin{proof}
+    See notes of 9 February, page 7.
+\end{proof}
 
 \subsection{Hypergeometric distribution}
 
