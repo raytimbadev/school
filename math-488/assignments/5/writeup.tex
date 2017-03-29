@@ -1,0 +1,98 @@
+\documentclass[11pt]{article}
+
+\author{Jacob Thomas Errington}
+\title{Assignment \#5\\Honours set theory -- MATH 488}
+\date{31 March 2017}
+
+\usepackage[geometry]{jakemath}
+
+\begin{document}
+
+\maketitle
+
+\begin{prop}{(Knaster-Tarski fixed point theorem.)}
+    Suppose $X$ is a set and $f : P(X) \to P(X)$ is a monotone function.
+    Then, $f$ has a fixed point.
+\end{prop}
+
+\begin{proof}
+    We want to find $A \in P(X)$ such that $A = f(A)$.
+    %
+    Let
+    %
+    \begin{equation*}
+        \mathcal{A} = \setof{ A \in P(X) : A \subseteq f(A) }
+    \end{equation*}
+    %
+    be a family of subsets of $X$. Let $A = \Union \mathcal{A}$.
+    Since each ``piece'' of $A$ is a subset of its image, the whole $A$ is a
+    subset of its image, so we have that $A \subseteq f(A)$, and so
+    $A \in \mathcal{A}$.
+
+    Note that by monotonicity we have that $f(A) \subseteq f(f(A))$, so
+    %
+    \begin{equation}
+        \label{eq:rekt}
+        f(A) \in \mathcal{A}
+    \end{equation}
+
+    Next, we want to see that $f(A) \subseteq A$.
+    %
+    Take arbitrary $x \in f(A)$
+    and suppose for a contradiction that $x \notin A$.
+    %
+    Since $A$ is a union,
+    we deduce that for any $B \in \mathcal{A}$,
+    we have $x \notin B$.
+    %
+    But then since $f(A) \in \mathcal{A}$, we have that $x \notin f(A)$, which
+    is a contradiction.
+\end{proof}
+
+\begin{prop}{(Banach's lemma.)}
+    Suppose $f : X \to Y$ and $g : Y \to X$ are functions.
+    Then there exists a set $C \subseteq X$ such that
+    \begin{equation}
+        \label{eq:wts-2}
+        g(Y \setminus f(C)) = X \setminus C
+    \end{equation}
+\end{prop}
+
+\begin{proof}
+    Define $F : P(X) \to P(X)$ by $A \mapsto g \circ f (A)$.
+    Then due to the fact that $f$ and $g$ are functions rather than arbitrary
+    relations, it is clear that $F$ is monotonically decreasing.
+    %
+    We apply the fixed-point theorem to obtain a set $A \subseteq X$ such that
+    $g \circ f (A) = A$, so $f(A) = g\inv(A) = B \subseteq Y$.
+
+    Another way of thinking about the set $C$ we are looking for is as a piece
+    of $X$ such that removing it from $X$ and removing its image from $Y$
+    results in subsets of $X$ and $Y$ that are in bijection when $f$ and $g$
+    are restricted to these subsets.
+
+    The sets $A$ and $B$ correspond with this intuition, so let
+    $C = X \setminus A$. We check \eqref{eq:wts-2}.
+
+    Consider $f(X \setminus A)$. Since $f$ restricted to $A$ is a bijection
+    with $B$, the function must send everything outside $A$ to things outside
+    $B$, so $f(X \setminus A) \subseteq Y \setminus B$.
+    But then, since $g$ restricted to $B$ is a bijection with $A$, things
+    outside $B$ must be sent to things outside $A$.
+    Hence,
+    %
+    \begin{equation*}
+        g(Y \setminus f(C))
+        = g(Y \setminus f(X \setminus A))
+        = g(Y \setminus (Y \setminus B))
+        = g(B)
+        = A
+        = X \setminus (X \setminus A)
+        = X \setminus C
+    \end{equation*}
+    as required.
+\end{proof}
+
+
+
+\end{document}
