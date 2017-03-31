@@ -59,40 +59,158 @@
 \end{prop}
 
 \begin{proof}
-    Define $F : P(X) \to P(X)$ by $A \mapsto g \circ f (A)$.
-    Then due to the fact that $f$ and $g$ are functions rather than arbitrary
-    relations, it is clear that $F$ is monotonically decreasing.
+    Define $F : P(X) \to P(X)$ by $A \mapsto g(Y \setminus f(X \setminus A))$.
     %
-    We apply the fixed-point theorem to obtain a set $A \subseteq X$ such that
-    $g \circ f (A) = A$, so $f(A) = g\inv(A) = B \subseteq Y$.
+    Notice that $F$ is monotone:
+    %
+    \begin{align*}
+        A &\subseteq B \\
+        X \setminus A &\supseteq X \setminus B \\
+        f(X \setminus A) &\supseteq f(X \setminus B) \\
+        Y \setminus f(X \setminus A) &\subseteq Y \setminus f(X \setminus B) \\
+        g(Y\setminus f(X\setminus A) &\subseteq g(Y\setminus f(X\setminus B))
+    \end{align*}
+    %
+    Applying the fixed-point theorem, we find $A$ such that
+    %
+    \begin{equation*}
+        g(Y \setminus f(X \setminus A)) = A
+    \end{equation*}
+    %
+    Let $C = X \setminus A$, and substitute.
+    %
+    \begin{equation}
+        \label{eq:prop-2}
+        g(Y \setminus f(C)) = X \setminus C
+    \end{equation}
+\end{proof}
 
-    Another way of thinking about the set $C$ we are looking for is as a piece
-    of $X$ such that removing it from $X$ and removing its image from $Y$
-    results in subsets of $X$ and $Y$ that are in bijection when $f$ and $g$
-    are restricted to these subsets.
+\begin{cor}{(Bernstein-Cantor-Schr\"oder.)}
+    Suppose $f : X \to Y$ and $f : Y \to X$ are injections.
+    Then, $X$ is equinumerous with $Y$.
+\end{cor}
 
-    The sets $A$ and $B$ correspond with this intuition, so let
-    $C = X \setminus A$. We check \eqref{eq:wts-2}.
+\begin{proof}
+    Applying the lemma, we find $A \subseteq X$ such that
+    %
+    \begin{equation*}
+        g(Y \setminus f(A)) = X \setminus A
+    \end{equation*}
+    %
+    Note that $f \restrictto A$ is a bijection with a subset of $Y$,
+    namely $B = Y \setminus f(A)$.
+    Note that $g$ is injective and maps $B$ outside $A$.
+    Hence, if we look at $(g \restrictto B)\inv$, it takes anything outside $A$
+    into $Y$ in a one-to-one fashion.
+    So $h = (f \restrictto A) \union (g \restrictto B)\inv$ is a bijection.
+\end{proof}
 
-    Consider $f(X \setminus A)$. Since $f$ restricted to $A$ is a bijection
-    with $B$, the function must send everything outside $A$ to things outside
-    $B$, so $f(X \setminus A) \subseteq Y \setminus B$.
-    But then, since $g$ restricted to $B$ is a bijection with $A$, things
-    outside $B$ must be sent to things outside $A$.
+\newcommand{\equisub}{\prec}
+
+Write $A \equisub B$ to mean that $A \sim B^\prime$ for $B^\prime \subseteq B$.
+
+\begin{prop}
+    If $A \equisub B$ and $B \equisub A$.
+    then, $A \sim B$.
+\end{prop}
+
+\begin{proof}
+    Let $f_A : A \to B$ map points according to the equidecomposition of $A$
+    and $B^\prime$ and let $f_B : B \to A$ map according to the
+    equidecomposition from $B$ and $A^\prime$.
+    Note then that $f_A(A) = B^\prime$ and $f_B(B) = A^\prime$.
+
+    Define the map $F : P(A) \to P(A)$ by
+    \begin{equation*}
+        X \mapsto A \setminus f_B(B \setminus f_A(X))
+    \end{equation*}
+    and note that it is monotonically increasing, so it has a fixed point $X$.
+
+    Let $X^\prime = A \setminus X$, $Y = f_A(X)$, and
+    $Y^\prime = B \setminus Y$.
+
+    Notice that
+    we have $X = (A \setminus A^\prime) \union f_A(f_B(X))$.
     Hence,
     %
     \begin{equation*}
-        g(Y \setminus f(C))
-        = g(Y \setminus f(X \setminus A))
-        = g(Y \setminus (Y \setminus B))
-        = g(B)
-        = A
-        = X \setminus (X \setminus A)
-        = X \setminus C
+        X^\prime
+        = f_B(B) \intersn (A \setminus f_B(f_A(X))
+        = f_B(B) \setminus f_B(f_A(X))
+        = f_B(B) \setminus f_B(Y)
+        = f_B(Y^\prime)
     \end{equation*}
-    as required.
+
+    This means we can split $A$ into $X$ and $X^\prime$ such that on $X$, we
+    use $f_A$ and on $X^\prime$ we use $f_B\inv$. This gives an
+    equidecomposition with $B$.
 \end{proof}
 
+\begin{prop}
+    The circle is countably paradoxical with respect to the action of
+    $SO_2(\R)$.
+\end{prop}
 
+\begin{proof}
+    Define a relation $R$ on points $a$ and $b$ of the circle by saying that
+    $aRb$ if $b$ can be obtained from $a$ by a rotation of a rational multiple
+    of $2\pi$. Since there are countably many rationals, there are countably
+    many equivalence classes. Note that this relation is an equivalence
+    relation.
+
+    Using a countable choice principle, form the set $A$ by choosing one
+    representative from each equivalence class of this relation.
+    Enumerate the rotations by $\setof{r_i}_{i\in\N}$ and let $A_i = r_i(A)$.
+    The $A_i$ are pairwise disjoint and their union gives the circle, so they
+    form a partition.
+    Note that any $A_i$ and $A_j$ are congruent by a (irrational) rotation.
+    Hence if we look at the even-numbered $A_i$, we may rotate each of them (by
+    different amounts) to recover the full set $\setof{A_i}_{i\in\N}$.
+    The same applies to the odd-numbered $A_i$. Hence the circle is
+    equidecomposable into two disjoint (countable) subsets, each of them
+    congruent to the whole circle.
+    Hence the circle is paradoxical.
+\end{proof}
+
+\begin{cor}
+    The unit ball in $R^2$ is countably paradoxical.
+\end{cor}
+
+\begin{proof}
+    Each point on the circle can be identified with a point in the interval
+    $(0, 2\pi]$ using $\sin$ and $\cos$. Hence, we can extend the equivalence
+    relation we defined earlier to include any point in the unit ball.
+    Hence, instead of looking at points, we look at line segments that are
+    rotations of $(0, 2\pi]$ about the origin.
+
+    But now we have a problem at the origin, because we needs "two origins" to
+    reconstruct two balls, yet we only have one.
+
+    To fix this, when we instead look at rotations of \emph{open} segments
+    corresponding to $(0, 2\pi)$ to construct the interior of the ball. For the
+    boundary, when we apply the argument from the previous proposition, in
+    considering the even-numbered rotations, we discount the zeroth one, and
+    instead use that point as the new origin by translating it to the center of
+    the first ball that we construct. The second ball, built from the
+    odd-numbered rotations of the boundary, can use the origin of the original
+    ball.
+
+    It is precisely because of this translation that we need to consider the
+    full group of isometries and not just the rotations.
+\end{proof}
+
+\begin{prop}
+    There does not exist a nonzero finitely additive measure defined on all
+    subsets of $\R^3$ that is invariant under translations and rotations.
+\end{prop}
+
+\begin{proof}
+    Suppose that such a measure did exist. From the Banach-Tarski paradox, we
+    can decompose the ball into two identical copies using translations and
+    rotations. By induction, the ball can be duplicated into $k$ many copies
+    for any $k \in \N$ of our choosing. Hence, the measure must assign the same
+    measure to one ball as it does to $k$ many of them. This is possible only
+    if it assigns zero to them all.
+\end{proof}
 
 \end{document}
