@@ -1,0 +1,17 @@
+rm comes up
+find most recent main data lock file
+load corresponding main data
+find most recent prepared transaction lock file
+load corresponding list of prepared transactions
+for each:
+    load transaction data
+    if doesn't exist:
+        then we must have crashed after deleting data file but before updating
+        the list of prepared transactions; this is not a problem
+    check status of transaction with middleware
+    if committed:
+        merge with main data
+        persist main data
+    delete transaction data file
+    write updated prepared transaction list to alternate file
+    write lock file for alternate transaction list

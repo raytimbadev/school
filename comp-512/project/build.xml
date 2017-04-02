@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="help" name="project">
+
+    <property name="server.bindAddress" value="localhost"/>
+    <property name="server.listenPort" value="8080"/>
+    <property name="server.type" value="item"/>
+    <property name="server.threadCount" value="4" />
+
+    <property name="test-loop-count" value="1000"/>
+    <property name="test-tps" value="10"/>
+    <property name="test-setting" value="0"/>
+    <property name="test-filename" value="log/log.txt"/>
+
+    <property name="middleware.hostname" value="localhost"/>
+    <property name="middleware.bindAddress" value="0.0.0.0"/>
+    <property name="middleware.listenPort" value="8080"/>
+
+    <property name="flightServer.hostname" value="localhost"/>
+    <property name="flightServer.listenPort" value="8081"/>
+
+    <property name="carServer.hostname" value="localhost"/>
+    <property name="carServer.listenPort" value="8082"/>
+
+    <property name="roomServer.hostname" value="localhost"/>
+    <property name="roomServer.listenPort" value="8083"/>
+ 
+    <property name ="customerServer.hostname" value="localhost"/>
+    <property name ="customerServer.listenPort" value="8084" />
+
+    <target name="clean">
+        <delete dir="${basedir}/build" includeEmptyDirs="true"/>
+    </target>
+
+    <target name="reset">
+        <delete dir="${basedir}/persistence"/>
+    </target>
+
+    <target name="setup">
+        <mkdir dir="${basedir}/build" />
+        <mkdir dir="${basedir}/build/server" />
+        <mkdir dir="${basedir}/build/client" />
+        <mkdir dir="${basedir}/build/middleware" />
+    </target>
+
+    <target name="build-server" depends="setup">
+        <javac
+            fork="true"
+            debug="true"
+            verbose="${verbose}"
+            destdir="${basedir}/build/server"
+            srcdir="${basedir}/src"
+            includes="client/**, common/**, server/**, lockmanager/**, transactionmanager/**"
+            sourcepath="${basedir}/src" >
+        </javac>
+    </target>
+
+    <target name="build-client" depends="setup">
+        <javac
+            fork="true"
+            debug="true"
+            verbose="${verbose}"
+            destdir="${basedir}/build/client"
+            srcdir="${basedir}/src"
+            includes="common/**, client/**, transactionmanager/**"
+            sourcepath="${basedir}/src">
+        </javac>
+    </target>
+	
+	<target name="build-test-client" depends="setup">
+		<javac
+            fork="true"
+            debug="true"
+			verbose="${verbose}"
+			destdir="${basedir}/build/client"
+			srcdir="${basedir}/src"
+			includes="common/**, client/**, transactionmanager/**"
+			sourcepath="${basedir}/src">
+		</javac>
+	</target>
+
+    <target name="build-middleware" depends="setup">
+        <javac
+            fork="true"
+            debug="true"
+            verbose="${verbose}"
+            destdir="${basedir}/build/middleware"
+            srcdir="${basedir}/src"
+            includes="common/**, middleware/**, client/**, transactionmanager/**"
+            sourcepath="${basedir}/src">
+        </javac>
+    </target>
+
+    <target name="server" depends="build-server">
+        <echo message="Launching ${server.type} server."/>
+        <java classname="server.sockets.Server">
+            <classpath>
+                <pathelement location="${basedir}/build/server" />
+            </classpath>
+            <arg value="${server.bindAddress}" />
+            <arg value="${server.listenPort}" />
+            <arg value="${server.type}" />
+            <arg value="${server.threadCount}" />
+            <arg value="${middleware.hostname}" />
+            <arg value="${middleware.listenPort}" />
+        </java>
+    </target>
+
+    <target name="client" depends="build-client">
+        <java classname="client.Client">
+            <classpath>
+                <pathelement location="${basedir}/build/client" />
+            </classpath>
+            <arg value="${middleware.hostname}" />
+            <arg value="${middleware.listenPort}" />
+        </java>
+    </target>
+
+
+    <target name="test-client" depends="build-test-client">
+        <java classname="client.ScriptedClient">
+            <classpath>
+                <pathelement location="${basedir}/build/client" />
+            </classpath>
+            <arg value="${middleware.hostname}" />
+            <arg value="${middleware.listenPort}" />
+            <arg value="${test-loop-count}"/>
+            <arg value="${test-tps}"/>
+            <arg value="${test-setting}"/>
+            <arg value="${test-filename}"/>
+        </java>
+    </target>
+
+
+    <target name="middleware" depends="build-middleware">
+        <java classname="middleware.Middleware">
+            <classpath>
+                <pathelement location="${basedir}/build/middleware" />
+            </classpath>
+            <arg value="${middleware.bindAddress}" />
+            <arg value="${middleware.listenPort}" />
+            <arg value="${flightServer.hostname}" />
+            <arg value="${flightServer.listenPort}" />
+            <arg value="${carServer.hostname}" />
+            <arg value="${carServer.listenPort}" />
+            <arg value="${roomServer.hostname}" />
+            <arg value="${roomServer.listenPort}" />
+            <arg value="${customerServer.hostname}"/>
+            <arg value="${customerServer.listenPort}"/>
+        </java>
+    </target>
+
+</project>

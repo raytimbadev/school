@@ -1,0 +1,8 @@
+/build/
+/persistence/
+/webapps/
+*.class
+*.swp
+*wsdl
+*.secrets
+log*/
