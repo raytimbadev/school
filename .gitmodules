@@ -1,9 +1,6 @@
 [submodule "hgen-396"]
 	path = hgen-396
 	url = git@github.com:djeik/HGEN-396.git
-[submodule "comp-512/project"]
-	path = comp-512/project
-	url = https://github.com/djeik/comp-512-project.git
 [submodule "comp-520/project"]
 	path = comp-520/project
 	url = git@github.com:djeik/comp-520-project.git
