@@ -1,0 +1,118 @@
+\documentclass[11pt,letterpaper]{article}
+
+\author{Jacob Thomas Errington (260636023)}
+\date{28 January 2016}
+\title{Assignment \#1\\Logic and Computation (COMP 527)}
+
+\usepackage{proof}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.0cm]{geometry}
+\DeclareMathOperator{\TrueOp}{true}
+\newcommand{\true}{\TrueOp{}}
+
+\newtheorem{proposition}{Proposition}
+
+\begin{document}
+
+\maketitle
+
+We consider the following proposed disjunction inference rules.
+
+$$
+\infer[\land E^{u, v}]{C}{
+    A \land B \true
+    &
+    \infer*{C \true}{
+        \infer[u]{A \true}{\;}
+        &
+        \infer[v]{B \true}{\;}
+    }
+}
+$$
+
+$$
+\infer[\land I]{A \land B \true}{
+    A \true
+    &
+    B \true
+}
+$$
+
+\begin{proposition}
+    The proposed disjunction inference rules are locally sound.
+\end{proposition}
+
+\begin{proof}
+    Consider the following derivation.
+
+    $$
+    \infer[\land E^{u, v}]{C \true}{
+        \infer[\land I]{A \land B \true}{
+            \deduce[\mathcal{D}]{A \true}{}
+            &
+            \deduce[\mathcal{E}]{B \true}{}
+        }
+        &
+        \deduce[\mathcal{F}]{C \true}{
+            \infer[u]{A \true}{}
+            &
+            \infer[v]{B \true}{}
+        }
+    }
+    $$
+
+    We may rewrite it as follows, entirely eliminating the disjunctions.
+
+    $$
+    \deduce[\mathcal{F}]{C \true}{
+        \deduce[\mathcal{D}]{A \true}{}
+        &
+        \deduce[\mathcal{E}]{B \true}{}
+    }
+    $$
+
+    Hence, the proposed disjunction inference rules are locally sound.
+\end{proof}
+
+\begin{proposition}
+    The proposed disjunction inference rules are locally complete.
+\end{proposition}
+
+\begin{proof}
+    Suppose we have a derivation for $A \land B \true$.
+
+    $$
+    \deduce[\mathcal{D}]{A \land B \true}{}
+    $$
+
+    We may make a detour through disjunction elimination and reintroduction as
+    follows.
+
+    $$
+    \infer[\land I]{A \land B \true}{
+        \infer[\land E^{u, v}]{A \true}{
+            \deduce[\mathcal{D}]{A \land B \true}{}
+            &
+            \infer*{A \true}{
+                \infer[u]{A \true}{}
+                &
+                \infer[v]{B \true}{}
+            }
+        }
+        &
+        \infer[\land E^{u, v}]{B \true}{
+            \deduce[\mathcal{D}]{A \land B \true}{}
+            &
+            \infer*{B \true}{
+                \infer[u]{A \true}{}
+                &
+                \infer[v]{B \true}{}
+            }
+        }
+    }
+    $$
+
+    This shows local completeness.
+\end{proof}
+
+\end{document}

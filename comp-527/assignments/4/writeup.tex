@@ -1,0 +1,365 @@
+\documentclass[11pt,letterpaper]{article}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#4\\Logic and computation -- COMP 527}
+\date{24 March 2016}
+
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{amsmath,amsthm,amssymb,proof}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\DeclareMathOperator{\opNode}{Node}
+\DeclareMathOperator{\opTree}{tree}
+\DeclareMathOperator{\opNat}{nat}
+\DeclareMathOperator{\opTrue}{true}
+\DeclareMathOperator{\opRec}{\mathtt{rec}}
+\DeclareMathOperator{\opLet}{\mathtt{let}}
+\DeclareMathOperator{\opIn}{\mathtt{in}}
+\DeclareMathOperator{\opWith}{\mathtt{with}}
+\DeclareMathOperator{\opInit}{\mathrm{init}}
+
+\newcommand{\emptyTree}{\mathrm{Empty}}
+\newcommand{\nodeTree}[3]{\opNode{#1\,#2\,#3}}
+\newcommand{\tree}{\opTree{}}
+\newcommand{\nat}{\opNat{}}
+\newcommand{\with}{\opWith{}}
+\newcommand{\case}[3]{#1\,#2\mapsto #3}
+\newcommand{\orCase}{\mid}
+\newcommand{\rec}[1]{\opRec{\,#1\,}}
+\newcommand{\reducesTo}{\implies}
+\newcommand{\olet}{\opLet{}\,}
+\newcommand{\oin}{\opIn{}\,}
+\newcommand{\proves}{\vdash}
+\newcommand{\init}{\opInit{}}
+\newcommand{\seq}{\implies}
+\newcommand{\imp}{\supset}
+\renewcommand{\t}{\opTrue{}}
+
+\begin{document}
+
+\maketitle
+
+\section{Induction principles for binary trees}
+
+Consider the following definition of binary trees.
+
+\begin{align*}
+    \infer{\emptyTree : \text{tree}}{}
+    &
+    \quad
+    &
+    \infer{\nodeTree{n}{t_1}{t_2} : \tree}{
+        n : \nat & t_1 : \tree & t_2 : \tree
+    }
+\end{align*}
+
+\begin{enumerate}
+    \item Here is an induction rule for binary trees.
+
+        \begin{equation*}
+            \infer[\tree E^{n, t_1, t_2, ih_1, ih_2}]{A(t) \t}{
+                t : \tree
+                &
+                A(\emptyTree) \t
+                &
+                \infer*{A(\nodeTree{n}{t_1}{t_2}) \t}{
+                    \infer{n : \nat}{}
+                    &
+                    \infer{t_1 : \tree}{}
+                    &
+                    \infer{t_2 : \tree}{}
+                    &
+                    \infer[ih_1]{A(t_1) \t}{}
+                    &
+                    \infer[ih_2]{A(t_2) \t}{}
+                }
+            }
+        \end{equation*}
+
+    \item Here is an induction rule for binary trees annotated with proof
+        terms.
+
+        \begin{equation*}
+            \infer[\tree E^{n, t_1, t_2, ih_1, ih_2}]{
+                \rec{t} \with
+                \case{f}{\emptyTree}{M_E}
+                \orCase
+                \case{f}{\nodeTree{n}{t_1}{t_2}}{M_N}
+                : A(t)
+            }{
+                t : \tree
+                &
+                M_E : A(\emptyTree)
+                &
+                \infer*{M_N : A(\nodeTree{n}{t_1}{t_2})}{
+                    \infer{n : \nat}{}
+                    &
+                    \infer{t_1 : \tree}{}
+                    &
+                    \infer{t_2 : \tree}{}
+                    &
+                    \infer[ih_1]{f\, t_1 : A(t_1)}{}
+                    &
+                    \infer[ih_2]{f\, t_2 : A(t_2)}{}
+                }
+            }
+        \end{equation*}
+
+    \item Here is a reduction rule for recursion on binary trees.
+
+        \begin{equation*}
+            \rec{\emptyTree}
+            \with \case{f}{\emptyTree}{M_E}
+            \orCase \case{f}{\nodeTree{n}{t_1}{t_2}}{M_N} \reducesTo M_E
+        \end{equation*}
+
+        \begin{align*}
+            &\rec{\nodeTree{m}{s_1}{s_2}}
+            \with \case{f}{\emptyTree}{M_E}
+            \orCase \case{f}{\nodeTree{n}{t_1}{t_2}}{M_N} \\
+            \reducesTo
+            &\olet r_1 = \rec{s_1}
+                \with \case{f}{\emptyTree}{M_E}
+                \orCase \case{f}{\nodeTree{n}{t_1}{t_2}}{M_N} \oin \\
+            &\olet r_2 = \rec{s_2}
+                \with \case{f}{\emptyTree}{M_E}
+                \orCase \case{f}{\nodeTree{n}{t_1}{t_2}}{M_N} \oin \\
+            &\left[m/n, s_1/t_1, s_2/t_2, r_1/f\,t_1, r_2/f\,t_2\right]M_N
+        \end{align*}
+
+    \item The proposed rules preserve typing.
+
+        \begin{proof} By examining the operation of the rules.
+            \begin{description}
+                \item[Base case.] Using the first reduction rule.
+
+                    \begin{tabular}{c r}
+                        $
+                        \rec{\emptyTree}
+                        \with \case{f}{\emptyTree}{M_E}
+                        \orCase \case{f}{\nodeTree{n}{t_1}{t_2}}{M_N}
+                        : A(\emptyTree)
+                        $
+                        &
+                        ass. \\
+                        $
+                        M_E : A(\emptyTree)
+                        $
+                        &
+                        by $\tree E$
+                    \end{tabular}
+
+                \item[Step case.] Using the second reduction rule.
+
+                    \begin{tabular}{c r}
+                        $ % ***
+                        \rec{\nodeTree{m}{s_1}{s_2}}
+                        \with \case{f}{\emptyTree}{M_E}
+                        \orCase \case{f}{\nodeTree{n}{t_1}{t_2}}{M_N}
+                        : A(\nodeTree{m}{s_1}{s_2})
+                        $
+                        &
+                        ass. \\
+                        $ % ***
+                        \nodeTree{m}{s_1}{s_2} : \tree,
+                        m : \nat, s_1 : \tree, s_2 : \tree
+                        $
+                        &
+                        by $\tree E$ \\
+                        $ % ***
+                        M_E : A(\emptyTree)
+                        $
+                        &
+                        ~ \\
+                        $ % ***
+                        n : \nat, t_1 : \tree, t_2 : \tree,
+                        ih_1 : A(t_1), ih_2 : A(t_2)
+                        \proves M_N : A(\nodeTree{n}{t_1}{t_2})
+                        $
+                        &
+                        ~ \\
+                        $ % ***
+                        ih_1 : A(s_1), ih_2 : A(s_2)
+                        \proves
+                        \left[m/n, s_1/t_1, s_2/t_2\right]
+                        M_N : A(\nodeTree{m}{s_1}{s_2})
+                        $
+                        &
+                        subst. \\
+                        $ % ***
+                        \proves
+                        \left[
+                            m/n, s_1/t_1, s_2/t_2, r_1/f\, t_1, r_2/f\, t_2
+                        \right]
+                        M_N : A(\nodeTree{m}{s_1}{s_2})
+                        $
+                        &
+                        subst. \\
+                    \end{tabular}
+            \end{description}
+        \end{proof}
+
+    \item Here is a primitive recursive program to compute the size of a binary
+        tree.
+
+        \begin{equation*}
+            \rec{t}
+            \with \case{f}{\emptyTree}{z}
+            \orCase \case{f}{\nodeTree{n}{t_1}{t_2}}{s(f\, t_1 + f\, t_2)}
+        \end{equation*}
+
+\end{enumerate}
+
+\section{Sequent calculus}
+
+\subsection{Practice}
+
+See figures \ref{fig:seq-calc-1} and \ref{fig:seq-calc-2}.
+
+\begin{figure}[ht]
+    \centering
+    Let $\Gamma = A \land (B \lor C)$ and $\Gamma^\prime = \Gamma, A, B \lor C$.
+    \begin{equation*}
+        \infer[\land L_l]{\Gamma \seq A \land B \lor A \land C}{
+            \infer[\land L_r]{\Gamma, A \seq A \land B \lor A \land C}{
+                \infer[\lor L^{u,v}]{\Gamma^\prime \seq A \land B \lor A \land C}{
+                    \infer[\lor R_l]{\Gamma^\prime, u:B \seq A \land B \lor A \land C}{
+                        \infer[\land R]{\Gamma^\prime, u:B \seq A \land B}{
+                            \infer[\init]{\Gamma^\prime, u:B \seq A}{}
+                            &
+                            \infer[\init]{\Gamma^\prime, u:B \seq B}{}
+                        }
+                    }
+                    &
+                    \infer[\lor R_r]{\Gamma^\prime, v:C \seq A \land B \lor A \land C}{
+                        \infer[\land R]{\Gamma^\prime, v:C \seq A \land C}{
+                            \infer[\init]{\Gamma^\prime, v:C \seq A}{}
+                            &
+                            \infer[\init]{\Gamma^\prime, v:C \seq C}{}
+                        }
+                    }
+                }
+            }
+        }
+    \end{equation*}
+    \caption{
+        Sequent calculus proofs can be very large sometimes.
+    }
+    \label{fig:seq-calc-1}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    Let $\Gamma = (D \imp B) \imp C \imp D, B \imp A, (C \imp D) \imp B$.
+    \begin{equation*}
+        \infer[\imp L]{\Gamma \seq A}{
+            \infer[\imp L]{\Gamma \seq B}{
+                \infer[\imp R^u]{\Gamma \seq C \imp D}{
+                    \infer[\imp L]{\Gamma, u:C \seq D}{
+                        \infer[\imp R^v]{\Gamma, u:C \seq (D \imp B) \imp C}{
+                            \infer[\init]{\Gamma, u:C, v:D \imp B \seq C}{}
+                        }
+                        &
+                        \infer[\init]{\Gamma, u:C, D \seq D}{}
+                    }
+                }
+                &
+                \infer[\init]{\Gamma, B \seq B}{}
+            }
+            &
+            \infer[\init]{\Gamma, A \seq A}{}
+        }
+    \end{equation*}
+    \caption{
+        I can't tell which is crazier; this one, or the previous one?
+    }
+    \label{fig:seq-calc-2}
+\end{figure}
+
+\section{Optimization}
+
+\begin{lemma}
+    For all propositions $A$, $$\Gamma, A \seq A$$
+\end{lemma}
+
+\begin{proof}
+    By structural induction on $A$.
+
+    \begin{description}
+        \item[Base case.] $A = P$, i.e. $A$ is atomic. Then by $init^\prime$ we
+            have $\Gamma, A \seq A$.
+
+        \item[Base case.] $A = \top$
+
+            By $\top R$, $\Gamma \seq \top$ and by weakening
+            \begin{equation*}
+                \Gamma, \top \seq \top
+            \end{equation*}
+
+        \item[Base case.] $A = \bot$
+
+            By $\bot L$, $\Gamma, \bot \seq C$ for any $C$. Instantiating $C$
+            to $\bot$ completes the construction.
+
+        \item[Case] $A = B \land C$
+
+            \begin{equation*}
+                \infer[\land R]{\Gamma, B \land C \seq B \land C}{
+                    \infer[\land L_l]{\Gamma, B \land C \seq B}{
+                        \deduce[\mathcal{D}]{\Gamma, B \land C, B \seq B}{}
+                    }
+                    &
+                    \infer[\land L_r]{\Gamma, B \land C \seq C}{
+                        \deduce[\mathcal{E}]{\Gamma, B \land C, C \seq C}{}
+                    }
+                }
+            \end{equation*}
+
+            We apply the induction hypothesis on $\Gamma, B \seq B$ and use
+            weakening to build the derivation $\mathcal{D}$. Likewise we apply
+            the induction hypothesis on $\Gamma, C \seq C$ and use weakening to
+            build $\mathcal{E}$.
+
+
+        \item[Case] $A = B \imp C$
+
+            \begin{equation*}
+                \infer[\imp R]{\Gamma, B \imp C \seq B \imp C}{
+                    \infer[\imp L]{\Gamma, B \imp C, B \seq C}{
+                        \deduce[\mathcal{D}]{\Gamma, B \imp C, B \seq B}{}
+                        &
+                        \deduce[\mathcal{E}]{\Gamma, B \imp C, C \seq C}{}
+                    }
+                }
+            \end{equation*}
+
+            We proceed by using the induction hypothesis and weakening as in
+            the case of conjunction.
+
+        \item[Case] $A = B \lor C$
+
+            \begin{equation*}
+                \infer[\lor L^{u, v}]{\Gamma, B \lor C \seq B \lor C}{
+                    \infer[\lor R_l]{\Gamma, B \lor C, u:B \seq B \lor C}{
+                        \deduce[\mathcal{D}]{\Gamma, B \lor C, u:B \seq B}{}
+                    }
+                    &
+                    \infer[\lor R_r]{\Gamma, B \lor C, v:C \seq B \lor C}{
+                        \deduce[\mathcal{E}]{\Gamma, B \lor C, v:C \seq C}{}
+                    }
+                }
+            \end{equation*}
+
+            We proceed by using the induction hypothesis and weakening as in
+            the case of conjunction.
+
+    \end{description}
+\end{proof}
+
+\section{Proving cut}
+
+Omitted.
+
+\end{document}

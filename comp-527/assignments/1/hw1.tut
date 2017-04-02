@@ -1,0 +1,248 @@
+% -------------------------------------------------------------
+% HOMEWORK 1  --- due Jan 28 1:05pm (beginning of class)
+% ------------------------------------------------------------
+%
+% ------------------------------------------------------------
+% Q1 : Prove the following statements (26 points)
+
+proof easy0 : (A & (B & C)) => (A & B) =
+begin
+[   A & (B & C) ;               % Assumption u (begin hypothetical)
+    A ;                         % left &-elimination
+    B & C ;                     % right &-elimination
+    B ;                         % left &-elimination
+    A & B                       % &-introduction
+] ;                             % conclusion of hypothetical
+
+(A & (B & C)) => (A & B)    % discharge assumption u
+end;
+
+term easy0 : (A & (B & C)) => (A & B) =
+    fn p => (fst p, fst (snd p)) ;
+
+proof easy1 : (A => B) => ((B => C) => (A => C)) =
+begin
+[   A => B ;
+
+    [   B => C ;
+
+        [   A ;
+            B ;
+            C
+        ] ;
+
+        A => C
+    ] ;
+
+    (B => C) => (A => C)
+] ;
+
+(A => B) => ((B => C) => (A => C))
+end;
+
+term easy1 : (A => B) => (B => C) => (A => C) =
+    fn f => fn g => fn x => g (f x) ;
+
+annotated proof d1a : ((A | B) => C) => (A => C) & (B => C) =
+begin
+[   f : ((A | B) => C) ;            % assumption u
+    [   x : A ;
+        inl x : A | B ;             % |-intro
+        f (inl x) : C               % =>-elimination on u
+    ] ;
+
+    fn x => f (inl x) : A => C ;    % =>-intro from above hypothetical
+
+    [   x : B ;
+        inr x : A | B ;             % |-intro
+        f (inr x) : C               % =>-elimination on u
+    ] ;
+
+    fn x => f (inr x) : B => C ;    % =>-intro from above hypothetical
+
+    (fn x => f (inl x), fn x => f (inr x)) : (A => C) & (B => C) % &-intro
+] ;
+
+fn f => (fn x => f (inl x), fn x => f (inr x)) : ((A | B) => C) => (A => C) & (B => C)
+end;
+
+annotated proof d1b : (A => C) & (B => C) => (A | B) => C =
+begin
+[   p : (A => C) & (B => C) ;
+    fst p : A => C ;
+    snd p : B => C ;
+    [   e : A | B ;
+        [   x : A ;
+            (fst p) x : C
+        ] ;
+        [   y : B ;
+            (snd p) y : C
+        ] ;
+        case e of inl x => (fst p) x | inr y => (snd p) y end : C
+    ] ;
+
+    fn e => case e of inl x => (fst p) x | inr y => (snd p) y end : A | B => C ;
+] ;
+fn p => fn e =>
+    case e
+        of inl x => (fst p) x
+         | inr y => (snd p) y
+    end
+: (A => C) & (B => C) => (A | B) => C
+end;
+
+proof d1c : ((A => B) & (A | C)) => (B | C) =
+begin
+[   (A => B) & (A | C) ;
+    A => B ;
+    A | C ;
+    [   C ;
+        B | C
+    ] ;
+    [   A ;
+        B ;
+        B | C
+    ] ;
+    B | C
+] ;
+
+((A => B) & (A | C)) => (B | C)
+end;
+
+term d1c : ((A => B) & (A | C)) => (B | C) =
+    fn p =>
+        case (snd p)
+            of inl x => inl ((fst p) x)
+             | inr x => inr x
+        end ;
+
+% OPTIONAL
+proof easy2 : (A | (B & C)) => ((A | B) & (A | C)) =
+begin
+[   A | B & C ;
+    [   A ;
+        A | B ;
+        A | C ;
+        (A | B) & (A | C)
+    ] ;
+    [   B & C ;
+        B ;
+        C ;
+        A | B ;
+        A | C ;
+        (A | B) & (A | C)
+    ] ;
+    (A | B) & (A | C)
+] ;
+A | B & C => ((A | B) & (A | C))
+end ;
+
+proof d1d : (A => ~ A) => (~ A) =
+begin
+[   A => ~ A ;
+    [   A ;
+        ~ A ;
+        F
+    ] ;
+    ~ A
+] ;
+(A => ~A) => ~A
+end  ;
+
+proof q1a  : (~A | ~B) => ~(A & B) =
+begin
+[   ~A | ~B ;
+    [   ~A ;
+        [   A & B ;
+            A ;
+            F
+        ] ;
+        ~(A & B)
+    ] ;
+    [   ~B ;
+        [   A & B ;
+            B ;
+            F
+        ] ;
+        ~(A & B)
+    ] ;
+    ~(A & B) ;
+] ;
+(~A | ~B) => ~(A & B)
+end;
+
+proof q1b : ~A & ~B => ~(A | B) =
+begin
+[   ~A & ~B ;
+    ~A ;
+    ~B ;
+    [   A | B ;
+        [   A ;
+            F
+        ] ;
+        [   B ;
+            F
+        ] ;
+        F
+    ] ;
+    ~(A | B)
+] ;
+~A & ~B => ~(A | B)
+end;
+
+proof q1c : ~(A | B) => ~A & ~B =
+begin
+[   ~(A | B) ;
+    [   A ;
+        A | B ;
+        F
+    ] ;
+    ~A ;
+    [   B ;
+        A | B ;
+        F
+    ] ;
+    ~B ;
+    ~A & ~B
+] ;
+~(A | B) => ~A & ~B
+end ;
+
+classical proof q1d : ~(A & B) => ~A | ~B =
+begin
+[   A & B => F ;
+    [   ~(~A | ~B) ;
+        [   ~A ;
+            ~A | ~B ;
+            F
+        ] ;
+        ~~A ;
+        A ;
+        [   ~B ;
+            ~A | ~B ;
+            F
+        ] ;
+        ~~B ;
+        B ;
+        A & B ;
+        F
+    ] ;
+    ~A | ~B
+] ;
+~(A & B) => ~A | ~B
+end;
+
+proof q1e : (~ ~ ~ A => ~ A) =
+begin
+[   ~~~A ;
+    [   A ;
+        [   ~A ;
+            F
+        ] ;
+        ~~A ;
+        F
+    ];
+    ~A
+] ;
+~~~A => ~A
+end ;

@@ -1,0 +1,114 @@
+proof t1 : (?x : t. A => B x) => A => (?x : t. B x) =
+begin
+[?x : t . A => B x;
+ [A;
+  [a : t, A => B a;
+   B a;
+   ?x : t . B x
+  ];
+  ?x : t . B x
+ ];
+ A => (?x : t . B x)
+];
+(?x : t. A => B x) => A => (?x : t. B x)
+end;
+
+term t1 : (?x : t . A => B x) => A => (?x : t . B x) =
+    fn x =>
+        let (c, f) = x
+        in fn a =>
+            (c, f a);
+
+proof t4 : (?x : t . P x => A) => ((!x : t . P x) => A) =
+begin
+[?x : t . P x => A;
+
+ [a : t, P a => A;
+  [!x : t . P x;
+   P a;
+   A
+  ];
+  (!x : t . P x) => A
+ ];
+ (!x : t . P x) => A
+];
+(?x : t . P x => A) => ((!x : t . P x) => A)
+end;
+
+term t4 : (?x : t . P x => A) => ((!x : t . P x) => A) =
+    fn x =>
+        let (c, p) = x
+        in fn a =>
+            p (a c);
+
+term t6 : ~(?x : t . B x) => !x : t . ~ B x =
+    fn f =>
+        fn a =>
+            fn v =>
+                f (a, v);
+
+proof s1 : (A & ?x : t . B x) => (?x : t . A & B x) =
+begin
+[A & ?x : t . B x;
+ ?x : t . B x;
+ A;
+ [a : t, B a;
+  A & B a;
+  ?x : t . A & B x
+ ];
+ ?x : t . A & B x
+];
+(A & ?x : t . B x) => (?x : t . A & B x)
+end;
+
+term s1 : (A & ?x : t . B x) => (?x : t . A & B x) =
+    fn x =>
+        let (c, p) = snd x
+        in (c, (fst x, p));
+
+proof s2 : (?x : t . A & B x) => (A & ?x : t . B x) =
+begin
+[?x : t . A & B x;
+ [a : t, A & B a;
+  A;
+  B a;
+  ?x : t . B x;
+  A & ?x : t . B x
+ ];
+ A & ?x : t . B x
+];
+(?x : t . A & B x) => (A & ?x : t . B x)
+end;
+
+term s2 : (A & ?x : t . B x) => (?x : t . A & B x) =
+    fn j =>
+        let (x, b) = snd j
+        in (x, (fst j, b));
+
+proof s3 : (A | !x : t . B x) => (!x : t . A | B x) =
+begin
+[A | !x : t . B x;
+ [a : t;
+  [A;
+   A | B a
+  ];
+
+  [!x : t . B x;
+   B a;
+   A | B a
+  ];
+
+  A | B a;
+ ];
+ !x : t . A | B x
+];
+(A | !x : t . B x) => (!x : t . A | B x)
+end;
+
+term s3 : (A | !x : t . B x) => (!x : t . A | B x) =
+    fn e =>
+        fn x =>
+            case e
+             of inl a => inl a
+              | inr f => inr (f x)
+            end;

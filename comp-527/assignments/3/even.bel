@@ -1,0 +1,69 @@
+LF nat:type = 
+| z : nat
+| s : nat -> nat ;
+
+LF even: nat -> type =
+| ev_z : even z
+| ev_s : even N -> even (s (s N));
+
+% Use logic programming proof search to find a proof P for the proposition/type on the right.
+%query 1 *  P : even (s (s (s (s z)))).
+%query 1 1  P : even (s (s (s (s N)))).
+
+% Specify the proof that is the witness for a given type
+rec d1 : [ |- even (s (s z))]  =
+ [|- ev_s ev_z];
+
+rec d2 : [ |- even (s (s (s (s z))))] =
+ let [|- D] = d1 in [|- ev_s D];
+
+rec d2' : [ |- even (s (s (s (s z))))] =
+  [|- ev_s (ev_s ev_z)];
+
+
+% Simple proofs about even;
+% If [|- even N] then [|- even (s (s (s (s N))))] 
+rec thm : [ |- even N] -> [|- even (s (s (s (s N)))) ] = 
+fn d => let [ |- D] = d in [|- ev_s (ev_s D)];
+
+% -----------------------------------------------------------
+LF add: nat -> nat -> nat -> type = 
+| a_z: add z N N 
+| a_s: add N M K -> add (s N) M (s K);
+
+%query 1 * Q : add (s (s z)) (s z) N.
+%query * * add N M (s (s (s (s z)))).
+
+rec a1 : [ |- add (s (s z)) N (s (s N))] = 
+ [|- a_s (a_s a_z)];
+
+% -----------------------------------------------------------
+
+LF list: type = 
+| nil : list
+| cons: nat -> list -> list;
+
+LF length : list -> nat -> type = 
+| l_nil : length nil z
+| l_cons: length L N -> length (cons H L) (s N);
+
+rec l1: [ |- length (cons z (cons (s z) nil)) (s (s z))] = 
+ [ |- l_cons (l_cons l_nil)];
+
+
+% -----------------------------------------------------------
+% Vectors
+
+LF bool : type = 
+| tt: bool
+| ff: bool;
+
+LF vec: nat -> type = 
+| e: vec z
+| snoc : vec N -> bool -> vec (s N);
+
+rec v0 : [|- vec (s (s z))] = [|- snoc (snoc e tt) ff];
+rec v1 : [|- vec (s (s z))] = [|- snoc (snoc e ff) ff];
+rec v2 : [|- vec (s (s z))] = [|- snoc (snoc e ff) tt];
+rec v3 : [|- vec (s (s z))] = [|- snoc (snoc e tt) tt];
+

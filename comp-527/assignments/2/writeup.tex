@@ -1,0 +1,537 @@
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage{proof}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=2.0cm]{geometry}
+\usepackage{enumitem}
+
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\DeclareMathOperator{\trueP}{\text{ true}}
+\DeclareMathOperator{\fst}{\mathtt{fst}}
+\DeclareMathOperator{\snd}{\mathtt{snd}}
+\DeclareMathOperator{\fste}{\mathtt{fst}_\equiv}
+\DeclareMathOperator{\snde}{\mathtt{snd}_\equiv}
+
+\newcommand{\D}{\mathcal{D}}
+\renewcommand{\t}{\trueP{}}
+\newcommand{\proves}{\vdash}
+\newcommand{\neut}{\uparrow}
+\newcommand{\norm}{\downarrow}
+\renewcommand{\implies}{\supset}
+
+\newcommand{\la}{\left\langle}
+\newcommand{\ra}{\right\rangle}
+
+\newcommand{\equivproofterm}[6]{
+    \left \langle \left \langle
+        \lambda #1 : #2 . #3,
+        \lambda #4 : #5 . #6
+    \right \rangle \right \rangle : #2 \equiv #5
+}
+
+\newcommand{\andproofterm}[4]{
+    \left \langle #1, #3 \right \rangle : #2 \land #4
+}
+
+\author{Jacob Thomas Errington (260636023)}
+\title{Assignment \#2\\Logic and computations -- COMP 527}
+\date{11 February 2016}
+
+\begin{document}
+
+\maketitle
+
+\section{Logical equivalence}
+
+We can interpret logical equivalence,
+$A \equiv B$
+as $A \supset B$ and $B \supset A$, with the following introduction and
+elimination rules.
+
+\begin{center}
+    \begin{tabular}{c c c}
+        $$
+        \infer[\equiv I^{u,v}]{A \equiv B \t}{
+            \infer*{B\t}{
+                \infer[u]{A\t}{}
+            }
+            &
+            \infer*{A\t}{
+                \infer[v]{B\t}{}
+            }
+        }
+        $$
+        &
+        $$
+        \infer[\equiv E_L]{A\t}{
+            A \equiv B \t
+            &
+            B \t
+        }
+        $$
+        &
+        $$
+        \infer[\equiv E_R]{B\t}{
+            A \equiv B \t
+            &
+            A \t
+        }
+        $$
+    \end{tabular}
+\end{center}
+
+\begin{enumerate}
+    \item These rules have the following proof terms, which look overall like a
+        combination of the terms for conjunctions and implications.
+
+        $$
+        \infer[\equiv I^{u,v}]{\equivproofterm{x}{A}{M}{y}{B}{N}}{
+            \infer*{M : B}{
+                \infer[u]{x : A}{}
+            }
+            &
+            \infer*{N : A}{
+                \infer[v]{y : B}{}
+            }
+        }
+        $$
+
+        $$
+        \infer[\equiv E_L]{\fste M x : B}{
+            M : A \equiv B
+            &
+            x : A
+        }
+        $$
+
+        $$
+        \infer[\equiv E_R]{\snde M y : A}{
+            M : A \equiv B
+            &
+            y : B
+        }
+        $$
+
+    \item Using these proof terms, here are the local reduction and expansion
+        rules for logical equivalence.
+
+        $$
+        \begin{array}{c c c}
+            \infer[\equiv E_L]{M : B}{
+                \infer[\equiv I^{u, v}]{\equivproofterm{x}{A}{M}{y}{B}{N}}{
+                    \deduce[\mathcal{D}]{M:B}{
+                        \infer[u]{x:A}{}
+                    }
+                    &
+                    \deduce[\mathcal{E}]{N:A}{
+                        \infer[v]{y:B}{}
+                    }
+                }
+                &
+                \deduce[\mathcal{F}]{x : A}{}
+            }
+            &
+            \Rightarrow_R
+            &
+            \deduce[{[}\mathcal{F} / u{]} \mathcal{D}]{M:B}{}
+        \end{array}
+        $$
+
+        $$
+        \begin{array}{c c c}
+            \deduce[\mathcal{D}]{M : A \equiv B}{}
+            &
+            \Rightarrow_E
+            &
+            \infer[\equiv I^{u, v}]{
+                \equivproofterm{x}{A}{\fste M x}{y}{B}{\snde M y}
+            }{
+                \infer[\equiv E_L]{\fste M x : B}{
+                    \deduce[\mathcal{D}]{M : A \equiv B}{}
+                    &
+                    \infer[u]{x : A}{}
+                }
+                &
+                \infer[\equiv E_R]{\snde M y : A}{
+                    \deduce[\mathcal{D}]{M : A \equiv B}{}
+                    &
+                    \infer[v]{y : B}{}
+                }
+            }
+        \end{array}
+        $$
+
+        These rules show that the proposed extension is locally sound and
+        complete.
+
+    \item
+        The addition of these three rules necessitates adding three cases to
+        the proof by structural induction of the substitution lemma.
+
+        \begin{lemma}[Substitution]
+            If $\Gamma, x:A, \Gamma^\prime \proves M : B$
+            and $\Gamma \proves N : A$, then
+            $$
+            \Gamma, \Gamma^\prime \proves [N/x]M : B
+            $$
+        \end{lemma}
+
+
+        \begin{proof} By structural induction on a given derivation.
+
+            \begin{description}
+                \item[Case] $\equiv I^{u, v}$.
+                    $$
+                    \mathcal{D} = \infer[\equiv I^{u, v}]{
+                        \Gamma, x:A, \Gamma^\prime
+                        \proves
+                        \equivproofterm{u}{B}{M_1}{z}{C}{M_2}
+                    }{
+                        \deduce[\mathcal{D}_1]{
+                            \Gamma, x:A, \Gamma^\prime, u:B \proves M_1 : C
+                        }{}
+                        &
+                        \deduce[\mathcal{D}_2]{
+                            \Gamma, x:A, \Gamma^\prime, v:C \proves M_2 : B
+                        }{}
+                    }
+                    $$
+
+                    \begin{center}
+                        \begin{tabular}{l r}
+                            $\Gamma \proves N : A$
+                            &
+                            by assumption. \\
+                            $\Gamma, \Gamma^\prime, u:B \proves [N/x]M_1 : C$
+                            &
+                            by I.H. on $\mathcal{D}_1$. \\
+                            $\Gamma, \Gamma^\prime, v:C \proves [N/x]M_2 : B$
+                            &
+                            by I.H. on $\mathcal{D}_2$. \\
+                            $
+                            \Gamma, \Gamma^\prime
+                            \proves
+                            \equivproofterm{u}{B}{[N/x]M_1}{v}{C}{[N/x]M_2}
+                            $
+                            &
+                            by $\equiv I^{u, v}$. \\
+                            $
+                            \Gamma, \Gamma^\prime
+                            \proves
+                            [N/x]\equivproofterm{u}{B}{M_1}{v}{C}{M_2}
+                            $
+                            &
+                            by substitution definition. \\
+                        \end{tabular}
+                    \end{center}
+
+                \item[Case] $\equiv E_L$.
+                    $$
+                    \mathcal{D} = \infer[\equiv E_L]{
+                        \Gamma, x:A, \Gamma^\prime
+                        \proves
+                        \fst M u : C
+                    }{
+                        \deduce[\mathcal{D}_1]{
+                            \Gamma, x:A, \Gamma^\prime
+                            \proves
+                            M : B \equiv C
+                        }{}
+                        &
+                        \deduce[\mathcal{D}_2]{
+                            \Gamma, x:A, \Gamma^\prime
+                            \proves
+                            u : B
+                        }{}
+                    }
+                    $$
+
+                    \begin{center}
+                        \begin{tabular}{l r}
+                            $\Gamma \proves N : A$
+                            &
+                            by assumption. \\
+                            $
+                            \Gamma, \Gamma^\prime
+                            \proves
+                            [N/x]M : B \equiv C
+                            $
+                            &
+                            by I.H. on $\mathcal{D}_1$. \\
+                            $
+                            \Gamma, \Gamma^\prime
+                            \proves
+                            [N/x]u : B
+                            $
+                            &
+                            by I.H. on $\mathcal{D}_2$. \\
+                            $
+                            \Gamma, \Gamma^\prime
+                            \proves
+                            \fst [N/x]M [N/x]u : C
+                            $
+                            &
+                            by $\equiv E_L$. \\
+                            $
+                            \Gamma, \Gamma^\prime
+                            \proves
+                            [N/x] \fst M u : C
+                            $
+                            &
+                            by substitution definition.
+                        \end{tabular}
+                    \end{center}
+
+                \item[Case] $\equiv E_R$.
+
+                    This proof is essentially the same as for $\equiv E_L$ so
+                    we will omit it.
+            \end{description}
+        \end{proof}
+
+    \item
+        We restate introduction and elimination rules for logical equivalence
+        with the judgements $A\norm$ and $A\neut$ to show how to construct only
+        normal proofs with these rules.
+
+        \begin{center}
+            \begin{tabular}{c c c}
+                $$
+                \infer[\equiv I^{u,v}]{A \equiv B \norm}{
+                    \infer*{B \norm}{
+                        \infer[u]{A \neut}{}
+                    }
+                    &
+                    \infer*{A \norm}{
+                        \infer[v]{B \neut}{}
+                    }
+                }
+                $$
+                &
+                $$
+                \infer[\equiv E_R]{A \neut}{
+                    A \equiv B \neut
+                    &
+                    B \norm
+                }
+                $$
+                &
+                $$
+                \infer[\equiv E_L]{B \neut}{
+                    A \equiv B \neut
+                    &
+                    A \norm
+                }
+                $$
+            \end{tabular}
+        \end{center}
+
+\end{enumerate}
+
+\section{Type uniqueness}
+
+\begin{proposition}
+    If $\Gamma \proves M : A$ and $\Gamma \proves M : B$, then $A = B$.
+\end{proposition}
+
+\begin{proof}
+    By structural induction on given derivations.
+
+    \begin{description}
+        \item[Case] $\top I$
+
+            \begin{center}
+                \begin{tabular}{cc}
+                    $\mathcal{D}_1
+                        = \infer[\top I]{\Gamma \proves () : \top}{}$
+                    &
+                    $\mathcal{D}_2
+                        = \infer[\top I]{\Gamma \proves () : \top}{}$
+                \end{tabular}
+            \end{center}
+
+            This is a base case. By reflexivity, $() = ()$.
+
+        \item[Case] $\land I$
+
+            \begin{center}
+                \begin{tabular}{cc}
+                    $
+                    \mathcal{D}_1 = \infer[\land I]{
+                        \Gamma \proves \andproofterm{M}{A_1}{N}{B_1}
+                    }{
+                        \deduce[\mathcal{D}_{11}]{
+                            \Gamma \proves M : A_1
+                        }{}
+                        &
+                        \deduce[\mathcal{D}_{12}]{
+                            \Gamma \proves N : B_1
+                        }{}
+                    }
+                    $
+                    &
+                    $
+                    \mathcal{D}_2 = \infer[\land I]{
+                        \Gamma \proves \andproofterm{M_2}{A_2}{N_2}{B_2}
+                    }{
+                        \deduce[\mathcal{D}_{21}]{
+                            \Gamma \proves M : A_2
+                        }{}
+                        &
+                        \deduce[\mathcal{D}_{22}]{
+                            \Gamma \proves N : B_2
+                        }{}
+                    }
+                    $
+                \end{tabular}
+            \end{center}
+
+            By the induction hypothesis on $\D_{11}$ and $\D_{21}$, we get that
+            $M : A_1 = M : A_2$. Likewise we get that $N : B_1 = N : B_2$.
+            Then by $\land I$ on $\D_{21}$ and $\D_{22}$ we get
+            $\left \langle M, N \right \rangle : A_1 \land B_1$ as required.
+
+        \item[Case] $\land E_L$ (and $\land E_R$)
+
+            \begin{center}
+                \begin{tabular}{cc}
+                    $
+                    \mathcal{D}_1 = \infer[\land E_L]{\fst M : A_1}{
+                        \deduce[\mathcal{D}_1^\prime]{
+                            \Gamma \proves M : A_1 \land B_1
+                        }{}
+                    }
+                    $
+                    &
+                    $
+                    \mathcal{D}_2 = \infer[\land E_L]{\fst M : A_2}{
+                        \deduce[\mathcal{D}_2^\prime]{
+                            \Gamma \proves M : A_2 \land B_2
+                        }{}
+                    }
+                    $
+                \end{tabular}
+            \end{center}
+
+            By the induction hypothesis we can establish that from
+            $\D_2^\prime$, $\Gamma \proves M : A_1 \land M_1$. Then by $\land
+            E_L$ (or $\land E_R$), we conclude from $\D_2^\prime$ that
+            $\Gamma \proves \fst M : A_1$.
+
+            The proof for $\land E_R$ is essentially the same: we change $\fst$
+            to $\snd$ and use $\land E_R$ instead of $\land E_L$.
+
+        \item[Case] $\implies I$
+
+            \begin{center}
+                \begin{tabular}{cc}
+                    $
+                    \mathcal{D}_1 = \infer[\implies I]{
+                        \Gamma \proves \lambda u : A_1 . M : A_1 \implies B_1
+                    }{
+                        \deduce[\mathcal{D}_1^\prime]{
+                            \Gamma, x:A_1 \proves M : B_1
+                        }{}
+                    }
+                    $
+                    &
+                    $
+                    \mathcal{D}_2 = \infer[\implies I]{
+                        \Gamma \proves \lambda u : A_2 . M : A_2 \implies B_2
+                    }{
+                        \deduce[\mathcal{D}_2^\prime]{
+                            \Gamma, x:A_2 \proves M : B_2
+                        }{}
+                    }
+                    $
+                \end{tabular}
+            \end{center}
+
+            By the induction hypothesis on $\D_1^\prime$ and $\D_2^\prime$, we
+            can conclude both $x : A_1 = x : A_2$ and $M : B_1 = M : B_2$. By
+            implication introduction on the right derivation, we derive $\Gamma
+            \proves \lambda x : A_1 . M : A_1 \implies B_1$ as required.
+
+        \item[Case] $\implies E$
+
+            \begin{center}
+                \begin{tabular}{cc}
+                    $
+                    \mathcal{D}_1 = \infer[\implies E]{
+                        \Gamma \proves N x : B_1
+                    }{
+                        \deduce[\mathcal{D}_{11}]{
+                            \Gamma \proves N : A_1 \implies B_1
+                        }{}
+                        &
+                        \deduce[\mathcal{D}_{12}]{
+                            \Gamma \proves x : A_1
+                        }{}
+                    }
+                    $
+                    &
+                    $
+                    \mathcal{D}_2 = \infer[\implies E]{
+                        \Gamma \proves N x : B_2
+                    }{
+                        \deduce[\mathcal{D}_{21}]{
+                            \Gamma \proves N : A_2 \implies B_2
+                        }{}
+                        &
+                        \deduce[\mathcal{D}_{22}]{
+                            \Gamma \proves x : A_2
+                        }{}
+                    }
+                    $
+                \end{tabular}
+            \end{center}
+
+            By the induction hypothesis on $\mathcal{D}_{11}$ and
+            $\mathcal{D}_{21}$, we can conclude from $\Gamma \proves N : A_1
+            \implies B_1$ from $\mathcal{D}_{21}$. Likewise we can conclude
+            that $\Gamma \proves x : A_1$ from $\mathcal{D}_{22}$. Then by
+            $\implies E$, we can derive $\Gamma \proves N x : B_1$ from
+            $\mathcal{D}_{21}$ and $\mathcal{D}_{22}$ as required.
+
+        \item[Case] \ldots
+
+            The other cases follow from essentially the same argument, so we
+            will not include them.
+
+    \end{description}
+\end{proof}
+
+\section{First-order logic proofs}
+
+See the attached verified proofs written for Tutch.
+
+We found the following statements to be unprovable.
+
+\begin{itemize}
+    \item
+        $(\exists x : \tau . (A \implies P x)
+        \implies A \implies \forall x : \tau . P x$
+
+        From the assumptions that we have, it can only be proved that $P a$
+        holds for the specific witness $a : \tau$ that was used to construct
+        the existential. We cannot prove that $P x$ holds for a general $x$.
+
+    \item
+        $((\forall x : \tau . P x) \implies A)
+        \implies \exists x : \tau . (P x \implies A)$
+
+        It is impossible to produce a specific witness $a : \tau$ for which
+        $P a \implies A$ using nothing more that the fact that
+        $(\forall x : \tau . P x) \implies A$. The proof breaks down when we
+        try to construct the existential.
+
+    \item
+        $\neg (\forall x : \tau . B x) \implies \exists x : \tau . \neg B x$
+
+        Again from nothing more than an assumption involving a universally
+        quantified proposition, we can't construct the witness necessary to
+        build the existential.
+\end{itemize}
+
+\end{document}
