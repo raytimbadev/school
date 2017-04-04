@@ -1,0 +1,74 @@
+\documentclass[11pt]{article}
+
+\usepackage[geometry,questions]{jakemath}
+
+\author{Jacob Thomas Errington}
+\title{Assignment \#5\\Discrete structures 2 -- MATH 340}
+\date{7 April 2017}
+
+\begin{document}
+
+\maketitle
+
+\question{Combinatorial identities}
+
+\begin{prop}
+    We have
+    %
+    \begin{equation}
+        \label{eq:identity}
+        %
+        \binom{n+1}{m+1} = \sum_{k=m}^n \binom{k}{m}
+    \end{equation}
+\end{prop}
+
+\begin{proof}{(Algebraic.)}
+    
+\end{proof}
+
+\begin{proof}{(Combinatorial.)}
+    We know that the number of solutions to $\sum_{i=1}^m x_i = n$ is
+    $\binom{n+m-1}{m-1}$ and intuitively gives the number of ways we may
+    distribute $n$ items among $k$ containers.
+
+    Another way to look at this is to imagine an algorithm that counts these
+    different distributions of items among the containers.
+
+    A naive such procedure could operate recursively, by knowing two pieces of
+    information at each stage: the number of containers in consideration and
+    the number of items to distribute among them.
+    We reach a base case when there is a single container into which any number
+    of items must be distributed, as there is a unique way in which to perform
+    this distribution.
+    The algorithm would first assign $0$ items to the first container,
+    and then recursively determine how to distribute all $n$ remaining items
+    among the remaining $m-1$ containers;
+    then, the algorithm could assign $1$ item to the first container, and
+    inductively compute how to distribute the $n-1$ items among the remaining
+    $m-1$ containers; and so on.
+    Once these counts have all been determined, the procedure adds all the
+    counts and produces the final sum.
+
+    This procedure establishes a bijective proof that
+    %
+    \begin{equation*}
+        \binom{n + m - 1}{m - 1}
+        = \sum_{i=0}^n \binom{(n - i) + (k - 1) - 1}{(k - 1) - 1}
+        = \sum_{i=0}^n \binom{n + k - 2 - i}{k - 2}
+    \end{equation*}
+
+    Then, perform the substitution $m = k - 2$ and $n^\prime = n + m$ to
+    obtain
+    %
+    \begin{equation*}
+        \binom{n^\prime + 1}{m + 1}
+        =
+        \sum_{i=0}^n \binom{n^\prime - i}{m}
+        = 
+        \sum_{i=m}^{n^\prime} \binom{i}{m}
+    \end{equation*}
+    %
+    as required.
+\end{proof}
+
+\end{document}
