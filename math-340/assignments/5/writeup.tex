@@ -103,4 +103,61 @@
     as required.
 \end{proof}
 
+\question{Labelled trees}
+
+\begin{prop}
+    Let $f : \nset \to \nset$ and $T_f$ be a labelled tree on $n$ vertices
+    constructed by the procedure seen in class.
+    Suppose $T_f$ contains a vertex of degree at least $k$.
+    Then $f$ takes on at most $n - k + 2$ different values.
+\end{prop}
+
+\begin{proof}
+    First remark that if $k < 3$, the upper bound is simply $n$ which is a
+    trivial bound. We assume that $k \geq 3$ for the remainder of the proof.
+
+    The size of the image of such a function can be found by looking at the
+    number of ``duplicates'' in the graph. We say that a point $y \in \nset$
+    has $k$ duplicates under $f$ if $\abs{f\preimage{y}} = k + 1$.
+    The number of duplicates in $f$ is the sum of the number of duplicates
+    across all points in the image of $f$.
+
+    Now consider $T_f$.
+    The tree consists of two types of vertices.
+    We have \emph{backbone} vertices, corresponding to those vertices belonging
+    to a cycle in the graph of $f$; and \emph{appendage} vertices,
+    corresponding to those vertices not belonging to cycles.
+
+    The backbone of the tree corresponds to the ``bijective part'' of $f$.
+    Formally, if we restrict $f$ to its backbone, then we have a bijection.
+
+    Backbone vertices are tricky because the ones on the ``ends'' of the tree
+    have only one edge due to the cycle, whereas the ``inner'' backbone
+    vertices have two edges due to edges from cycles in the graph of $f$.
+
+    Suppose an end backbone vertex labelled $y$ has degree at least $k \geq 3$.
+    Then, there are at least $k - 1 \geq 2$ appendage vertices adjacent to it.
+    By the construction, appendage vertices come directly from the graph of
+    $f$.
+    This means that there are at least $k$ values in the domain of $f$
+    --
+    at least $k-1$ due to the appendage vertices plus exactly one because the
+    backbone edge is in a cycle
+    --
+    that are mapped to $y$ under $f$.
+    Consequently, these $k-1$ appendage vertices are not going elsewhere, so
+    there are $k-1$ elements in the codomain of $f$ that are unmapped.
+    Hence, the size of the image of $f$ is at most $n - k + 1$.
+
+    The same argument applies for inner backbone vertices, but we have to
+    subtract $2$ instead of one, since two edges come from the cycle.
+
+    Finally, appendage vertices have exactly one edge that corresponds with an
+    outgoing edge in the graph of $f$. Hence they are treated the same was as
+    end backbone vertices, and result in a bound of $n - k + 1$.
+
+    The most restrictive of these bounds is the one resulting from inner
+    backbone edges, and this bound is precisely the one we are seeking.
+\end{proof}
+
 \end{document}
