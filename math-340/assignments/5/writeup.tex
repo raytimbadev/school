@@ -23,7 +23,39 @@
 \end{prop}
 
 \begin{proof}{(Algebraic.)}
-    
+    We proceed by induction on $n$.
+
+    In the base case, we have $n = m$, so the sum degenerates into a single
+    term in which the top and bottom of the binomial coefficient are the same.
+    Similarly the left-hand side has equal top and bottom. Hence both evaluate
+    to one.
+
+    In the step case, suppose that
+    %
+    \begin{equation*}
+        \binom{n+1}{m+1} = \sum_{k=m}^n \binom{k}{m}
+    \end{equation*}
+    %
+    We want to show that
+    %
+    \begin{equation*}
+        \binom{(n+1) + 1}{m+1} = \sum_{k=m}^{n+1} \binom{k}{m}
+    \end{equation*}
+
+    Starting from the right-hand side, we split the sum, use the induction
+    hypothesis, and apply Pascal's identity.
+    %
+    \begin{equation*}
+        \sum_{k=m}^{n+1} \binom{k}{m}
+        =
+        \binom{n+1}{m} + \sum_{k=m}^n \binom{k}{m}
+        =
+        \binom{n+1}{m} + \binom{n+1}{m+1}
+        =
+        \binom{(n+1)+1}{m+1}
+    \end{equation*}
+    %
+    as required.
 \end{proof}
 
 \begin{proof}{(Combinatorial.)}
