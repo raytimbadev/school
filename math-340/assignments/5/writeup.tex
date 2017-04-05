@@ -59,8 +59,8 @@
 \end{proof}
 
 \begin{proof}{(Combinatorial.)}
-    We know that the number of solutions to $\sum_{i=1}^m x_i = n$ is
-    $\binom{n+m-1}{m-1}$ and intuitively gives the number of ways we may
+    We know that the number of solutions to $\sum_{i=1}^k x_i = n$ is
+    $\binom{n+k-1}{k-1}$ and intuitively gives the number of ways we may
     distribute $n$ items among $k$ containers.
 
     Another way to look at this is to imagine an algorithm that counts these
@@ -74,17 +74,17 @@
     this distribution.
     The algorithm would first assign $0$ items to the first container,
     and then recursively determine how to distribute all $n$ remaining items
-    among the remaining $m-1$ containers;
+    among the remaining $k-1$ containers;
     then, the algorithm could assign $1$ item to the first container, and
     inductively compute how to distribute the $n-1$ items among the remaining
-    $m-1$ containers; and so on.
+    $k-1$ containers; and so on.
     Once these counts have all been determined, the procedure adds all the
     counts and produces the final sum.
 
     This procedure establishes a bijective proof that
     %
     \begin{equation*}
-        \binom{n + m - 1}{m - 1}
+        \binom{n + k - 1}{k - 1}
         = \sum_{i=0}^n \binom{(n - i) + (k - 1) - 1}{(k - 1) - 1}
         = \sum_{i=0}^n \binom{n + k - 2 - i}{k - 2}
     \end{equation*}
