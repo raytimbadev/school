@@ -2,25 +2,34 @@ If I do majors math cs:
 
     required courses (54 credits ~ 18 courses):
 
-        comp 206 - introduction to software systems (F14) !
-        comp 250 - introduction to computer science (F14) !
-        comp 251 - algorithms and data structures (W15) !
-        comp 273 - introduction to computer systems (W15) !
-        comp 302 - programming languages and paradigms (W15) !
-        comp 310 - operating systems (F15) !
-        comp 330 - theory of computation (F15) !
-        comp 360 - algorithm design (F15) !
+        comp 206 - introduction to software systems (F14) (3) !
+        comp 250 - introduction to computer science (F14) (3) !
+        comp 251 - algorithms and data structures (W15) (3) !
+        comp 273 - introduction to computer systems (W15) (3) !
+        comp 302 - programming languages and paradigms (W15) (3) !
+        comp 310 - operating systems (F15) (3) !
+        comp 330 - theory of computation (F15) (3) !
+        comp 360 - algorithm design (F15) (3) !
         math 222 - calculus 3 (CEGEP) !
-        math 235 - algebra 1 (F14) !
-        math 236 - algebra 2 (W15) !
-        math 315 - ordinary differential equations (F15) !
-        math 318 - mathematical logic (F14) !
-        math 242 - analysis 1 (F16) !
+        math 235 - algebra 1 (F14) (3) !
+        math 236 - algebra 2 (W15) (3) !
+        math 315 - ordinary differential equations (F15) (3) !
+        math 318 - mathematical logic (F14) (3) !
+        math 242 - (did honours, math 256) analysis 1 (F16) (3) !
         math 317 - numerical analysis (F17)
         math 323 - probability (W17) !
         math 340 - discrete structures 2 (W17) !
 
-    complementary courses (18 credits ~ 6 courses):
+        Calculus 3 and comp 202 are skipped.
+        Hence, the credit count here is 48, not 54.
+
+        I believe that:
+            * instead of cal 3, I get one additional _elective_.
+
+        I know that:
+            * instead of comp 202, I get one additional COMP complementary.
+
+    complementary courses (18 credits ~ 6 courses -- actually 21 credits):
 
         3 math courses:
 
@@ -33,11 +42,17 @@ If I do majors math cs:
             comp 512 - distributed systems (F15) ! (4)
             comp 520 - compiler design (W16) ! (4)
 
-            remains one more credit; intro to C++?
+            remains one more credit:
+                * I will take a 3-credit comp course, so 1 credit counts as a
+                  complementary and 2 count as electives.
 
-    electives (18 credits ~ 6 courses):
+        + 1 additional computer science course, because I didn't do comp 202:
 
-        6 courses:
+            comp 523 - language-based security
+
+    electives (18 credits ~ 6 courses -- actually 21 credits):
+
+        6 courses: (actually 7)
 
             hgen 396 - human genetics research project (W15) ! (3)
             comp 531 - advanced theory of computation (W16) ! (3)
@@ -45,7 +60,12 @@ If I do majors math cs:
             comp 527 - logic and commputation (W16) ! (3)
             comp 525 - formal verification (W17) ! (3)
 
-            remains 2 credits
+            remains 2 credits:
+                * see note in comp complementary courses about using a 3-credit
+                  comp course so 2 of its credits count as electives
+
+            + 1 additional elective, because CEGEP exempts me from cal 2:
+                * dunno what that will be yet !
 
     Overall:
 
@@ -105,6 +125,9 @@ If I do majors math cs:
 
             math 370 - honours algebra 3 (math complementary)
             math 317 - numerical analysis (required)
+            comp 523 - language based security (comp complementary)
             one 3-credit comp course:
                 one credit will count towards comp complementary
                 two credits will count towards elective
+
+            + one elective
