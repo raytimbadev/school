@@ -1,6 +1,7 @@
 \documentclass[11pt]{article}
 
 \usepackage[geometry,questions]{jakemath}
+\newcounter{dummy}
 
 \author{Jacob Thomas Errington}
 \title{Assignment \#5\\Discrete structures 2 -- MATH 340}
@@ -96,7 +97,7 @@
         \binom{n^\prime + 1}{m + 1}
         =
         \sum_{i=0}^n \binom{n^\prime - i}{m}
-        = 
+        =
         \sum_{i=m}^{n^\prime} \binom{i}{m}
     \end{equation*}
     %
@@ -256,5 +257,102 @@ diagram.
             ]
     \end{tikzpicture}
 \end{center}
+
+To find the corresponding decomposition of an 8-gon into triangles requires
+more work. First, we find the corresponding planted trivalent tree on $14$
+vertices.
+Then, we draw the triangulation of the 8-gon. The following diagram illustrates
+both constructions.
+
+\begin{tikzpicture}[
+        shorten >=0,
+        x=1.5in,
+        y=1.5in,
+    ]
+    \foreach \n in {0,1,2,3,4,5,6,7} {
+        \draw ({22.5 + 45 * \n}:1) coordinate (\n)
+            -- ({22.5 + 45 * (\n + 1)}:1) ;
+
+        \ifnum\n=0{
+            \node (outerpt\n) at ({45 * \n}:1.1) {root} ;
+        }
+        \else{
+            \node (outerpt\n) at ({45 * \n}:1.1) {x} ;
+        }
+        \fi
+
+    }
+
+    \tikzset{
+        triangle/.style={
+            draw=blue!50,
+        },
+    }
+
+    \path[triangle]
+        (7) -- (4)
+        (4) -- (0)
+        (0) -- (2)
+        (2) -- (4)
+        (6) -- (4)
+        ;
+
+    \newcommand{\centroid}[2]{
+        \setcounter{dummy}{0}
+
+        \coordinate (acc) at (0, 0) ;
+
+        \foreach \p in {#2} {
+            \draw (acc) ++\p coordinate (acc) ;
+            \stepcounter{dummy}
+        }
+
+        \pgfmathsetmacro\a{1 / \arabic{dummy}}
+        \path (acc) ;
+        \pgfgetlastxy{\x}{\y}
+        \coordinate (#1) at (\a * \x, \a * \y) ;
+    }
+
+    \centroid{A}{(7),(0),(4)}
+    \node[draw=black,circle] (p2) at (A) {} ;
+
+    \centroid{B}{(7),(6),(4)}
+    \node[draw=black,circle] (p6) at (B) {} ;
+
+    \centroid{C}{(4),(5),(6)}
+    \node[draw=black,circle] (p7) at (C) {} ;
+
+    \centroid{D}{(0),(2),(4)}
+    \node[draw=black,circle] (p3) at (D) {} ;
+
+    \centroid{E}{(2),(3),(4)}
+    \node[draw=black,circle] (p5) at (E) {} ;
+
+    \centroid{F}{(0),(1),(2)}
+    \node[draw=black,circle] (p4) at (F) {} ;
+
+    \graph[use existing nodes]{
+        outerpt0 --
+        p2 -- {
+            p6 -- {
+                outerpt7,
+                p7 -- {
+                    outerpt6,
+                    outerpt5,
+                },
+            },
+            p3 -- {
+                p4 -- {
+                    outerpt1,
+                    outerpt2,
+                },
+                p5 -- {
+                    outerpt3,
+                    outerpt4,
+                },
+            },
+        } ;
+    };
+\end{tikzpicture}
 
 \end{document}
