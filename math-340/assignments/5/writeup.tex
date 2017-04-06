@@ -160,4 +160,101 @@
     backbone edges, and this bound is precisely the one we are seeking.
 \end{proof}
 
+\question{Catalan numbers 1}
+
+\begin{prop}
+    The number of orderings of $N = \range{2n}$ such that
+    %
+    \begin{enumerate}
+        \item
+            the odd numbers appear in order,
+        \item
+            the even numbers ppear in order, and
+        \item
+            $2k-1$ precedes $2k$ for every $k \in \range{n}$
+    \end{enumerate}
+    %
+    is counted by Catalan numbers.
+\end{prop}
+
+\begin{proof}{(By bijection.)}
+    We construct a bijection between valid orderings and sequences of $+$ and
+    $-$ such that each partial sum is nonnegative.
+
+    Take an arbitrary valid ordering. Rewrite each odd number to $+$ and each
+    even number of $-$ to form a sequence.
+    Now suppose for a contradiction that $i$ is the least position in the
+    sequence that gives a negative partial sum.
+    By minimality, the $i$\th element is a $-$, and we have $i = 2k + 1$, such
+    that $k$ elements in the sequence are $+$ and $k + 1$ elements are $-$.
+    Hence, the $i$\th element in the ordering has value $2(k + 1)$.
+    Now we look at $k$ more closely.
+    \begin{description}
+        \item[Case] $k = 0$.
+            Then, we have the value $2$ appearing before $1$ in the original
+            ordering, which contradicts property 3.
+        \item[Case] $k > 0$.
+            Then, the greatest odd number in the ordering before position $i$
+            is $2k - 1$. But then we have $2k + 2$ preceding $2k + 1$ in the
+            ordering, which contradicts property 3.
+    \end{description}
+
+    Hence, this transformation is correct, and the sequence produced by it does
+    satisfy the property that all its partial sums are nonnegative.
+
+    It is easy to see that this transformation is bijective, because it is
+    invertible: given a sequence of $+$ and $-$, rewrite the $+$s into ordered
+    odd numbers and the $-$s into ordered even numbers. By the property that
+    the partial sums of the sequence are positive, we will always have more odd
+    numbers before even numbers, so property three is guaranteed.
+    (A similar simple argument by contradiction as above can be used as well.)
+\end{proof}
+
+\question{Catalan numbers 2}
+
+Consider the sequence $+++--+--++--$.
+
+\tikzset{
+    dyckUp/.style={
+        color=red!50,
+    },
+    dyckDown/.style={
+        color=blue!50,
+    },
+}
+
+The corresponding Dyck path is given in the following diagram.
+
+\begin{center}
+    \begin{tikzpicture}
+        \draw[step=1,color=black!50] (0, 0) grid (12, 3);
+        \coordinate (prev) at (0,0) ;
+        \foreach \dir in {1,1,1,0,0,1,0,0,1,1,0,0} {
+            \ifnum\dir=1
+            \coordinate (dep) at (1, 1);
+            \draw[dyckUp] (prev) -- ++(dep) coordinate (prev) ;
+            \else
+            \coordinate (dep) at (1, -1);
+            \draw[dyckDown] (prev) -- ++(dep) coordinate (prev) ;
+            \fi
+        }
+    \end{tikzpicture}
+\end{center}
+
+The corresponding rooted plane tree on 7 vertices is given in the following
+diagram.
+
+\begin{center}
+    \begin{tikzpicture}
+        \Tree
+            [.$\cdot$
+                [.$\cdot$
+                    [.$\cdot$ $\cdot$ ]
+                    $\cdot$
+                ]
+                [.$\cdot$ $\cdot$ ]
+            ]
+    \end{tikzpicture}
+\end{center}
+
 \end{document}
