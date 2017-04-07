@@ -355,4 +355,122 @@ both constructions.
     };
 \end{tikzpicture}
 
+\question{Generating functions}
+
+\begin{enumerate}
+    \item
+        Consider the following recurrence.
+        %
+        \begin{equation*}
+            f(n) = \begin{cases}
+                3   &\quad\text{for } n = 0 \\
+                10  &\quad\text{for } n = 1 \\
+                6f(n-1) - 8f(n-2)
+                    &\quad\text{for } n \geq 2
+            \end{cases}
+        \end{equation*}
+
+        We define the formal power series
+        %
+        \begin{equation*}
+            F(x) = \sum_{n=0}^\infty f(n)x^n
+        \end{equation*}
+        %
+        and proceed by the method of generating functions.
+        %
+        \begin{align*}
+            \frac{F(x) - 3}{x} &= \sum_{n=0}^\infty f(n+1) x^n \\
+            6 \frac{F(x) - 3}{x} - 8 F(x)
+                &= \sum_{n=0}^\infty (6 f(n+1) - 8 f(n)) x^n \\
+                &= \sum_{n=0}^\infty f(n+2) x^n \\
+                &= \frac{F(x) - f(0) - f(1) x}{x^2}
+        \end{align*}
+
+        Solving for $F(x)$ we find
+        %
+        \begin{equation*}
+            F(x) = \frac{3 - 8x}{(2x-1)(4x-1)} = \cdots
+        \end{equation*}
+        %
+        which we rewrite by performing a partial fraction decomposition
+        %
+        \begin{equation*}
+            \cdots
+            =
+            \frac{-1}{2x-1} + \frac{-2}{4x - 1}
+            =
+            \frac{1}{1-2x} + \frac{2}{1-4x}
+            \cdots
+        \end{equation*}
+        %
+        and finally rewrite as series
+        %
+        \begin{equation*}
+            \cdots
+            =
+            \sum_{n=0}^\infty{
+                (2^n + 2 \cdot 4^n)x^n
+            }
+        \end{equation*}
+
+        Hence, the closed form of the recurrence is
+        %
+        \begin{equation*}
+            f(n) = 2^n + 2 \cdot 4^n
+        \end{equation*}
+
+    \item
+        Consider the recurrence
+        %
+        \begin{equation*}
+            f(n) = \begin{cases}
+                0   &\quad\text{for } n = 0 \\
+                2   &\quad\text{for } n = 1 \\
+                4 f(n-1) - 4 f(n-2)
+                    &\quad\text{for } n \geq 2
+            \end{cases}
+        \end{equation*}
+
+        We define a formal power series $F$ as before, and apply the method of
+        generating functions to find that
+        %
+        \begin{equation*}
+            F(x) = \frac{2x}{(2x - 1)^2} = \cdots
+        \end{equation*}
+        %
+        which we decompose by partial fractions as before to obtain
+        %
+        \begin{equation*}
+            \cdots = \frac{1}{2x - 1} + \frac{1}{(2x-1)^2}
+        \end{equation*}
+
+        The first of these terms is easy to write as a series, but the latter
+        requires additional work. Observe the following derivation.
+        %
+        \begin{align*}
+            \frac{1}{1-2x} &= \sum_{n=0}^\infty 2^n x^n \\
+            \deriv{x} \frac{1}{1-2x}
+                = \frac{\cancel{-}1}{(1-2x)^2} \cdot (\cancel{-} 2)
+                &= \sum_{n=1}^\infty 2^n n x^{n-1} \\
+            \frac{1}{(1-2x)^2} &=
+                \sum_{n=1}^\infty 2^{n-1} n x^{n-1}
+                =
+                \sum_{n=0}^\infty 2^n (n+1) x^n
+        \end{align*}
+
+        Finally, we can write the series we need.
+        %
+        \begin{equation*}
+            F(x)
+            = \sum_{n=0}^\infty f(n) x^n
+            = \sum_{n=0}^\infty (2^n (n+1) - 2^n) x^n
+        \end{equation*}
+
+        So the closed form of the recurrence is
+        %
+        \begin{equation*}
+            f(n) = 2^n (n+1) - 2^n
+        \end{equation*}
+\end{enumerate}
+
 \end{document}
