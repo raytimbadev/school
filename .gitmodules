@@ -21,4 +21,4 @@
 	url = https://github.com/Sable/mclab-core
 [submodule "comp-525/project"]
 	path = comp-525/project
-	url = git@github.com:tortoise.git
+	url = git@github.com:tsani/tortoise.git
