@@ -1,0 +1,91 @@
+\documentclass[11pt]{article}
+
+\author{Jacob Thomas Errington}
+\title{Assignment \#6\\Honours Set Theory -- MATH 488}
+\date{10 April 2017}
+
+\usepackage[geometry]{jakemath}
+\renewcommand{\P}{\mathbb{P}}
+\renewcommand{\phi}{\varphi}
+
+\begin{document}
+
+\maketitle
+
+\begin{prop}
+    Let $M$ be a CTM and $\P \in M$ be a forcing notion.
+    If $G \subseteq \P$ is $\P$-generic over $M$, then $G$ is
+    an ultrafilter.
+\end{prop}
+
+\begin{proof}
+    Define $C_p = \setof{ q \in \P : q \leq p }$
+    and $C^\prime_p = \setof{ q \in \P : q \perp p }$.
+    Let $D_p = C_p \union C^\prime_p$.
+
+    Note that for any $p \in \P$, the set $D_p$ is dense.
+    To see this, consider an arbitrary $r \in \P$.
+    If $r$ is compatible with $p$, then we will have some
+    $q \in C_p \subseteq D_p$ such that $q \leq r$.
+    If $r \perp p$, then $r \in C^\prime_p$.
+
+    Now consider some arbitrary $p \in \P$ and suppose $p \notin G$.
+    Since $D_p$ is dense, we have that $G \intersn D_p \neq \emptyset$.
+    Since $G$ is is a filter, it is upwards closed, which implies that
+    $G \intersn C_p = \emptyset$. (Otherwise, we would have $p \in G$, a
+    contradiction.)
+    Hence, $G \intersn C^\prime_p \neq \emptyset$.
+    Let $p^\prime \in G \intersn C^\prime_p$.
+
+    Suppose there exists $G^\prime \supset G$ such that $p \in G^\prime$.
+    This is a contradiction, as two incompatible elements of $\P$, namely
+    $p^\prime$ and $p$, belong to $G^\prime$.
+    Therefore, $G$ is maximal and hence an ultrafilter.
+\end{proof}
+
+\begin{prop}
+    Let $M$ be a CTM and $\P \in M$ be a forcing notion.
+    Then,
+    $G \subseteq \P$ is $\P$-generic over $M$ if and only if $G$ is a filter
+    and for every maximal antichain $A \subseteq \P$ such that $A \in M$ we
+    have that $G \intersn A \neq \emptyset$.
+\end{prop}
+
+\begin{proof}
+    Suppose $G \subseteq \P$ is generic.
+    Take an arbitrary maximal antichain $A$ such that $A \in M$.
+    Suppose for a contradiction that $G \intersn A = \emptyset$.
+    Let $a \in A$ and consider $D_a$ as in the previous proof.
+    Since $D_a$ is dense, we have $G \intersn D_a \neq \emptyset$.
+    Since $a \notin G$, then $G \intersn C^\prime_a \neq \emptyset$.
+    But $C^\prime_a$ is the set of all elements in $\P$ that are incompatible
+    with $a$, so $C^\prime_a \subseteq A$. This is a contradiction.
+
+    Suppose $G \subseteq \P$ is a filter and that $G$ meets every maximal
+    antichain in $\P$ that can be formed in $M$.
+    Take an arbitrary dense set $D \subseteq \P$.
+    Well-order
+    $D = (p_\alpha : \alpha < \lambda)$.
+
+    Then, we inductively construct a maximal antichain $A$ by going through the
+    sequence and selecting each $p_\alpha$ that is incompatible with all
+    elements we have so far put in $A$. We start by putting $p_0 \in A$.
+
+    We claim that this antichain is maximal.
+    Suppose not.
+    Then there is $p \notin A$ incompatible with everything in $A$.
+    Therefore $p$ must not have been in $D$ to begin with, else we would have
+    put it in $A$.
+    Then by density we can find some $p_\alpha \in D$ such that
+    $p_\alpha \leq p$.
+    Since $p$ is incompatible with everything in $A$, so is $p_\alpha$,
+    so $p_\alpha \in A$.
+    As $p$ is compatible with $p_\alpha$, this contradicts the assumption that
+    $p$ was incompatible with everything in $A$.
+
+    Since $G$ meets every maximal antichain, it meets $A \subseteq D$.
+    Since $D$ is an arbitrary dense subset of $\P$, this means $G$ is a
+    $\P$-generic filter.
+\end{proof}
+
+\end{document}
