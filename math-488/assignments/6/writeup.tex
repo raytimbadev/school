@@ -88,4 +88,28 @@
     $\P$-generic filter.
 \end{proof}
 
+\begin{prop}
+    Let $\P$ be a forcing notion.
+    Suppose $p \in \P$ and $\phi(x)$ is a formula in the forcing language.
+    If $p \forces \exists x : \phi(x)$,
+    then there exists a name $\dot x$ such that $p \forces \phi(\dot x)$.
+\end{prop}
+
+\begin{proof}
+    Suppose $p \forces \exists x : \phi(x)$.
+    By definition, the set
+    %
+    \begin{equation*}
+        A = \setof{ q \leq p \sth \exists \dot x : q \forces \phi(\dot x) }
+    \end{equation*}
+    %
+    is dense below $p$.
+
+    By the same inductive procedure as in the previous proof, we build a
+    maximal antichain $C \subseteq A$ (below $p$).
+    Form the set of names witnessing the existentials in $C$,
+    and let $\dot x$ be the union of this set of witnesses.
+    We claim that $p \forces \phi(\dot x)$.
+\end{proof}
+
 \end{document}
