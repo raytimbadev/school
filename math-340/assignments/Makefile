@@ -5,3 +5,4 @@ all:
 	make -C 2
 	make -C 3
 	make -C 4
+	make -C 5
