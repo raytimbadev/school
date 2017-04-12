@@ -227,9 +227,9 @@
     cardinals in $\verum[G]$.
 \end{prop}
 
+\newcommand{\m}{\verum[G]}
+
 \begin{proof}
-    \newcommand{\m}{\verum[G]}
-    %
     We want to show that in $\m$, there exists a surjection from $\omega$ to
     $\kappa$.
 
@@ -423,6 +423,54 @@
     Then, $\m \models \delta \notin \rng{f}$.
     Hence $f$ is not a surjection in $\m$, which contradicts that $\m$ thinks
     that $f$ is a bijection.
+\end{proof}
+
+\begin{prop}
+    Suppose $\P$ is a $\sigma$-closed forcing notion and $G \subset \P$ is a
+    generic filter. Then the forcing does not add any reals.
+\end{prop}
+
+\begin{proof}
+    Take an arbitrary subset $A \subseteq \omega$ in $\m$.
+    We want to show that this subset is already in $\verum$.
+
+    Since $A \in \m$, we must have a name for it, so $\dot A / G = A$.
+    Define the set
+    %
+    \begin{equation*}
+        E = \setof{
+            p \in \P
+            \sth
+            \exists C \subseteq \omega, C \in V: p \forces \dot A = C
+        }
+    \end{equation*}
+    %
+    to be those conditions forcing that $A$ was already in $\verum$.
+
+    We claim that $E$ is dense in $\P$. To see this, let $q \in \P$.
+    We define a countable decreasing sequence of conditions $(p_n)_{n\in\N}$
+    such that
+    %
+    \begin{align*}
+        p_i &\forces \check \i \in \dot A \\
+            &\text{or} \\
+        p_i &\forces \check \i \notin \dot A
+    \end{align*}
+    %
+    which is possible because generic filters are also ultrafilters.
+    As for ensuring that the sequence is decreasing, we use the downwards
+    directedness of the generic filter to accomplish this at each step.
+    We furthermore use downward-directedness to ensure that $q \geq p_0$.
+    %
+    By the $\sigma$-closedness of $\P$, there exists a lower bound $p \in \P$
+    for the sequence, such that $p \leq p_i$ for all $i \in \omega$.
+    Hence, this $p \in E$ and $p \leq q$. This demonstrates the density of $E$.
+
+    Since $E$ is dense, it meets $G$, so there exists $p \in G$ such that
+    $p \forces \dot A = C$ for some $C \subseteq \omega$ such that
+    $C \in \verum$.
+
+    Hence, $\dot A / G \in V$, so the forcing does not add any reals.
 \end{proof}
 
 \end{document}
