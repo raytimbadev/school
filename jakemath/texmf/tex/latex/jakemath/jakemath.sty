@@ -129,6 +129,8 @@
 \newcommand{\inv}{^{-1}}
 \newcommand{\restrictto}{\upharpoonright}
 \newcommand{\preimage}[1]{^{-1}\parens{\setof{#1}}}
+\DeclareMathOperator{\rngOp}{range}
+\newcommand{\rng}[1]{\rngOp{\parens{#1}}}
 \newcommand{\compose}{\circ}
 \newcommand{\range}[2][1]{%
     \setof{#1,\ldots,#2}
@@ -156,11 +158,36 @@
 \newcommand{\proves}{\vdash}
 \renewcommand{\models}{\vDash} % \models is in core latex, but is ugly
 \newcommand{\forces}{\Vdash}
+\DeclareMathOperator{\domOp}{dom}
+\newcommand{\dom}[1]{\domOp{\parens{#1}}}
+\newcommand{\qmark}[1]{\overset{?}{#1}}
+\newcommand{\incompatible}{\perp}
+\newcommand{\stmt}[1]{\text{``#1''}}
+\DeclareMathOperator{\psetOp}{\mathcal{P}}
+\newcommand{\pset}[1]{\psetOp{\parens{#1}}}
 
 % Sets of numbers
-\newcommand{\R}{\mathbb{R}}
-\newcommand{\N}{\mathbb{N}}
 \newcommand{\unit}{[0,1]}
+\newcommand{\makebb}[1]{%
+    \expandafter\newcommand\csname #1\endcsname{\mathbb{#1}}
+}
+\makebb{N}
+\makebb{Z}
+\makebb{Q}
+\makebb{R}
+\makebb{C}
+
+% Other sets and classes
+\newcommand{\verum}[1][]{
+    \mathbf{V}
+    \def\temp{#1}
+    \ifx\temp\empty
+    \else
+    \bracks{#1}
+    \fi
+}
+\newcommand{\ord}{\mathbf{Ord}}
+\newcommand{\constructible}{\mathbf{L}}
 
 % Probabilistic operators
 \DeclareMathOperator{\Prob}{P}
@@ -199,8 +226,7 @@
 \newcommand{\Exp}[1]{ \ExpOp\parens{#1} }
 \newcommand{\ChiSq}{\Chi^2}
 
-% Absolutely misc
-\renewcommand{\th}{\textsuperscript{th}}
+% Misc mathematical
 \newcommand{\cdf}{cumulative distribution function}
 \newcommand{\pmf}{probability mass function}
 \newcommand{\pdf}{probability density function}
@@ -209,5 +235,15 @@
 \newcommand{\Pmf}{Probability mass function}
 \newcommand{\Pdf}{Probability density function}
 \newcommand{\Mgf}{Moment generating function}
+
+\newcommand{\constructibleAxiom}{\verum = \constructible}
+
+% Make varphi the main phi that we use, and define `aphi' for phi treated as an
+% angle.
+\let\aphi\phi
+\renewcommand{\phi}{\varphi}
+
+% Other misc
+\renewcommand{\th}{\textsuperscript{th}}
 
 \endinput
