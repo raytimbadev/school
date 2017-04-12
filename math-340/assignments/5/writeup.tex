@@ -1,7 +1,6 @@
 \documentclass[11pt]{article}
 
 \usepackage[geometry,questions]{jakemath}
-\newcounter{dummy}
 
 \author{Jacob Thomas Errington}
 \title{Assignment \#5\\Discrete structures 2 -- MATH 340}
@@ -296,22 +295,6 @@ both constructions.
         (2) -- (4)
         (6) -- (4)
         ;
-
-    \newcommand{\centroid}[2]{
-        \setcounter{dummy}{0}
-
-        \coordinate (acc) at (0, 0) ;
-
-        \foreach \p in {#2} {
-            \draw (acc) ++\p coordinate (acc) ;
-            \stepcounter{dummy}
-        }
-
-        \pgfmathsetmacro\a{1 / \arabic{dummy}}
-        \path (acc) ;
-        \pgfgetlastxy{\x}{\y}
-        \coordinate (#1) at (\a * \x, \a * \y) ;
-    }
 
     \centroid{A}{(7),(0),(4)}
     \node[draw=black,circle] (p2) at (A) {} ;
