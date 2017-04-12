@@ -47,6 +47,33 @@
     >=stealth', % this tip is provided by `arrows` !
 }
 
+\newcounter{CentroidCalculationDummy}
+
+% Compute the centroid of a sequence of points.
+\newcommand{\centroid}[2]{
+    % The first argument is the name of the coordinate in which to store the
+    % centroid.
+    % The second argument is a comma-separated sequence of coordinates (or
+    % nodes)
+    % e.g. \centroid{A}{(1),(2),(3)}
+    % will compute the center of the triangle 1-2-3 and store it into a
+    % coordinate that can be referred to by (A) after.
+
+    \setcounter{CentroidCalculationDummy}{0}
+
+    \coordinate (acc) at (0, 0) ;
+
+    \foreach \p in {#2} {
+        \draw (acc) ++\p coordinate (acc) ;
+        \stepcounter{CentroidCalculationDummy}
+    }
+
+    \pgfmathsetmacro\a{1 / \arabic{CentroidCalculationDummy}}
+    \path (acc) ;
+    \pgfgetlastxy{\x}{\y}
+    \coordinate (#1) at (\a * \x, \a * \y) ;
+}
+
 %%%%% THEOREM-LIKE ENVIRONMENTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Actual theorem-like things
