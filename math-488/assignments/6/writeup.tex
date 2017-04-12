@@ -8,6 +8,9 @@
 \renewcommand{\P}{\mathbb{P}}
 \renewcommand{\phi}{\varphi}
 
+\DeclareMathOperator{\collOp}{Coll}
+\newcommand{\coll}[1]{\collOp{\parens{#1}}}
+
 \begin{document}
 
 \maketitle
@@ -19,15 +22,16 @@
 \end{prop}
 
 \begin{proof}
-    Define $C_p = \setof{ q \in \P : q \leq p }$
-    and $C^\prime_p = \setof{ q \in \P : q \perp p }$.
+    Define $C_p = \setof{ q \in \P : q \leq p }$ the principal ideal generated
+    by $p$
+    and $C^\prime_p = \setof{ q \in \P : q \incompatible p }$.
     Let $D_p = C_p \union C^\prime_p$.
 
     Note that for any $p \in \P$, the set $D_p$ is dense.
     To see this, consider an arbitrary $r \in \P$.
     If $r$ is compatible with $p$, then we will have some
     $q \in C_p \subseteq D_p$ such that $q \leq r$.
-    If $r \perp p$, then $r \in C^\prime_p$.
+    If $r \incompatible p$, then $r \in C^\prime_p$.
 
     Now consider some arbitrary $p \in \P$ and suppose $p \notin G$.
     Since $D_p$ is dense, we have that $G \intersn D_p \neq \emptyset$.
@@ -100,16 +104,325 @@
     By definition, the set
     %
     \begin{equation*}
-        A = \setof{ q \leq p \sth \exists \dot x : q \forces \phi(\dot x) }
+        E = \setof{ q \leq p \sth \exists \dot x : q \forces \phi(\dot x) }
     \end{equation*}
     %
     is dense below $p$.
 
     By the same inductive procedure as in the previous proof, we build a
-    maximal antichain $C \subseteq A$ (below $p$).
-    Form the set of names witnessing the existentials in $C$,
-    and let $\dot x$ be the union of this set of witnesses.
-    We claim that $p \forces \phi(\dot x)$.
+    maximal antichain $A \subseteq E$ (below $p$). In other words, for any
+    $q \leq p$, we have that $q$ is compatible with some $r \in A$. (In fact,
+    this $r$ is unique.)
+
+    For each $q \in E$, we have that
+    %
+    \begin{equation*}
+        \exists \dot x : q \forces \phi(\dot x)
+    \end{equation*}
+    %
+    so write $\dot x_q$ for the name witnessing the existential corresponding
+    to $q$.
+
+    We would like to construct a name $\dot y$ that is forced to be equal to
+    $\dot x_q$ for each $q \in A$.
+    With such a name in hand, we would have
+    %
+    \begin{equation*}
+        q \forces \phi(\dot x_q) \land \dot x_q = \dot y
+    \end{equation*}
+    %
+    from which we may deduce $q \forces \phi(\dot y)$.
+    Let's see how we can build $\dot y$.
+
+    Note that each $q \in A$ identifies a ``cone'' below it in $E$ of
+    conditions that force the existence of a name such that $\phi$ holds for
+    that name. We want to look at each cone and form a name $E_q$ whose domain
+    consists of all those $\dot z$ in the domain of $\dot x_q$ that are forced
+    to belong to $\dot x_q$ by an $r \leq q$.
+    More precisely, we define
+    %
+    \begin{equation*}
+        E_q = \setof{
+            (\dot z, r) \sth
+            r \leq q
+            \land
+            r \forces \dot z \in \dot x_q
+            \land
+            \dot z \in \dom{\dot x_q}
+        }
+    \end{equation*}
+
+    Then, we claim that $\dot y = \Union_{q \in A} E_q$ is as needed,
+    i.e. that each $q \in A$ forces $\phi(\dot y)$.
+
+    To see this, we look at an arbitrary $q \in A$ and an arbitrary generic
+    filter $G \ni q$ and check that the evaluations are the same, specifically:
+    %
+    \begin{equation*}
+        \dot y / G \qmark{=} \dot x_q / G
+    \end{equation*}
+
+    Take an arbitrary element $z \in \dot y / G$.
+    It must have the form $\dot z / G$
+    for some $r \in G$.
+    %
+    Since $\dot y$ is a union,
+    $(\dot z, r)$ comes from some $E_s$,
+    so $r \leq s$ and
+    %
+    \begin{equation}
+        \label{eq:r-forces-z-in-x-s}
+        r \forces \dot z \in \dot x_s
+    \end{equation}
+    %
+    Since $A$ is an antichain, we must have that $s = q$;
+    otherwise, we would have two incompatible elements belonging to $G$.
+    %
+    By rewriting $s$ to $q$ in \eqref{eq:r-forces-z-in-x-s}, we have
+    $r \forces \dot z \in \dot x_q$.
+    %
+    But then, since $r \in G$, we have $z \in x_q$.
+    This demonstrates that $\dot y / G \subseteq \dot x_q$.
+
+    Next, take an arbitrary element $z \in \dot x_q / G$.
+    It must have the form $\dot z / G$
+    for some $\dot z \in \dot x_q$,
+    and furthermore there must be some $p \in G$ such that
+    $p \forces z \in x_q$.
+    Since $p, q \in G$, let $r \in G$ such that $r \leq p$ and $r \leq q$.
+    But then since $r \leq q$
+    and $r \forces z \in x_q$
+    and $\dot z \in \dom{x_q}$,
+    we have that $(\dot z, r) \in \dot y$ by definition.
+
+    Finally, we have a name $\dot y$ such that $q \forces \phi(\dot y)$ for
+    each $q$ in the maximal (below $p$) antichain $A$ that we started with.
+    However, we want to show that $p \forces \phi(\dot y)$, so
+    suppose not.
+
+    Then there exists some $r \leq p$ such that $r \forces \neg \phi(\dot y)$.
+    By the density of $E$ below $p$, find $q^\prime \in E$ such that
+    $q^\prime \leq r$ and
+    such that there exists a name $\dot x$ and $q^\prime \forces \phi(\dot x)$.
+    %
+    Since $q^\prime$ is stronger than $r$, we also have
+    $q^\prime \forces \neg \phi(\dot y)$.
+    %
+    Hence, for every $q \in A$, since $q \forces \phi(\dot y)$, we must have
+    that $q^\prime \incompatible q$.
+    But this contradicts the maximality of $A$.
+\end{proof}
+
+\begin{prop}
+    Let $\kappa$ be an uncountable cardinal.
+    Write $\P = \coll{\omega, \kappa}$ for the partial order of finite partial
+    functions from $\omega$ to $\kappa$, ordered by reverse inclusion.
+    If $G \subset \P$ is a $\P$-generic filter on $\verum$, then
+    %
+    \begin{equation*}
+        \verum[G] \models \stmt{$\kappa$ is countable}
+    \end{equation*}
+    %
+    and all cardinals in $\verum$ that are bigger than $\kappa$ remain
+    cardinals in $\verum[G]$.
+\end{prop}
+
+\begin{proof}
+    \newcommand{\m}{\verum[G]}
+    %
+    We want to show that in $\m$, there exists a surjection from $\omega$ to
+    $\kappa$.
+
+    Let $g = \Union G$.
+    We will see that $g : \omega \to \kappa$ is a total function, and
+    furthermore is a surjection.
+
+    First, define
+    %
+    \begin{equation*}
+        D_n = \setof{ f \in \P \sth n \in \dom{f} }
+    \end{equation*}
+    %
+    for any $n \in \omega$.
+
+    For each $n \in \omega$, the set $D_n$ is dense.
+    To see this take $f \in \P$.
+    %
+    \begin{itemize}
+        \item
+            If $n \in \dom{f}$, then there's nothing to do as $f \in D_n$.
+            %
+        \item
+            If $n \notin \dom{f}$,
+            then we have $D_n \ni f^\prime = f[n \mapsto 0] \leq f$.
+            %
+    \end{itemize}
+
+    Since $G \intersn D_n \neq \emptyset$ for all $n$, we have that
+    $n \in \dom{g}$ for all $n \in \omega$, so $g$ is in fact a total function.
+
+    Second, we would like $g$ to be a surjective function, so we encode this
+    property as a dense set.
+    %
+    Define
+    %
+    \begin{equation*}
+        J_{\alpha} = \setof{
+            f \in \P \sth \exists n \in \omega : f(n) = \alpha
+        }
+    \end{equation*}
+    %
+    for any $\alpha < \kappa$.
+
+    To see that such a set is dense, take arbitrary $f \in \P$.
+    %
+    \begin{enumerate}
+        \item
+            If there exists $n \in \omega$ such that $f(n) = \alpha$,
+            then there's nothing to do as $f \in J_\alpha$.
+            %
+        \item
+            Suppose there is no $n \in \omega$ such that $f(n) = \alpha$.
+            Since $f$ has a finite domain, let $m \in \omega$ be such that
+            $m > n$ for all $n \in \dom{f}$.
+            Define $f^\prime \in J_{\alpha}$ such that
+            %
+            \begin{equation*}
+                f^\prime = f[m \mapsto \alpha]
+            \end{equation*}
+            %
+            and notice that $f^\prime \leq f$.
+    \end{enumerate}
+
+    Since $G \intersn J_\alpha$ for all $\alpha < \kappa$, we have that
+    for every $\alpha < \kappa$,
+    there exists $n \in \omega$ such that $g(n) = \alpha$.
+    %
+    Consequently, $g$ is surjective, so $\kappa \leq \omega$, and hence
+    $\kappa$ must be countable.
+
+    Next, we want to see that every cardinal $\lambda > \kappa$ in $\verum$ is
+    still a cardinal in $\m$. To do this, we will generalize the idea of a
+    poset being CCC to the idea of $\kappa$-CC to mean that there is no
+    antichain of cardinality $\kappa^+$ in the poset. In particular, we claim
+    that $\P$ is $\kappa$-CC.
+
+    To see this, suppose not, so $A = ( p_\alpha \sth \alpha < \kappa^+ )$ is
+    an antichain in $\P$.
+    %
+    We define
+    %
+    \begin{equation*}
+        B = \setof{ \dom{p_\alpha} \sth \alpha < \kappa^+ }
+    \end{equation*}
+    %
+    and note that there are $\kappa^+$-many (finite) domains in this family
+    because for any $N \subseteq \omega$ we have that
+    $\setof{ f \in \coll{\omega, \kappa} \sth \dom{f} = N }$
+    has cardinality $\kappa$.
+
+    We apply the Sunflower Lemma to find a $\Delta$-system
+    $B^\prime \subset B$ with cardinality $\kappa^+$ and root
+    $R \subset B^\prime$.
+    %
+    For each $b \in B^\prime$, choose $p_b \in A$ such that $\dom{p_b} = b$
+    and notice that
+    %
+    \begin{equation*}
+        \abs{
+            \setof{f \in \coll{\omega, \kappa} \sth \dom{f} = R}
+        }
+        = \kappa
+    \end{equation*}
+    %
+    Hence, there exists $f : R \to \kappa$ such that for $\kappa^+$-many
+    $b \in B^\prime$, we have that $p_b \restrictto R = f$.
+    Let $b_1, b_2 \in B^\prime$ and notice that $p_{b_1}$ is compatible
+    with $p_{b_2}$; their union is a valid finite partial function, since they
+    agree on $R$, and forms a lower bound for them.
+    But $p_{b_1}$ and $p_{b_2}$ belong to an antichain, so this is a
+    contradiction.
+
+    Therefore, $\P = \coll{\omega, \kappa}$ is $\kappa$-CC.
+    Next we want to generalize the result that CCC forcing notions preserve
+    uncountable cardinals to a result that $\kappa$-CC forcing notions
+    preserve cardinals bigger than $\kappa$.
+
+    Suppose $\beta \in V$ and
+    $V \models \stmt{$\beta > \kappa$ and $\beta$ is a cardinal}$.
+    Suppose for a contradiction that
+    $\m \models \stmt{$\beta > \kappa$ but $\beta$ is not a cardinal}$.
+    Then, we have an ordinal $\alpha < \beta$ and a function $f \in \m$ such
+    that $\m \models \stmt{$f : \alpha \to \beta$ and $f$ is a bijection}$.
+
+    Since $f \in \m$, there exists a name $\dot f$ such that $f = \dot f / G$.
+    Hence, by the Forcing Theorem, there exists $p \in G$ such that
+    %
+    \begin{equation*}
+        p \forces
+        \dot f : \check \alpha \to \check \beta
+        \text{ and $\dot f$ is a bijection}
+    \end{equation*}
+
+    Define the function $F : \alpha \to \pset{\beta}$ such that
+
+    \begin{equation*}
+        F(\gamma) = \setof{
+            \delta < \beta
+            \sth
+            \exists q \leq p : q \forces \dot f(\check \gamma) = \check \delta
+        }
+    \end{equation*}
+
+    We first claim that $\m \models f(\gamma) \in F(\gamma)$.
+    To see this, suppose that $\m \models f(\gamma) = \delta$.
+    Then by the Forcing Theorem there exists $q \in G$ (assume without loss of
+    generality that $q \leq p$) such that
+    %
+    \begin{equation*}
+        q \forces \dot f(\check \gamma) = \check \delta
+    \end{equation*}
+    %
+    so $\delta \in F(\gamma)$ by definition.
+
+    We next claim that $\abs{F(\gamma)} \leq \kappa$.
+    Notice that if $\delta_1, \delta_2 \in F(\gamma)$, then there are
+    $q_1, q_2 \leq p$ such that
+    %
+    \begin{align*}
+        q_1 &\forces \dot f(\check \gamma) = \delta_1 \\
+        q_2 &\forces \dot f(\check \gamma) = \delta_2
+    \end{align*}
+    %
+    but then $q_1 \incompatible q_2$ by the functionality of $f$.
+    %
+    Therefore, for any $\delta \in F(\gamma)$,
+    choose $q_\delta$
+    such that $q_\delta \forces f(\check \gamma) = \check \delta$
+    so $\setof{q_\delta \sth \delta \in F(\gamma)}$ forms an antichain in
+    $\coll{\omega, \kappa}$.
+    %
+    This antichain must have cardinality $\kappa$ since we showed that
+    $\coll{\omega,\kappa}$ is $\kappa^+$-CC.
+
+    Finally, in $\verum$ we can see that
+    %
+    \begin{equation*}
+        \abs{\Union_{\gamma < \alpha} F(\gamma)}
+        \leq \abs{\alpha} \cdot \kappa
+        = \abs{\alpha} < \beta
+    \end{equation*}
+    %
+    Hence, subtracting this union from $\beta$ leaves us with a nonempty set.
+    Let
+    %
+    \begin{equation*}
+        \delta \in \beta \setminus \Union_{\gamma < \alpha} F(\gamma)
+    \end{equation*}
+    %
+    Then, $\m \models \delta \notin \rng{f}$.
+    Hence $f$ is not a surjection in $\m$, which contradicts that $\m$ thinks
+    that $f$ is a bijection.
 \end{proof}
 
 \end{document}
