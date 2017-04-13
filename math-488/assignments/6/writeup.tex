@@ -452,22 +452,20 @@
     such that
     %
     \begin{align*}
-        p_i &\forces \check \i \in \dot A \\
+        p_i &\forces \check i \in \dot A \\
             &\text{or} \\
-        p_i &\forces \check \i \notin \dot A
+        p_i &\forces \check i \notin \dot A
     \end{align*}
     %
-    which is possible because generic filters are also ultrafilters.
-    As for ensuring that the sequence is decreasing, we use the downwards
-    directedness of the generic filter to accomplish this at each step.
-    We furthermore use downward-directedness to ensure that $q \geq p_0$.
-    %
+    since each natural either belongs to $A$ or doesn't. The sequence is also
+    defined so that $q \geq q_0$.
+
     By the $\sigma$-closedness of $\P$, there exists a lower bound $p \in \P$
     for the sequence, such that $p \leq p_i$ for all $i \in \omega$.
     Hence, this $p \in E$ and $p \leq q$. This demonstrates the density of $E$.
 
-    Since $E$ is dense, it meets $G$, so there exists $p \in G$ such that
-    $p \forces \dot A = C$ for some $C \subseteq \omega$ such that
+    Since $E$ is dense, it meets $G$, so there exists $p \in G \intersn E$ such
+    that $p \forces \dot A = C$ for some $C \subseteq \omega$ such that
     $C \in \verum$.
 
     Hence, $\dot A / G \in V$, so the forcing does not add any reals.
