@@ -1,0 +1,349 @@
+\documentclass[11pt]{article}
+
+\author{Jacob Thomas Errington}
+\title{Set theory}
+\date{}
+
+\usepackage[geometry]{jakemath}
+\let\P\undefined
+\makebb{P}
+
+\begin{document}
+
+\maketitle
+
+\section{Axiomatic set theory}
+
+\begin{defn}{(Well-order.)}
+    A set together with a binary relation $(W, \leq)$ is a \emph{well-order}
+    if it is a linear order such that any subset $A \subseteq W$ has a minimal
+    element.
+\end{defn}
+
+\begin{defn}{(Transitive set.)}
+    A set $A$ is \emph{transitive} if
+    %
+    \begin{equation*}
+        x \in y \land y \in A \implies x \in A
+    \end{equation*}
+    %
+    Equivalently, this means that every element of $A$ is a subset of $A$.
+\end{defn}
+
+\begin{defn}{(Ordinal.)}
+    An \emph{ordinal} is a transitive well-ordered set.
+\end{defn}
+
+\begin{defn}{(Successor ordinal.)}
+    Let $\alpha$ be an ordinal.
+    Then we write $\alpha^+$ or $\alpha + 1$ to denote
+    $\alpha \union \setof{\alpha}$, the \emph{successor} of $\alpha$.
+\end{defn}
+
+\begin{thm}{(Isomorphism of well-orders to ordinals.)}
+    Let $(W, \leq)$ be a well-order.
+    Then there exists an ordinal number $\alpha$ and a unique isomorphism
+    %
+    \begin{equation*}
+        \phi : W \to \alpha
+    \end{equation*}
+\end{thm}
+
+\begin{cor}{(Order type.)}
+    The ordinal $\alpha$ to which a given well-order $W$ is isomorphic is
+    unique.
+\end{cor}
+
+\begin{proof}
+    Suppose not.
+    Then we have ordinals $\alpha$ and $\beta$ such that $\alpha \neq \beta$ as
+    well as isomorphisms $\phi_\alpha : W \to \alpha$
+    and $\phi_\beta : W \to \beta$.
+    By composing, we obtain an isomorphism $\phi : \alpha \to \beta$, which
+    contradicts the trichotomy theorem for ordinal numbers.
+\end{proof}
+
+\begin{defn}
+    The ordinal $\alpha$ isomorphic to a given well-order $W$ is called its
+    \emph{order type}.
+\end{defn}
+
+This establishes that ordinals are the \emph{canonical well-orders}.
+
+\begin{cor}{(Trichotomy theorem of well-orders.)}
+    If $(W_1, \leq)$ and $(W_2, \leq)$ are well-orders, then either
+    %
+    \begin{enumerate}
+        \item $W_1$ is isomorphic to $W_2$, or
+        \item $W_1$ is isomorphic to an initial segment of $W_2$, or
+        \item an initial segment of $W_1$ is isomorphic to $W_2$.
+    \end{enumerate}
+\end{cor}
+
+\begin{proof}
+    This follows from the unique isomorphism to ordinals and the corresponding
+    trichotomy theorem for ordinals.
+\end{proof}
+
+\begin{prop}{(Cantor's Theorem.)}
+    There is no surjection $f : X \to \pset{X}$.
+\end{prop}
+
+\begin{proof}
+    Suppose there is a surjection $f : X \to \pset{X}$.
+    %
+    Define the set
+    %
+    \begin{equation*}
+        A = \setof{
+            x \in X \sth
+            x \notin f(x)
+        }
+    \end{equation*}
+    %
+    Note that $A \subset X$.
+    Since $f$ is a surjection, we have $A \in \rng{f}$,
+    so let $x \in X$ be such that $f(x) = A$.
+
+    \begin{itemize}
+        \item
+            Suppose $x \in A = f(x)$.
+            But then by definition of $A$, we have that $x \notin f(x)$.
+            %
+        \item
+            Suppose $x \notin A = f(x)$.
+            But then by definition of $A$, we have that $x \in f(x)$.
+    \end{itemize}
+
+    This is a contradiction, so $f$ cannot be a surjection.
+\end{proof}
+
+\begin{prop}{(Knaster-Tarski Fixed-Point Theorem.)}
+    Suppose $L$ is a complete lattice and $f : L \to L$ is a continuous
+    monotone function.
+    Then $f$ has a fixed point $x \in L$ such that $x = f(x)$.
+\end{prop}
+
+\begin{proof}
+    Define the set
+    %
+    \begin{equation*}
+        A = \setof{x \in L \sth x \leq f(x)}
+    \end{equation*}
+    %
+    and let $a = \Join A$.
+
+    We claim $a \leq f(a)$.
+    Since $a$ is an upper bound for $A$,
+    we have that both $x \leq f(x)$ and $x \leq a$.
+    By monotonicity, deduce that $f(x) \leq f(a)$, so $x \leq f(a)$.
+    Hence, $f(a)$ is an upper bound for $A$ as well.
+    But since $a$ is the \emph{least} upper bound, we have $a \leq f(a)$.
+
+    Therefore, $a \in A$ by definition.
+    By monotonicity, we have $f(a) \leq f(f(a))$,
+    so $f(a) \in A$ as well.
+    Since $a$ is an upper bound of $A$, we have $f(a) \leq a$.
+    By antisymmetry, $a = f(a)$, so $a$ is fixed by $f$.
+\end{proof}
+
+\begin{prop}{(Banach's Lemma.)}
+    For any functions
+    %
+    \begin{align*}
+        f &: X \to Y \\
+        g &: Y \to X
+    \end{align*}
+    %
+    there exists a set $C$ such that
+    %
+    \begin{equation*}
+        g(Y \setminus f(C)) = X \setminus C
+    \end{equation*}
+\end{prop}
+
+\begin{proof}
+    Define the map $A \mapsto X \setminus g(Y \setminus f(A))$.
+    Suppose $A \subseteq B$ and observe the deduction
+    %
+    \begin{align*}
+        A &\subseteq B \\
+        f(A) &\subseteq f(B) \\
+        Y \setminus f(A) &\supseteq Y \setminus f(B) \\
+        g(Y \setminus f(A)) &\supseteq g(Y \setminus f(B)) \\
+        X \setminus g(Y \setminus f(A))
+            &\subseteq X \setminus g(Y \setminus f(A))
+    \end{align*}
+    %
+    Hence, the map is monotone. It is furthermore continuous because taking the
+    image of a function preserves unions (suprema).
+
+    Hence by the fixed-point theorem, there exists $C$ such that
+    %
+    \begin{equation*}
+        C = X \setminus g(Y \setminus f(C))
+    \end{equation*}
+    %
+    as required.
+\end{proof}
+
+\begin{prop}{(Bernstein-Cantor-Schr\"oder Theorem.)}
+    Suppose $f : X \to Y$ and $g : Y \to X$ are injections.
+    Then there exists a bijection $h : X \to Y$.
+\end{prop}
+
+\begin{proof}
+    By the Banach Lemma, there exists a set $A$ such that
+    %
+    \begin{equation*}
+        A = X \setminus g(Y \setminus f(A))
+    \end{equation*}
+
+    Note that $g(Y \setminus f(A)) = X \setminus A$ by the construction of $A$.
+    By the injectivity of $g$, we have
+    %
+    \begin{equation*}
+        Y \setminus f(A) = g\inv(X \setminus A)
+    \end{equation*}
+    %
+    so $Y = g\inv(X \setminus A) \union f(A)$.
+
+    Therefore, define the function $h : X \to Y$ by
+    %
+    \begin{equation*}
+        h(x) = \begin{cases}
+            f(x) &\quad\text{if } x \in A \\
+            g\inv(x) &\quad\text{if } x \in X \setminus A
+        \end{cases}
+    \end{equation*}
+    %
+    and note that it is a bijection.
+\end{proof}
+
+\subsection{Cardinals}
+
+\begin{defn}{(Cardinal number.)}
+    An ordinal number $\alpha$ is called a \emph{cardinal} if it is not
+    equinumerous with any ordinal $\beta < \alpha$.
+
+    In other words, there exists no bijection $f : \beta \to \alpha$.
+\end{defn}
+
+\section{The axiom of choice}
+
+\begin{prop}{(Characterizations of Choice.)}
+    The following are equivalent.
+    %
+    \begin{enumerate}
+        \item
+            The Axiom of Choice
+            %
+        \item
+            Zorn's Lemma
+            %
+        \item
+            The Well-Ordering Theorem
+            %
+    \end{enumerate}
+\end{prop}
+
+\begin{proof}
+    \begin{description}
+        \item[$1 \implies 2$.]
+            Suppose not. Then we have a poset $\P$ in which every chain has an
+            upper bound, $\P$ itself is unbounded.
+
+            Let $T$ be the set of chains in $\P$.
+            Construct the function $b : T \to \P$ which sends each chain to one
+            of an upper bound strictly greater than all elements in the chain.
+            The construction of this function uses choice.
+
+            Define the transfinite sequence $(a_\alpha)$ by
+            %
+            \begin{align*}
+                a_0 &= b(\emptyset) \\
+                a_\alpha &= b(\setof{a_\beta \sth \beta < \alpha})
+            \end{align*}
+            %
+            Note that successor stages are the same as limit stages.
+
+            This sequence is defined over all ordinals, which form a proper
+            class. Hence, it would imply that $\P$ is also a proper class,
+            which contradicts that $\P$ is a set.
+
+        \item[$2 \implies 3$.]
+            Take an arbitrary set $X$.
+            %
+            The property of $R \subset Y \times Y$ being a well-order on $Y$ is
+            a definable property, so we form the set $\mathcal{W}$ of all
+            well-orders on \emph{subsets} of $X$.
+            %
+            We define a partial order $\leq$ on $\mathcal{W}$ by saying that
+            $U \prec V$ if $V$ is an end-extension of $U$.
+
+            Take an arbitrary chain $\mathcal{C} \subset \mathcal{W}$ and note
+            that the union of its elements gives an upper bound for it. We
+            apply Zorn's Lemma to obtain a maximal well-ordering $(W, \leq)$ on
+            $X$.
+
+            We claim that $W = X$.
+            It is obvious that $W \subseteq X$,
+            so it suffices to show that $X \subseteq W$.
+            Suppose not, then there exists $x \in X$ such that $x \notin W$.
+            But then we can define
+            $\leq^\prime = \leq \union \setof{(y, x) : y \in W}$
+            and note that $(W \union \setof{x}, \leq^\prime)$ is an
+            end-extension of $W$, which contradicts the maximality of $W$.
+
+            Hence, any set can be well-ordered.
+
+        \item[$3 \implies 1$.]
+            Let $\mathcal{X} = \setof{X_i \sth i \in I}$ be an indexed family
+            of nonempty sets.
+            Using the Axiom of Replacement, form an indexed family of
+            well-orders by the Well-Ordering Theorem.
+            Using Replacement a second time, take the unique minimal element of
+            each well-order.
+            This procedure builds a choice function on the family
+            $\mathcal{X}$.
+    \end{description}
+\end{proof}
+
+\section{Forcing}
+
+\begin{defn}{(Model of set theory.)}
+    We say that a set $M$ together with a membership relation $R$ models a
+    statement $\phi$ in the language of set theory if using $R$ in place of
+    $\in$ in $\phi$ gives a true sentence in $M$.
+\end{defn}
+
+\begin{defn}{(Countable transitive model.)}
+    A model $(M, R)$ is \emph{transitive} if its underlying set $R$ is
+    transitive, i.e. if $x \in y$ and $y \in M$, then $x \in M$.
+    In other words, everything contained by elements of $M$ are themselves
+    elements of $M$, namely sets.
+    Hence, the sets in $M$ always contain \emph{other sets} and not weird
+    things.
+
+    A model is \emph{countable} if its underlying set $M$ is countable.
+\end{defn}
+
+Unless explicitly stated, anywhere a model $M$ pops up, it should be understood
+as a countable transitive model satisfying enough of ZFC.
+
+\begin{defn}{(Preservation of cardinals.)}
+    A forcing notion $\P$ is said to \emph{preserve cardinals} if for any
+    $\P$-generic filter $G \subset \P$ we have that if
+    %
+    \begin{equation*}
+        M \models \stmt{$\alpha$ is a cardinal}
+    \end{equation*}
+    %
+    then
+    %
+    \begin{equation*}
+        M[G] \models \stmt{$\alpha$ is a cardinal}
+    \end{equation*}
+\end{defn}
+
+\end{document}
