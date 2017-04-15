@@ -38,6 +38,35 @@
     Let $\alpha$ be an ordinal.
     Then we write $\alpha^+$ or $\alpha + 1$ to denote
     $\alpha \union \setof{\alpha}$, the \emph{successor} of $\alpha$.
+
+\end{defn}
+
+\begin{rem}
+    For example, every natural number except zero is a successor ordinal.
+
+    Why? We define the natural numbers inductively, with the ordinal successor
+    operation. Zero is defined $0 = \emptyset$ and $n + 1$ is defined by
+    $n + 1 = n \union \setof{n}$.
+\end{rem}
+
+\begin{rem}
+    The natural number $n$ is a set of $n$ elements.
+    This can be by induction.
+    Zero is the empty set, and so contains zero elements as required.
+    In the step case, we have $n$ being a set of $n$ elements.
+    Note that $n \notin n$ by the Axiom of Regularity,
+    so $\setof{n}$ is disjoint from $n$.
+    Hence, $n + 1 = n \union \setof{n}$ has $n + 1$ elements.
+\end{rem}
+
+\begin{defn}{(Limit ordinal.)}
+    Any ordinal that is not a successor is a \emph{limit ordinal}, e.g.
+    %
+    \begin{itemize}
+        \item zero
+        \item the set of natural numbers, denoted $\omega$.
+        \item the set of real numbers, denoted $\omega_1$.
+    \end{itemize}
 \end{defn}
 
 \begin{thm}{(Isomorphism of well-orders to ordinals.)}
@@ -83,39 +112,6 @@ This establishes that ordinals are the \emph{canonical well-orders}.
 \begin{proof}
     This follows from the unique isomorphism to ordinals and the corresponding
     trichotomy theorem for ordinals.
-\end{proof}
-
-\begin{prop}{(Cantor's Theorem.)}
-    There is no surjection $f : X \to \pset{X}$.
-\end{prop}
-
-\begin{proof}
-    Suppose there is a surjection $f : X \to \pset{X}$.
-    %
-    Define the set
-    %
-    \begin{equation*}
-        A = \setof{
-            x \in X \sth
-            x \notin f(x)
-        }
-    \end{equation*}
-    %
-    Note that $A \subset X$.
-    Since $f$ is a surjection, we have $A \in \rng{f}$,
-    so let $x \in X$ be such that $f(x) = A$.
-
-    \begin{itemize}
-        \item
-            Suppose $x \in A = f(x)$.
-            But then by definition of $A$, we have that $x \notin f(x)$.
-            %
-        \item
-            Suppose $x \notin A = f(x)$.
-            But then by definition of $A$, we have that $x \in f(x)$.
-    \end{itemize}
-
-    This is a contradiction, so $f$ cannot be a surjection.
 \end{proof}
 
 \begin{prop}{(Knaster-Tarski Fixed-Point Theorem.)}
@@ -225,9 +221,100 @@ This establishes that ordinals are the \emph{canonical well-orders}.
 \begin{defn}{(Cardinal number.)}
     An ordinal number $\alpha$ is called a \emph{cardinal} if it is not
     equinumerous with any ordinal $\beta < \alpha$.
-
+    %
     In other words, there exists no bijection $f : \beta \to \alpha$.
+    %
+    For example, each natural number is a cardinal by the pigeonhole principle.
+    The set of natural numbers is a cardinal, denoted $\aleph_0$, since it is
+    infinite yet all its elements are finite.
 \end{defn}
+
+\begin{defn}{(Cardinality.)}
+    The least ordinal equinumerous with a given set $X$ is called the
+    \emph{cardinality} of $X$
+\end{defn}
+
+\begin{rem}
+    Axiom of Choice is required to see that every set has a cardinality.
+    From the axiom, we have the Well-Ordering theorem which states that every
+    set can be well-ordered.
+    Let $X$ be an arbitrary set, and $(W, \leq)$ be a well-order on it.
+    The well-order is isomorphic to a unique ordinal $\alpha$.
+    Form the set of ordinals smaller than $\alpha$ and equinumerous with
+    $\alpha$.
+    The ordinal numbers being themselves well-ordered allows us to pick the
+    least ordinal equinumerous with $\alpha$
+\end{rem}
+
+\begin{prop}{(Cantor's Theorem.)}
+    There is no surjection $f : X \to \pset{X}$.
+\end{prop}
+
+\begin{proof}
+    Suppose there is a surjection $f : X \to \pset{X}$.
+    %
+    Define the set
+    %
+    \begin{equation*}
+        A = \setof{
+            x \in X \sth
+            x \notin f(x)
+        }
+    \end{equation*}
+    %
+    Note that $A \subset X$.
+    Since $f$ is a surjection, we have $A \in \rng{f}$,
+    so let $x \in X$ be such that $f(x) = A$.
+
+    \begin{itemize}
+        \item
+            Suppose $x \in A = f(x)$.
+            But then by definition of $A$, we have that $x \notin f(x)$.
+            %
+        \item
+            Suppose $x \notin A = f(x)$.
+            But then by definition of $A$, we have that $x \in f(x)$.
+    \end{itemize}
+
+    This is a contradiction, so $f$ cannot be a surjection.
+\end{proof}
+
+\begin{defn}
+    For a set of cardinals $K$, we say that its \emph{limit} is $\kappa$ and
+    write $\kappa = \lim K$ if $\kappa = \Union K$ is the union of the set.
+\end{defn}
+
+\begin{prop}{(Limit of cardinals is a cardinal.)}
+    Suppose $K$ is a set of cardinals.
+    Then $\kappa = \lim K$ is a cardinal.
+\end{prop}
+
+\begin{proof}
+    Write $K = (\kappa_i \sth i \in I)$ for some index set $I$, so
+    $\kappa = \lim_{i < I} \kappa_i$.
+    Suppose $\kappa$ is not a cardinal.
+    Then there exists a bijection $f : \lambda \to \kappa$
+    for some $\lambda < \kappa$.
+    %
+    Since $\lambda < \Union \kappa_i$,
+    there exists some $i \in I$
+    such that $\lambda < \kappa_i$.
+    Hence there exists a surjection $g : \kappa_i \to \lambda$.
+    %
+    Composing $f$ and $g$, we obtain a surjection $\kappa_i \to \kappa$.
+    %
+    Since $\kappa_i < \kappa$, there exists a surjection $\kappa \to \kappa_i$.
+
+    With surjections in both directions, we apply the
+    Bernstein-Cantor-Schr\"oder theorem to obtain a bijection
+    $h : \kappa \to \kappa_i$.
+
+    By composing the bijection $h$ with the bijection $f$, we obtain a
+    bijection $\lambda \to \kappa_i$.
+    But $\lambda < \kappa_i$, so this contradicts the assumption that
+    $\kappa_i$ is a cardinal, meaning that it is equinumerous with no ordinal
+    less than it.
+\end{proof}
 
 \section{The axiom of choice}
 
