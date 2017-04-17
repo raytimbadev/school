@@ -4,10 +4,204 @@
 \author{Jacob Thomas Errington}
 \date{17 April 2017}
 
-\usepackage{jakemath}
+\usepackage[questions,geometry]{jakemath}
 
 \begin{document}
 
 \maketitle
+
+\question{Fruit salad}
+
+Let $s(n)$ be the number of ways to make a fruit salad consisting of
+strawberries, apples, bananas, and pineapples, with $n$ pieces of
+fruit, where
+%
+\begin{itemize}
+    \item strawberries are used by the half-dozen;
+    \item apples are an even number;
+    \item there are at most five bananas; and
+    \item there is at most one pineapple.
+\end{itemize}
+
+First, we define a generating function for each constraint.
+%
+\begin{description}
+    \item[Strawberries.]
+        Let $f_s(x)$ denote the number of counts for strawberries.
+        %
+        \begin{equation*}
+            f_s(x) = \infsum_{k=0} x^{6k} = \frac{1}{1 - x^6}
+        \end{equation*}
+
+    \item[Apples.]
+        Let $f_a(x)$ denote the number of counts for apples.
+        %
+        \begin{equation*}
+            f_a(x) = \infsum_{k=0} x^{2k} = \frac{1}{1 - x^2}
+        \end{equation*}
+
+    \item[Bananas.]
+        Let $f_b(x)$ denote the number of counts for bananas.
+        %
+        \begin{equation*}
+            f_b(x)
+            = 1 + x + x^2 + x^3 + x^4 + x^5
+            = \frac{1-x^6}{1 - x}
+        \end{equation*}
+
+    \item[Pineapples.]
+        Let $f_p(x)$ denote the number of counts for pineapples.
+        %
+        There can be only zero or one pineapple, so
+        %
+        \begin{equation*}
+            f_p(x) = 1 + x = \frac{1 - x^2}{1 - x}
+        \end{equation*}
+\end{description}
+
+Taking the product of these gives an ordinary generating function for ways to
+select the counts of fruit, subject to each constraint, to produce the ordinary
+generating function for the fruit salad.
+%
+\begin{equation*}
+    S(x)
+    =
+    \frac{1}{\cancel{1 - x^6}}
+    \cdot \frac{1}{\cancel{1 - x^2}}
+    \cdot \frac{\cancel{1 - x^6}}{1 - x}
+    \cdot \frac{\cancel{1 - x^2}}{1 - x}
+    = \frac{1}{(1-x)^2}
+\end{equation*}
+
+Next, we want to find an explicit formula for the coefficients,
+since $s(n) = [x^n]S(x)$. These can be found by differentiation.
+%
+Notice
+%
+\begin{equation*}
+    \frac{1}{(1-x)^2}
+    = \deriv{x} { \frac{1}{1-x} }
+    = \deriv{x} { \infsum_{n=0} x^n }
+    = \infsum_{n=1} n x^{n-1}
+    = \infsum_{n=0} (n + 1) x^n
+\end{equation*}
+%
+So there are $n + 1$ ways to make a fruit salad with $n$ pieces of fruit
+subject to the above constraints, i.e. $s(n) = n + 1$.
+
+\question{Round table}
+
+Let $r(n)$ be the number of different ways to seat $n$ people around a round
+table. The idea is that because the table is round, two arrangements of people
+are considered equivalent if one arrangement is obtained as a rotation of the
+other, e.g. $(12345) \equiv (23451)$ are the same seating arrangement, for
+$n=5$. The goal is to count the number of such equivalence classes for each
+$n$.
+%
+Note that each equivalence class has exactly $n$ members, and there are
+$n\fact$ permutations of $[n]$. Dividing by $n$ gives the number of equivalence
+classes, so there are $(n-1)\fact$ seating arrangements at a round table.
+%
+Hence, the exponential generating function has the series representation
+%
+\begin{equation*}
+    R(x)
+    = \infsum_{n=0} (n-1)\fact \frac{x^n}{n\fact}
+    = \infsum_{n=0} \frac{x^n}{n}
+\end{equation*}
+
+Differentiating, we find
+%
+\begin{equation*}
+    R^\prime(x)
+    = \infsum_{n=1} \frac{\cancel{n} x^{n-1}}{\cancel{n}}
+    = \infsum_{n=0} x^n
+    = \frac{1}{1-x}
+\end{equation*}
+
+Integrating, we find
+%
+\begin{equation*}
+    R(x) = \int R^\prime(x) \intd x
+    = \int \frac{1}{1-x} \intd x
+    = - \ln (1-x)
+\end{equation*}
+%
+for a closed form representation of the exponential generating function.
+
+\question{Sum of cubes}
+
+Using generating functions, we can find a closed form equation to evaluate
+%
+\begin{equation*}
+    s(n) = \sum_{k=0}^n (k-1)k(k+1)
+\end{equation*}
+
+We begin with $\frac{1}{1-x} = \sum x^n$ and differentiate three times.
+%
+\begin{align*}
+    \deriv{x} \deriv{x} \deriv{x} \frac{1}{1-x}
+    &= \deriv{x} \deriv{x} \deriv{x} \infsum_{n=0} x^n \\
+    %
+    \frac{1}{(1-x)^4} &= \infsum_{n=0} (n+1)(n+2)(n+3) x^n \\
+    \frac{x^2}{(1-x)^4} &= \infsum_{n=0} (n+1)(n+2)(n+3) x^{n+2}
+\end{align*}
+%
+Notice that
+%
+\begin{equation*}
+    [x^n] \frac{x^2}{(1-x)^4} = (n-1)n(n+1)
+\end{equation*}
+
+Using convolution with $\frac{1}{1-x} = \sum x^n$ we obtain the partial sums.
+%
+\begin{equation*}
+    [x^n] \frac{1}{1-x} \cdot \frac{x^2}{(1-x)^4}
+    = [x^n] \frac{x^2}{(1-x)^5}
+    = \sum_{k=0}^n (k-1)k(k+1)
+\end{equation*}
+
+We perform a partial fraction decomposition on $\frac{x^2}{(1-x)^5}$.
+%
+\begin{equation*}
+    \frac{x^2}{(1-x)^5}
+    = \cancel{\frac{0}{1-x}}
+    + \cancel{\frac{0}{(1-x)^2}}
+    + \frac{1}{(1-x)^3}
+    + \frac{-2}{(1-x)^4}
+    + \frac{1}{(1-x)^5}
+\end{equation*}
+%
+Then, we can compute the corresponding series by differentiating.
+%
+\begin{align*}
+    \frac{1}{(1-x)^3}
+    &= \infsum_{n=0} \frac{(n+1)(n+2)}{2} x^n \\
+    %
+    \frac{-2}{(1-x)^4}
+    &= \infsum_{n=0}
+        (-\cancel{2}) \frac{(n+1)(n+2)(n+3)}{\cancel{2} \cdot 3}
+        x^n \\
+    %
+    \frac{1}{(1-x)^5}
+    &= \infsum_{n=0} \frac{(n+1)(n+2)(n+3)(n+4)}{2 \cdot 3 \cdot 4} x^n
+\end{align*}
+
+Summing these series, we obtain
+%
+\begin{align*}
+    \frac{x^2}{(1-x)^5}
+    &= \infsum_{n=0} \frac{(n+1)(n+2)}{2} x^n \\
+    &+ \infsum_{n=0} \frac{-(n+1)(n+2)(n+3)}{3} x^n \\
+    &+ \infsum_{n=0} \frac{(n+1)(n+2)(n+3)(n+4)}{24} x^n \\
+    %
+    &= \infsum_{n=0} \frac{1}{24} (n-1)n(n+1)(n+2) x^n
+\end{align*}
+%
+which gives the closed form
+%
+\begin{equation*}
+    s(n) = \frac{1}{24} (n-1)n(n+2)(n+2)
+\end{equation*}
 
 \end{document}
