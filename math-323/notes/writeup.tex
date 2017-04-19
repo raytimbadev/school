@@ -2588,6 +2588,8 @@ following theorem.
 
 \subsection{Special cases of the gamma distribution}
 
+\subsubsection{Exponential distribution}
+
 \begin{defn}{(Exponential distribution.)}
     The \emph{exponential distribution} with scale parameter $\beta > 0$,
     denoted $\Exp{\beta}$,
@@ -2606,5 +2608,58 @@ following theorem.
         \end{cases}
     \end{equation*}
 \end{defn}
+
+\begin{thm}{(Memoryless property of the exponential distribution.)}
+    Suppose $X \sim \Exp{\beta}$.
+    Then for any $a, b > 0$,
+    %
+    \begin{equation}
+        \label{eq:exponential-memoryless}
+        %
+        \P{X \geq a + b \given X \geq a}
+        =
+        \P{X \geq b}
+        =
+        e^\frac{-b}{\beta}
+    \end{equation}
+\end{thm}
+
+\begin{proof}
+    See notes of 9 March, page 6.
+\end{proof}
+
+\subsubsection{Chi-squared distribution}
+
+\begin{defn}{(Chi-squared distribution.)}
+    The \emph{chi-squared distribution} with $\nu > 0$ degrees of freedomz,
+    denoted $\chi^2_\nu$, is the distribution $\GammaD{\frac{\nu}{2}, 2}$.
+    %
+    The density of this distribution is
+    %
+    \begin{equation*}
+        f(x) = \begin{cases}
+            \frac{
+                x^{\frac{\nu}{2} - 1} e^{-\frac{x}{2}}
+            }{
+                2^{\frac{\nu}{2}} \GammaD{\frac{\nu}{2}}
+            }
+                &\quad\text{if } x \geq 0 \\
+            0   &\quad\text{if } x < 0
+        \end{cases}
+    \end{equation*}
+\end{defn}
+
+\begin{thm}{(Relation to the standard normal distribution.)}
+    Suppose $X \sim \StdNormal$, and $Y = X^2$.
+    Then,
+    \begin{equation}
+        \label{eq:square-normal-chi-squared}
+        Y \sim \chi^2_1
+    \end{equation}
+\end{thm}
+
+\begin{proof}
+    See notes of 9 March, page 7.
+\end{proof}
 
 \end{document}
