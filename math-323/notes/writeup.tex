@@ -1589,17 +1589,288 @@ converges, by theorem \ref{thm:negative-binomial-series}, to $1$.
 
 \subsection{Hypergeometric distribution}
 
-Notes of 9 February.
+\begin{defn}
+    Suppose $N$, $n$, $r$ are positive integers,
+    such that $n \leq N$ and $r \leq r$.
+    We say that a random variable $Y$
+    follows a \emph{hypergeometric distribution},
+    and write $Y \sim \HGeo{N;n;r}$ if
+    %
+    \begin{equation}
+        \label{eq:hypergeomtric-distribution}
+        %
+        \p[Y]{k}
+        = \P{Y = k}
+        = \frac{\binom{r}{k} \binom{N - r}{n - k}}{
+            \binom{N}{n}
+        }
+    \end{equation}
+    %
+    where $0 \leq k \leq r$
+    and $0 \leq n - k \leq N - r$.
+\end{defn}
+
+\begin{rem}{(Interpretation of the hypergeometric distribution.)}
+    Suppose an urn contains $N$ distinguishable balls,
+    of which $r$ and red and $N - r$ are blue.
+    An unordered sample of $n$ balls is taken from the urn,
+    without replacement.
+    %
+    If $Y$ denotes the number of red balls in the sample,
+    then $Y \sim \HGeo{N;n;r}$.
+\end{rem}
+
+\begin{thm}{(Expectation and variance of the hypergeometric distribution.)}
+    Suppose $Y \sim \HGeo{N;n;r}$.
+    Then,
+    %
+    \begin{enumerate}
+        \item $\E{Y} = \frac{nr}{N}$
+        \item $
+            \V{Y}
+            = n
+            \parens{\frac{r}{N}}
+            \parens{\frac{N-r}{N}}
+            \parens{\frac{N-n}{N-1}}
+            $
+    \end{enumerate}
+\end{thm}
+
+\begin{proof}
+    See notes of 14 February.
+\end{proof}
+
+The notes of 14 February contains an example.
 
 \section{Moments and moment-generating functions}
 
-Notes of 14 February.
+\begin{defn}
+    The $k$\th \emph{moment} of a real-valued random variable $X$ is the
+    expectation of its $k$\th power, often denoted $\mu_k^\prime$.
+    %
+    \begin{equation*}
+        \mu_k^\prime = \E{X^k}
+    \end{equation*}
+    %
+    The $k$\th \emph{central moment}, denoted $\mu_k$, corrects for the mean.
+    %
+    \begin{equation*}
+        \mu_k
+        = \E{\parens{X - \mu_1^\prime}^k}
+        = \E{\parens{X - \E{X}}^k}
+    \end{equation*}
+\end{defn}
+
+\begin{rem}
+    Notice that $\mu_1^\prime = \E{X}$ and $\mu_2 = \V{X}$.
+\end{rem}
+
+\begin{defn}{(Moment-generating function.)}
+    The \emph{\mgf} of a real-valued random variable $X$ is
+    %
+    \begin{equation*}
+        m_X(t) = \E{e^{t X}}
+    \end{equation*}
+\end{defn}
+
+\begin{rem}
+    There are real-valued random variables for which not all moments are
+    finite.
+\end{rem}
+
+\begin{proof}
+    Consider
+    \begin{equation*}
+        \p[1]{n} = \P{X_1 = n} = \frac{6}{\pi^2 n^2}
+    \end{equation*}
+    %
+    Since $\sum \frac{1}{n^2} = \frac{\pi^2}{6}$, we have that
+    %
+    \begin{equation*}
+        \infsum_{n=1} \p[1]{n} = \frac{6}{\pi^2} \cdot \frac{\pi^2}{6} = 1
+    \end{equation*}
+    %
+    Then,
+    \begin{equation*}
+        \E{X_1}
+        = \mu_1
+        = \frac{6}{\pi^2} \infsum_{n=1} n \frac{1}{n^2}
+        = \frac{6}{\pi^2} \infsum_{n=1} \frac{1}{n}
+        = \infty
+    \end{equation*}
+
+    Next, consider
+    %
+    \begin{equation*}
+        \p[2]{n} = \frac{1}{\zeta(3) n^3}
+    \end{equation*}
+    %
+    where $\zeta(n) = \sum \frac{1}{n^3}$.
+    %
+    Then, $\E{X_2}$ is infinite, but $\V{X_2}$ diverges.
+\end{proof}
+
+\begin{thm}
+    If the \mgf{} of $X$,
+    denoted $m_X(t)$ is finite on $(-a, a)$
+    for some $a > 0$,
+    then
+    %
+    \begin{equation*}
+        \E{\abs{X}^\beta} < \infty
+    \end{equation*}
+    %
+    for all $\beta > 0$.
+\end{thm}
+
+\begin{proof}
+    See notes of 14 February.
+\end{proof}
+
+\begin{thm}
+    If the \mgf{} of $X$, denoted $m_X(t)$ is infinite on the interval
+    $(-a, a)$,
+    then $m_X$ admits a power series expansion on $(-a, a)$.
+    %
+    \begin{equation*}
+        m_X(t)
+        = \infsum_{k=0} {
+            \frac{t^k}{k!}
+            \E{X^k}
+        }
+    \end{equation*}
+\end{thm}
+
+\omittedproof
+
+\begin{cor}
+    If the \mgf{} of $X$, denoted $m_X(t)$ is infinite on the interval
+    $(-a, a)$,
+    then $m_X$ is differentiable infinitely many times on $(-a, a)$,
+    and
+    %
+    \begin{equation*}
+        \nderiv{r}{t} m_X(t)
+        =
+        \infsum_{k=0} {
+            \frac{t^k}{k!}
+            \E{X^{k+r}}
+        }
+    \end{equation*}
+    %
+    for $t \in (-a, a)$ and $r \in \range[1]{}$.
+
+    In particular,
+    %
+    \begin{equation*}
+        \nderiv{r}{t} m_X(t) \evaluated{t=0} = \E{X^r}
+    \end{equation*}
+\end{cor}
+
+\begin{thm}
+    Suppose $X$ and $Y$ are real-valued random variables
+    with \mgf $m_X$ and $m_Y$.
+    If there is $a > 0$ such that both $m_X(t)$ and $m_Y(t)$ converge on
+    $(-a, a)$ and such that $m_Y(t) = m_X(t)$ for all $t \in (-a, a)$,
+    then $X$ and $Y$ have the same probability distribution.
+\end{thm}
+
+\omittedproof
+
+Moment-generating functions for some well-known distributions.
+%
+\begin{description}
+    \item[Binomial.]
+        Suppose $X \sim \Bin{n;p}$.
+        %
+        \begin{align*}
+            \E{e^{tX}}
+            &= \sum_{k=0}^n e^{tk} \binom{n}{k} p^k (1-p)^{n-k} \\
+            &= \sum_{k=0}^n \binom{n}{k} \parens{pe^t}^k (1-p)^{n-k} \\
+            &= \parens{1 - p + pe^t}^n
+        \end{align*}
+        %
+    \item[Poisson.]
+        Suppose $X \sim \Poi{\lambda}$.
+        %
+        \begin{align*}
+            \E{e^{tX}}
+            &= \infsum_{k=0} e^{tk} e^{-\lambda} \frac{\lambda^k}{k!} \\
+            &= \infsum_{k=0} e^{-\lambda} \frac{\parens{\lambda e^t}^k}{k!} \\
+            &= e^{-\lambda} \cdot e^{\lambda e^t} \\
+            &= e^{\lambda \parens{e^t - 1}}
+        \end{align*}
+        %
+    \item[Geometric.]
+        Suppose $X \sim \Geo{p}$.
+        %
+        \begin{align*}
+            \E{e^{tX}}
+            &= \infsum_{k=1} e^{kt} (1-p)^{k-1} p \\
+            &= p e^t \infsum_{k=1} e^{(k - 1)t} (1-p)^{k-1} \\
+            &= p e^t \infsum_{k=0} \parens{e^t (1-p)}^k
+        \end{align*}
+        %
+        Note that this converges only when $e^t (1-p) < 1$, i.e. if
+        %
+        \begin{equation*}
+            t < - \log {1-p}
+        \end{equation*}
+        %
+        Then,
+        \begin{equation*}
+            \E{e^{tX}}
+            =
+            \frac{p e^t}{1 - (1-p)e^t}
+        \end{equation*}
+        %
+\end{description}
 
 \section{Probabilistic inequalities}
 
 \subsection{Markov's inequality}
 
-Notes of 14 February.
+\begin{thm}{(Markov's inequality.)}
+    Let $X$ be a real-valued, nonnegative random variable.
+    Then for any $a > 0$, we have
+    %
+    \begin{equation}
+        \label{eq:markov-inequality}
+        %
+        \P{X \geq a} \leq \frac{\E{X}}{a}
+    \end{equation}
+\end{thm}
+
+\begin{proof}
+    Since the events $X \geq a$ and $X < a$ are mutually exclusive, we can
+    express $X$ as a sum.
+    %
+    \begin{equation*}
+        X = X \cdot 1_{\setof{X \geq a}} + X \cdot 1_{\setof{X < a}}
+    \end{equation*}
+    %
+    Note that when $1_{\setof{X \geq a}} = 1$, well, $X \geq a$. Duh.
+    So we can use this to replace $X$ with $a$ and form an inequality.
+    %
+    \begin{equation*}
+        X \geq a \cdot 1_{\setof{X \geq a}} + X \cdot 1_{\setof{X < a}}
+    \end{equation*}
+    %
+    Since $X$ is nonnegative, we can drop the second term, giving
+    %
+    \begin{equation*}
+        X \geq a \cdot 1_{\setof{X \geq a}}
+    \end{equation*}
+
+    Since expectation is monotone, we can take it both sides.
+    We use the linearity of expectation and the fact that the expectation of an
+    indicator for an event is the probability of that event.
+    %
+    \begin{align*}
+        \E{X} &\geq a \P{X \geq a} \\
+        \P{X \geq a} & \leq \frac{\E{X}}{a}
+    \end{align*}
+\end{proof}
 
 \subsection{Chebyshev's inequality}
 
