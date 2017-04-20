@@ -137,12 +137,21 @@
 \newcommand{\rng}[1]{\rngOp{\parens{#1}}}
 \newcommand{\compose}{\circ}
 \newcommand{\range}[2][1]{%
+    \def\temp{#2}
+    \ifx\temp\empty
+    \setof{#1,\ldots}
+    \else
     \setof{#1,\ldots,#2}
+    \fi
 }
 \newcommand{\nset}[1][n]{\bracks{#1}}
 \newcommand{\infsum}{\sum^\infty}
 \renewcommand{\d}{\mathrm{d}}
 \newcommand{\intd}{\;\d}
+\newcommand{\nderiv}[2]{%
+    \ensuremath
+    \frac{\d^{#1}}{\d {#2}^{#1}}
+}
 \newcommand{\deriv}[2][]{%
     \ensuremath
     \frac{\d #1}{\d #2}
@@ -157,6 +166,14 @@
 }
 \newcommand{\inttoinf}{%
     \ensuremath \int^{\infty}
+}
+\newcommand{\evaluated}[2][]{
+    \def\temp{#1}
+    \ifx\temp\empty
+    \Big\vert_{#2}
+    \else
+    \Big\vert_{#1}^{#2}
+    \fi
 }
 \DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
 \newcommand{\proves}{\vdash}
@@ -219,6 +236,8 @@
 \newcommand{\NBin}[1]{ \NBinOp\parens{#1} }
 \DeclareMathOperator{\GeoOp}{Geo}
 \newcommand{\Geo}[1]{ \GeoOp\parens{#1} }
+\DeclareMathOperator{\HGeoOp}{HG}
+\newcommand{\HGeo}[1]{ \HGeoOp\parens{#1} }
 \DeclareMathOperator{\UnifOp}{Unif}
 \newcommand{\Unif}[1]{ \UnifOp\parens{#1} }
 \DeclareMathOperator{\NormalOp}{\mathcal{N}}
@@ -226,6 +245,8 @@
 \newcommand{\StdNormal}{\Normal{0;1}}
 \DeclareMathOperator{\GammaOp}{Gamma}
 \newcommand{\GammaD}[1]{ \GammaOp\parens{#1} }
+\DeclareMathOperator{\BetaOp}{Beta}
+\newcommand{\BetaD}[1]{ \BetaOp\parens{#1} }
 \DeclareMathOperator{\ExpOp}{Exp}
 \newcommand{\Exp}[1]{ \ExpOp\parens{#1} }
 \newcommand{\ChiSq}{\Chi^2}
