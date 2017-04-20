@@ -4,35 +4,7 @@
 \title{Assignment \#4\\Honours set theory -- MATH 488}
 \date{10 March 2017}
 
-\usepackage[margin=2.0cm]{geometry}
-\usepackage{amsmath,amssymb,amsthm}
-
-\newtheorem{prop}{Proposition}
-
-\newcommand{\inv}{^{-1}}
-\newcommand{\Union}{\bigcup}
-\newcommand{\Intersn}{\bigcap}
-\newcommand{\parens}[1]{\left(#1\right)}
-\newcommand{\compl}{\overline}
-\newcommand{\intersn}{\cap}
-\DeclareMathOperator{\closureOp}{Cl}
-\newcommand{\closure}[1]{\closureOp{\parens{#1}}}
-\newcommand{\embedsto}{\hookrightarrow}
-\newcommand{\compose}{\circ}
-\newcommand{\setof}[1]{\left\{#1\right\}}
-
-\usepackage{scalerel,stackengine}
-\stackMath
-\newcommand\reallywidehat[1]{%
-\savestack{\tmpbox}{\stretchto{%
-  \scaleto{%
-    \scalerel*[\widthof{\ensuremath{#1}}]{\kern-.6pt\bigwedge\kern-.6pt}%
-    {\rule[-\textheight/2]{1ex}{\textheight}}%WIDTH-LIMITED BIG WEDGE
-  }{\textheight}%
-}{0.5ex}}%
-\stackon[1pt]{#1}{\tmpbox}%
-}
-\parskip 1ex
+\usepackage[geometry]{jakemath}
 
 \newcommand{\cechstone}{\v{C}ech-Stone}
 
@@ -101,9 +73,9 @@
     each piece's complement is. Hence, the intersection of all the complements,
     which is finite, is also in the ultrafilter, but this is empty set.
     \begin{align*}
-        \compl{ \Union_{z \in Z_0} A_z }
-        = \Intersn_{z \in Z_0} \compl{A_z}
-        = \compl{X}
+        \parens{ \Union_{z \in Z_0} A_z }\compl
+        = \Intersn_{z \in Z_0} A_z\compl
+        = X\compl
         = \emptyset
         \in p
     \end{align*}
@@ -114,7 +86,7 @@
     $z_1 \neq z_2$. Since $C$ is Hausdorff, we have disjoint neighbourhoods
     $U_{z_1} \ni z_1$ and $U_{z_2} \ni z_2$. By definition of the limit,
     \begin{equation*}
-        f\inv (U_{z_1}) \intersn f\inv (U_{z_2}
+        f\inv (U_{z_1}) \intersn f\inv (U_{z_2})
         = f\inv (U_{z_1} \intersn U_{z_2})
         = \emptyset
         \in p
