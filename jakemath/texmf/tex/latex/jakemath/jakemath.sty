@@ -13,6 +13,9 @@
 \RequirePackage{cancel}
 \RequirePackage{mathtools}
 
+% For \reallywidehat command
+\RequirePackage{scalerel,stackengine}
+
 %%%%%%%%%%% OPTIONS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%% GENERAL FORMATTING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -186,6 +189,9 @@
 \newcommand{\stmt}[1]{\text{``#1''}}
 \DeclareMathOperator{\psetOp}{\mathcal{P}}
 \newcommand{\pset}[1]{\psetOp{\parens{#1}}}
+\DeclareMathOperator{\closureOp}{Cl}
+\newcommand{\closure}[1]{\closureOp{\parens{#1}}}
+\newcommand{\embedsto}{\hookrightarrow}
 
 % Sets of numbers
 \newcommand{\unit}{[0,1]}
@@ -262,6 +268,19 @@
 \newcommand{\Mgf}{Moment generating function}
 
 \newcommand{\constructibleAxiom}{\verum = \constructible}
+
+% Really wide hats
+\stackMath
+\newcommand\reallywidehat[1]{%
+\savestack{\tmpbox}{\stretchto{%
+  \scaleto{%
+    \scalerel*[\widthof{\ensuremath{#1}}]{\kern-.6pt\bigwedge\kern-.6pt}%
+    {\rule[-\textheight/2]{1ex}{\textheight}}%WIDTH-LIMITED BIG WEDGE
+  }{\textheight}%
+}{0.5ex}}%
+\stackon[1pt]{#1}{\tmpbox}%
+}
+\parskip 1ex
 
 % Make varphi the main phi that we use, and define `aphi' for phi treated as an
 % angle.
