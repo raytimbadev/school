@@ -2728,4 +2728,80 @@ following theorem.
     See notes of 9 March, page 7.
 \end{proof}
 
+\subsection{Beta distribution}
+
+\begin{defn}{(Beta function.)}
+    The \emph{beta function} $B : (0, \infty) \times (0, \infty) \to \R$
+    is defined by
+    %
+    \begin{equation*}
+        (\alpha, \beta)
+        \mapsto
+        \int_0^1 x^{\alpha - 1} (1-x)^{\beta - 1} \intd x
+    \end{equation*}
+\end{defn}
+
+\begin{thm}{(Relation of the beta function to the gamma function.)}
+    For any $\alpha, \beta > 0$,
+    \begin{equation}
+        \label{eq:beta-gamma-relation}
+        B(\alpha, \beta)
+        = \frac{\Gamma(\alpha) \Gamma(\beta}{\Gamma(\alpha + \beta)}
+    \end{equation}
+\end{thm}
+
+\omittedproof
+
+\begin{defn}{(Beta distribution.)}
+    We say that a random variable $Y$ follows a \emph{beta distribution} with
+    parameters $\alpha, \beta > 0$ and write $Y \sim \BetaD{\alpha;\beta}$
+    if
+    %
+    \begin{equation}
+        \label{eq:beta-distribution-pdf}
+        %
+        f(y) = \begin{cases}
+            \frac{y^{\alpha - 1} (1-y)^{\beta - 1}}{B(\alpha, \beta)}
+                &\quad\text{if } 0 \leq y \leq 1 \\
+            0   &\quad\text{otherwise}
+        \end{cases}
+    \end{equation}
+    %
+    is a density for $Y$.
+\end{defn}
+
+\begin{rem}
+    There is no closed form for the \cdf{} of a beta distributed variable,
+    unless $\alpha = 1$ or $\beta = 1$.
+\end{rem}
+
+\begin{thm}{(Expectation and variance of a beta distributed variable.)}
+    Suppose $Y \sim \BetaD{\alpha;\beta}$.
+    Then,
+    \begin{enumerate}
+        \item
+            The expectation of $Y$ is
+            %
+            \begin{equation}
+                \label{eq:expectation-beta}
+                %
+                \E{Y} = \frac{\alpha}{\alpha + \beta}
+            \end{equation}
+            %
+        \item
+            The variance of $Y$ is
+            %
+            \begin{equation}
+                \label{eq:variance-beta}
+                %
+                \E{Y}
+                = \frac{\alpha \beta}{(\alpha + \beta)^2 (\alpha + \beta + 1)}
+            \end{equation}
+    \end{enumerate}
+\end{thm}
+
+\begin{proof}
+    See the notes of 9 March, page 11.
+\end{proof}
+
 \end{document}
