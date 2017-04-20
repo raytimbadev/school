@@ -2804,4 +2804,91 @@ following theorem.
     See the notes of 9 March, page 11.
 \end{proof}
 
+\begin{lem}
+    If $Z \sim \StdNormal$, then for any $z > 1$ we have
+    %
+    \begin{equation*}
+        \frac{2}{\sqrt{2\pi}}
+        \parens{\frac{1}{z} - \frac{1}{z^3}}
+        e^{-\frac{z^2}{2}}
+        %
+        \leq
+        %
+        \P{\abs{Z} \geq z}
+        %
+        \leq
+        %
+        \frac{2}{z \sqrt{2\pi}} e^{-\frac{z^2}{2}}
+    \end{equation*}
+\end{lem}
+
+\begin{proof}
+    First, notice that by the symmetry about zero of the standard normal
+    distribution, we have
+    %
+    \begin{equation*}
+        \P{\abs{Z} \geq z}
+        = \P{Z \geq z} + \P{Z \leq -z}
+        = \P{Z \geq z} + \P{Z \geq z}
+        = 2 \P{Z \geq z}
+    \end{equation*}
+
+    To get the upper bound, we start with the definition of probability over a
+    range.
+    %
+    \begin{align*}
+        \P{Z \geq z}
+        = \inttoinf_z \frac{1}{\sqrt{2\pi}} e^{-\frac{u^2}{2}} \intd u
+    \end{align*}
+    %
+    Since $z > 1$ and under the integral $u > z$, the ratio $\frac{u}{z} > 1$
+    as well. We can therefore multiply by it to find a bigger integral.
+    %
+    \newcommand{\bleh}{\ensuremath \frac{1}{\sqrt{2\pi}}}
+    \newcommand{\blehz}{\ensuremath \frac{1}{z\sqrt{2\pi}}}
+    %
+    \begin{align*}
+        \inttoinf_z \bleh e^{-\frac{u^2}{2}} \intd u
+        &\leq \inttoinf_z {
+            \frac{u}{z} \bleh e^{-\frac{u^2}{2}}
+        } \intd u \\
+        &= \blehz \inttoinf_z u e^{-\frac{u^2}{2}} \intd u \\
+        &= \blehz \inttoinf_{\frac{z^2}{2}} {
+            e^{-v}
+        } \intd v \\
+        &= \blehz \lim_{t\to\infty} {
+            \parens{-e^{-v}}\evaluated[v=\frac{z^2}{2}]{t}
+        } \\
+        &= \blehz e^{-\frac{z^2}{2}}
+    \end{align*}
+    %
+    which gives the desired upper bound.
+
+    For the lower bound, we start with the definition and use integration by
+    parts.
+    %
+    \begin{align*}
+        \P{Z \geq z} \sqrt{2\pi}
+        &= \inttoinf_z e^{-\frac{u^2}{2}} \intd u \\
+        &= \inttoinf_z \frac{1}{u} u e^{-\frac{u^2}{2}} \intd u \\
+        &\phantom{=}\text{ integrate $ue^{-\frac{u^2}{2}} \intd u$} \\
+        &\phantom{=}\text{ differentiate $\frac{1}{u}$} \\
+        &= \frac{1}{u}\parens{-e^{-\frac{u^2}{2}}} \evaluated[z]{\infty}
+        - \inttoinf_z \frac{1}{u^2} e^{-\frac{u^2}{2}} \intd u \\
+        &= \frac{1}{z} e^{-\frac{z^2}{2}}
+        - \inttoinf_z \frac{1}{u^3} u e^{-\frac{u^2}{2}} \intd u \\
+        &\geq \frac{1}{z} e^{-\frac{z^2}{2}}
+        - \frac{1}{z^3} \inttoinf_z u e^{-\frac{u^2}{2}} \intd u \\
+        &= \frac{1}{z} e^{-\frac{z^2}{2}} - \frac{1}{z^3} e^{-\frac{u^2}{2}} \\
+        &= \parens{\frac{1}{z} - \frac{1}{z^3}} e^{-\frac{z^2}{2}}
+    \end{align*}
+    %
+    At the moment we introduce the inequality, we use the fact that $z > 1$ and
+    $u > z$ under the integral to note that $\frac{1}{z^3} \leq \frac{1}{u^3}$.
+    Then we factor it out of the integral.
+
+    Combining these with minor algebraic manipulation gives the desired bounds
+    on $\P{\abs{Z} \geq z}$.
+\end{proof}
+
 \end{document}
