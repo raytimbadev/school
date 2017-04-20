@@ -7,6 +7,7 @@
 \date{}
 
 \usepackage[geometry]{jakemath}
+\newcommand{\boxref}[1]{[\ref{#1}}
 
 \begin{document}
 
@@ -1874,11 +1875,76 @@ Moment-generating functions for some well-known distributions.
 
 \subsection{Chebyshev's inequality}
 
-Notes of 21 February.
+\begin{thm}
+    \label{thm:chebyshev}
+    %
+    Suppose $X$ is a real-valued random-variable.
+    %
+    Let $\E{X} = \mu$ and $\V{X}$.
+    %
+    Then,
+    %
+    \begin{equation}
+        \label{eq:chebyshev-inequality}
+        %
+        \P{\abs{X - \mu} \geq x \sigma} \leq \frac{1}{x^2}
+    \end{equation}
+\end{thm}
+
+\begin{proof}
+    Using Markov's inequality \eqref{eq:markov-inequality} and the definition
+    of the variance \boxref{def:variance} we arrive at the desired result.
+    %
+    \begin{align*}
+        \P{\abs{X - \mu} \geq x \sigma}
+        & = \P{\abs{X - \mu}^2 \geq x^2 \sigma^2} \\
+        & \leq \frac{\E{\parens{X - \mu}^2}}{x^2 \sigma^2} \\
+        & = \frac{\sigma^2}{x^2 \sigma^2} \\
+        & = \frac{1}{x^2}
+    \end{align*}
+\end{proof}
+
+\begin{rem}
+    The Chebyshev inequality tells us that the variable is close to the mean
+    with high probability.
+    %
+    In other words, the probability that $X$ deviates from the mean by $x$
+    standard deviations follows an inverse square law.
+\end{rem}
 
 \subsection{Chernoff bounds}
 
-Notes of 21 February.
+\begin{thm}{(Chernoff bound.)}
+    \label{thm:chernoff-bound}
+    Let $X$ be a real-valued random variable with \mgf{} $m_X(t)$.
+    Then for any $t > 0$ and any $x \in \R$ we have,
+    %
+    \begin{equation}
+        \label{eq:chernoff-bound}
+        %
+        \P{X \geq x} \leq e^{-tx} m_X(t)
+    \end{equation}
+    %
+    In particular,
+    %
+    \begin{equation}
+        \label{eq:chernoff-bound-inf}
+        \P{X \geq x} \leq \inf_{t>0} \bracks{e^{-tx} m_X(t)}
+    \end{equation}
+\end{thm}
+
+\begin{proof}
+    The proof follows from Markov's inequality \eqref{eq:markov-inequality}.
+    \begin{align*}
+        \P{X \geq x}
+        =
+        \P{e^{tX} \geq e^{tx}}
+        \leq
+        \frac{\E{e^{tX}}}{e^{tx}}
+        =
+        e^{-tx} m_X(t)
+    \end{align*}
+\end{proof}
 
 \section{Real-valued random variables}
 
