@@ -3,14 +3,16 @@
 \usepackage[geometry]{jakemath}
 
 \author{Jacob Thomas Errington}
-\title{Van der Waerden Theorem}
+\title{Hales-Jewett Corollaries}
 \date{}
+
+\newcommand{\Seq}{\operatorname{Seq}}
 
 \begin{document}
 
 \maketitle
 
-\begin{prop}
+\begin{prop}{(Van der Waerden.)}
     For any $n, m \in \N$, there exists $N \in \N$ such that for any $d > N$,
     if $d$ is partitioned into $m$ many pieces, then one of the pieces contains
     an arithmetic progression of size $n$.
@@ -37,6 +39,37 @@
     theorem, and the for any $d > N$ we use the remainder of the theorem to
     obtain a combinatorial line by choosing an arbitrary partition of $n^d$
     into $m$ many pieces.
+\end{proof}
+
+\begin{prop}{(Finitary Hales-Jewett.)}
+    For any $n, m \in \N$, there exists $N \in \N$ such that for any $d > N$,
+    if $n^d$ is partitioned into $m$ many pieces, then one of the pieces
+    contains a combinatorial line.
+\end{prop}
+
+\begin{proof}
+    Suppose not.
+    Then for every $N \in \N$, there exists $d > N$ and a ``bad partition'' of
+    $n^d$ into $m$ many pieces such that none of the pieces contains a
+    combinatorial line.
+
+    For simplicity, if I ignore the $d$ and assume that for every $N \in \N$,
+    there exists a bad partition of $n^N$ into $m$ many pieces such that none
+    of the pieces contains a combinatorial line, then I can take the union of
+    across pieces of all the bad partitions to form a partition of $\Seq(n)$
+    into $m$ many pieces.
+    (What I mean is that if we enumerate the pieces by $P_{i,N}$ for the
+    $i$\th{} piece of the bad partition for length $N$, then we can partition
+    $\Seq(n)$ by taking the pieces $P_i = \Union_{k < \omega} P_{i,k}$.)
+    %
+    Then by the infinitary Hales-Jewett theorem, there is a
+    combinatorial line in one of the pieces. This line consists of words of
+    length $l$, meaning that it is contained by a piece of the bad partition at
+    stage $l$. This is a contradiction.
+
+    However, I cannot see how to relax the assumption that there exists a bad
+    partition for every $N$ back to the assumption that for every $N$, there is
+    some $d > N$ with a bad partition.
 \end{proof}
 
 \end{document}
