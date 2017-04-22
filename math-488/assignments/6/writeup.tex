@@ -471,4 +471,158 @@
     Hence, $\dot A / G \in V$, so the forcing does not add any reals.
 \end{proof}
 
+\begin{prop}
+    Suppose $\mathbb{P}$ is weakly homogeneous.
+    Then for any sentence $\sigma$ involving only standard names, either
+    \begin{align*}
+        \one &\forces \sigma \\
+             &\text{or}      \\
+        \one &\forces \neg \sigma
+    \end{align*}
+\end{prop}
+
+\begin{proof}
+    Suppose that for any automorphism $\phi : \P \to \P$, we have that
+    $p \forces \sigma$ implies $\phi(p) \forces \sigma$.
+    Then suppose $p \forces \sigma$.
+    We want to show that $A = \setof{q \leq \one \sth q \forces \sigma}$ is
+    dense. Take arbitrary $q \leq \one$.
+    We want to find a condition stronger than $q$ that forces $\sigma$.
+
+    By weak homoegeneity,
+    there exists $r = \phi(p) \meet q$.
+    Note that by assumption, $\phi(p) \forces \sigma$, so since
+    $r \leq \phi(p)$, we have that $r \forces \sigma$.
+    Also, $r$ is stronger than $q$. Hence $A$ is dense.
+
+    Now it suffices to prove that
+    $p \forces \sigma$ implies $\phi(p) \forces \sigma$.
+
+    First, we extend poset automorphisms to $\P$-names inductively.
+    For any poset automorphism $\phi$,
+    %
+    \begin{align*}
+        \phi(\emptyset) &= \emptyset \\
+        \phi(\dot z) &= \setof{
+            (\phi(\dot x), \phi(p)) \sth
+            (\dot x, p) \in \dot z
+        }
+    \end{align*}
+
+    Next, we prove a stronger claim.
+    Let $\sigma(\dot x_1, \ldots, \dot x_n)$ be a sentence in the forcing
+    language.
+    If $p \forces \sigma(\dot x_1, \ldots, \dot x_n)$,
+    then $\phi p \forces \sigma(\phi(\dot x_1), \ldots, \phi(\dot x_n))$.
+
+    (Remark that applied to a standard name, the automorphism is the identity,
+    so the required implication from the beginning of the proof is a special
+    case of this more general one. We need this more general one for its
+    stronger induction hypothesis.)
+
+    We see this by induction on $\sigma$ (and for the base cases the $\gamma$
+    rank).
+
+    \begin{description}
+        \item[Case] $\sigma = ``\dot x \in \dot y''$.
+
+            We know that the set
+            %
+            \begin{equation*}
+                A = \setof{
+                    q \leq p \sth
+                    \exists (\dot z, r) \in \dot y :
+                    q \leq r \land q \forces \dot x = \dot z
+                }
+            \end{equation*}
+            %
+            is dense below $p$.
+
+            We want to show that
+            $\phi(p) \forces \phi(\dot x) \in \phi(\dot y)$,
+            i.e. that the set
+            %
+            \begin{equation*}
+                \phi(A) = \setof{
+                    q \leq \phi(p) \sth
+                    \exists (\dot z, r) \in \phi(\dot y):
+                    q \leq r \land q \forces \phi(\dot x) = \dot z
+                }
+            \end{equation*}
+            %
+            is dense below $\phi(p)$.
+
+            Take arbitrary $q$ such that $\phi(q) \leq \phi(p)$.
+            (This is just a nicer way of looking at an arbitrary element below
+            $\phi(p)$ since $\phi$ is an automorphism.)
+            Then by the isomorphism $\phi$ we have $q \leq p$, and by the
+            density of $A$ some $q^\prime \in A$ such that $q^\prime \leq p$.
+
+            Then we know that there exists $(\dot z, r) \in \dot y$ such that
+            $q^\prime \leq r$ and $q^\prime \forces \dot x = \dot z$.
+
+            Applying the induction hypothesis to the formula
+            $q^\prime \forces \dot x = \dot z$
+            (this is induction on the $\gamma$ rank, and not on the formula
+            structure,)
+            we find that $\phi(q^\prime) \forces \phi(\dot x) = \phi(\dot z)$.
+
+            Since $\phi$ is an isomorphism $\phi(q^\prime) \leq \phi(r)$,
+            so we have a pair $(\phi(\dot z), \phi(r))$ such that
+            $\phi(q^\prime) \leq \phi(r)$ and
+            $\phi(q^\prime) \forces \phi(\dot x) = \phi(\dot z)$.
+            Since $\phi(q^\prime) \leq \phi(p)$, we find that $\phi(q^\prime)$
+            satisfies the definition of $\phi(A)$, so $\phi(q^\prime) \in A$.
+
+            This establishes that $\phi(A)$ is dense below $\phi(p)$.
+
+        \item[Case] $p \forces \exists x : \sigma(x)$.
+
+            We know that the set
+            %
+            \begin{equation*}
+                A = \setof{
+                    q \leq p \sth
+                    \exists \dot x \in M^\P :
+                    q \forces \sigma(\dot x)
+                }
+            \end{equation*}
+            %
+            is dense below $p$.
+
+            We want to show that
+            $\phi p \forces \exists x : \sigma(x)$,
+            i.e. that the set
+            %
+            \begin{equation*}
+                \phi(A) = \setof{
+                    q \leq \phi(p) \sth
+                    \exists \dot x \in M^\P :
+                    q \forces \sigma(\dot x)
+                }
+            \end{equation*}
+            %
+            is dense below $\phi(p)$.
+
+            Take arbitrary $\phi(q) \leq \phi(p)$.
+            Then $q \leq p$, so by the density of $A$ below $p$ we find
+            $r \leq q$ such that $r \in A$. Hence we have a name $\dot x$ such
+            that $r \forces \sigma(\dot x)$.
+            By the induction hypothesis,
+            $\phi(r) \forces \sigma(\phi(\dot x))$.
+            (It is exactly here that we needed the stronger induction
+            hypothesis.
+            Had we been only working with standard names, the witness $\dot x$
+            might have not been a standard name, so the weaker induction
+            hypothesis would not have applied.)
+            Hence, $\phi(\dot x)$ witnesses the existential
+            $\exists \dot x \in M^\P : \phi(r) \forces \sigma(\dot x)$.
+            Therefore, $\phi(r) \in \phi(A)$.
+            Since $\phi(r) \leq \phi(q)$, this establishes that $\phi(A)$ is
+            dense below $\phi(p)$.
+    \end{description}
+
+    This other cases are similar.
+\end{proof}
+
 \end{document}
