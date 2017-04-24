@@ -482,24 +482,28 @@
 \end{prop}
 
 \begin{proof}
+    Suppose $\sigma$ is any sentence involving only standard names.
     Suppose that for any automorphism $\phi : \P \to \P$, we have that
     $p \forces \sigma$ implies $\phi(p) \forces \sigma$.
     Then suppose $p \forces \sigma$.
-    We want to show that $A = \setof{q \leq \one \sth q \forces \sigma}$ is
-    dense. Take arbitrary $q \leq \one$.
+    We want to show that $\one \forces \sigma$,
+    i.e. that the set $A = \setof{q \leq \one \sth q \forces \sigma}$ is dense.
+    Take arbitrary $q \leq \one$.
     We want to find a condition stronger than $q$ that forces $\sigma$.
 
-    By weak homoegeneity,
-    there exists $r = \phi(p) \meet q$.
+    By weak homogeneity,
+    there exists an automorphism $\phi : \P \to \P$ such that there exists
+    $r = \phi(p) \meet q$.
     Note that by assumption, $\phi(p) \forces \sigma$, so since
     $r \leq \phi(p)$, we have that $r \forces \sigma$.
     Also, $r$ is stronger than $q$. Hence $A$ is dense.
 
-    Now it suffices to prove that
+    Now it suffices to prove that indeed,
     $p \forces \sigma$ implies $\phi(p) \forces \sigma$.
+    We will instead prove a stronger claim.
 
-    First, we extend poset automorphisms to $\P$-names inductively.
-    For any poset automorphism $\phi$,
+    First, we need to extend poset automorphisms to $\P$-names.
+    We do so inductively. For any poset automorphism $\phi$,
     %
     \begin{align*}
         \phi(\emptyset) &= \emptyset \\
@@ -509,7 +513,7 @@
         }
     \end{align*}
 
-    Next, we prove a stronger claim.
+    The stronger claim is the following.
     Let $\sigma(\dot x_1, \ldots, \dot x_n)$ be a sentence in the forcing
     language.
     If $p \forces \sigma(\dot x_1, \ldots, \dot x_n)$,
