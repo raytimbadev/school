@@ -629,4 +629,127 @@
     This other cases are similar.
 \end{proof}
 
+\renewcommand{\Q}{\mathbb{Q}}
+
+\begin{prop}
+    Suppose $\P$ and $\Q$ are forcing notions in a CTM $M \models ZFC^*$.
+    Consider $\P \times \Q$ ordered coordinatewise.
+    Let $G \subseteq \P$ and $H \subseteq \Q$.
+    The following are equivalent.
+    %
+    \begin{enumerate}
+        \item
+            $G$ is $\P$-generic over $M$ and $H$ is $\Q$-generic over $M[G]$.
+
+        \item
+            $G \times H$ is $\P \times \Q$-generic over $M$.
+    \end{enumerate}
+\end{prop}
+
+\begin{proof}
+    First suppose $G$ is $\P$-generic over $M$ and $H$ is $\Q$-generic over
+    $M[G]$.
+    We want to show that $G \times H$ is $\P \times \Q$-generic over $M$.
+    Take an arbitrary dense subset $D \subseteq \P \times \Q$.
+    We want to show that it meets $G \times H$,
+    i.e. that there exists a pair $(p, q)$ such that $(p, q) \in G \times H$
+    and $(p, q) \in D$.
+
+    Consider the set
+    %
+    \begin{equation*}
+        D_\Q = \setof{ q \in \Q \sth \exists p \in G : (p, q) \in D }
+    \end{equation*}
+    %
+    We claim that it is dense in $\Q$.
+    To see this, take arbitrary $q \in \Q$.
+    %
+    Now consider the set
+    \begin{equation*}
+        D_{\P,q} = \setof{
+            p \in \P \sth \exists q^\prime \leq q : (p, q^\prime) \in D
+        }
+    \end{equation*}
+    %
+    We claim that this set is dense in $\P$.
+    To see this, take arbitrary $p \in \P$.
+    Applying the density of $D$,
+    we find $(p^\prime, q^\prime) \in D$
+    such that $(p^\prime, q^\prime) \leq (p, q)$.
+    %
+    Note that $q^\prime$ witnesses that $p^\prime \in D_{\P,q}$ and
+    $p^\prime \leq p$, so $D_{\P,q}$ is dense in $\P$.
+
+    Now we return to showing that $D_\Q$ is dense in $\Q$.
+    Since $D_{\P,q}$ is dense in $\P$, it meets $G$.
+    Let $p \in D_{\P,q} \intersn G$.
+    Then $p \in D_{\P,q}$, so we have $q^\prime \leq q$
+    such that $(p, q^\prime) \in D$.
+    Hence, $q^\prime \leq q$ and $q^\prime \in D_\Q$,
+    as witnessed by $p \in G$.
+
+    Since $D_\Q$ is dense in $\Q$, it meets $H$.
+    Let $q \in D_\Q \intersn H$.
+    Then there exists a witness $p \in G$, such that $(p, q) \in D$.
+    But $p \in G$ and $q \in H$ and $(p, q) \in D$,
+    so $(p, q) \in D \intersn (G \times H)$.
+    Hence $G \times H$ meets every dense set.
+
+    For the converse, suppose that $G \times H$ is $\P \times \Q$-generic over
+    $M$.
+    We want to show that $G$ is $\P$-generic over $M$ and $H$ is $\Q$-generic
+    over $M[G]$.
+    The former is easy.
+    Take an arbitrary dense set $D \subseteq \P$.
+    Note that $D \times \Q$ is dense in $\P \times \Q$.
+    Hence $G \times H$ meets $D \times \Q$,
+    so let $(p, q) \in (G \times H) \intersn (D \times \Q)$.
+    But then $p \in G \times D$, so we're done.
+
+    To see that $H$ is $\Q$-generic over $M[G]$,
+    take an arbitrary dense set $D \subseteq \Q$, in $M[G]$.
+    (Density is absolute, but the set $D$ might not belong to the ground
+    model.)
+    Since $D \in M[G]$, then let $\dot D$ be a name for it, such that for some
+    $p \in G$
+    %
+    \begin{equation*}
+        p \forces_\P \stmt{$\dot D$ is dense in $\Q$}
+    \end{equation*}
+    %
+    and we in fact have that the set $A$ of conditions below $p$ that force
+    ``$\dot D$ is dense in $\Q$'' is dense below $p$.
+
+    We form the following set in $M$, by the definability of the forcing
+    relation $\forces_\P$.
+    %
+    \begin{equation*}
+        D_q = \setof{
+            (r, q^\prime) \sth
+            q^\prime \leq q \land
+            r \leq p \land
+            r \forces_\P \check q^\prime \in \dot D
+        }
+    \end{equation*}
+    %
+    Note first that this set is nonempty for any choice of $q \in H$,
+    since
+    by the density of $A$ we can find $r^\prime \leq p$ such that
+    $r^\prime \forces_\P \stmt{$\dot D$ is dense in $\Q$}$
+    and
+    by the density of $D$ we can find $q^\prime \in D$ such that
+    $q^\prime \leq q$.
+    %
+    That latter part happens in $M[G]$, so a condition $r \in G$ forces it and
+    we can assume without loss of generality that $r \leq r^\prime$.
+
+    This set is dense below $(p, q)$, for any choice $q \in H$.
+    Since $(p, q) \in G \times H$, we have that $G \times H$ meets $D_q$, and
+    there exists $(r, q^\prime) \in (G \times H) \times D_q$ by the genericity
+    of $G \times H$.
+    Therefore $r \leq p$ and $r \forces_\P \check q^\prime \in \dot D$.
+    By the Forcing Theorem, $M[G] \models q^\prime \in D$.
+    But $q^\prime \in H$, so $H$ meets the dense set $D$.
+\end{proof}
+
 \end{document}
